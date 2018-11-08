@@ -8,6 +8,8 @@ from libcpp.list cimport list as clist
 from libcpp cimport bool as cbool
 
 cdef extern from "Continuous.h" namespace "flowstar":
+  cdef vector[string] domainVarNames
+
   cdef cppclass Flowpipe:
     Flowpipe()
     Flowpipe(const TaylorModelVec & tmvPre_input,
@@ -29,6 +31,9 @@ cdef extern from "Continuous.h" namespace "flowstar":
     ContinuousSystem(const ContinuousSystem & system)
 
     ContinuousSystem & operator = (const ContinuousSystem & system)
+
+    vector[Flowpipe] initialSets
+    TaylorModelVec tmvOde
 
     cbool bAuto
 

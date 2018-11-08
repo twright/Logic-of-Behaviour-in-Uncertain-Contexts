@@ -1,5 +1,11 @@
 from libcpp.string cimport string
 
+cdef extern from 'mpfr.h':
+    ctypedef int mpfr_prec_t
+
+cdef extern from "Interval.h":
+  mpfr_prec_t intervalNumPrecision
+
 cdef extern from "Interval.h" namespace "flowstar":
   # cdef cppclass Real:
   #   Real()
@@ -9,6 +15,7 @@ cdef extern from "Interval.h" namespace "flowstar":
     Interval()
     Interval(double)
     Interval(double, double)
+    Interval(Interval & I)
 
     double sup()
     double inf()

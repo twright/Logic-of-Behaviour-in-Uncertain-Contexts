@@ -10,11 +10,18 @@ cimport cython.operator as op
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
+# import wand.image as wimage
 
 from flowstar.reachability import Reach, Poly
 
+# cdef extern from "Python.h":
+    # embedding functions
+    # void Py_Initialize()
+    # void Py_Finalize()
+
 def main():
-    vars = {'t': 0, 'x': 1}
+    # Py_Initialize()
+    vars = ['t', 'x']
     t = Poly(1, 't', 1, vars)
     x = Poly(1, 'x', 1, vars)
     pt = Poly(1, 't', 0, vars)
@@ -23,12 +30,13 @@ def main():
 
     print("creating ContinuousReachability wrapper")
     C = Reach(
-        [b"t", b"x"],
+        vars,
         [pt, px],
         [(0,0), (5,5)],
         5,
         0.5,
-        order=2,
+        orders=[1, 2],
+        run=False,
     )
 
     print("running...")
@@ -38,20 +46,21 @@ def main():
     print "{} -- {} flowpipes computed".format(stat, C.num_flowpipes)
 
     print("plotting...")
-    C.plot('t', 'x', b'res1')
+    C.plot('t', 'x', b'ressc')
 
-    varsd = {b't': 0, b'x': 1, b'y': 2}
+    varsd = ['t', 'x', 'y']
     qt = Poly(1, 't', 0, varsd)
     qx = Poly(-1, 'y', 1, varsd)
     qy = Poly(1, 'x', 1, varsd)
     print("creating ContinuousReachability wrapper")
     D = Reach(
-        [b't', b'x', b'y'],
+        varsd,
         [qt, qx, qy],
         [(0,0), (4,5), (1,2)],
         5,
         0.1,
-        order=7,
+        orders=[1, 7, 7],
+        run=False,
     )
         # orders=[1, 7, 7],
     print "t' = {}\nx' = {}\ny' = {}".format(qt, qx, qy)
@@ -60,7 +69,7 @@ def main():
     statd = "ran successfully!" if 1 <= resd <= 3 else "failed!"
     print "{} -- {} flowpipes computed".format(statd, D.num_flowpipes)
     print("plotting...")
-    D.plot(b'x', b'y', b'resd')
+    D.plot(b'x', b'y', b'ressd')
 
 def main_old():
     cdef string s = <string>("x")
@@ -70,7 +79,7 @@ def main_old():
     cdef Polynomial q = x*deref(new Interval(-1,-1))
     cdef Polynomial ptime = deref(new Polynomial(deref(new Interval(1,1)), 2))
     cdef vector[TaylorModel] tms = deref(new vector[TaylorModel]())
-    print "t' = {}\nx' = {}".format(ptime.as_str(), q.as_str())
+    # print "t' = {}\nx' = {}".format(ptime.as_str(), q.as_str())
     tms.push_back(deref(new TaylorModel(ptime)))
     tms.push_back(deref(new TaylorModel(q)))
 

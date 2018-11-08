@@ -1,1 +1,2 @@
-cmd: cd flowstar && python setup.py build_ext --inplace
+cmd: cd flowstar/flowstar-2.1.0; make; cd ..; rm *.so; python setup.py build_ext --inplace; cd ..; python -c "import flowstar.flowtest as F; F.main()
+# cmd: cd flowstar && python setup.py build_ext --inplace
