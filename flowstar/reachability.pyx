@@ -118,8 +118,6 @@ cdef class Poly:
 
 cdef class Reach:
     cdef ContinuousReachability c_reach
-    cdef unique_ptr[ContinuousSystem] c_system
-    cdef dict vars
     cdef bint ran
     cdef bint prepared
     cdef int result
@@ -149,41 +147,25 @@ cdef class Reach:
         max_remainder_queue=200,
         maxNumSteps=100,
         run=True):
-        print "constructing Reach"
-        # self.c_reach = ContinuousReachability()
         cdef ContinuousReachability * C = &self.c_reach
         self.ran = False
         self.prepared = False
         self.result = 0
 
         cdef Poly poly
-        # careful not to use any stack local variables
-        # These will each go through lots of different values
-        # No refs should be made!
-        # cdef Polynomial * c_poly
-        # cdef Interval * I
-        cdef string * s
 
         # --- Creating the continuous system ---
         assert len(vars) == len(odes) == len(initials) + 1
 
 
         # Create Taylor Models for polynomials
-        print("tm polys")
-
         cdef vector[TaylorModel] odes_tms
-
         for ode in odes[1:]:
-            # print "ode {}".format(ode)
             odes_tms.push_back(TaylorModel((<Poly?>ode).c_poly))
-            # print "end of ode"
 
-        # cdef TaylorModelVec odes_tmv
-        # can we use odes_tmv after this?
         cdef TaylorModelVec odes_tmv = TaylorModelVec(odes_tms)
 
         # Create initial conditions
-        print("initials")
         cdef vector[Interval] initials_vect
         for initial in initials:
             initials_vect.push_back(deref(_interval(initial)))
@@ -193,20 +175,9 @@ cdef class Reach:
         initials_fpvect.push_back(Flowpipe(initials_vect, zero_int))
 
         # Create system object
-        print("system")
-        print("assigning system")
-        # Great big bug! ContinuousSystem is meant to be a value so it
-        # it should not matter whether create a new object on the heap before
-        # assigning. However, if we try this, everything breaks.
-        self.c_system = make_unique[ContinuousSystem](odes_tmv, initials_fpvect)
-        C.system = deref(self.c_system)
-        # Should be equivalent to (but this is broken):
-        # C.system = ContinuousSystem(odes_tmv, initials_fpvect)
-
-        print "created continuous system"
+        C.system = ContinuousSystem(odes_tmv, initials_fpvect)
 
         # The orders and order kwargs are mutually exclusive
-        print("orders")
         if orders is None:
             orders = [order]*len(initials)
             C.orderType = 0
@@ -238,20 +209,14 @@ cdef class Reach:
         C.maxNumSteps = maxNumSteps
         C.max_remainder_queue = max_remainder_queue
 
-        # Declare taylor model time variable
-        # cdef string st = "local_t"
-        # C.declareTMVar(st)
-
         # Declare state/taylor model variables
-        self.vars = dict()
         C.declareTMVar("local_t")
         for i, var in enumerate(vars[1:]):
-            self.vars[var] = <int>i
             C.declareStateVar(<string>var)
             assert i == C.getIDForStateVar(<string>var)
             C.declareTMVar(<string>"local_var_{}".format(i+1))
 
-        # Run immediately (may be the only way to avoid memory/timing errors)
+        # Run immediately?
         if run:
             self.run()
 
@@ -267,10 +232,9 @@ cdef class Reach:
         if len(filename) >= 100:
             raise Exception('Filename too long!')
         strcpy(C.outputFileName, c_filename)
-        # C.outputFileName = c_filename
 
         # prepare for plotting -- must be done here, not in run since this
-        # seems to depend on the output axes
+        # depends on the output axes
         self.prepare(x, y)
         # set bProjected = True since apparently prepareForPlotting has
         # already projected the flowpipes to the correct dimensions
@@ -290,8 +254,6 @@ cdef class Reach:
         if filename is None:
             filename = bytes(uuid.uuid4())
         self.plot(x, y, filename, plot_type)
-        # with open('./images/{}.eps'.format(filename)) as f:
-        # blb = f.read()
         img = Image(filename='./images/{}.eps'.format(filename), format='eps')
         img.rotate(90)
         return img
@@ -402,7 +364,8 @@ cdef class Reach:
         res = []
         cdef string ode_str
         cdef string interval_str
-        cdef vector[string] names = ['t','x','y','z','w']
+        cdef vector[string] names = self.c_reach.stateVarNames
+        names.insert(names.begin(), "local_t")
         for v in self.c_reach.system.tmvOde.tms:
             v.expansion.toString(ode_str, names)
             v.remainder.toString(interval_str)
@@ -412,7 +375,3 @@ cdef class Reach:
     @property
     def num_odes(self):
         return int(self.c_reach.system.tmvOde.tms.size())
-
-    # def __dealloc__(self):
-        # print "Reach.__dealloc__"
-        # del self.c_reach

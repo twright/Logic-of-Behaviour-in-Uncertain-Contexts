@@ -1,4 +1,4 @@
-.ipybn_checkpoints/*
+**/.ipybn_checkpoints/*
 .tags
 .tags_swap
 cysignals_crash_logs/*
