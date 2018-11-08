@@ -22,3 +22,7 @@ cdef extern from "Interval.h" namespace "flowstar":
     void setInf(const double l)
     void setSup(const double u)
     void toString(string & res)
+    void add_assign(const double c)
+    const Interval operator + (const Interval & I) const
+    Interval intersect(const Interval & I) const
+    void intersect_assign(const Interval & I)

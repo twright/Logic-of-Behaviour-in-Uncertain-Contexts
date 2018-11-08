@@ -6,6 +6,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.list cimport list as clist
 from libcpp cimport bool as cbool
+from libcpp.map cimport map as cmap
 
 cdef extern from "Continuous.h" namespace "flowstar":
   cdef vector[string] domainVarNames
@@ -87,3 +88,4 @@ cdef extern from "Continuous.h" namespace "flowstar":
     long num_of_flowpipes
     char outputFileName[NAME_SIZE]
     vector[string] stateVarNames
+    cmap[string, int] stateVarTab

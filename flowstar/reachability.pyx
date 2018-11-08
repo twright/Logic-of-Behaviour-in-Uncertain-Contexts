@@ -4,13 +4,38 @@ from Interval cimport Interval, intervalNumPrecision
 from Polynomial cimport Polynomial, factorial_rec, power_4, double_factorial
 
 from cython.operator cimport dereference as deref
+from cython.operator cimport preincrement as inc
 from libc.string cimport strcpy
 from libcpp.vector cimport vector
+from libcpp.list cimport list as clist
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
+from libcpp.map cimport map as cmap
 from subprocess import call
 from libcpp.memory cimport unique_ptr, make_unique
+from libcpp.algorithm cimport sort as csort
 
+
+cdef cbool overlaps(Interval & I, Interval & J):
+    il, iu = I.inf(), I.sup()
+    jl, ju = J.inf(), J.sup()
+    return il <= jl <= iu or il <= ju <= iu
+
+
+cdef void interval_union(Interval & I, Interval & J):
+    I.setInf(min(I.inf(), J.inf()))
+    I.setSup(max(I.sup(), J.sup()))
+
+cdef void interval_vect_union(vector[Interval] & Is, vector[Interval] & Js):
+    cdef:
+        vector[Interval].iterator itI = Is.begin()
+        vector[Interval].iterator itJ = Js.begin()
+
+    while itI != Is.end() and itJ != Js.end():
+        interval_union(deref(itI), deref(itJ))
+
+        inc(itI)
+        inc(itJ)
 
 cpdef get_domain_var_names():
     global domainVarNames
@@ -70,7 +95,7 @@ cdef extern from "<utility>" namespace "std" nogil:
     cdef unique_ptr[ContinuousSystem] std_move "move" (unique_ptr[ContinuousSystem])
 
 
-cdef unique_ptr[Interval] _interval(i):
+cdef Interval _interval(i):
     try:
         (lo, hi) = i
     except:
@@ -79,7 +104,7 @@ cdef unique_ptr[Interval] _interval(i):
         except:
             lo = hi = i
 
-    return make_unique[Interval](<double>lo, <double>hi)
+    return Interval(<double>lo, <double>hi)
 
 
 cdef class Poly:
@@ -101,7 +126,7 @@ cdef class Poly:
             num_vars = len(self.vars)
 
             self.c_poly = Polynomial(self.vars[var_name], expn, num_vars)
-            self.c_poly.mul_assign(deref(_interval(coeff)))
+            self.c_poly.mul_assign(_interval(coeff))
         elif len(args) == 1:
             vars, = args
             self.vars = {v: i for i,v in enumerate(vars, 1)}
@@ -171,7 +196,7 @@ cdef class Reach:
         # Create initial conditions
         cdef vector[Interval] initials_vect
         for initial in initials:
-            initials_vect.push_back(deref(_interval(initial)))
+            initials_vect.push_back(_interval(initial))
 
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
@@ -238,14 +263,19 @@ cdef class Reach:
 
         # prepare for plotting -- must be done here, not in run since this
         # depends on the output axes
-        self.prepare(x, y)
+        self.prepare()
         # set bProjected = True since apparently prepareForPlotting has
         # already projected the flowpipes to the correct dimensions
 
+        self.c_reach.outputAxes.clear()
+        self.c_reach.outputAxes.push_back(self.c_reach.getIDForStateVar(x))
+        self.c_reach.outputAxes.push_back(self.c_reach.getIDForStateVar(y))
+
         with self:  # Use class's version of flowstar global variables
-            # We set projected to True since prepare projects the flowpipes to
-            # the requested domensions
-            C.plot_2D(True)
+            # We set projected to False since we use prepareForDumping
+            # which does not project the flowpipes to the output
+            # dimensions for us
+            C.plot_2D(False)
 
         # note: filename is unsanitized
         call(['gnuplot', './outputs/{}.plt'.format(filename)])
@@ -253,7 +283,7 @@ cdef class Reach:
     def wplot(self, str x, str y, int plot_type=1, bytes filename = None):
         from wand.image import Image
         import uuid
-        import os
+
         if filename is None:
             filename = bytes(uuid.uuid4())
         self.plot(x, y, filename, plot_type)
@@ -261,25 +291,89 @@ cdef class Reach:
         img.rotate(90)
         return img
 
+    cdef vector[Interval] eval_interval(self, Interval & I):
+        cdef:
+            clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
+            clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
+            clist[vector[Interval]].iterator domain = self.c_reach.domains.begin()
+            clist[vector[Interval]].iterator domain_end = self.c_reach.domains.end()
+            string s1, s2, s3, s4, s5, s6, s0
+            vector[Interval] res
+            vector[int] varIDs
+            double t = 0
+            Interval T
+
+        for i in self.c_reach.stateVarTab:
+            varIDs.push_back(i.second)
+        csort(varIDs.begin(), varIDs.end())
+
+        cdef vector[Interval] domainCopy
+        cdef vector[Interval] final_res
+        cdef cbool initialized = False
+
+        I.toString(s0)
+        print "I = {}".format(s0)
+
+        while (tmv != tmv_end and domain != domain_end):
+            # J = &
+            T = deref(domain).at(0)
+            T.add_assign(t)
+            if overlaps(I, T):
+                # deref(tmv).domain.toString(s)
+                # Evalutate the taylor model
+                domainCopy = deref(domain)
+                domainCopy[0] = T.intersect(I) # No bounds checking!
+                domainCopy.at(0).add_assign(-t)
+                T.toString(s4)
+                domainCopy.at(0).toString(s5)
+                deref(tmv).intEval(res, domainCopy, varIDs)
+                res.at(0).toString(s1)
+                res.at(1).toString(s2)
+                res.at(2).toString(s3)
+                print "test! {}".format(s5)
+
+                if initialized:
+                    interval_vect_union(final_res, res)
+                else:
+                    final_res = res
+                    initialized = True
+
+                final_res.at(1).toString(s6)
+
+                print "final! {}".format(s6)
+            # else:
+                # print "does not overlap!"
+
+            t = T.sup()
+            inc(tmv)
+            inc(domain)
+
+        return final_res
+
+
     def __call__(self, t):
-        # cdef Interval c_t
+        self.prepare()
 
         # Convert python interval to flow* interval
-        cdef unique_ptr[Interval] c_t = _interval(t)
+        cdef vector[Interval] res
+        cdef Interval I = _interval(t)
 
-    def prepare(self, x, y):
-        '''Prepare for plotting'''
+        with self: # Use captured globals
+            res = self.eval_interval(I)
+                # tmv = tmv + 1
+                # domain = domain + 1
+
+        return [(I.inf(), I.sup()) for I in res]
+
+    def prepare(self):
+        '''Prepare for plotting / evaluating.'''
         if not self.ran:
             raise Exception('Not ran!')
 
-        self.c_reach.outputAxes.clear()
-        self.c_reach.outputAxes.push_back(self.c_reach.getIDForStateVar(x))
-        self.c_reach.outputAxes.push_back(self.c_reach.getIDForStateVar(y))
-
         if not self.prepared:
-            # if we run prepareForPlotting more than once we crash
             with self:  # with local globals
-                self.c_reach.prepareForPlotting()
+                # if we run prepareForPlotting more than once we crash
+                self.c_reach.prepareForDumping()
             self.prepared = True
 
     def run(self):

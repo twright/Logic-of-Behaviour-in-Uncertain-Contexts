@@ -8,10 +8,11 @@
         ], 
         "extra_compile_args": [
             "-O3", 
-            "-std=c++14"
+            "-std=c++17", 
+            "-Wno-register"
         ], 
         "extra_link_args": [
-            "-std=c++14"
+            "-std=c++17"
         ], 
         "include_dirs": [
             ".", 
@@ -616,7 +617,6 @@ static CYTHON_INLINE float __PYX_NAN() {
 #define __PYX_HAVE__interval
 #define __PYX_HAVE_API__interval
 /* Early includes */
-#include "Interval.h"
 #include <string.h>
 #include "ios"
 #include "new"
@@ -624,6 +624,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "typeinfo"
 #include <string>
 #include "mpfr.h"
+#include "Interval.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */

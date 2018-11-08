@@ -8,8 +8,8 @@ Cython.Compiler.Options.annotate = True
 
 LIB_DIRS = ['.', 'flowstar-2.1.0']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
-COMPILE_ARGS = ['-O3', '-std=c++14']
-LINK_ARGS = ['-std=c++14']
+COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register']
+LINK_ARGS = ['-std=c++17']
 
 extensions = [
     Extension(

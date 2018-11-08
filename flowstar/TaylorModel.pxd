@@ -25,6 +25,6 @@ cdef extern from "TaylorModel.h" namespace "flowstar":
 
     TaylorModelVec & operator = (const TaylorModelVec & tm)
 
-    void intEval(vector[Interval] & result, const vector[Interval] & domain) const
+    void intEval(vector[Interval] & result, const vector[Interval] & domain, const vector[int] & varIDs) const
 
     vector[TaylorModel] tms
