@@ -2299,10 +2299,10 @@ void Polynomial::sqrt_taylor(Polynomial & result, const int numVars, const int o
 }
 
 std::string Polynomial::as_str() {
-	std::string t = "t", x = "x", y = "y", z = "z",  w = "w";
-	std::vector<std::string> varNames = {t,x,y,z,w};
+	std::string t_local = "t_local", t = "t", x = "x", y = "y", z = "z",  w = "w";
+	std::vector<std::string> varNames = {t_local, t,x,y,z,w};
 	std::string res;
-	
+
 	if (monomials.size() == 0) {
 		res = "";
 	} else {

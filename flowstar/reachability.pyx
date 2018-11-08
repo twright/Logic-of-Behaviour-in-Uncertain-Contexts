@@ -95,17 +95,20 @@ cdef class Poly:
         if len(args) == 4:
             coeff, var_name, expn, vars = args
 
-            self.vars = {v: i for i,v in enumerate(vars)}
-            num_vars = len(vars)
+            # start var ids from 1 to take TM time var into account
+            self.vars = {v: i for i,v in enumerate(vars, 1)}
+            self.vars['local_t'] = 0
+            num_vars = len(self.vars)
 
             self.c_poly = Polynomial(self.vars[var_name], expn, num_vars)
             self.c_poly.mul_assign(deref(_interval(coeff)))
         elif len(args) == 1:
             vars, = args
-            self.vars = {v: i for i,v in enumerate(vars)}
+            self.vars = {v: i for i,v in enumerate(vars, 1)}
+            self.vars['local_t'] = 0
             # self.vars = vars
         else:
-            raise Exception()
+            raise Exception("Invalid args for Poly")
 
     def __repr__(self):
         cdef vector[string] var_names
@@ -155,12 +158,12 @@ cdef class Reach:
         cdef Poly poly
 
         # --- Creating the continuous system ---
-        assert len(vars) == len(odes) == len(initials) + 1
+        assert len(vars) == len(odes) == len(initials)
 
 
         # Create Taylor Models for polynomials
         cdef vector[TaylorModel] odes_tms
-        for ode in odes[1:]:
+        for ode in odes:
             odes_tms.push_back(TaylorModel((<Poly?>ode).c_poly))
 
         cdef TaylorModelVec odes_tmv = TaylorModelVec(odes_tms)
@@ -211,10 +214,10 @@ cdef class Reach:
 
         # Declare state/taylor model variables
         C.declareTMVar("local_t")
-        for i, var in enumerate(vars[1:]):
+        for i, var in enumerate(vars, 1):
             C.declareStateVar(<string>var)
-            assert i == C.getIDForStateVar(<string>var)
-            C.declareTMVar(<string>"local_var_{}".format(i+1))
+            assert i == C.getIDForStateVar(<string>var) + 1
+            C.declareTMVar(<string>"local_var_{}".format(i))
 
         # Run immediately?
         if run:
