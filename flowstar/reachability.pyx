@@ -17,9 +17,9 @@ from libcpp.algorithm cimport sort as csort
 
 
 cdef cbool overlaps(Interval & I, Interval & J):
-    il, iu = I.inf(), I.sup()
-    jl, ju = J.inf(), J.sup()
-    return il <= jl <= iu or il <= ju <= iu
+    il, im, iu = I.inf(), I.midpoint(), I.sup()
+    jl, jm, ju = J.inf(), J.midpoint(), J.sup()
+    return il <= jm <= iu or jl <= im <= ju
 
 
 cdef void interval_union(Interval & I, Interval & J):
@@ -311,26 +311,15 @@ cdef class Reach:
         cdef vector[Interval] final_res
         cdef cbool initialized = False
 
-        I.toString(s0)
-        print "I = {}".format(s0)
-
         while (tmv != tmv_end and domain != domain_end):
-            # J = &
             T = deref(domain).at(0)
             T.add_assign(t)
             if overlaps(I, T):
-                # deref(tmv).domain.toString(s)
-                # Evalutate the taylor model
                 domainCopy = deref(domain)
                 domainCopy[0] = T.intersect(I) # No bounds checking!
                 domainCopy.at(0).add_assign(-t)
                 T.toString(s4)
-                domainCopy.at(0).toString(s5)
                 deref(tmv).intEval(res, domainCopy, varIDs)
-                res.at(0).toString(s1)
-                res.at(1).toString(s2)
-                res.at(2).toString(s3)
-                print "test! {}".format(s5)
 
                 if initialized:
                     interval_vect_union(final_res, res)
@@ -338,18 +327,11 @@ cdef class Reach:
                     final_res = res
                     initialized = True
 
-                final_res.at(1).toString(s6)
-
-                print "final! {}".format(s6)
-            # else:
-                # print "does not overlap!"
-
             t = T.sup()
             inc(tmv)
             inc(domain)
 
         return final_res
-
 
     def __call__(self, t):
         self.prepare()
@@ -360,8 +342,6 @@ cdef class Reach:
 
         with self: # Use captured globals
             res = self.eval_interval(I)
-                # tmv = tmv + 1
-                # domain = domain + 1
 
         return [(I.inf(), I.sup()) for I in res]
 
@@ -375,6 +355,30 @@ cdef class Reach:
                 # if we run prepareForPlotting more than once we crash
                 self.c_reach.prepareForDumping()
             self.prepared = True
+
+    def sage_plot(self, x, double step=1e-1):
+        from sage.all import Graphics, line
+
+        p = Graphics()
+        cdef int var_id = self.c_reach.getIDForStateVar(x)
+        lo1, hi1 = self((-1e-7,1e-7))[var_id]
+        cdef double t = 0
+
+        for i in range(int(self.c_reach.time/step)):
+            t = step*i
+            res = self((t, t+step))
+            try:
+                (lo, hi) = res[var_id]
+            except:
+                print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+            p += line([(t, lo), (t+step, lo)])
+            p += line([(t, lo1), (t, lo)])
+            p += line([(t, hi), (t+step, hi)], color='green')
+            p += line([(t, hi1), (t, hi)], color='green')
+            lo1 = lo
+            hi1 = hi
+
+        return p
 
     def run(self):
         if self.ran:

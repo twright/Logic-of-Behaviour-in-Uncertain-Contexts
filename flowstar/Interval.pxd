@@ -26,3 +26,4 @@ cdef extern from "Interval.h" namespace "flowstar":
     const Interval operator + (const Interval & I) const
     Interval intersect(const Interval & I) const
     void intersect_assign(const Interval & I)
+    double midpoint() const

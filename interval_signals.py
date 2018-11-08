@@ -29,6 +29,19 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
     #values += [(I, RIF(f(I.center())) > 0)]
     return Signal(domain, values)
 
+def to_signal_bisection(f, domain, epsilon=0.1):
+    I = f(domain)
+
+    if I > 0:
+        return true_signal(domain)
+    elif I < 0:
+        return false_signal(domain)
+    elif domain.absolute_diameter() < epsilon:
+        return Signal(domain, [])
+    else:
+        J, K = domain.bisection()
+        return to_signal_bisection(f, J, epsilon).union(to_signal_bisection(f, K, epsilon))
+
 
 def shift_F(J, (I, b)):
     il, iu = I.endpoints()
