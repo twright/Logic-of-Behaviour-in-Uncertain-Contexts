@@ -26,7 +26,7 @@ def isub(a, b):
 
 def extdiv(a, b, d):
     a = RIF(a)
-    print 'b = {}'.format(repr(b))
+    # print 'b = {}'.format(repr(b))
     b = RIF(b)
     al, au = a.endpoints()
     bl, bu = b.endpoints()

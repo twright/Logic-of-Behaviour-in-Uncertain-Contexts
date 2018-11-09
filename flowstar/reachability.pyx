@@ -317,6 +317,8 @@ cdef class Reach:
             if overlaps(I, T):
                 domainCopy = deref(domain)
                 domainCopy[0] = T.intersect(I) # No bounds checking!
+                # for i in range(1,domainCopy.size()):
+                    # domainCopy[i] = Interval(0)
                 domainCopy.at(0).add_assign(-t)
                 T.toString(s4)
                 deref(tmv).intEval(res, domainCopy, varIDs)
@@ -356,7 +358,7 @@ cdef class Reach:
                 self.c_reach.prepareForDumping()
             self.prepared = True
 
-    def sage_plot(self, x, double step=1e-1):
+    def sage_plot_manual(self, x, double step=1e-1):
         from sage.all import Graphics, line
 
         p = Graphics()
@@ -373,13 +375,96 @@ cdef class Reach:
                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
             p += line([(t, lo), (t+step, lo)])
             p += line([(t, lo1), (t, lo)])
-            p += line([(t, hi), (t+step, hi)], color='green')
-            p += line([(t, hi1), (t, hi)], color='green')
+            p += line([(t, hi), (t+step, hi)], color='#3bcc00')
+            p += line([(t, hi1), (t, hi)], color='#3bcc00')
             lo1 = lo
             hi1 = hi
 
         return p
 
+    def sage_interval_plot(self, str x, str y, double step=1e-1):
+        from sage.all import Graphics, polygon
+
+        p = Graphics()
+        cdef int var_id_x = self.c_reach.getIDForStateVar(x)
+        cdef int var_id_y = self.c_reach.getIDForStateVar(y)
+        cdef double t = 0
+
+        for i in range(int(self.c_reach.time/step)):
+            t = step*i
+            res = self((t, t+step))
+            try:
+                (xlo, xhi) = res[var_id_x]
+                (ylo, yhi) = res[var_id_y]
+            except:
+                print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+            p += polygon([(xlo, ylo), (xlo, yhi), (xhi, yhi), (xhi, ylo)],
+                         fill=False)
+
+        return p
+
+    # def sage_tube_plot(self, str x, str y, double step=1e-1):
+    #     from sage.all import Graphics, polygon, RIF
+    #
+    #     p = Graphics()
+    #     cdef int var_id_x = self.c_reach.getIDForStateVar(x)
+    #     cdef int var_id_y = self.c_reach.getIDForStateVar(y)
+    #     cdef double t = 0
+    #
+    #     for i in range(int(self.c_reach.time/step)):
+    #         t = step*i
+    #         res = self((t, t+step))
+    #         try:
+    #             Ix = res[var_id_x]
+    #             Iy = res[var_id_y]
+    #         except:
+    #             print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+    #         cx0, cy0 = cx, cy
+    #         cx, cy = Ix.center(), Iy.center()
+    #         xx, cy = Ix.center(), Iy.center()
+    #         lx, ly = Ix.lower(), Iy.lower()
+    #         hx, hy = Ix.lower(), Iy.lower()
+    #         dx, dy = (cx - cx0)/step, (cy - cy0)/step
+    #
+    #
+    #     return p
+
+    def sage_plot(self, x, double step=1e-2):
+        from sage.all import plot
+
+        cdef int var_id = self.c_reach.getIDForStateVar(x)
+        # Cache the evaluations
+        ress = dict()
+
+        def fl(t):
+            if t not in ress:
+                ress[t] = self((t - step, t + step))[var_id]
+            return ress[t][0]
+        def fu(t):
+            if t not in ress:
+                ress[t] = self((t - step, t + step))[var_id]
+            return ress[t][1]
+
+        return plot([fl, fu],
+                    (0, float(self.c_reach.time)),
+                    plot_points=self.c_reach.time//step)
+
+    def sage_parametric_plot(self, str x, str y, double step=1e-2):
+        from sage.all import parametric_plot, RIF
+        from functools import partial
+
+        cdef int var_id_x = self.c_reach.getIDForStateVar(x)
+        cdef int var_id_y = self.c_reach.getIDForStateVar(y)
+
+        def f(t):
+            return RIF(self((t, t+step))[var_id_x]).center()
+        def g(t):
+            return RIF(self((t, t+step))[var_id_y]).center()
+
+        return parametric_plot((f, g), (0, float(self.c_reach.time)))
+
+            # [partial(f, 0, var_id_x),
+            #                     partial(f, 0, var_id_y)],
     def run(self):
         if self.ran:
             raise Exception('Already ran')

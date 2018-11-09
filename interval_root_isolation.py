@@ -25,26 +25,28 @@ def search_zero(f, fprime, t0, epsilon=0.00001, theta=0.01, abs_inf=0.0001):
 
     if 0 not in RIF(f(tl)):
         while not bound_found:
-            print 't =', t.str(style='brackets')
+            # print 't =', t.str(style='brackets')
             tbak = t
             tl = t.lower('RNDD')
             d = extdiv(-f(tl), fprime(t), t - tl)
             if d is None:
-                print "stopping since presumed converged"
-                print "t = {}, fprime(t) = {}".format(
-                    t.str(style='brackets'),
-                    RIF(fprime(t)).str(style='brackets'))
+                # print "stopping since presumed converged"
+                # print "t = {}, fprime(t) = {}".format(
+                #     t.str(style='brackets'),
+                #     RIF(fprime(t)).str(style='brackets'))
                 return None
             t = (tl + d).intersection(t)
             bound_found = int_dist(tbak, t) <= epsilon
-
-        print "found lower bound!"
-    else:
-        print "0 on lower boundary!"
+        # print "found lower bound!"
+    # else:
+        # print "0 on lower boundary!"
 
     tuu = t.upper('RNDU')
     tl = tu = t.lower('RNDD')
-    while not (0 in RIF(f(RIF(tl,tu))) and (RIF(f(tu)) > 0 or RIF(f(tu)) < 0)) and tu < tuu:
+    while (not (((0 in RIF(f(RIF(tl,tu))) or 0 in RIF(f(tl)))
+            and (RIF(f(tu)) > 0 or RIF(f(tu)) < 0)))
+            and tu < tuu):
+        print "tu = {}".format(tu)
         tu = min((1 + theta)*tu + abs_inf, tuu)
 
     t = RIF(tl,tu)
@@ -52,7 +54,7 @@ def search_zero(f, fprime, t0, epsilon=0.00001, theta=0.01, abs_inf=0.0001):
     if tu < tuu:
         bound_found = False
         while not bound_found:
-            print 't =', t.str(style='brackets')
+            # print 't =', t.str(style='brackets')
             tbak = t
             tu = t.upper('RNDU')
             d = extdiv(f(tu), fprime(t), tu - t)
@@ -61,13 +63,15 @@ def search_zero(f, fprime, t0, epsilon=0.00001, theta=0.01, abs_inf=0.0001):
                 print "t = {}, fprime(t) = {}".format(
                     t.str(style='brackets'),
                     RIF(fprime(t)).str(style='brackets'))
-                return None
+                # This means the root was on the lower boundary!
+                return t
+                # break
+                # return None
             t = (tu - d).intersection(t)
             bound_found = int_dist(tbak, t) <= epsilon
-
-        print "found upper bound!"
-    else:
-        print "0 on upper boundary!"
+        # print "found upper bound!"
+    # else:
+        # print "0 on upper boundary!"
 
     return t
 
