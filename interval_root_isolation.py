@@ -46,7 +46,7 @@ def search_zero(f, fprime, t0, epsilon=0.00001, theta=0.01, abs_inf=0.0001):
     while (not (((0 in RIF(f(RIF(tl,tu))) or 0 in RIF(f(tl)))
             and (RIF(f(tu)) > 0 or RIF(f(tu)) < 0)))
             and tu < tuu):
-        print "tu = {}".format(tu)
+        # print "tu = {}".format(tu)
         tu = min((1 + theta)*tu + abs_inf, tuu)
 
     t = RIF(tl,tu)

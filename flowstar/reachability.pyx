@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 from Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
 from TaylorModel cimport TaylorModel, TaylorModelVec
 from Interval cimport Interval, intervalNumPrecision
@@ -403,31 +405,101 @@ cdef class Reach:
 
         return p
 
-    # def sage_tube_plot(self, str x, str y, double step=1e-1):
-    #     from sage.all import Graphics, polygon, RIF
-    #
-    #     p = Graphics()
-    #     cdef int var_id_x = self.c_reach.getIDForStateVar(x)
-    #     cdef int var_id_y = self.c_reach.getIDForStateVar(y)
-    #     cdef double t = 0
-    #
-    #     for i in range(int(self.c_reach.time/step)):
-    #         t = step*i
-    #         res = self((t, t+step))
-    #         try:
-    #             Ix = res[var_id_x]
-    #             Iy = res[var_id_y]
-    #         except:
-    #             print("warning: eval failed for t in [{}, {}]".format(t, t+step))
-    #         cx0, cy0 = cx, cy
-    #         cx, cy = Ix.center(), Iy.center()
-    #         xx, cy = Ix.center(), Iy.center()
-    #         lx, ly = Ix.lower(), Iy.lower()
-    #         hx, hy = Ix.lower(), Iy.lower()
-    #         dx, dy = (cx - cx0)/step, (cy - cy0)/step
-    #
-    #
-    #     return p
+    def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False, plot_angle=None, tight=False, joins=True):
+        from sage.all import line, Graphics, RIF, sqrt, arctan, tan, cos, sin, arrow, point, pi, vector
+
+        p = Graphics()
+        var_id_x = self.c_reach.getIDForStateVar(x)
+        var_id_y = self.c_reach.getIDForStateVar(y)
+        cx0 = cy0 = 0
+        cx = cy = 0
+        tx = ty = 0
+        rx = ry = 0
+        r00 = r0 = r = 0
+
+        n = int(self.c_reach.time//step)
+        for i in range(n + 1):
+            t = step*i
+            if i < n:
+                res = self((t, t+step))
+            try:
+                Ix = RIF(res[var_id_x])
+                Iy = RIF(res[var_id_y])
+            except:
+                print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+            cx00, cy00 = cx0, cy0
+            cx0, cy0 = cx, cy
+            tx0, ty0 = tx, ty
+            if i < n:
+                cx, cy = Ix.center(), Iy.center()
+                dx, dy = (cx - cx0), (cy - cy0)
+                if plot_angle is None:
+                    theta = pi/2 - arctan(dy/dx)
+                elif isinstance(plot_angle, float):
+                    theta = plot_angle
+                else:
+                    theta = plot_angle(t)
+
+            r000 = r00
+            r00 = r0
+            r0 = r
+            rx0, ry0 = rx, ry
+            rx, ry = Ix.absolute_diameter()/2, Iy.absolute_diameter()/2
+            r = sqrt(rx**2 + ry**2)
+
+            if tight:
+                # This finds where we hit the bounding box -- does not work
+                # well due to the edges intersecting
+                if rx0 < ry0:
+                    tx = rx0
+                    ty = tx*tan(theta)
+                else:
+                    ty = ry0
+                    tx = ty/tan(theta)
+            else:
+                tx = r0 * cos(theta)
+                ty = r0 * sin(theta)
+            # if theta > pi/2:
+            #     tx = -tx
+            #     ty = -ty
+            # if rx0 < ry0:
+            #     tx = rx0
+            #     ty = tx*tan(theta)
+            # else:
+            #     ty = ry0
+            #     tx = ty/tan(theta)
+
+            if cx0 != 0 and cy0 != 0 and ty0 != 0 and tx0 != 0 and cy00 != 0 and cx00 != 0:
+                # Draw width
+                if joins:
+                    p += line([(cx00 - tx0, cy00 + ty0),
+                               (cx00 + tx0, cy00 - ty0)], linestyle='--')
+
+                # Connect subsequent lines (draw lines between their endpoints
+                # chosing the pairs of endpoints which make the most
+                # parallel lines)
+                if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])
+                   > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
+                    p += line([(cx00 - tx0, cy00 + ty0),
+                               (cx0 - tx, cy0 + ty)])
+                    p += line([(cx00 + tx0, cy00 - ty0),
+                               (cx0 + tx, cy0 - ty)])
+                else:
+                    p += line([(cx00 - tx0, cy00 + ty0),
+                               (cx0 + tx, cy0 - ty)])
+                    p += line([(cx00 + tx0, cy00 - ty0),
+                               (cx0 - tx, cy0 + ty)])
+
+                # Draw arrows in the plotting direction
+                if arrows:
+                    p += point((cx0, cy0), size=100)
+                    p += arrow((cx0, cy0), (cx0 + dx, cy0 + dy))
+
+        if joins:
+            p += line([(cx0 - tx, cy0 + ty),
+                       (cx0 + tx, cy0 - ty)], linestyle='--')
+
+        return p
 
     def sage_plot(self, x, double step=1e-2):
         from sage.all import plot
