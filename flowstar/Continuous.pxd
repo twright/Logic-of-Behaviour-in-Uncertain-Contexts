@@ -89,3 +89,4 @@ cdef extern from "Continuous.h" namespace "flowstar":
     char outputFileName[NAME_SIZE]
     vector[string] stateVarNames
     cmap[string, int] stateVarTab
+    cmap[string, int] tmVarTab

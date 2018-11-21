@@ -18,3 +18,4 @@ flowstar/old*
 *.log
 flowstar/flowstar-2.1.0-debug/flowstar
 flowstar/flowstar-2.1.0-clean/flowstar
+*.swp

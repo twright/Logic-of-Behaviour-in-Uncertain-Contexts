@@ -6,10 +6,15 @@ from interval_utils import *
 from interval_root_isolation import isolate_roots
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
-           'Signal', 'C']
+           'Signal', 'C', 'ctx', 'to_signal_piecewise']
 
 
 def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
+    # Shortcut if signal consistient over domain
+    fI = RIF(f(domain))
+    #if 0 not in fI:
+    #    return Signal(domain, [(domain, fI.center() > 0)])
+
     values = []
     a = domain.lower('RNDD')
     #while 0 in RIF(f(a)):
@@ -24,7 +29,7 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
         a = root.upper('RNDU')
     b = domain.upper('RNDU')
     I = RIF(a, b)
-    if 0 not in RIF(f(b)):
+    if 0 not in RIF(f(RIF(b))):
         values += [(I, RIF(f(I.center())) > 0)]
     #values += [(I, RIF(f(I.center())) > 0)]
     return Signal(domain, values)
@@ -99,10 +104,10 @@ class Signal(object):
                             self._values.pop(j)
                             found = True
                             dup = True
-                        else:
+                        elif v.upper() != u.lower() and u.upper() != v.lower():
                             raise Exception('Inconsitient intervals {} ({}) '
                                             'and {} ({}) in signal!'.format(
-                                                v, bv, u, bu))
+                                                v.str(style='brackets'), bv, u.str(style='brackets'), bu))
         self._values.sort(key=lambda (I, b): I.lower())
 
     def to_domain(self, J):
@@ -227,6 +232,17 @@ class Signal(object):
     __nonzero__ = __bool__  # For python 2 this is the correct name
 
 
+def to_signal_piecewise(f, fprime, time, step):
+    sig = Signal(RIF(0), [])
+    for i in range(time/step+1):
+        domain = RIF(step*i, step*(i+1))
+        # print("computing on domain {}".format(domain.str(style='brackets')))
+        res = to_signal(f, fprime, domain)
+        sig = sig.union(res)
+        # print("sig = {}".format(res))
+    return sig
+
+
 def C(I, ctx, phi, f, g, epsilon=1):
     # phi :: solution -> {True, False, None}
     # f(t) assumed to be the trace,
@@ -236,9 +252,9 @@ def C(I, ctx, phi, f, g, epsilon=1):
     d = I.absolute_diameter()
 
     fI = RIF(f(I))
-    print 'I  =', I.str(style='brackets')
+    # print 'I  =', I.str(style='brackets')
     h = g(ctx(fI))
-    print 'C || f(I) =', RIF(ctx(fI)).str(style='brackets')
+    # print 'C || f(I) =', RIF(ctx(fI)).str(style='brackets')
     print 'h  =', h
     # hprime = h.derivative()
     # print "h' =", hprime
@@ -263,6 +279,37 @@ def C(I, ctx, phi, f, g, epsilon=1):
         return Signal.union(C(J, ctx, phi, f, g, epsilon),
                             C(K, ctx, phi, f, g, epsilon))
 
-    print 'returning res =', repr(res)
+    # print 'returning res =', repr(res)
     return Signal(I, [(I, res)])
     # .G(RIF(0,d)) #.G(self.domain)
+
+def ctx(I, C, phi, f, g, epsilon=1):
+    # I is the time interval
+    # C(x) places state x in context
+    # phi :: solution -> {True, False, None}
+    # f(t) assumed to be the trace,
+    # g(x)(t) a `continuation function` which computes the evolution of
+    # the system from a given starting set
+    # Note: states are now presumed to be n-dimensional
+    d = I.absolute_diameter()
+
+    fI = [RIF(x) for x in f(I)]
+    # print 'I  =', I.str(style='brackets')
+    h = g(C(fI))
+    # print 'C || f(I) =', [x.str(style='brackets') for x in C(fI)]
+    # print 'h  =', h
+    res = phi(h)
+    print(res)
+
+    if res is None and d > epsilon:
+        J, K = I.bisection()
+        print "bisecting {} -> {}, {}".format(
+            I.str(style='brackets'),
+            J.str(style='brackets'),
+            K.str(style='brackets'),
+        )
+        return Signal.union(ctx(J, C, phi, f, g, epsilon),
+                            ctx(K, C, phi, f, g, epsilon))
+
+    # print 'returning res =', repr(res)
+    return Signal(I, [(I, res)])
