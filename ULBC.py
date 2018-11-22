@@ -1,43 +1,12 @@
 from builtins import *
-from sage.all import *
+from sage.all import RIF
+import sage.all as sage
 from collections import OrderedDict
-
-# from interval_signals import *
-from flowstar.reachability import Poly, Reach
 import operator
-import itertools
-from functools import reduce
 
-def zip_with(f, *coll):
-    return itertools.starmap(f, itertools.izip(*coll))
+from interval_signals import true_signal, false_signal, to_signal_piecewise
+from flowstar.reachability import Poly, Reach
 
-def flowstar_poly(p, vars):
-    '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
-    >>> vars = {x: x, y: y}
-    '''
-    varsd = vars.values()
-    x = varsd[0]
-    zero = Poly(0, x, 0, varsd)
-    ts = [Poly(1, k, 1, varsd) for k in varsd]
-    cs = [Poly(c, x, 0, varsd) for c in p.coefficients()]
-
-    return sum(
-        zip_with(operator.mul,
-                 cs,
-                 reduce(operator.mul,
-                        (zip_with(operator.mul, exs, ts)
-                        for exs in p.exponents()))),
-        zero,
-    )
-    #
-    # sum(
-    #     product(
-    #         Poly(1, ) for x,
-    #         Poly(c, x, 0, varsd),
-    #     ) for c, m in p,
-    #     zero
-    # )
 
 class Logic(object):
     def __init__(self, arg):
@@ -45,7 +14,7 @@ class Logic(object):
             self._R = arg
             self._vars = OrderedDict((str(x), x) for x in arg.gens())
         else:
-            self._R = PolynomialRing(QQ, arg)
+            self._R = sage.PolynomialRing(sage.QQ, arg)
             self._vars = OrderedDict(zip(arg, self._R.gens()))
 
     @property
@@ -56,11 +25,15 @@ class Logic(object):
     def vars(self):
         return self._vars
 
-    # Let's be immutable!
-    # @property.setter
-    # def vars(self, value):
-    #     self._R = PolynomialRing(QQ, value)
-    #     self._vars = dict(zip(self._vars, self.R.gens()))
+    def signal_for_system(self, odes, initials, duration, step=0.01, order=10):
+        reach = Reach(
+            odes,
+            initials,
+            self.duration + duration,
+            step=step,
+            order=order,
+        )
+        return self.signal(reach, odes).to_domain(RIF(0, duration))
 
     def __and__(self, other):
         return And([self, other])
@@ -81,9 +54,15 @@ class Logic(object):
             return "({})".format(self)
 
 
+def index_fn(p):
+    R = p.parent()
+    gs = R.gens()
+    return lambda xs: RIF(p.subs({g: x for g, x in zip(gs, xs)}))
+
+
 class Atomic(Logic):
     '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
+    >>> R, (x, y) = sage.PolynomialRing(sage.RIF, 'x, y').objgens()
     >>> Atomic(x**2 + y + 1).p
     x^2 + y + 1
     >>> Atomic(x**2 + y + 1)
@@ -107,7 +86,29 @@ class Atomic(Logic):
         return self._p
 
     def dpdt(self, odes):
-        return vector(map(self.p.derivative, self.vars.values())) * odes
+        return (sage.vector(map(self.p.derivative, self.vars.values()))
+                * sage.vector(odes))
+
+    def sage_plot(self, R):
+        idx = index_fn(self.p)
+
+        def up(t):
+            return idx(R(t)).upper()
+
+        def lo(t):
+            return idx(R(t)).lower()
+
+        return sage.plot((lo, up), (0, R.time))
+
+    def signal(self, R, odes):
+        ip = index_fn(self.p)
+        idp = index_fn(self.dpdt(odes))
+        return to_signal_piecewise(
+            (lambda t: ip(R(t))),
+            (lambda t: idp(R(t))),
+            R.time,
+            R.step,
+        )
 
     def __repr__(self):
         return 'Atomic({})'.format(repr(self.p))
@@ -116,11 +117,9 @@ class Atomic(Logic):
         return '{} > 0'.format(str(self.p))
 
 
-
-
 class And(Logic):
     '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> And([Atomic(x**2 + 1), Atomic(y**3 - 2)])
     And([Atomic(x^2 + 1), Atomic(y^3 - 2)])
     >>> And([Atomic(x**2 + 1), Atomic(y**3 - 2)]).terms
@@ -171,6 +170,11 @@ class And(Logic):
     def duration(self):
         return max(t.duration for t in self.terms)
 
+    def signal(self, reach, odes):
+        return reduce(operator.and_,
+                      (t.signal(reach, odes) for t in self.terms),
+                      true_signal(RIF(0, reach.time)))
+
     def __repr__(self):
         return "And({})".format(repr(self.terms))
 
@@ -180,7 +184,7 @@ class And(Logic):
 
 class Or(Logic):
     '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> Or([Atomic(x**2 + 1), Atomic(y**3 - 2)])
     Or([Atomic(x^2 + 1), Atomic(y^3 - 2)])
     >>> Or([Atomic(x**2 + 1), Atomic(y**3 - 2)]).terms
@@ -235,10 +239,15 @@ class Or(Logic):
     def __str__(self):
         return ' | '.join(t.bstr(self.priority) for t in self.terms)
 
+    def signal(self, reach, odes):
+        return reduce(operator.or_,
+                      (t.signal(reach, odes) for t in self.terms),
+                      false_signal(RIF(0, reach.time)))
+
 
 class Neg(Logic):
     '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> Neg(Atomic(x**3 - 2))
     Neg(Atomic(x^3 - 2))
     >>> ~Atomic(x**3 - 2)
@@ -274,6 +283,9 @@ class Neg(Logic):
     def __str__(self):
         return "~{}".format(self.p.bstr(self.priority))
 
+    def signal(self, reach, odes):
+        return ~self.p.signal(reach, odes)
+
 
 def finterval(I):
     a, b = I.endpoints()
@@ -286,18 +298,22 @@ def finterval(I):
 
 class C(Logic):
     '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> {x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)
     C({x: [1 .. 2], y: [3 .. 4]}, Atomic(x^3 - 2))
     >>> print({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
     {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)
-    >>> print({x: RIF(1,2), y: RIF(3,4)} >> (Atomic(x**3 - 2) & Atomic(y**2 + 3)))
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
+    ...       (Atomic(x**3 - 2) & Atomic(y**2 + 3)))
     {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 & y^2 + 3 > 0)
-    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)) & Atomic(y**2 + 3))
+    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    ...        & Atomic(y**2 + 3))
     ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) & y^2 + 3 > 0
-    >>> print({x: RIF(1,2), y: RIF(3,4)} >> (Atomic(x**3 - 2) | Atomic(y**2 + 3)))
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
+    ...       (Atomic(x**3 - 2) | Atomic(y**2 + 3)))
     {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 | y^2 + 3 > 0)
-    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)) | Atomic(y**2 + 3))
+    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    ...       | Atomic(y**2 + 3))
     ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) | y^2 + 3 > 0
     >>> ({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)).duration
     0
@@ -336,7 +352,7 @@ class C(Logic):
 
 class G(Logic):
     '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> print(repr(G(RIF(1, 2), Atomic(x**3 - 2))))
     G([1 .. 2], Atomic(x^3 - 2))
     >>> print(G(RIF(1, 2), Atomic(x**3 - 2)))
@@ -371,10 +387,13 @@ class G(Logic):
     def __str__(self):
         return 'G({}, {})'.format(finterval(self.I), str(self.phi))
 
+    def signal(self, reach, odes):
+        return self.phi.signal(reach, odes).G(self.I)
+
 
 class F(Logic):
     '''
-    >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> print(repr(G(RIF(1, 2), Atomic(x**3 - 2))))
     G([1 .. 2], Atomic(x^3 - 2))
     >>> print(G(RIF(1, 2), Atomic(x**3 - 2)))
@@ -406,6 +425,9 @@ class F(Logic):
 
     def __str__(self):
         return 'F({}, {})'.format(finterval(self.I), str(self.phi))
+
+    def signal(self, reach, odes):
+        return self.phi.signal(reach, odes).G(self.I)
 
 
 class U(Logic):

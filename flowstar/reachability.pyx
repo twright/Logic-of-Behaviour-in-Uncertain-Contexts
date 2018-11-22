@@ -247,7 +247,6 @@ cdef class Reach:
     # initials :: [(lower, upper)]
     def __cinit__(
         self,
-        vars,
         odes,
         initials,
         time,
@@ -261,22 +260,26 @@ cdef class Reach:
         estimation=1e-3,
         max_remainder_queue=200,
         maxNumSteps=100,
+        vars=None,
         run=True):
         cdef ContinuousReachability * C = &self.c_reach
         self.ran = False
         self.prepared = False
         self.result = 0
 
-        cdef Poly poly
-
         # --- Creating the continuous system ---
-        assert len(vars) == len(odes) == len(initials)
+        assert len(odes) == len(initials)
+        assert len(odes) > 0
 
+        if vars is None:
+            vars = [str(x) for x in odes[0].parent().gens()]
+
+        assert len(vars) == len(odes)
 
         # Create Taylor Models for polynomials
         cdef vector[TaylorModel] odes_tms
         for ode in odes:
-            odes_tms.push_back(TaylorModel((<Poly?>ode).c_poly))
+            odes_tms.push_back(TaylorModel(Poly(ode).c_poly))
 
         cdef TaylorModelVec odes_tmv = TaylorModelVec(odes_tms)
 
@@ -725,6 +728,14 @@ cdef class Reach:
     @property
     def num_initials(self):
         return int(self.c_reach.system.initialSets.size())
+
+    @property
+    def step(self):
+        return float(self.c_reach.step)
+
+    @property
+    def time(self):
+        return float(self.c_reach.time)
 
     @property
     def ode_strs(self):

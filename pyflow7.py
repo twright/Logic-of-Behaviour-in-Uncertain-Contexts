@@ -1,4 +1,4 @@
-from flowstar.reachability import Reach, Poly, get_power_4, get_factorial_rec, get_double_factorial, get_precision, set_precision
+from flowstar.reachability import Poly
 
 varsd = [b't', b'x', b'y']
 qt = Poly(1, 't', 0, varsd)

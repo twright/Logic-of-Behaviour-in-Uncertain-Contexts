@@ -1,5 +1,4 @@
-from flowstar.reachability import Reach, Poly, get_power_4, get_factorial_rec, get_double_factorial, get_precision, set_precision
-
+from flowstar.reachability import Reach, Poly
 varsd = [b't', b'x', b'y']
 qt = Poly(1, 't', 0, varsd)
 qx = Poly(-1, 'y', 1, varsd)
@@ -8,7 +7,7 @@ print "t' = {}\nx' = {}\ny' = {}".format(qt, qx, qy)
 D = Reach(
     varsd,
     [qt, qx, qy],
-    [(0,0), (4,5), (1,2)],
+    [(0, 0), (4, 5), (1, 2)],
     5,
     0.1,
     order=3,
