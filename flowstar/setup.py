@@ -8,7 +8,7 @@ Cython.Compiler.Options.annotate = True
 
 LIB_DIRS = ['.', 'flowstar-2.1.0']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
-COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register']
+COMPILE_ARGS = ['-O0', '-std=c++17', '-Wno-register']
 LINK_ARGS = ['-std=c++17']
 
 extensions = [
@@ -41,6 +41,28 @@ extensions = [
         extra_link_args=LINK_ARGS,
         library_dirs=LIB_DIRS,
         include_dirs=LIB_DIRS,
+    ),
+    Extension(
+        name='flowroots',
+        sources=['flowroots.pyx'],
+        libraries=LIBS,
+        language='c++',
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+    ),
+    Extension(
+        name='flowinttests',
+        sources=['flowinttests.pyx'],
+        libraries=LIBS,
+        language='c++',
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+        setup_requires=['pytest-runner'],
+        tests_require=['pytest']
     ),
     # Extension(
     #     name='flowtest',

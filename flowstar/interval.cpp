@@ -7,7 +7,7 @@
             "flowstar-2.1.0/Interval.h"
         ], 
         "extra_compile_args": [
-            "-O3", 
+            "-O0", 
             "-std=c++17", 
             "-Wno-register"
         ], 

@@ -1,8 +1,11 @@
+# cython: profile=True
+# cython: linetrace=True
 from __future__ import division, print_function
 
 from Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
 from TaylorModel cimport TaylorModel, TaylorModelVec
 from Interval cimport Interval, intervalNumPrecision
+# from reachability cimport interval_fn, Reach, poly_fn
 from Polynomial cimport Polynomial, factorial_rec, power_4, double_factorial
 
 from cython.operator cimport dereference as deref
@@ -18,18 +21,30 @@ from libcpp.memory cimport unique_ptr, make_unique
 from libcpp.algorithm cimport sort as csort
 import operator
 from functools import reduce
+import collections
+import sage.all as sage
+from cysignals.signals cimport sig_on, sig_off, sig_check
+
+cdef extern from "<algorithm>" namespace "std" nogil:
+    T cmin "std::min"[T](T, T);
+    T cmax "std::max"[T](T, T);
+
+cdef extern from "<cstdlib>" namespace "std" nogil:
+    double cabs "std::abs"(double);
 
 
-cdef cbool overlaps(Interval & I, Interval & J):
+cdef cbool overlaps(Interval & I, Interval & J) nogil:
     il, iu = I.inf(), I.sup()
     jl, ju = J.inf(), J.sup()
     return not (iu < jl or ju < il)
 
-cdef void interval_union(Interval & I, Interval & J):
-    I.setInf(min(I.inf(), J.inf()))
-    I.setSup(max(I.sup(), J.sup()))
 
-cdef void interval_vect_union(vector[Interval] & Is, vector[Interval] & Js):
+cdef void interval_union(Interval & I, Interval & J) nogil:
+    I.setInf(cmin(I.inf(), J.inf()))
+    I.setSup(cmax(I.sup(), J.sup()))
+
+
+cdef void interval_vect_union(vector[Interval] & Is, vector[Interval] & Js) nogil:
     cdef:
         vector[Interval].iterator itI = Is.begin()
         vector[Interval].iterator itJ = Js.begin()
@@ -39,6 +54,7 @@ cdef void interval_vect_union(vector[Interval] & Is, vector[Interval] & Js):
 
         inc(itI)
         inc(itJ)
+
 
 cpdef get_domain_var_names():
     global domainVarNames
@@ -111,10 +127,6 @@ cdef Interval _interval(i):
 
 
 cdef class Poly:
-    cdef Polynomial c_poly
-    cdef dict vars
-
-
     # Constructor makes a univariate monomial -- should combine using
     # arithmetic operations
     def __cinit__(self, *args):
@@ -156,8 +168,10 @@ cdef class Poly:
 
     @staticmethod
     def from_monomial(coeff, mono, vars):
+        # print("coeff =", coeff)
+        # print("mono =", mono)
         c = Poly(coeff, vars)
-        ts = [Poly(1, k, 1, vars) for k in vars]
+        # ts = [Poly(1, k, 1, vars) for k in vars]
         return reduce(operator.mul,
                       (Poly(1, k, n, vars) for k, n in zip(vars, mono)),
                       c)
@@ -165,17 +179,40 @@ cdef class Poly:
     @staticmethod
     def from_sage(p):
         '''
-        >>> R, (x, y) = PolynomialRing(QQ, 'x, y').objgens()
-        >>> vars = {x: x, y: y}
+        >>> R, (x, y) = sage.PolynomialRing(sage.RIF, 'x, y').objgens()
+        >>> Poly.from_sage(x*y + x + R(3))
+        (([3.0000000000e+00 , 3.0000000000e+00]) + ([1.0000000000e+00 , 1.0000000000e+00] * x) + ([1.0000000000e+00 , 1.0000000000e+00] * x * y))
+        >>> R, (t,) = sage.PolynomialRing(sage.RIF, 't').objgens()
+        >>> Poly(t - 0.5)
+        (([-5.0000000000e-01 , -5.0000000000e-01]) + ([1.0000000000e+00 , 1.0000000000e+00] * t))
+        >>> Poly(t + sage.RIF(-1,1))
+        (([-1.0000000000e+00 , 1.0000000000e+00]) + ([1.0000000000e+00 , 1.0000000000e+00] * t))
+        >>> Poly(t**2 - 2)
+        (([-2.0000000000e+00 , -2.0000000000e+00]) + ([1.0000000000e+00 , 1.0000000000e+00] * t^2))
         '''
+        # print(p)
+        # print(p.coefficients())
+        # print(p.exponents())
         vars = list(map(str, p.parent().gens()))
         zero = Poly(vars)
-        # ts = [Poly(1, k, 1, vars) for k in vars]
-        cs = [Poly(c, vars) for c in p.coefficients()]
+        if hasattr(p, 'list'):
+            # Univariate polynomials handle interval coefficients containing
+            # 0 strangly so we must treat this as a special case
+            cs = (c for c in p.list() if not(c == 0 and hasattr(c, 'diameter') <= (c.diameter() == 0)))
+        else:
+            cs = p.coefficients()
+        # try:
+        #     cs = p.coefficients(sparse=False)
+        # except:
+        #     cs = p.coefficients()
+        #cs = [Poly(c, vars) for c in p.coefficients()]
 
         return sum(
-            (Poly.from_monomial(c, ex, vars)
-                for c, ex in zip(p.coefficients(), p.exponents())),
+            (Poly.from_monomial(c,
+                                ex if isinstance(ex, collections.Iterable)
+                                else (ex,),
+                                vars)
+                for c, ex in zip(cs, p.exponents())),
             zero,
         )
 
@@ -231,19 +268,500 @@ cdef class Poly:
         return str(res)
 
 
+cdef double int_dist(Interval & I, Interval & J) nogil:
+    cdef double il, iu, jl, ju
+    il, iu = I.inf(), J.sup()
+    jl, ju = J.inf(), J.sup()
+    # Round up/down endpoints so as to overapproximate the real distance
+    return cmax(cabs(il - jl), cabs(iu - ju))
+
+
+cdef cbool int_diff_assign(Interval & a, const Interval & b) nogil:
+    cdef double al, au, bl, bu
+    al, au = a.inf(), a.sup()
+    bl, bu = b.inf(), b.sup()
+    if al <= bl <= au <= bu:
+        a.setSup(bl)
+        return True
+    elif bl <= al <= bu <= au:
+        a.setInf(bu)
+        return True
+    elif bl <= al <= au <= bu:
+        return False
+    else:
+        return True
+
+def py_int_diff2(a, b):
+    '''
+    >>> py_int_diff2((1,3), (2,4))
+    (True, False, (1.0, 2.0), ...)
+    >>> py_int_diff2((1,3), (4,5))
+    (True, False, (1.0, 3.0), ...)
+    >>> py_int_diff2((1,3), (0,2))
+    (True, False, (2.0, 3.0), ...)
+    >>> py_int_diff2((1,3), (2,4))
+    (True, False, (1.0, 2.0), ...)
+    >>> py_int_diff2((1,5), (2,4))
+    (True, True, (1.0, 2.0), (4.0, 5.0))
+    >>> py_int_diff2((2,4), (1,5))
+    (False, False, ..., ...)
+    '''
+    cdef Interval L, U, A, B
+    cdef cbool res,split
+
+    A = _interval(a)
+    B = _interval(b)
+
+    res = int_diff2(L, U, split, A, B)
+
+    return (<bint?>res,
+            <bint?>split,
+            (L.inf(), L.sup()),
+            (U.inf(), U.sup()))
+
+# Interval difference separating upper and lower
+# Return value indicates existance of answer
+cdef cbool int_diff2(Interval & L, Interval & U, cbool & split, Interval & a, const Interval & b):
+    cdef double al, au, bl, bu
+    al, au = a.inf(), a.sup()
+    bl, bu = b.inf(), b.sup()
+    (&split)[0] = False
+    if al <= bl <= au <= bu:
+        (&L)[0] = (&U)[0] = Interval(al, bl)
+        return True
+    elif bl <= al <= bu <= au:
+        (&L)[0] = (&U)[0] = Interval(bu, au)
+        return True
+    elif bl <= al <= au <= bu:
+        return False
+    elif al <= bl <= bu <= au:
+        # print("split on diff")
+        (&L)[0] = Interval(al, bl)
+        (&U)[0] = Interval(bu, au)
+        (&split)[0] = True
+        return True
+    else:
+        (&L)[0] = (&U)[0] = a
+        return True
+
+def py_extdiv2(d, a, b):
+    '''
+    >>> py_extdiv2((0,5), (4,4), (2,2))
+    (True, False, (2.0, 2.0), ...)
+    >>> py_extdiv2((-5,5), (4,4), (-2,2))
+    (True, True, (-5.0, -2.0), (2.0, 5.0))
+    >>> py_extdiv2((-5,5), (4,4), (-2,0.0))
+    (True, False, (-5.0, -2.0), ...)
+    '''
+    cdef Interval A = _interval(a)
+    cdef Interval B = _interval(b)
+    cdef Interval D = _interval(d)
+    cdef Interval L, U
+    cdef cbool split
+
+    res = <bint?>extdiv2(L, U, split, D, A, B)
+
+    return (res,
+            <bint?>split,
+            (L.inf(), L.sup()),
+            (U.inf(), U.sup()))
+
+cdef cbool extdiv2(Interval & L, Interval & U, cbool & split, Interval & d, const Interval & a, const Interval & b):
+    cdef double al, au, bl, bu
+    cdef Interval ratio
+    al, au = a.inf(), a.sup()
+    bl, bu = b.inf(), b.sup()
+    if not (bl <= 0 <= bu):
+        # print("div a")
+        ratio = a / b
+        (&split)[0]=False
+        (&L)[0] = d
+        if overlaps(ratio, L):
+            L.intersect_assign(ratio)
+            (&U)[0] = L
+            return True
+        else:
+            return False
+    elif al > 0:
+        # print("div b")
+        return int_diff2(L, U, split, d,
+                         Interval(d.inf() if bl == 0 else al/bl,
+                                  d.sup() if bu == 0 else al/bu))
+    elif au < 0:
+        # print("div c")
+        return int_diff2(L, U, split, d,
+                         Interval(d.inf() if bu == 0 else au/bu,
+                                  d.sup() if bl == 0 else au/bl))
+    else:
+        # print("div d")
+        (&L)[0] = (&U)[0] = d
+        (&split)[0] = False
+        return True
+
+# Store result in D
+cdef cbool extdiv(Interval & d, const Interval & a, const Interval & b) nogil:
+    cdef double al, au, bl, bu
+    cdef Interval ratio
+    al, au = a.inf(), a.sup()
+    bl, bu = b.inf(), b.sup()
+    if not (bl <= 0 <= bu):
+        ratio = a / b
+        if overlaps(ratio, d):
+            d.intersect_assign(ratio)
+            return True
+        else:
+            return False
+    elif bl > 0:
+        return int_diff_assign(d, Interval(al/bl, al/bu))
+    elif bu < 0:
+        return int_diff_assign(d, Interval(au/bu, au/bl))
+    else:
+        return True
+
+
+cdef Interval call_f(interval_fn f,
+                     TaylorModelVec & tmv,
+                     vector[Interval] & domain) nogil:
+    cdef vector[Interval] I
+    tmv.intEval(I, domain)
+    I.insert(I.begin(), domain[0])
+    return f.call(I)
+
+
+# t assumed to be scaled in the same manner as tmv domain
+cdef cbool search_zero(Interval & t, interval_fn f, interval_fn fprime,
+                       TaylorModelVec & tmv, vector[Interval] & domain,
+                       double epsilon=0.00001, double theta=0.01,
+                       double abs_inf=0.0001) nogil:
+    cdef cbool bound_found = False
+    cdef double tl0 = t.inf()
+    cdef double tu0 = t.sup()
+    cdef double tl = t.inf()
+    # We will reset the time domain at the end to allow us to pass domain
+    # by reference
+    cdef Interval T0 = domain[0]
+    # Perform interval evaluation
+    cdef vector[Interval] I
+    domain[0] = Interval(tl)
+    cdef Interval fI = call_f(f, tmv, domain)
+    cdef Interval fP
+    cdef Interval tbak
+    cdef Interval d
+    cdef cbool failed
+
+    bound_found = fI.inf() <= 0 <= fI.sup()
+    while not bound_found:
+        # print("tl = {}".format(tl))
+        # print("t = {}".format(t.as_str()))
+        tbak = t
+        tl = t.inf()
+        domain[0] = Interval(tl)
+        fI = call_f(f, tmv, domain)
+        fI.inv_assign()
+        t.add_assign(-tl)
+        domain[0] = t
+        fP = call_f(fprime, tmv, domain)
+        failed = not extdiv(t, fI, fP)
+        # print("t' = {} ({})".format(t.as_str(), failed))
+        if failed:
+            domain[0] = T0  # Restore TMV domain
+            return False
+        t.add_assign(tl)
+        t.intersect_assign(tbak)
+        bound_found = int_dist(tbak, t) <= 0.00001
+
+    tl = t.inf()
+    cdef double tu = tl + 1e-6
+
+    while True:
+        domain[0] = Interval(tu)
+        fI = call_f(f, tmv, domain)
+        if (fI.inf() > 0 or fI.sup() < 0 or tu >= tu0):
+            break
+        tu = cmin((1 + theta)*tu + abs_inf, tu0)
+        # print("tu = {} (finding upper)".format(tu))
+
+    (&t)[0] = Interval(tl0, tu)
+    bound_found = False
+    while tu <= tu0 and not bound_found:
+        # print("tu = {} (refining upper)".format(tu))
+        tbak = t
+        tu = t.sup()
+        domain[0] = Interval(tu)
+        fI = call_f(f, tmv, domain)
+        t.inv_assign()
+        t.add_assign(tu)
+        domain[0] = t
+        fP = call_f(fprime, tmv, domain)
+        failed = not extdiv(t, fI, fP)
+        t.inv_assign()
+        t.add_assign(tu)
+        t.intersect_assign(tbak)
+        bound_found = failed or int_dist(tbak, t) <= 0.00001
+
+    (&t)[0] = Interval(tl, tu)
+    domain[0] = T0  # Restore TMV domain
+    return True
+    # >>> py_detect_roots3(Poly(t - 0.5), Poly(R(1.0)), sage.RIF(0, 1))
+    # verified contractive!
+    # [(0.5, 0.5)]
+    # >>> py_detect_roots3(Poly(t - sage.RIF(0.4,0.5)), Poly(R(1.0)), sage.RIF(0, 1))
+    # verified contractive!
+    # [(0.4, 0.5)]
+
+def py_detect_roots3(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1):
+    '''
+    >>> R, (t,) = sage.PolynomialRing(sage.RIF, 't').objgens()
+    >>> py_detect_roots3(Poly(t - 0.5), Poly(R(1.0)), sage.RIF(0, 1))
+    verified contractive!
+    [(0.5, 0.5)]
+    >>> py_detect_roots3(Poly(t - sage.RIF(0.4,0.5)), Poly(R(1.0)), sage.RIF(0, 1))
+    verified contractive!
+    [(0.4, 0.5)]
+    >>> py_detect_roots3(Poly(t**2 - 2), Poly(2*t), sage.RIF(1, 2))
+    verified contractive!
+    [(1.4142135623730947, 1.4142135623730954)]
+    >>> py_detect_roots3(Poly(6*(t - 0.5)**2 - sage.RIF(0.4)), Poly(12*t - 6), sage.RIF(0, 1))
+    verified contractive!
+    verified contractive!
+    [(0.7581988897471607, 0.7581988897471615), (0.24180111025283868, 0.24180111025283899)]
+    >>> py_detect_roots3(Poly(t - sage.RIF(-1,1)), Poly(R(1)), sage.RIF(0, 1))
+    root on boundary!
+    [(-0.0, 1.0)]
+    '''
+
+    cdef Interval T = _interval(t)
+    cdef interval_time_fn F = poly_time_fn(f.c_poly)
+    cdef interval_time_fn Fprime = poly_time_fn(fprime.c_poly)
+    cdef vector[Interval] roots
+    # cdef Interval R = F.call(Interval(0.0))
+    # cdef Interval Rprime = Fprime.call(Interval(0.0))
+
+    # print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))
+    # print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
+
+    detect_roots3(roots, F, Fprime, T, epsilon, verbosity)
+
+    return [(r.inf(), r.sup()) for r in roots]
+
+cdef void detect_roots3(vector[Interval] & roots,
+                        interval_time_fn f, interval_time_fn fprime,
+                        Interval & T0,
+                        double epsilon=0.00001,
+                        int verbosity=1):
+    cdef:
+        # Interval T0 = domain[0]
+        Interval T = T0
+        Interval Tbak
+        Interval fT
+        Interval fTprime
+        Interval M
+        Interval Tl
+        Interval Tu
+        cbool bound_found = False
+        cbool failed = False
+        cbool contractive = False
+        cbool split = False
+        Interval Told
+
+    if verbosity >= 3:
+        print("T = [{}..{}]".format(T.inf(), T.sup()))
+    while not (failed or bound_found):
+        Tbak = T
+        T.midpoint(M)
+        fI = f.call(M)
+        fP = fprime.call(T)
+        T.inv_assign()
+        T.add_assign(M)
+        Told=T
+        failed = not extdiv2(T, Tu, split, T, fI, fP)
+        if failed:
+            if verbosity >= 2:
+                print("failed! on:")
+                print("M=[{}..{}]".format(M.inf(), M.sup()))
+                print("extdiv2(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(
+                    T.inf(), T.sup(),
+                    Tu.inf(), Tu.sup(),
+                    split,
+                    Told.inf(), Told.sup(),
+                    fI.inf(), fI.sup(),
+                    fP.inf(), fP.sup()
+                ))
+            return #  No roots here!
+        T.inv_assign()
+        T.add_assign(M)
+        T.intersect_assign(Tbak)
+        if split:
+            break
+        contractive = (contractive
+                    or Tbak.inf() < T.inf()
+                    and T.sup() < Tbak.sup())
+        bound_found = int_dist(Tbak, T) <= epsilon
+        if verbosity >= 2:
+            print("T = [{}..{}]".format(T.inf(), T.sup()))
+
+    if split:
+        Tu.inv_assign()
+        Tu.add_assign(M)
+        Tu.intersect_assign(Tbak)
+        if verbosity >= 2:
+            print("splitting! [{}..{}] -> [{}..{}] + [{}..{}]".format(
+                T0.inf(), T0.sup(),
+                T.inf(), T.sup(),
+                Tu.inf(), Tu.sup(),
+            ))
+        detect_roots3(roots, f, fprime, T, epsilon)
+        detect_roots3(roots, f, fprime, Tu, epsilon)
+        return
+
+    if bound_found:
+        # T is a subset of Tbak by construction
+        # -- we check for strict contractiveness
+        # Tbak.inf() <= T.inf() and and T.sup() <= Tbak.sup()
+        if T0.inf() == T.inf() or T0.sup() == T.sup():
+            # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
+            if verbosity >= 1:
+                print("root on boundary!")
+        elif contractive:
+            # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
+            if verbosity >= 1:
+                print("verified contractive!")
+        else:
+            # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
+            if verbosity >= 1:
+                print("failed to verify contractive!")
+        roots.push_back(T)
+        # elif T.width() > epsilon:
+        #     # Bisect T into Tl and Tu
+        #     Tl.setInf(T)
+        #     Tl.setSup(M)
+        #     Tu.setInf(M)
+        #     Tu.setSup(T)
+        #     # print("bisecting!: [{}..{}] -> [{}..{}] + [{}..{}]".format(
+        #     #     T.inf(), T.sup(),
+        #     #     Tl.inf(), Tl.sup(),
+        #     #     Tu.inf(), Tu.sup(),
+        #     # ))
+        #
+        #     # Add roots from each
+        #     domain[0] = Tl
+        #     detect_roots2(roots, f, fprime, tmv, domain, epsilon)
+        #     domain[0] = Tu
+        #     detect_roots2(roots, f, fprime, tmv, domain, epsilon)
+        # else:
+        #     print("stopping!")
+
+cdef void detect_roots2(vector[Interval] & roots,
+                        interval_fn f, interval_fn fprime,
+                        TaylorModelVec & tmv,
+                        vector[Interval] & domain,
+                        double epsilon=0.00001):
+    cdef:
+        Interval T0 = domain[0]
+        Interval T = T0
+        Interval Tbak
+        Interval fT
+        Interval fTprime
+        Interval M
+        Interval Tl
+        Interval Tu
+        cbool bound_found = False
+        cbool failed = False
+        cbool contractive = False
+
+    # print("T = [{}..{}]".format(T.inf(), T.sup()))
+    while not (failed or bound_found):
+        Tbak = T
+        T.midpoint(M)
+        domain[0] = M
+        fI = call_f(f, tmv, domain)
+        T.inv_assign()
+        T.add_assign(M)
+        domain[0] = T
+        fP = call_f(fprime, tmv, domain)
+        failed = not extdiv(T, fI, fP)
+        if failed:
+            domain[0] = T0
+            return #  No roots here!
+        T.inv_assign()
+        T.add_assign(M)
+        T.intersect_assign(Tbak)
+        contractive = (contractive
+                    or Tbak.inf() < T.inf()
+                    or T.sup() < Tbak.sup())
+        bound_found = int_dist(Tbak, T) <= epsilon
+        # print("T = [{}..{}]".format(T.inf(), T.sup()))
+
+    if bound_found:
+        # T is a subset of Tbak by construction
+        # -- we check for strict contractiveness
+        # Tbak.inf() <= T.inf() and and T.sup() <= Tbak.sup()
+        if contractive:
+            # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
+            roots.push_back(T)
+        elif T.width() > epsilon:
+            # Bisect T into Tl and Tu
+            Tl.setInf(T)
+            Tl.setSup(M)
+            Tu.setInf(M)
+            Tu.setSup(T)
+            # print("bisecting!: [{}..{}] -> [{}..{}] + [{}..{}]".format(
+            #     T.inf(), T.sup(),
+            #     Tl.inf(), Tl.sup(),
+            #     Tu.inf(), Tu.sup(),
+            # ))
+
+            # Add roots from each
+            domain[0] = Tl
+            detect_roots2(roots, f, fprime, tmv, domain, epsilon)
+            domain[0] = Tu
+            detect_roots2(roots, f, fprime, tmv, domain, epsilon)
+        # else:
+        #     print("stopping!")
+
+    domain[0] = T0
+
+# Append result to roots
+cdef void detect_roots(vector[Interval] & roots,
+                       interval_fn f, interval_fn fprime,
+                       TaylorModelVec & tmv,
+                       vector[Interval] & domain,
+                       double epsilon=0.00001, double theta=0.01,
+                       double abs_inf=0.0001, double nudge=0.001) nogil:
+    cdef Interval T0 = domain[0]
+    cdef double tl = T0.inf()
+    cdef double tu = T0.sup()
+    cdef Interval T
+    cdef Interval fI
+    cdef Interval fprimeI
+
+    while tl <= tu:
+        T.setInf(tl)
+        T.setSup(tu)
+
+        # Terminatre prematurly if we are past the root
+        domain[0] = T
+        fI = call_f(f, tmv, domain)
+        domain[0] = T0
+        if 0 < fI.inf() or fI.sup() < 0:
+            # print("skipping [{}..{}] given fI = [{}..{}]".format(T.inf(), T.sup(), fI.inf(), fI.sup()))
+            return
+
+        # Isolate root
+        res = search_zero(T, f, fprime, tmv, domain,
+                          epsilon, theta, abs_inf)
+        domain[0] = T0
+
+        # Add root to list or stop
+        if res:
+            # print("got back [{}..{}]".format(T.inf(), T.sup()))
+            roots.push_back(T)
+            tl = tu + nudge
+        else:
+            return
+
+
 cdef class Reach:
-    cdef ContinuousReachability c_reach
-    cdef bint ran
-    cdef bint prepared
-    cdef int result
-
-    # store globals for polynomial operations
-    cdef vector[Interval] factorial_rec
-    cdef vector[Interval] power_4
-    cdef vector[Interval] double_factorial
-    cdef vector[string] domainVarNames
-
-    # By default call run in order to avoid nasty memory issues
     # initials :: [(lower, upper)]
     def __cinit__(
         self,
@@ -295,27 +813,44 @@ cdef class Reach:
         # Create system object
         C.system = ContinuousSystem(odes_tmv, initials_fpvect)
 
+        # === Set properties ===
+
+        # --- Steps
+        try:
+            (step_lo, step_hi) = step
+            C.bAdaptiveSteps = True
+        except:
+            step_lo = step_hi = step
+            C.bAdaptiveSteps = False
+        C.miniStep = <double>step_lo
+        C.step = <double>step_hi
+
+        # --- Orders
         # The orders and order kwargs are mutually exclusive
         if orders is None:
-            orders = [order]*len(initials)
+            orders = [order if isinstance(order, tuple) else (order, order)]
             C.orderType = 0
         else:
-            order = max(orders)
             C.orderType = 1
+        order_lo = min((order[0] if isinstance(order, tuple) else order)
+                       for order in orders)
+        order_hi = max((order[1] if isinstance(order, tuple) else order)
+                       for order in orders)
+        C.bAdaptiveOrders = order_lo < order_hi
+        for order in orders:
+            try:
+                (order_lo, order_hi) = order
+            except:
+                order_lo = order_hi = order
+            C.orders.push_back(order_lo)
+            C.maxOrders.push_back(order_hi)
+        C.globalMaxOrder = order_hi
 
-        # Set properties
-        C.step = <double>step
+        # --- The rest
         C.time = <double>time
         C.precondition = precondition
         C.plotSetting = 1  # We have to set this to something, but should be
         # set by plot method
-        C.bAdaptiveSteps = False
-        C.bAdaptiveOrders = False
-        C.miniStep = 1e-10
-        for order in orders:
-            C.orders.push_back(order)
-        C.maxOrders = C.orders
-        C.globalMaxOrder = order
         C.bPrint = verbose
         C.bSafetyChecking = False
         C.bPlot = True
@@ -381,7 +916,72 @@ cdef class Reach:
         img.rotate(90)
         return img
 
-    cdef vector[Interval] eval_interval(self, Interval & I):
+    def roots(Reach self, f, fprime):
+        cdef:
+            interval_fn f_fn = poly_fn(Poly(f).c_poly)
+            interval_fn fprime_fn = poly_fn(Poly(fprime).c_poly)
+            vector[Interval] c_res
+        self.prepare()
+        with self:
+            c_res = self.c_roots(f_fn, fprime_fn)
+        return [sage.RIF(r.inf(), r.sup()) for r in c_res]
+
+    cdef vector[Interval] c_roots(Reach self, interval_fn f, interval_fn fprime):
+        cdef:
+            clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
+            clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
+            clist[vector[Interval]].iterator domain = self.c_reach.domains.begin()
+            clist[vector[Interval]].iterator domain_end = self.c_reach.domains.end()
+            vector[Interval] roots
+            vector[Interval] new_roots
+            vector[Interval].iterator root_iter = roots.begin()
+            cdef Interval T0
+            double t = 0.0
+
+        cdef vector[Interval] domainCopy
+        cdef vector[Interval] final_res
+        cdef cbool initialized = False
+
+        var_id_t = self.c_reach.tmVarTab['local_t']
+
+        while (tmv != tmv_end and domain != domain_end):
+            # Isolate roots for current timestep
+            # print("reached detect roots t={} + {}".format(t,
+            #       deref(domain)[0].as_str()))
+            # print("f(t) = ")
+            # root_iter = roots.end()
+            new_roots.clear()
+            T0 = deref(domain)[0]
+            detect_roots3(new_roots,
+                          compose_interval_fn(f, deref(tmv), deref(domain)),
+                          compose_interval_fn(fprime, deref(tmv), deref(domain)),
+                          T0)
+            deref(domain)[0] = T0
+            # print("left detect roots")
+
+            # Shift roots by current time
+            root_iter = new_roots.begin()
+            while root_iter != new_roots.end():
+                # print("shifting root")
+                deref(root_iter).add_assign(t)
+                if (not roots.empty()
+                    and abs(deref(root_iter).inf() - roots.back().sup()) < 1e-9):
+                    # print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
+                    #       deref(root_iter).inf(), deref(root_iter).sup(),
+                    #       roots.back().inf(), roots.back().sup()))
+                    roots.back().setSup(deref(root_iter).sup())
+                else:
+                    roots.push_back(deref(root_iter))
+                inc(root_iter)
+
+            # Increment time and loop iters
+            t += deref(domain).at(var_id_t).sup()
+            inc(tmv)
+            inc(domain)
+
+        return roots
+
+    cdef vector[Interval] eval_interval(Reach self, Interval & I):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
             clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
@@ -390,7 +990,7 @@ cdef class Reach:
             vector[Interval] res
             vector[int] varIDs # state variable ids
             # string s1, s2, s3, s4
-            double t = 0
+            double t = 0.0
             Interval T
 
         for i in self.c_reach.stateVarTab:
@@ -443,7 +1043,7 @@ cdef class Reach:
         cdef vector[Interval] res
         cdef Interval I = _interval(t)
 
-        with self: # Use captured globals
+        with self: #  Use captured globals
             res = self.eval_interval(I)
 
         return [RIF(I.inf(), I.sup()) for I in res]
@@ -613,8 +1213,11 @@ cdef class Reach:
 
         return p
 
-    def sage_plot(self, x, double step=1e-2):
+    def sage_plot(self, x, duration=None, double step=1e-2):
         from sage.all import plot
+
+        if duration is None:
+            duration = (0, float(self.c_reach.time))
 
         cdef int var_id = self.c_reach.getIDForStateVar(x)
         # Cache the evaluations
@@ -630,7 +1233,7 @@ cdef class Reach:
             return ress[t].upper()
 
         return plot([fl, fu],
-                    (0, float(self.c_reach.time)),
+                    duration,
                     plot_points=self.c_reach.time//step)
 
     def sage_parametric_plot(self, str x, str y, double step=1e-2):
@@ -695,9 +1298,11 @@ cdef class Reach:
         double_factorial = self.double_factorial
 
     def __enter__(self):
+        # sig_on()
         self.restore_globals()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        # sig_off()
         clear_globals()
 
     @property

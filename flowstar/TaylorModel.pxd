@@ -2,7 +2,7 @@ from Interval cimport Interval
 from Polynomial cimport Polynomial
 from libcpp.vector cimport vector
 
-cdef extern from "TaylorModel.h" namespace "flowstar":
+cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
   cdef cppclass TaylorModel:
     TaylorModel()
     TaylorModel(Interval & I, const int numVars)
@@ -26,5 +26,6 @@ cdef extern from "TaylorModel.h" namespace "flowstar":
     TaylorModelVec & operator = (const TaylorModelVec & tm)
 
     void intEval(vector[Interval] & result, const vector[Interval] & domain, const vector[int] & varIDs) const
+    void intEval(vector[Interval] & result, const vector[Interval] & domain) const
 
     vector[TaylorModel] tms

@@ -19,3 +19,7 @@ flowstar/old*
 flowstar/flowstar-2.1.0-debug/flowstar
 flowstar/flowstar-2.1.0-clean/flowstar
 *.swp
+.vscode/*
+**/.pytest_cache/*
+*.prof
+tags

@@ -1,4 +1,5 @@
 from functools import partial, reduce
+import warnings
 from builtins import *
 
 from sage.all import RIF, region_plot
@@ -8,7 +9,7 @@ from sage.all import RIF, region_plot
 from interval_root_isolation import isolate_roots
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
-           'Signal', 'C', 'ctx', 'to_signal_piecewise']
+           'Signal', 'C', 'ctx', 'to_signal_piecewise', 'signal_given_roots']
 
 
 def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
@@ -16,12 +17,18 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
     # fI = RIF(f(domain))
     # if 0 not in fI:
     #     return Signal(domain, [(domain, fI.center() > 0)])
+    return signal_given_roots(f,
+                              isolate_roots(f, fprime, domain),
+                              domain)
 
+
+def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
     values = []
     a = domain.lower('RNDD')
     # while 0 in RIF(f(a)):
     #     a = theta*a + abs_inf
-    for root in isolate_roots(f, fprime, domain):
+    print "roots =", roots
+    for root in roots:
         if a < root.lower('RNDD'):
             I = RIF(a, root.lower('RNDD'))
             print "  I  = {}\nf(I) = {}".format(
@@ -110,10 +117,10 @@ class Signal(object):
                             found = True
                             dup = True
                         elif v.upper() != u.lower() and u.upper() != v.lower():
-                            raise Exception('Inconsitient intervals {} ({}) '
-                                            'and {} ({}) in signal!'.format(
-                                                v.str(style='brackets'), bv,
-                                                u.str(style='brackets'), bu))
+                            warnings.warn('Inconsitient intervals {} ({}) '
+                                          'and {} ({}) in signal!'.format(
+                                              v.str(style='brackets'), bv,
+                                              u.str(style='brackets'), bu))
         self._values.sort(key=lambda (I, b): I.lower())
 
     def to_domain(self, J):

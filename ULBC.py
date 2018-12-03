@@ -1,14 +1,52 @@
-from builtins import *
+from builtins import *  # NOQA
 from sage.all import RIF
 import sage.all as sage
 from collections import OrderedDict
 import operator
+from abc import ABCMeta, abstractmethod, abstractproperty
+import sympy
+import itertools
+import time
 
-from interval_signals import true_signal, false_signal, to_signal_piecewise
-from flowstar.reachability import Poly, Reach
+from interval_signals import (true_signal, false_signal,
+                              to_signal_piecewise,
+                              signal_given_roots, Signal)
+from flowstar.reachability import Reach
+
+
+def convert_mat(m):
+    return sympy.Matrix([[sage.SR(e)._sympy_() for e in r]
+                         for r in m.rows()])
+
+
+def convert_vec(v):
+    return [sage.SR(e)._sympy_() for e in v]
+
+
+def vec_to_numpy(R, v):
+    t_ = sympy.var('t_')
+    return sympy.lambdify((t_, convert_vec(R.gens())),
+                          convert_vec(v),
+                          modules='numpy')
+
+
+def mat_to_numpy(R, m):
+    t_ = sympy.var('t_')
+    return sympy.lambdify((t_, convert_vec(R.gens())),
+                          convert_mat(m),
+                          modules='numpy')
+
+
+def poly_to_numpy(R, p):
+    t_ = sympy.var('t_')
+    return sympy.lambdify((t_, convert_vec(R.gens())),
+                          sage.SR(p)._sympy_(),
+                          modules='numpy')
 
 
 class Logic(object):
+    __metaclass__ = ABCMeta
+
     def __init__(self, arg):
         if hasattr(arg, 'gens'):
             self._R = arg
@@ -25,15 +63,28 @@ class Logic(object):
     def vars(self):
         return self._vars
 
-    def signal_for_system(self, odes, initials, duration, step=0.01, order=10):
+    def signal_for_system(self, odes, initials, duration, **kwargs):
+        t0 = time.time()
+        if 'order' not in kwargs:
+            kwargs['order'] = 10
+        if 'step' not in kwargs:
+            kwargs['step'] = (0.001, 0.1)
         reach = Reach(
             odes,
             initials,
             self.duration + duration,
-            step=step,
-            order=order,
+            **kwargs
         )
-        return self.signal(reach, odes).to_domain(RIF(0, duration))
+        t1 = time.time()
+        print("Computed {} flowpipes in {} sec".format(
+            reach.num_flowpipes, t1 - t0))
+        reach.prepare()
+        t2 = time.time()
+        print("Prepared for plotting in {} sec".format(t2 - t1))
+        res = self.signal(reach, odes).to_domain(RIF(0, duration))
+        t3 = time.time()
+        print("Monitored signal {} sec".format(t3 - t2))
+        return res
 
     def __and__(self, other):
         return And([self, other])
@@ -53,11 +104,52 @@ class Logic(object):
         else:
             return "({})".format(self)
 
+    @abstractmethod
+    def signal(self, R, odes):
+        pass
+
+    @abstractmethod
+    def numerical_signal(self, f, events, duration):
+        pass
+
+    def numerical_signal_for_system(self, odes, initials, duration):
+        from scipy.integrate import solve_ivp
+
+        assert len(odes) > 0
+        odes = sage.vector(odes)
+        R = odes[0].parent()
+
+        events = [poly_to_numpy(R, atomic.p)
+                  for atomic in self.atomic_propositions]
+        f = vec_to_numpy(R, odes)
+        jac = mat_to_numpy(R, sage.jacobian(odes, R.gens()))
+
+        sln = solve_ivp(f,
+                        (0, self.duration + duration),
+                        initials,
+                        events=events,
+                        method='LSODA',
+                        jac=jac,
+                        vectorized=True,
+                        dense_output=True)
+
+        sln_events = dict(zip(self.atomic_propositions,
+                              sln.t_events))
+
+        return self.numerical_signal(sln.sol,
+                                     sln_events,
+                                     self.duration + duration)\
+                   .to_domain(RIF(0, duration))
+
+    @abstractproperty
+    def atomic_propositions(self):
+        pass
+
 
 def index_fn(p):
     R = p.parent()
     gs = R.gens()
-    return lambda xs: RIF(p.subs({g: x for g, x in zip(gs, xs)}))
+    return lambda xs: RIF(p.subs({g: x for g, x in zip(gs, itertools.chain(xs, itertools.cycle([0])))}))
 
 
 class Atomic(Logic):
@@ -71,7 +163,7 @@ class Atomic(Logic):
     x^2 + y + 1 > 0
     >>> Atomic(x**2 + 1).duration
     0
-    >>> Atomic(2*x + 3*y).dpdt(vector([-y, x]))
+    >>> Atomic(2*x + 3*y).dpdt([-y, x])
     3*x - 2*y
     '''
     priority = 10
@@ -101,20 +193,42 @@ class Atomic(Logic):
         return sage.plot((lo, up), (0, R.time))
 
     def signal(self, R, odes):
+        roots = R.roots(self.p, self.dpdt(odes))
         ip = index_fn(self.p)
-        idp = index_fn(self.dpdt(odes))
-        return to_signal_piecewise(
-            (lambda t: ip(R(t))),
-            (lambda t: idp(R(t))),
-            R.time,
-            R.step,
-        )
+        return signal_given_roots((lambda t: ip(R(t))),
+                                  roots,
+                                  RIF(0, R.time))
+        # ip = index_fn(self.p)
+        # idp = index_fn(self.dpdt(odes))
+        # return to_signal_piecewise(
+        #     (lambda t: ip(R(t))),
+        #     (lambda t: idp(R(t))),
+        #     R.time,
+        #     R.step,
+        # )
 
     def __repr__(self):
         return 'Atomic({})'.format(repr(self.p))
 
     def __str__(self):
         return '{} > 0'.format(str(self.p))
+
+    @property
+    def atomic_propositions(self):
+        return [self]
+
+    def numerical_signal(self, f, events, duration):
+        intervals = list()
+        a = 0
+
+        for b in itertools.chain(events[self], [duration]):
+            tmid = (a + b) / 2
+            pmid = self.p.subs(dict(zip(self.R.gens(),
+                                        f(tmid))))
+            intervals.append((RIF(a, b), sage.RR(pmid) > 0))
+            a = b
+
+        return Signal(RIF(0, duration), intervals)
 
 
 class And(Logic):
@@ -181,6 +295,16 @@ class And(Logic):
     def __str__(self):
         return ' & '.join(t.bstr(self.priority) for t in self.terms)
 
+    @property
+    def atomic_propositions(self):
+        return sum((t.atomic_propositions for t in self.terms), [])
+
+    def numerical_signal(self, f, events, duration):
+        return reduce(operator.and_,
+                      (t.numerical_signal(f, events, duration)
+                       for t in self.terms),
+                      true_signal(RIF(0, duration)))
+
 
 class Or(Logic):
     '''
@@ -244,6 +368,16 @@ class Or(Logic):
                       (t.signal(reach, odes) for t in self.terms),
                       false_signal(RIF(0, reach.time)))
 
+    @property
+    def atomic_propositions(self):
+        return sum((t.atomic_propositions for t in self.terms), [])
+
+    def numerical_signal(self, f, events, duration):
+        return reduce(operator.or_,
+                      (t.numerical_signal(f, events, duration)
+                       for t in self.terms),
+                      false_signal(RIF(0, duration)))
+
 
 class Neg(Logic):
     '''
@@ -285,6 +419,13 @@ class Neg(Logic):
 
     def signal(self, reach, odes):
         return ~self.p.signal(reach, odes)
+
+    @property
+    def atomic_propositions(self):
+        return self.p.atomic_propositions
+
+    def numerical_signal(self, f, events, duration):
+        return ~self.p.numerical_signal(f, events, duration)
 
 
 def finterval(I):
@@ -349,6 +490,15 @@ class C(Logic):
         # Put extra brackets for readability even if not necessary
         return '{} >> {}'.format(self.ctx_str(), self.phi.bstr(8))
 
+    @property
+    def atomic_propositions(self):
+        # We consider a context to be atomic since we cannot monitor
+        # after it
+        return [self]
+
+    def numerical_signal(self, f, events, duration):
+        raise NotImplementedError()
+
 
 class G(Logic):
     '''
@@ -370,7 +520,7 @@ class G(Logic):
         super().__init__(phi.R)
 
     @property
-    def I(self):
+    def interval(self):
         return self._I
 
     @property
@@ -379,16 +529,23 @@ class G(Logic):
 
     @property
     def duration(self):
-        return self.phi.duration + self.I.upper()
+        return self.phi.duration + self.interval.upper()
 
     def __repr__(self):
-        return 'G({}, {})'.format(finterval(self.I), repr(self.phi))
+        return 'G({}, {})'.format(finterval(self.interval), repr(self.phi))
 
     def __str__(self):
-        return 'G({}, {})'.format(finterval(self.I), str(self.phi))
+        return 'G({}, {})'.format(finterval(self.interval), str(self.phi))
 
     def signal(self, reach, odes):
-        return self.phi.signal(reach, odes).G(self.I)
+        return self.phi.signal(reach, odes).G(self.interval)
+
+    def numerical_signal(self, f, events, duration):
+        return self.phi.numerical_signal(f, events, duration).G(self.interval)
+
+    @property
+    def atomic_propositions(self):
+        return self.phi.atomic_propositions
 
 
 class F(Logic):
@@ -409,7 +566,7 @@ class F(Logic):
         super().__init__(phi.R)
 
     @property
-    def I(self):
+    def interval(self):
         return self._I
 
     @property
@@ -418,16 +575,23 @@ class F(Logic):
 
     @property
     def duration(self):
-        return self.phi.duration + self.I.upper()
+        return self.phi.duration + self.interval.upper()
 
     def __repr__(self):
-        return 'F({}, {})'.format(finterval(self.I), repr(self.phi))
+        return 'F({}, {})'.format(finterval(self.interval), repr(self.phi))
 
     def __str__(self):
-        return 'F({}, {})'.format(finterval(self.I), str(self.phi))
+        return 'F({}, {})'.format(finterval(self.interval), str(self.phi))
 
     def signal(self, reach, odes):
-        return self.phi.signal(reach, odes).G(self.I)
+        return self.phi.signal(reach, odes).F(self.interval)
+
+    def numerical_signal(self, f, events, duration):
+        return self.phi.numerical_signal(f, events, duration).F(self.interval)
+
+    @property
+    def atomic_propositions(self):
+        return self.phi.atomic_propositions
 
 
 class U(Logic):

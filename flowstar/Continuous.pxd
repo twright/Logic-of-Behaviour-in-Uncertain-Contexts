@@ -8,7 +8,7 @@ from libcpp.list cimport list as clist
 from libcpp cimport bool as cbool
 from libcpp.map cimport map as cmap
 
-cdef extern from "Continuous.h" namespace "flowstar":
+cdef extern from "Continuous.h" namespace "flowstar" nogil:
   cdef vector[string] domainVarNames
 
   cdef cppclass Flowpipe:

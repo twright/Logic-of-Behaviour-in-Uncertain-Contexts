@@ -5,7 +5,7 @@ from libcpp.list cimport list
 from libcpp.string cimport string
 
 
-cdef extern from "Polynomial.h" namespace "flowstar":
+cdef extern from "Polynomial.h" namespace "flowstar" nogil:
   vector[Interval] factorial_rec
   vector[Interval] power_4
   vector[Interval] double_factorial
@@ -19,6 +19,7 @@ cdef extern from "Polynomial.h" namespace "flowstar":
     Polynomial(const int varID, const int degree, const int numVars)
     Polynomial(const Polynomial & poly)
 
+    void intEval(Interval & result, const vector[Interval] & domain) const
     Polynomial operator + (const Polynomial & polynomial) const
     Polynomial operator - (const Polynomial & polynomial) const
     Polynomial operator * (const Polynomial & polynomial) const
