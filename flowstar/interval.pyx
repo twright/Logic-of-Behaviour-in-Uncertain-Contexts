@@ -1,6 +1,6 @@
-from Interval cimport Interval
-from TaylorModel cimport TaylorModelVec
-from utils cimport cabs, cmin, cmax
+from flowstar.Interval cimport Interval
+from flowstar.TaylorModel cimport TaylorModelVec
+from flowstar.utils cimport cabs, cmin, cmax
 
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
@@ -72,7 +72,7 @@ cdef double int_dist(Interval & I, Interval & J) nogil:
 
 # Interval difference separating upper and lower
 # Return value indicates existance of answer
-cdef cbool int_diff(Interval & L, Interval & U, cbool & split, Interval & a, const Interval & b) nogil:
+cdef cbool int_diff(Interval & L, Interval & U, cbool & split, const Interval & a, const Interval & b) nogil:
     cdef double al, au, bl, bu
     al, au = a.inf(), a.sup()
     bl, bu = b.inf(), b.sup()
@@ -125,7 +125,7 @@ def py_int_diff(a, b):
             (U.inf(), U.sup()))
 
 
-cdef cbool extdiv(Interval & L, Interval & U, cbool & split, Interval & d, const Interval & a, const Interval & b):
+cdef cbool extdiv(Interval & L, Interval & U, cbool & split, const Interval & d, const Interval & a, const Interval & b) nogil:
     cdef double al, au, bl, bu
     cdef Interval ratio
     al, au = a.inf(), a.sup()

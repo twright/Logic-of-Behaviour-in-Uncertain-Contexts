@@ -1,5 +1,6 @@
-from Interval cimport Interval
-from Monomial cimport Monomial
+from flowstar.Interval cimport Interval
+from flowstar.Monomial cimport Monomial
+
 from libcpp.vector cimport vector
 from libcpp.list cimport list
 from libcpp.string cimport string

@@ -1,8 +1,8 @@
-from Interval cimport Interval
-from TaylorModel cimport TaylorModel, TaylorModelVec
-from Monomial cimport Monomial
-from Polynomial cimport Polynomial
-from Continuous cimport Flowpipe, ContinuousSystem, ContinuousReachability
+from flowstar.Interval cimport Interval
+from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
+from flowstar.Monomial cimport Monomial
+from flowstar.Polynomial cimport Polynomial
+from flowstar.Continuous cimport Flowpipe, ContinuousSystem, ContinuousReachability
 
 from cython.operator cimport dereference as deref
 cimport cython.operator as op

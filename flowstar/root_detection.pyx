@@ -1,3 +1,10 @@
+from libcpp.vector cimport vector
+from libcpp cimport bool as cbool
+
+from flowstar.Interval cimport Interval
+from flowstar.interval cimport make_interval, interval_time_fn, int_dist, extdiv
+from flowstar.poly cimport Poly, poly_time_fn
+
 def py_detect_roots(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1):
     '''
     >>> R, (t,) = sage.PolynomialRing(sage.RIF, 't').objgens()
@@ -19,7 +26,7 @@ def py_detect_roots(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1
     [(-0.0, 1.0)]
     '''
 
-    cdef Interval T = _interval(t)
+    cdef Interval T = make_interval(t)
     cdef interval_time_fn F = poly_time_fn(f.c_poly)
     cdef interval_time_fn Fprime = poly_time_fn(fprime.c_poly)
     cdef vector[Interval] roots
@@ -29,15 +36,16 @@ def py_detect_roots(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1
     # print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))
     # print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
 
-    detect_roots3(roots, F, Fprime, T, epsilon, verbosity)
+    detect_roots(roots, F, Fprime, T, epsilon, verbosity)
 
     return [(r.inf(), r.sup()) for r in roots]
+
 
 cdef void detect_roots(vector[Interval] & roots,
                        interval_time_fn f, interval_time_fn fprime,
                        Interval & T0,
                        double epsilon=0.00001,
-                       int verbosity=1):
+                       int verbosity=1) nogil:
     cdef:
         # Interval T0 = domain[0]
         Interval T = T0
@@ -63,7 +71,7 @@ cdef void detect_roots(vector[Interval] & roots,
         T.inv_assign()
         T.add_assign(M)
         Told=T
-        failed = not extdiv2(T, Tu, split, T, fI, fP)
+        failed = not extdiv(T, Tu, split, T, fI, fP)
         if failed:
             if verbosity >= 2:
                 with gil:
@@ -101,8 +109,8 @@ cdef void detect_roots(vector[Interval] & roots,
                     T.inf(), T.sup(),
                     Tu.inf(), Tu.sup(),
                 ))
-        detect_roots3(roots, f, fprime, T, epsilon)
-        detect_roots3(roots, f, fprime, Tu, epsilon)
+        detect_roots(roots, f, fprime, T, epsilon)
+        detect_roots(roots, f, fprime, Tu, epsilon)
         return
 
     if bound_found:

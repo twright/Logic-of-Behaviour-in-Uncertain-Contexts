@@ -1,17 +1,19 @@
 # cython: profile=True
 # cython: linetrace=True
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 
-from Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
-from TaylorModel cimport TaylorModel, TaylorModelVec
-from Interval cimport Interval, intervalNumPrecision
+from flowstar.Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
+from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
+from flowstar.Interval cimport Interval, intervalNumPrecision
 # from reachability cimport interval_fn, Reach, poly_fn
-from Polynomial cimport Polynomial, factorial_rec, power_4, double_factorial
-from poly cimport Poly, poly_fn
-cimport interval
-from interval cimport make_interval
-cimport root_detection
-cimport plotting
+from flowstar.Polynomial cimport Polynomial, factorial_rec, power_4, double_factorial
+from flowstar.poly cimport Poly, poly_fn
+cimport flowstar.interval as interval
+from flowstar.interval cimport make_interval
+cimport flowstar.root_detection as root_detection
+cimport flowstar.plotting as plotting
+# import flowstar.plotting as plotting
+# import plotting
 
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
@@ -21,7 +23,6 @@ from libcpp.list cimport list as clist
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.map cimport map as cmap
-from subprocess import call
 from libcpp.memory cimport unique_ptr, make_unique
 from libcpp.algorithm cimport sort as csort
 import operator
@@ -31,17 +32,7 @@ import sage.all as sage
 from cysignals.signals cimport sig_on, sig_off, sig_check
 
 
-cdef class _Reach:
-    cdef FlowstarGlobalManager global_manger
-
-    cdef ContinuousReachability c_reach
-    cdef bint ran
-    cdef bint prepared
-    cdef int result
-
-    cdef vector[Interval] c_roots(Reach, interval_fn, interval_fn)
-    cdef vector[Interval] eval_interval(Reach, Interval)
-
+cdef class CReach:
     def __cinit__(
         self,
         odes,
@@ -63,6 +54,9 @@ cdef class _Reach:
         self.ran = False
         self.prepared = False
         self.result = 0
+
+        # Create global variable manager
+        self.global_manager = FlowstarGlobalManager()
 
         # --- Creating the continuous system ---
         assert len(odes) == len(initials)
@@ -152,17 +146,17 @@ cdef class _Reach:
         if run:
             self.run()
 
-    def roots(_Reach self, f, fprime):
+    def roots(CReach self, f, fprime):
         cdef:
             interval_fn f_fn = poly_fn(Poly(f).c_poly)
             interval_fn fprime_fn = poly_fn(Poly(fprime).c_poly)
             vector[Interval] c_res
         self.prepare()
-        with self.global_manger:
+        with self.global_manager:
             c_res = self.c_roots(f_fn, fprime_fn)
         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
 
-    cdef vector[Interval] c_roots(_Reach self, interval_fn f, interval_fn fprime):
+    cdef vector[Interval] c_roots(CReach self, interval_fn f, interval_fn fprime):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
             clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
@@ -218,7 +212,7 @@ cdef class _Reach:
 
         return roots
 
-    cdef vector[Interval] eval_interval(_Reach self, Interval & I):
+    cdef vector[Interval] eval_interval(CReach self, Interval & I):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
             clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
@@ -269,7 +263,7 @@ cdef class _Reach:
         cdef vector[Interval] res
         cdef Interval I = interval.make_interval(t)
 
-        with self: #  Use captured globals
+        with self.global_manager: #  Use captured globals
             res = self.eval_interval(I)
 
         return [RIF(I.inf(), I.sup()) for I in res]
@@ -289,9 +283,9 @@ cdef class _Reach:
         if self.ran:
             raise Exception('Already ran')
         try:
-            self.global_manger.clear_globals()
+            FlowstarGlobalManager.clear_global()
             self.result = int(self.c_reach.run())
-            self.global_manger.capture()
+            self.global_manager.capture()
             return self.result
         finally:
             self.ran = self.num_flowpipes > 0
@@ -354,7 +348,7 @@ cdef class _Reach:
 class Reach(plotting.FlowstarPlotMixin,
             plotting.SagePlotMixin,
             plotting.SageTubePlotMixin,
-            _Reach):
+            CReach):
     pass
 
 

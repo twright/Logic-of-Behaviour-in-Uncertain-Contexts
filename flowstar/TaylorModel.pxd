@@ -1,5 +1,6 @@
-from Interval cimport Interval
-from Polynomial cimport Polynomial
+from flowstar.Interval cimport Interval
+from flowstar.Polynomial cimport Polynomial
+
 from libcpp.vector cimport vector
 
 cdef extern from "TaylorModel.h" namespace "flowstar" nogil:

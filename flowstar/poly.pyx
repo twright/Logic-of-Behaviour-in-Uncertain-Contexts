@@ -1,3 +1,11 @@
+from libcpp.vector cimport vector
+from libcpp.string cimport string
+import collections
+import operator
+
+from flowstar.Polynomial cimport Polynomial
+from flowstar.interval cimport make_interval
+
 cdef class Poly:
     # Constructor makes a univariate monomial -- should combine using
     # arithmetic operations
@@ -12,14 +20,14 @@ cdef class Poly:
             num_vars = len(self.vars)
 
             self.c_poly = Polynomial(self.vars[var_name], expn, num_vars)
-            self.c_poly.mul_assign(_interval(coeff))
+            self.c_poly.mul_assign(make_interval(coeff))
         elif len(args) == 2:
             # print("from constant")
             coeff, vars = args
             self.vars = {v: i for i,v in enumerate(vars, 1)}
             self.vars['local_t'] = 0
             num_vars = len(self.vars)
-            self.c_poly = Polynomial(_interval(coeff), num_vars)
+            self.c_poly = Polynomial(make_interval(coeff), num_vars)
         elif len(args) == 1 and hasattr(args[0], 'exponents'):
             # print("from sage")
             p = <Poly?>Poly.from_sage(args[0])
@@ -31,7 +39,7 @@ cdef class Poly:
             self.vars = {v: i for i,v in enumerate(vars, 1)}
             self.vars['local_t'] = 0
             num_vars = len(self.vars)
-            self.c_poly = Polynomial(_interval(0), num_vars)
+            self.c_poly = Polynomial(make_interval(0), num_vars)
             # self.vars = vars
         else:
             raise Exception("Invalid args for Poly")
@@ -114,7 +122,7 @@ cdef class Poly:
             # We assume other is some kind of interval
             # CAREFUL: explicit NotImplemented case may be needed
             return <Poly>self * Poly(other, self.var_names)
-            # p.c_poly = <Polynomial?>self.c_poly * _interval(other)
+            # p.c_poly = <Polynomial?>self.c_poly * make_interval(other)
         elif isinstance(other, Poly):
             # print("case o * p")
             # We assume other is some kind of interval

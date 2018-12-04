@@ -1,17 +1,24 @@
 from libcpp.vector cimport vector
 from libcpp.string cimport string
-from Interval cimport Interval
-from interval cimport interval_fn
 
-from Continuous cimport ContinuousReachability
-from Polynomial cimport Polynomial
-from TaylorModel cimport TaylorModelVec
-cimport plotting
+from flowstar.Interval cimport Interval
+from flowstar.interval cimport interval_fn
+from flowstar.Continuous cimport ContinuousReachability
+from flowstar.Polynomial cimport Polynomial
+from flowstar.TaylorModel cimport TaylorModelVec
+# cimport flowstar.plotting
 
 
-# class Reach(plotting.FlowstarPlotMixin,
-#             plotting.SagePlotMixin,
-#             plotting.SageTubePlotMixin):
+cdef class CReach:
+    cdef FlowstarGlobalManager global_manager
+
+    cdef ContinuousReachability c_reach
+    cdef bint ran
+    cdef bint prepared
+    cdef int result
+
+    cdef vector[Interval] c_roots(CReach, interval_fn, interval_fn)
+    cdef vector[Interval] eval_interval(CReach, Interval)
 
 
 cdef class FlowstarGlobalManager:

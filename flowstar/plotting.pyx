@@ -1,13 +1,20 @@
-import abc
+from __future__ import absolute_import, division, print_function
+
+from libc.string cimport strcpy
+from subprocess import call
+
+from flowstar.Polynomial cimport Polynomial
+from flowstar.Continuous cimport ContinuousReachability
+from flowstar.reachability cimport CReach
+
 
 cdef class FlowstarPlotMixin:
-    __metaclass__ = abc.ABCMeta
-
-    def plot(self, x, y, bytes filename, plot_type=1):
+    def plot(CReach self, x, y, bytes filename, plot_type=1):
         if not self.ran:
             raise Exception('Not ran!')
 
-        cdef ContinuousReachability * C = &self.c_reach
+        cdef CReach cself = <CReach?>self
+        cdef ContinuousReachability * C = &cself.c_reach
 
         C.plotFormat = 0 # GNUPLOT format
         C.plotSetting = plot_type
@@ -22,11 +29,11 @@ cdef class FlowstarPlotMixin:
         # set bProjected = True since apparently prepareForPlotting has
         # already projected the flowpipes to the correct dimensions
 
-        self.c_reach.outputAxes.clear()
-        self.c_reach.outputAxes.push_back(self.c_reach.getIDForStateVar(x))
-        self.c_reach.outputAxes.push_back(self.c_reach.getIDForStateVar(y))
+        C.outputAxes.clear()
+        C.outputAxes.push_back(C.getIDForStateVar(x))
+        C.outputAxes.push_back(C.getIDForStateVar(y))
 
-        with self:  # Use class's version of flowstar global variables
+        with self.global_manager:  # Use class's version of flowstar global variables
             # We set projected to False since we use prepareForDumping
             # which does not project the flowpipes to the output
             # dimensions for us
@@ -47,8 +54,6 @@ cdef class FlowstarPlotMixin:
         return img
 
 cdef class SagePlotMixin:
-    __metaclass__ = abc.ABCMeta
-
     def sage_plot(self, x, duration=None, double step=1e-2):
         from sage.all import plot
 
@@ -134,8 +139,6 @@ cdef class SagePlotMixin:
 
 
 cdef class SageTubePlotMixin:
-    __metaclass__ = abc.ABCMeta
-
     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):
         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
 

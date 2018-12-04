@@ -1,7 +1,8 @@
-from Interval cimport Interval
-from Polynomial cimport Polynomial
-from TaylorModel cimport TaylorModel, TaylorModelVec
-from includeh cimport NAME_SIZE
+from flowstar.Interval cimport Interval
+from flowstar.Polynomial cimport Polynomial
+from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
+from flowstar.includeh cimport NAME_SIZE
+
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.list cimport list as clist

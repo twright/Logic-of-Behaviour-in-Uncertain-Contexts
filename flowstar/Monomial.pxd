@@ -1,4 +1,4 @@
-from Interval cimport Interval
+from flowstar.Interval cimport Interval
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 

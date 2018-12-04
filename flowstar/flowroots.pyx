@@ -1,8 +1,8 @@
-from Interval cimport Interval
-from TaylorModel cimport TaylorModel, TaylorModelVec
-from Monomial cimport Monomial
-from Polynomial cimport Polynomial
-from Continuous cimport Flowpipe, ContinuousSystem, ContinuousReachability
+from flowstar.Interval cimport Interval
+from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
+from flowstar.Monomial cimport Monomial
+from flowstar.Polynomial cimport Polynomial
+from flowstar.Continuous cimport Flowpipe, ContinuousSystem, ContinuousReachability
 # from flowstar.modelParser cimport declareGlobalStateVar, getIDForGlobalStateVar
 
 from cython.operator cimport dereference as deref
@@ -12,31 +12,12 @@ from libcpp.string cimport string
 from libcpp cimport bool as cbool
 # import wand.image as wimage
 
-from flowstar.reachability import Reach, Poly
-from flowstar.reachability cimport interval_fn, Reach, poly_fn, Poly
+from flowstar.reachability import Reach
+from flowstar.reachability cimport CReach
+from flowstar.interval cimport interval_fn
+cimport flowstar.interval as interval
+from flowstar.poly cimport poly_fn, Poly
 import sage.all as sage
-
-# cdef extern from "Python.h":
-    # embedding functions
-    # void Py_Initialize()
-    # void Py_Finalize()
-
-# cdef cppclass F:
-#     cdef Interval operator() (vector[Interval] & v):
-#         return v[0]
-
-# cdef cppclass FP:
-#     cdef Interval operator() (vector[Interval] & v):
-#         cdef Interval y = v[1]
-#         y.mul_assign(-1.0)
-#         return y
-
-# cdef Interval f(vector[Interval] v):
-#     return v[0]
-# cdef Interval fprime(vector[Interval] v):
-#     cdef Interval y = v[1]
-#     y.mul_assign(-1.0)
-#     return y
 
 cdef extern from *:
     """
@@ -181,7 +162,7 @@ def work_without_intEval():
     # for root1 in roots1:
     #     print("[{}..{}]".format(*root1.endpoints()))
     resd = D.prepare()
-    cdef vector[Interval] roots = (<Reach?>D).c_roots(f, fprime)
+    cdef vector[Interval] roots = (<CReach?>D).c_roots(f, fprime)
     print("found {} roots!".format(roots.size()))
     for root in roots:
         print("[{}..{}]".format(root.inf(), root.sup()))
@@ -211,7 +192,7 @@ def main():
     print("f = {}, f' = {}".format(f.call(test).as_str(), fprime.call(test).as_str()))
     print("Finding roots manually wrapping")
     D.prepare()
-    cdef vector[Interval] roots = (<Reach?>D).c_roots(f, fprime)
+    cdef vector[Interval] roots = (<CReach?>D).c_roots(f, fprime)
     print("found {} roots!".format(roots.size()))
     for root in roots:
         print("[{}..{}]".format(root.inf(), root.sup()))

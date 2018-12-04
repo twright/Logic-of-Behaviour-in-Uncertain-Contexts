@@ -1,5 +1,5 @@
-from Polynomial cimport Polynomial
-from interval cimport interval_fn, interval_time_fn
+from flowstar.Polynomial cimport Polynomial
+from flowstar.interval cimport interval_fn, interval_time_fn
 
 cdef extern from * nogil:
     '''

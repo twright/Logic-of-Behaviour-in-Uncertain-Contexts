@@ -1,5 +1,5 @@
-from TaylorModel cimport TaylorModelVec
-from Interval cimport Interval
+from flowstar.TaylorModel cimport TaylorModelVec
+from flowstar.Interval cimport Interval
 
 from libcpp.vector cimport vector
 from libcpp cimport bool as cbool
@@ -7,14 +7,14 @@ from libcpp cimport bool as cbool
 cdef void set_precision(int prec)
 cdef int get_precision()
 cdef Interval make_interval(object i)
-cdef cbool overlaps(Interval &, Interval &)
-cdef void interval_union(Interval&, Interval&)
-cdef void interval_vect_union(vector[Interval]&, vector[Interval]&)
+cdef cbool overlaps(Interval &, Interval &) nogil
+cdef void interval_union(Interval&, Interval&) nogil
+cdef void interval_vect_union(vector[Interval]&, vector[Interval]&) nogil
 cdef tuple interval_to_tuple(Interval & I)
 cdef list intervals_to_list(vector[Interval] &)
-cdef double int_dist(Interval &, Interval &)
-cdef cbool int_diff(Interval& L, Interval& U, cbool& split, const Interval& a, const Interval& b)
-cdef cbool extdiv(Interval& L, Interval& U, cbool& split, const Interval& d, const Interval& a, const Interval& b)
+cdef double int_dist(Interval &, Interval &) nogil
+cdef cbool int_diff(Interval& L, Interval& U, cbool& split, const Interval& a, const Interval& b) nogil
+cdef cbool extdiv(Interval& L, Interval& U, cbool& split, const Interval& d, const Interval& a, const Interval& b) nogil
 
 cdef extern from "<functional>" namespace "std" nogil:
     cdef cppclass interval_fn "std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>":
