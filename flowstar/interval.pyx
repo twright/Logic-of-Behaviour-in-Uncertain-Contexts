@@ -7,6 +7,10 @@ from cython.operator cimport preincrement as inc
 from libcpp.vector cimport vector
 from libcpp cimport bool as cbool
 
+cdef str as_str(const Interval & I):
+    # This is a test 3
+    return "[{}..{}]".format(I.inf(), I.sup())
+
 cpdef void set_precision(int prec):
     global intervalNumPrecision
 

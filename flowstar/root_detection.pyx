@@ -6,26 +6,6 @@ from flowstar.interval cimport make_interval, interval_time_fn, int_dist, extdiv
 from flowstar.poly cimport Poly, poly_time_fn
 
 def py_detect_roots(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1):
-    '''
-    >>> R, (t,) = sage.PolynomialRing(sage.RIF, 't').objgens()
-    >>> py_detect_roots(Poly(t - 0.5), Poly(R(1.0)), sage.RIF(0, 1))
-    verified contractive!
-    [(0.5, 0.5)]
-    >>> py_detect_roots(Poly(t - sage.RIF(0.4,0.5)), Poly(R(1.0)), sage.RIF(0, 1))
-    verified contractive!
-    [(0.4, 0.5)]
-    >>> py_detect_roots(Poly(t**2 - 2), Poly(2*t), sage.RIF(1, 2))
-    verified contractive!
-    [(1.4142135623730947, 1.4142135623730954)]
-    >>> py_detect_roots3(Poly(6*(t - 0.5)**2 - sage.RIF(0.4)), Poly(12*t - 6), sage.RIF(0, 1))
-    verified contractive!
-    verified contractive!
-    [(0.7581988897471607, 0.7581988897471615), (0.24180111025283868, 0.24180111025283899)]
-    >>> py_detect_roots(Poly(t - sage.RIF(-1,1)), Poly(R(1)), sage.RIF(0, 1))
-    root on boundary!
-    [(-0.0, 1.0)]
-    '''
-
     cdef Interval T = make_interval(t)
     cdef interval_time_fn F = poly_time_fn(f.c_poly)
     cdef interval_time_fn Fprime = poly_time_fn(fprime.c_poly)

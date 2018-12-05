@@ -8,9 +8,8 @@ import sympy
 import itertools
 import time
 
-from interval_signals import (true_signal, false_signal,
-                              to_signal_piecewise,
-                              signal_given_roots, Signal)
+from ulbc.interval_signals import (true_signal, false_signal,
+                                   signal_given_roots, Signal)
 from flowstar.reachability import Reach
 
 
@@ -495,6 +494,9 @@ class C(Logic):
         # We consider a context to be atomic since we cannot monitor
         # after it
         return [self]
+
+    def signal(self, reach, odes):
+        raise NotImplementedError()
 
     def numerical_signal(self, f, events, duration):
         raise NotImplementedError()

@@ -1924,7 +1924,6 @@ static PyObject *__pyx_builtin_staticmethod;
 static PyObject *__pyx_builtin_min;
 static PyObject *__pyx_builtin_max;
 static PyObject *__pyx_builtin_enumerate;
-static PyObject *__pyx_builtin_print;
 static PyObject *__pyx_builtin_TypeError;
 static const char __pyx_k_f[] = "f";
 static const char __pyx_k_t[] = "t";
@@ -1951,7 +1950,6 @@ static const char __pyx_k_Reach[] = "Reach";
 static const char __pyx_k_close[] = "close";
 static const char __pyx_k_enter[] = "__enter__";
 static const char __pyx_k_order[] = "order";
-static const char __pyx_k_print[] = "print";
 static const char __pyx_k_throw[] = "throw";
 static const char __pyx_k_exc_tb[] = "exc_tb";
 static const char __pyx_k_format[] = "format";
@@ -2069,7 +2067,6 @@ static PyObject *__pyx_n_s_parent;
 static PyObject *__pyx_n_s_precondition;
 static PyObject *__pyx_n_s_prepare;
 static PyObject *__pyx_n_s_prepare_2;
-static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_pyx_vtable;
 static PyObject *__pyx_n_s_qualname;
 static PyObject *__pyx_n_s_reduce;
@@ -5637,7 +5634,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
  *         cdef vector[Interval] res
  *         cdef Interval I = interval.make_interval(t)             # <<<<<<<<<<<<<<
  * 
- *         print(self.global_manager)
+ *         with self.global_manager: #  Use captured globals
  */
   __Pyx_TraceLine(264,0,__PYX_ERR(0, 264, __pyx_L1_error))
   __pyx_v_I = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_t);
@@ -5645,27 +5642,15 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
   /* "flowstar/reachability.pyx":266
  *         cdef Interval I = interval.make_interval(t)
  * 
- *         print(self.global_manager)             # <<<<<<<<<<<<<<
- *         with self.global_manager: #  Use captured globals
- *             res = self.eval_interval(I)
- */
-  __Pyx_TraceLine(266,0,__PYX_ERR(0, 266, __pyx_L1_error))
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, ((PyObject *)__pyx_v_self->global_manager)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 266, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "flowstar/reachability.pyx":267
- * 
- *         print(self.global_manager)
  *         with self.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
  *             res = self.eval_interval(I)
  * 
  */
-  __Pyx_TraceLine(267,0,__PYX_ERR(0, 267, __pyx_L1_error))
+  __Pyx_TraceLine(266,0,__PYX_ERR(0, 266, __pyx_L1_error))
   /*with:*/ {
-    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 267, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_1 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 267, __pyx_L3_error)
+    __pyx_t_1 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 266, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_3 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -5678,10 +5663,10 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
       }
     }
     if (__pyx_t_3) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 267, __pyx_L3_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 266, __pyx_L3_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else {
-      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 267, __pyx_L3_error)
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 266, __pyx_L3_error)
     }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5696,19 +5681,19 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
         __Pyx_XGOTREF(__pyx_t_7);
         /*try:*/ {
 
-          /* "flowstar/reachability.pyx":268
- *         print(self.global_manager)
+          /* "flowstar/reachability.pyx":267
+ * 
  *         with self.global_manager: #  Use captured globals
  *             res = self.eval_interval(I)             # <<<<<<<<<<<<<<
  * 
  *         return [RIF(I.inf(), I.sup()) for I in res]
  */
-          __Pyx_TraceLine(268,0,__PYX_ERR(0, 268, __pyx_L7_error))
+          __Pyx_TraceLine(267,0,__PYX_ERR(0, 267, __pyx_L7_error))
           __pyx_v_res = ((struct __pyx_vtabstruct_8flowstar_12reachability_CReach *)__pyx_v_self->__pyx_vtab)->eval_interval(__pyx_v_self, __pyx_v_I);
 
-          /* "flowstar/reachability.pyx":267
+          /* "flowstar/reachability.pyx":266
+ *         cdef Interval I = interval.make_interval(t)
  * 
- *         print(self.global_manager)
  *         with self.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
  *             res = self.eval_interval(I)
  * 
@@ -5724,20 +5709,20 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("flowstar.reachability.CReach.__call__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_1, &__pyx_t_3) < 0) __PYX_ERR(0, 267, __pyx_L9_except_error)
+          if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_1, &__pyx_t_3) < 0) __PYX_ERR(0, 266, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GOTREF(__pyx_t_1);
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_8 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 267, __pyx_L9_except_error)
+          __pyx_t_8 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 266, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_8);
           __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-          if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 267, __pyx_L9_except_error)
+          if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 266, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_9);
           __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-          if (__pyx_t_10 < 0) __PYX_ERR(0, 267, __pyx_L9_except_error)
+          if (__pyx_t_10 < 0) __PYX_ERR(0, 266, __pyx_L9_except_error)
           __pyx_t_11 = ((!(__pyx_t_10 != 0)) != 0);
           if (__pyx_t_11) {
             __Pyx_GIVEREF(__pyx_t_2);
@@ -5745,7 +5730,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
             __Pyx_XGIVEREF(__pyx_t_3);
             __Pyx_ErrRestoreWithState(__pyx_t_2, __pyx_t_1, __pyx_t_3);
             __pyx_t_2 = 0; __pyx_t_1 = 0; __pyx_t_3 = 0; 
-            __PYX_ERR(0, 267, __pyx_L9_except_error)
+            __PYX_ERR(0, 266, __pyx_L9_except_error)
           }
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5771,7 +5756,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
         if (__pyx_t_4) {
           __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_tuple__2, NULL);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 267, __pyx_L1_error)
+          if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 266, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         }
@@ -5786,16 +5771,16 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
     __pyx_L16:;
   }
 
-  /* "flowstar/reachability.pyx":270
+  /* "flowstar/reachability.pyx":269
  *             res = self.eval_interval(I)
  * 
  *         return [RIF(I.inf(), I.sup()) for I in res]             # <<<<<<<<<<<<<<
  * 
  *     def prepare(self):
  */
-  __Pyx_TraceLine(270,0,__PYX_ERR(0, 270, __pyx_L1_error))
+  __Pyx_TraceLine(269,0,__PYX_ERR(0, 269, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 270, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_12 = __pyx_v_res.begin();
   for (;;) {
@@ -5803,9 +5788,9 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
     __pyx_t_13 = *__pyx_t_12;
     ++__pyx_t_12;
     __pyx_v_I = __pyx_t_13;
-    __pyx_t_2 = PyFloat_FromDouble(__pyx_v_I.inf()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 270, __pyx_L1_error)
+    __pyx_t_2 = PyFloat_FromDouble(__pyx_v_I.inf()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 269, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_8 = PyFloat_FromDouble(__pyx_v_I.sup()); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 270, __pyx_L1_error)
+    __pyx_t_8 = PyFloat_FromDouble(__pyx_v_I.sup()); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 269, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(__pyx_v_RIF);
     __pyx_t_14 = __pyx_v_RIF; __pyx_t_15 = NULL;
@@ -5823,7 +5808,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_14)) {
       PyObject *__pyx_temp[3] = {__pyx_t_15, __pyx_t_2, __pyx_t_8};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 270, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 269, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5833,7 +5818,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_14)) {
       PyObject *__pyx_temp[3] = {__pyx_t_15, __pyx_t_2, __pyx_t_8};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 270, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 269, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5841,7 +5826,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
     } else
     #endif
     {
-      __pyx_t_17 = PyTuple_New(2+__pyx_t_16); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 270, __pyx_L1_error)
+      __pyx_t_17 = PyTuple_New(2+__pyx_t_16); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 269, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_17);
       if (__pyx_t_15) {
         __Pyx_GIVEREF(__pyx_t_15); PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_15); __pyx_t_15 = NULL;
@@ -5852,12 +5837,12 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
       PyTuple_SET_ITEM(__pyx_t_17, 1+__pyx_t_16, __pyx_t_8);
       __pyx_t_2 = 0;
       __pyx_t_8 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 270, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 269, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
     }
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_1))) __PYX_ERR(0, 270, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_1))) __PYX_ERR(0, 269, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
   __pyx_r = __pyx_t_3;
@@ -5891,7 +5876,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4__call__(struct __py
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":272
+/* "flowstar/reachability.pyx":271
  *         return [RIF(I.inf(), I.sup()) for I in res]
  * 
  *     def prepare(self):             # <<<<<<<<<<<<<<
@@ -5929,34 +5914,34 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
   PyObject *__pyx_t_10 = NULL;
   int __pyx_t_11;
   __Pyx_RefNannySetupContext("prepare", 0);
-  __Pyx_TraceCall("prepare", __pyx_f[0], 272, 0, __PYX_ERR(0, 272, __pyx_L1_error));
+  __Pyx_TraceCall("prepare", __pyx_f[0], 271, 0, __PYX_ERR(0, 271, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":274
+  /* "flowstar/reachability.pyx":273
  *     def prepare(self):
  *         '''Prepare for plotting / evaluating.'''
  *         if not self.ran:             # <<<<<<<<<<<<<<
  *             raise Exception('Not ran!')
  * 
  */
-  __Pyx_TraceLine(274,0,__PYX_ERR(0, 274, __pyx_L1_error))
+  __Pyx_TraceLine(273,0,__PYX_ERR(0, 273, __pyx_L1_error))
   __pyx_t_1 = ((!(__pyx_v_self->ran != 0)) != 0);
   if (unlikely(__pyx_t_1)) {
 
-    /* "flowstar/reachability.pyx":275
+    /* "flowstar/reachability.pyx":274
  *         '''Prepare for plotting / evaluating.'''
  *         if not self.ran:
  *             raise Exception('Not ran!')             # <<<<<<<<<<<<<<
  * 
  *         if not self.prepared:
  */
-    __Pyx_TraceLine(275,0,__PYX_ERR(0, 275, __pyx_L1_error))
-    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 275, __pyx_L1_error)
+    __Pyx_TraceLine(274,0,__PYX_ERR(0, 274, __pyx_L1_error))
+    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 274, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 275, __pyx_L1_error)
+    __PYX_ERR(0, 274, __pyx_L1_error)
 
-    /* "flowstar/reachability.pyx":274
+    /* "flowstar/reachability.pyx":273
  *     def prepare(self):
  *         '''Prepare for plotting / evaluating.'''
  *         if not self.ran:             # <<<<<<<<<<<<<<
@@ -5965,29 +5950,29 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
  */
   }
 
-  /* "flowstar/reachability.pyx":277
+  /* "flowstar/reachability.pyx":276
  *             raise Exception('Not ran!')
  * 
  *         if not self.prepared:             # <<<<<<<<<<<<<<
  *             with self.global_manager:  # with local globals
  *                 # if we run prepareForPlotting more than once we crash
  */
-  __Pyx_TraceLine(277,0,__PYX_ERR(0, 277, __pyx_L1_error))
+  __Pyx_TraceLine(276,0,__PYX_ERR(0, 276, __pyx_L1_error))
   __pyx_t_1 = ((!(__pyx_v_self->prepared != 0)) != 0);
   if (__pyx_t_1) {
 
-    /* "flowstar/reachability.pyx":278
+    /* "flowstar/reachability.pyx":277
  * 
  *         if not self.prepared:
  *             with self.global_manager:  # with local globals             # <<<<<<<<<<<<<<
  *                 # if we run prepareForPlotting more than once we crash
  *                 self.c_reach.prepareForDumping()
  */
-    __Pyx_TraceLine(278,0,__PYX_ERR(0, 278, __pyx_L1_error))
+    __Pyx_TraceLine(277,0,__PYX_ERR(0, 277, __pyx_L1_error))
     /*with:*/ {
-      __pyx_t_3 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 278, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 277, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 278, __pyx_L5_error)
+      __pyx_t_4 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 277, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_5 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -6000,10 +5985,10 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
         }
       }
       if (__pyx_t_5) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 278, __pyx_L5_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 277, __pyx_L5_error)
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       } else {
-        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 278, __pyx_L5_error)
+        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 277, __pyx_L5_error)
       }
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6018,17 +6003,17 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
           __Pyx_XGOTREF(__pyx_t_8);
           /*try:*/ {
 
-            /* "flowstar/reachability.pyx":280
+            /* "flowstar/reachability.pyx":279
  *             with self.global_manager:  # with local globals
  *                 # if we run prepareForPlotting more than once we crash
  *                 self.c_reach.prepareForDumping()             # <<<<<<<<<<<<<<
  *             self.prepared = True
  * 
  */
-            __Pyx_TraceLine(280,0,__PYX_ERR(0, 280, __pyx_L9_error))
+            __Pyx_TraceLine(279,0,__PYX_ERR(0, 279, __pyx_L9_error))
             __pyx_v_self->c_reach.prepareForDumping();
 
-            /* "flowstar/reachability.pyx":278
+            /* "flowstar/reachability.pyx":277
  * 
  *         if not self.prepared:
  *             with self.global_manager:  # with local globals             # <<<<<<<<<<<<<<
@@ -6046,20 +6031,20 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           /*except:*/ {
             __Pyx_AddTraceback("flowstar.reachability.CReach.prepare", __pyx_clineno, __pyx_lineno, __pyx_filename);
-            if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_4, &__pyx_t_5) < 0) __PYX_ERR(0, 278, __pyx_L11_except_error)
+            if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_4, &__pyx_t_5) < 0) __PYX_ERR(0, 277, __pyx_L11_except_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_GOTREF(__pyx_t_4);
             __Pyx_GOTREF(__pyx_t_5);
-            __pyx_t_9 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 278, __pyx_L11_except_error)
+            __pyx_t_9 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 277, __pyx_L11_except_error)
             __Pyx_GOTREF(__pyx_t_9);
             __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-            if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 278, __pyx_L11_except_error)
+            if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 277, __pyx_L11_except_error)
             __Pyx_GOTREF(__pyx_t_10);
             __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_10);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-            if (__pyx_t_1 < 0) __PYX_ERR(0, 278, __pyx_L11_except_error)
+            if (__pyx_t_1 < 0) __PYX_ERR(0, 277, __pyx_L11_except_error)
             __pyx_t_11 = ((!(__pyx_t_1 != 0)) != 0);
             if (__pyx_t_11) {
               __Pyx_GIVEREF(__pyx_t_2);
@@ -6067,7 +6052,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
               __Pyx_XGIVEREF(__pyx_t_5);
               __Pyx_ErrRestoreWithState(__pyx_t_2, __pyx_t_4, __pyx_t_5);
               __pyx_t_2 = 0; __pyx_t_4 = 0; __pyx_t_5 = 0; 
-              __PYX_ERR(0, 278, __pyx_L11_except_error)
+              __PYX_ERR(0, 277, __pyx_L11_except_error)
             }
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6093,7 +6078,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
           if (__pyx_t_3) {
             __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__4, NULL);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-            if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 278, __pyx_L1_error)
+            if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 277, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_8);
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           }
@@ -6108,17 +6093,17 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
       __pyx_L18:;
     }
 
-    /* "flowstar/reachability.pyx":281
+    /* "flowstar/reachability.pyx":280
  *                 # if we run prepareForPlotting more than once we crash
  *                 self.c_reach.prepareForDumping()
  *             self.prepared = True             # <<<<<<<<<<<<<<
  * 
  *     def run(self):
  */
-    __Pyx_TraceLine(281,0,__PYX_ERR(0, 281, __pyx_L1_error))
+    __Pyx_TraceLine(280,0,__PYX_ERR(0, 280, __pyx_L1_error))
     __pyx_v_self->prepared = 1;
 
-    /* "flowstar/reachability.pyx":277
+    /* "flowstar/reachability.pyx":276
  *             raise Exception('Not ran!')
  * 
  *         if not self.prepared:             # <<<<<<<<<<<<<<
@@ -6127,7 +6112,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
  */
   }
 
-  /* "flowstar/reachability.pyx":272
+  /* "flowstar/reachability.pyx":271
  *         return [RIF(I.inf(), I.sup()) for I in res]
  * 
  *     def prepare(self):             # <<<<<<<<<<<<<<
@@ -6152,7 +6137,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_6prepare(struct __pyx
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":283
+/* "flowstar/reachability.pyx":282
  *             self.prepared = True
  * 
  *     def run(self):             # <<<<<<<<<<<<<<
@@ -6191,34 +6176,34 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
   __Pyx_RefNannySetupContext("run", 0);
-  __Pyx_TraceCall("run", __pyx_f[0], 283, 0, __PYX_ERR(0, 283, __pyx_L1_error));
+  __Pyx_TraceCall("run", __pyx_f[0], 282, 0, __PYX_ERR(0, 282, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":284
+  /* "flowstar/reachability.pyx":283
  * 
  *     def run(self):
  *         if self.ran:             # <<<<<<<<<<<<<<
  *             raise Exception('Already ran')
  *         try:
  */
-  __Pyx_TraceLine(284,0,__PYX_ERR(0, 284, __pyx_L1_error))
+  __Pyx_TraceLine(283,0,__PYX_ERR(0, 283, __pyx_L1_error))
   __pyx_t_1 = (__pyx_v_self->ran != 0);
   if (unlikely(__pyx_t_1)) {
 
-    /* "flowstar/reachability.pyx":285
+    /* "flowstar/reachability.pyx":284
  *     def run(self):
  *         if self.ran:
  *             raise Exception('Already ran')             # <<<<<<<<<<<<<<
  *         try:
  *             FlowstarGlobalManager.clear_global()
  */
-    __Pyx_TraceLine(285,0,__PYX_ERR(0, 285, __pyx_L1_error))
-    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 285, __pyx_L1_error)
+    __Pyx_TraceLine(284,0,__PYX_ERR(0, 284, __pyx_L1_error))
+    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 284, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 285, __pyx_L1_error)
+    __PYX_ERR(0, 284, __pyx_L1_error)
 
-    /* "flowstar/reachability.pyx":284
+    /* "flowstar/reachability.pyx":283
  * 
  *     def run(self):
  *         if self.ran:             # <<<<<<<<<<<<<<
@@ -6227,25 +6212,25 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
  */
   }
 
-  /* "flowstar/reachability.pyx":286
+  /* "flowstar/reachability.pyx":285
  *         if self.ran:
  *             raise Exception('Already ran')
  *         try:             # <<<<<<<<<<<<<<
  *             FlowstarGlobalManager.clear_global()
  *             self.result = int(self.c_reach.run())
  */
-  __Pyx_TraceLine(286,0,__PYX_ERR(0, 286, __pyx_L5_error))
+  __Pyx_TraceLine(285,0,__PYX_ERR(0, 285, __pyx_L5_error))
   /*try:*/ {
 
-    /* "flowstar/reachability.pyx":287
+    /* "flowstar/reachability.pyx":286
  *             raise Exception('Already ran')
  *         try:
  *             FlowstarGlobalManager.clear_global()             # <<<<<<<<<<<<<<
  *             self.result = int(self.c_reach.run())
  *             self.global_manager.capture()
  */
-    __Pyx_TraceLine(287,0,__PYX_ERR(0, 287, __pyx_L5_error))
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager), __pyx_n_s_clear_global); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 287, __pyx_L5_error)
+    __Pyx_TraceLine(286,0,__PYX_ERR(0, 286, __pyx_L5_error))
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager), __pyx_n_s_clear_global); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 286, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_4 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -6258,34 +6243,34 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
       }
     }
     if (__pyx_t_4) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 287, __pyx_L5_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 286, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else {
-      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 287, __pyx_L5_error)
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 286, __pyx_L5_error)
     }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "flowstar/reachability.pyx":288
+    /* "flowstar/reachability.pyx":287
  *         try:
  *             FlowstarGlobalManager.clear_global()
  *             self.result = int(self.c_reach.run())             # <<<<<<<<<<<<<<
  *             self.global_manager.capture()
  *             return self.result
  */
-    __Pyx_TraceLine(288,0,__PYX_ERR(0, 288, __pyx_L5_error))
+    __Pyx_TraceLine(287,0,__PYX_ERR(0, 287, __pyx_L5_error))
     __pyx_v_self->result = __pyx_v_self->c_reach.run();
 
-    /* "flowstar/reachability.pyx":289
+    /* "flowstar/reachability.pyx":288
  *             FlowstarGlobalManager.clear_global()
  *             self.result = int(self.c_reach.run())
  *             self.global_manager.capture()             # <<<<<<<<<<<<<<
  *             return self.result
  *         finally:
  */
-    __Pyx_TraceLine(289,0,__PYX_ERR(0, 289, __pyx_L5_error))
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_capture); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 289, __pyx_L5_error)
+    __Pyx_TraceLine(288,0,__PYX_ERR(0, 288, __pyx_L5_error))
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->global_manager), __pyx_n_s_capture); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 288, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_4 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -6298,39 +6283,39 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
       }
     }
     if (__pyx_t_4) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 289, __pyx_L5_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 288, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else {
-      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 289, __pyx_L5_error)
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 288, __pyx_L5_error)
     }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "flowstar/reachability.pyx":290
+    /* "flowstar/reachability.pyx":289
  *             self.result = int(self.c_reach.run())
  *             self.global_manager.capture()
  *             return self.result             # <<<<<<<<<<<<<<
  *         finally:
  *             self.ran = self.num_flowpipes > 0
  */
-    __Pyx_TraceLine(290,0,__PYX_ERR(0, 290, __pyx_L5_error))
+    __Pyx_TraceLine(289,0,__PYX_ERR(0, 289, __pyx_L5_error))
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->result); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 290, __pyx_L5_error)
+    __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->result); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 289, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L4_return;
   }
 
-  /* "flowstar/reachability.pyx":292
+  /* "flowstar/reachability.pyx":291
  *             return self.result
  *         finally:
  *             self.ran = self.num_flowpipes > 0             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(292,0,__PYX_ERR(0, 292, __pyx_L1_error))
+  __Pyx_TraceLine(291,0,__PYX_ERR(0, 291, __pyx_L1_error))
   /*finally:*/ {
     __pyx_L5_error:;
     /*exception exit:*/{
@@ -6350,11 +6335,11 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
       __Pyx_XGOTREF(__pyx_t_13);
       __pyx_t_5 = __pyx_lineno; __pyx_t_6 = __pyx_clineno; __pyx_t_7 = __pyx_filename;
       {
-        __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_num_flowpipes); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 292, __pyx_L8_error)
+        __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_num_flowpipes); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 291, __pyx_L8_error)
         __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_3 = PyObject_RichCompare(__pyx_t_2, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 292, __pyx_L8_error)
+        __pyx_t_3 = PyObject_RichCompare(__pyx_t_2, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 291, __pyx_L8_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 292, __pyx_L8_error)
+        __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 291, __pyx_L8_error)
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __pyx_v_self->ran = __pyx_t_1;
       }
@@ -6387,11 +6372,11 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
     __pyx_L4_return: {
       __pyx_t_13 = __pyx_r;
       __pyx_r = 0;
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_num_flowpipes); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 292, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_num_flowpipes); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_2 = PyObject_RichCompare(__pyx_t_3, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 292, __pyx_L1_error)
+      __pyx_t_2 = PyObject_RichCompare(__pyx_t_3, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 292, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __pyx_v_self->ran = __pyx_t_1;
       __pyx_r = __pyx_t_13;
@@ -6400,7 +6385,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
     }
   }
 
-  /* "flowstar/reachability.pyx":283
+  /* "flowstar/reachability.pyx":282
  *             self.prepared = True
  * 
  *     def run(self):             # <<<<<<<<<<<<<<
@@ -6422,7 +6407,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8run(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":295
+/* "flowstar/reachability.pyx":294
  * 
  *     @property
  *     def res(self):             # <<<<<<<<<<<<<<
@@ -6449,24 +6434,24 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_3res___get__(struct _
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 295, 0, __PYX_ERR(0, 295, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 294, 0, __PYX_ERR(0, 294, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":296
+  /* "flowstar/reachability.pyx":295
  *     @property
  *     def res(self):
  *         return self.result             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(296,0,__PYX_ERR(0, 296, __pyx_L1_error))
+  __Pyx_TraceLine(295,0,__PYX_ERR(0, 295, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->result); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 296, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->result); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":295
+  /* "flowstar/reachability.pyx":294
  * 
  *     @property
  *     def res(self):             # <<<<<<<<<<<<<<
@@ -6486,7 +6471,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_3res___get__(struct _
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":299
+/* "flowstar/reachability.pyx":298
  * 
  *     @property
  *     def cutoff_threshold(self):             # <<<<<<<<<<<<<<
@@ -6517,33 +6502,33 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_16cutoff_threshold___
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 299, 0, __PYX_ERR(0, 299, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 298, 0, __PYX_ERR(0, 298, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":300
+  /* "flowstar/reachability.pyx":299
  *     @property
  *     def cutoff_threshold(self):
  *         i = self.c_reach.cutoff_threshold             # <<<<<<<<<<<<<<
  *         return (i.inf(), i.sup())
  * 
  */
-  __Pyx_TraceLine(300,0,__PYX_ERR(0, 300, __pyx_L1_error))
+  __Pyx_TraceLine(299,0,__PYX_ERR(0, 299, __pyx_L1_error))
   __pyx_t_1 = __pyx_v_self->c_reach.cutoff_threshold;
   __pyx_v_i = __pyx_t_1;
 
-  /* "flowstar/reachability.pyx":301
+  /* "flowstar/reachability.pyx":300
  *     def cutoff_threshold(self):
  *         i = self.c_reach.cutoff_threshold
  *         return (i.inf(), i.sup())             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(301,0,__PYX_ERR(0, 301, __pyx_L1_error))
+  __Pyx_TraceLine(300,0,__PYX_ERR(0, 300, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_i.inf()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 301, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_i.inf()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_i.sup()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 301, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_i.sup()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 301, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
@@ -6555,7 +6540,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_16cutoff_threshold___
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":299
+  /* "flowstar/reachability.pyx":298
  * 
  *     @property
  *     def cutoff_threshold(self):             # <<<<<<<<<<<<<<
@@ -6577,7 +6562,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_16cutoff_threshold___
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":304
+/* "flowstar/reachability.pyx":303
  * 
  *     @property
  *     def estimation(self):             # <<<<<<<<<<<<<<
@@ -6611,18 +6596,18 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_10estimation___get__(
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 304, 0, __PYX_ERR(0, 304, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 303, 0, __PYX_ERR(0, 303, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":305
+  /* "flowstar/reachability.pyx":304
  *     @property
  *     def estimation(self):
  *         return [(i.inf(), i.sup()) for i in self.c_reach.estimation]             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(305,0,__PYX_ERR(0, 305, __pyx_L1_error))
+  __Pyx_TraceLine(304,0,__PYX_ERR(0, 304, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 305, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 304, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = &__pyx_v_self->c_reach.estimation;
   __pyx_t_2 = __pyx_t_3->begin();
@@ -6631,11 +6616,11 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_10estimation___get__(
     __pyx_t_4 = *__pyx_t_2;
     ++__pyx_t_2;
     __pyx_v_i = __pyx_t_4;
-    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_i.inf()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 305, __pyx_L1_error)
+    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_i.inf()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 304, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_i.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 305, __pyx_L1_error)
+    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_i.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 304, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 305, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 304, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5);
@@ -6643,14 +6628,14 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_10estimation___get__(
     PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_6);
     __pyx_t_5 = 0;
     __pyx_t_6 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_7))) __PYX_ERR(0, 305, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_7))) __PYX_ERR(0, 304, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   }
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":304
+  /* "flowstar/reachability.pyx":303
  * 
  *     @property
  *     def estimation(self):             # <<<<<<<<<<<<<<
@@ -6673,7 +6658,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_10estimation___get__(
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":308
+/* "flowstar/reachability.pyx":307
  * 
  *     @property
  *     def num_flowpipes(self):             # <<<<<<<<<<<<<<
@@ -6701,27 +6686,27 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_13num_flowpipes___get
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 308, 0, __PYX_ERR(0, 308, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 307, 0, __PYX_ERR(0, 307, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":309
+  /* "flowstar/reachability.pyx":308
  *     @property
  *     def num_flowpipes(self):
  *         return int(self.c_reach.numOfFlowpipes())             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(309,0,__PYX_ERR(0, 309, __pyx_L1_error))
+  __Pyx_TraceLine(308,0,__PYX_ERR(0, 308, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->c_reach.numOfFlowpipes()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->c_reach.numOfFlowpipes()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 308, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 308, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":308
+  /* "flowstar/reachability.pyx":307
  * 
  *     @property
  *     def num_flowpipes(self):             # <<<<<<<<<<<<<<
@@ -6742,7 +6727,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_13num_flowpipes___get
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":312
+/* "flowstar/reachability.pyx":311
  * 
  *     @property
  *     def num_state_vars(self):             # <<<<<<<<<<<<<<
@@ -6770,27 +6755,27 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_14num_state_vars___ge
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 312, 0, __PYX_ERR(0, 312, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 311, 0, __PYX_ERR(0, 311, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":313
+  /* "flowstar/reachability.pyx":312
  *     @property
  *     def num_state_vars(self):
  *         return int(self.c_reach.stateVarNames.size())             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(313,0,__PYX_ERR(0, 313, __pyx_L1_error))
+  __Pyx_TraceLine(312,0,__PYX_ERR(0, 312, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_reach.stateVarNames.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 313, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_reach.stateVarNames.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 312, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 313, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 312, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":312
+  /* "flowstar/reachability.pyx":311
  * 
  *     @property
  *     def num_state_vars(self):             # <<<<<<<<<<<<<<
@@ -6811,7 +6796,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_14num_state_vars___ge
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":316
+/* "flowstar/reachability.pyx":315
  * 
  *     @property
  *     def state_vars(self):             # <<<<<<<<<<<<<<
@@ -6844,18 +6829,18 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_10state_vars___get__(
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 316, 0, __PYX_ERR(0, 316, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 315, 0, __PYX_ERR(0, 315, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":317
+  /* "flowstar/reachability.pyx":316
  *     @property
  *     def state_vars(self):
  *         return [str(v) for v in self.c_reach.stateVarNames]             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(317,0,__PYX_ERR(0, 317, __pyx_L1_error))
+  __Pyx_TraceLine(316,0,__PYX_ERR(0, 316, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 317, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 316, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = &__pyx_v_self->c_reach.stateVarNames;
   __pyx_t_2 = __pyx_t_3->begin();
@@ -6864,19 +6849,19 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_10state_vars___get__(
     __pyx_t_4 = *__pyx_t_2;
     ++__pyx_t_2;
     __pyx_v_v = __pyx_t_4;
-    __pyx_t_5 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_v); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 317, __pyx_L1_error)
+    __pyx_t_5 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_v); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 316, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 317, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 316, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_6))) __PYX_ERR(0, 317, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_6))) __PYX_ERR(0, 316, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":316
+  /* "flowstar/reachability.pyx":315
  * 
  *     @property
  *     def state_vars(self):             # <<<<<<<<<<<<<<
@@ -6898,7 +6883,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_10state_vars___get__(
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":320
+/* "flowstar/reachability.pyx":319
  * 
  *     @property
  *     def num_initials(self):             # <<<<<<<<<<<<<<
@@ -6926,27 +6911,27 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_12num_initials___get_
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 320, 0, __PYX_ERR(0, 320, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 319, 0, __PYX_ERR(0, 319, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":321
+  /* "flowstar/reachability.pyx":320
  *     @property
  *     def num_initials(self):
  *         return int(self.c_reach.system.initialSets.size())             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(321,0,__PYX_ERR(0, 321, __pyx_L1_error))
+  __Pyx_TraceLine(320,0,__PYX_ERR(0, 320, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_reach.system.initialSets.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 321, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_reach.system.initialSets.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 321, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":320
+  /* "flowstar/reachability.pyx":319
  * 
  *     @property
  *     def num_initials(self):             # <<<<<<<<<<<<<<
@@ -6967,7 +6952,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_12num_initials___get_
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":324
+/* "flowstar/reachability.pyx":323
  * 
  *     @property
  *     def step(self):             # <<<<<<<<<<<<<<
@@ -6994,24 +6979,24 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4step___get__(struct 
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 324, 0, __PYX_ERR(0, 324, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 323, 0, __PYX_ERR(0, 323, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":325
+  /* "flowstar/reachability.pyx":324
  *     @property
  *     def step(self):
  *         return float(self.c_reach.step)             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(325,0,__PYX_ERR(0, 325, __pyx_L1_error))
+  __Pyx_TraceLine(324,0,__PYX_ERR(0, 324, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_reach.step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 325, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_reach.step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 324, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":324
+  /* "flowstar/reachability.pyx":323
  * 
  *     @property
  *     def step(self):             # <<<<<<<<<<<<<<
@@ -7031,7 +7016,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4step___get__(struct 
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":328
+/* "flowstar/reachability.pyx":327
  * 
  *     @property
  *     def time(self):             # <<<<<<<<<<<<<<
@@ -7058,24 +7043,24 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4time___get__(struct 
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 328, 0, __PYX_ERR(0, 328, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 327, 0, __PYX_ERR(0, 327, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":329
+  /* "flowstar/reachability.pyx":328
  *     @property
  *     def time(self):
  *         return float(self.c_reach.time)             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(329,0,__PYX_ERR(0, 329, __pyx_L1_error))
+  __Pyx_TraceLine(328,0,__PYX_ERR(0, 328, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_reach.time); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 329, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_reach.time); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 328, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":328
+  /* "flowstar/reachability.pyx":327
  * 
  *     @property
  *     def time(self):             # <<<<<<<<<<<<<<
@@ -7095,7 +7080,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_4time___get__(struct 
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":332
+/* "flowstar/reachability.pyx":331
  * 
  *     @property
  *     def ode_strs(self):             # <<<<<<<<<<<<<<
@@ -7138,55 +7123,55 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8ode_strs___get__(str
   PyObject *__pyx_t_11 = NULL;
   int __pyx_t_12;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 332, 0, __PYX_ERR(0, 332, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 331, 0, __PYX_ERR(0, 331, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":333
+  /* "flowstar/reachability.pyx":332
  *     @property
  *     def ode_strs(self):
  *         res = []             # <<<<<<<<<<<<<<
  *         cdef string ode_str
  *         cdef string interval_str
  */
-  __Pyx_TraceLine(333,0,__PYX_ERR(0, 333, __pyx_L1_error))
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 333, __pyx_L1_error)
+  __Pyx_TraceLine(332,0,__PYX_ERR(0, 332, __pyx_L1_error))
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_res = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/reachability.pyx":336
+  /* "flowstar/reachability.pyx":335
  *         cdef string ode_str
  *         cdef string interval_str
  *         cdef vector[string] names = self.c_reach.stateVarNames             # <<<<<<<<<<<<<<
  *         names.insert(names.begin(), "local_t")
  *         for v in self.c_reach.system.tmvOde.tms:
  */
-  __Pyx_TraceLine(336,0,__PYX_ERR(0, 336, __pyx_L1_error))
+  __Pyx_TraceLine(335,0,__PYX_ERR(0, 335, __pyx_L1_error))
   __pyx_t_2 = __pyx_v_self->c_reach.stateVarNames;
   __pyx_v_names = __pyx_t_2;
 
-  /* "flowstar/reachability.pyx":337
+  /* "flowstar/reachability.pyx":336
  *         cdef string interval_str
  *         cdef vector[string] names = self.c_reach.stateVarNames
  *         names.insert(names.begin(), "local_t")             # <<<<<<<<<<<<<<
  *         for v in self.c_reach.system.tmvOde.tms:
  *             v.expansion.toString(ode_str, names)
  */
-  __Pyx_TraceLine(337,0,__PYX_ERR(0, 337, __pyx_L1_error))
+  __Pyx_TraceLine(336,0,__PYX_ERR(0, 336, __pyx_L1_error))
   try {
     __pyx_v_names.insert(__pyx_v_names.begin(), __pyx_k_local_t);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 337, __pyx_L1_error)
+    __PYX_ERR(0, 336, __pyx_L1_error)
   }
 
-  /* "flowstar/reachability.pyx":338
+  /* "flowstar/reachability.pyx":337
  *         cdef vector[string] names = self.c_reach.stateVarNames
  *         names.insert(names.begin(), "local_t")
  *         for v in self.c_reach.system.tmvOde.tms:             # <<<<<<<<<<<<<<
  *             v.expansion.toString(ode_str, names)
  *             v.remainder.toString(interval_str)
  */
-  __Pyx_TraceLine(338,0,__PYX_ERR(0, 338, __pyx_L1_error))
+  __Pyx_TraceLine(337,0,__PYX_ERR(0, 337, __pyx_L1_error))
   __pyx_t_4 = &__pyx_v_self->c_reach.system.tmvOde.tms;
   __pyx_t_3 = __pyx_t_4->begin();
   for (;;) {
@@ -7195,39 +7180,39 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8ode_strs___get__(str
     ++__pyx_t_3;
     __pyx_v_v = __pyx_t_5;
 
-    /* "flowstar/reachability.pyx":339
+    /* "flowstar/reachability.pyx":338
  *         names.insert(names.begin(), "local_t")
  *         for v in self.c_reach.system.tmvOde.tms:
  *             v.expansion.toString(ode_str, names)             # <<<<<<<<<<<<<<
  *             v.remainder.toString(interval_str)
  *             res.append("({}, {})".format(ode_str, interval_str))
  */
-    __Pyx_TraceLine(339,0,__PYX_ERR(0, 339, __pyx_L1_error))
+    __Pyx_TraceLine(338,0,__PYX_ERR(0, 338, __pyx_L1_error))
     __pyx_v_v.expansion.toString(__pyx_v_ode_str, __pyx_v_names);
 
-    /* "flowstar/reachability.pyx":340
+    /* "flowstar/reachability.pyx":339
  *         for v in self.c_reach.system.tmvOde.tms:
  *             v.expansion.toString(ode_str, names)
  *             v.remainder.toString(interval_str)             # <<<<<<<<<<<<<<
  *             res.append("({}, {})".format(ode_str, interval_str))
  *         return res
  */
-    __Pyx_TraceLine(340,0,__PYX_ERR(0, 340, __pyx_L1_error))
+    __Pyx_TraceLine(339,0,__PYX_ERR(0, 339, __pyx_L1_error))
     __pyx_v_v.remainder.toString(__pyx_v_interval_str);
 
-    /* "flowstar/reachability.pyx":341
+    /* "flowstar/reachability.pyx":340
  *             v.expansion.toString(ode_str, names)
  *             v.remainder.toString(interval_str)
  *             res.append("({}, {})".format(ode_str, interval_str))             # <<<<<<<<<<<<<<
  *         return res
  * 
  */
-    __Pyx_TraceLine(341,0,__PYX_ERR(0, 341, __pyx_L1_error))
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s__6, __pyx_n_s_format); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 341, __pyx_L1_error)
+    __Pyx_TraceLine(340,0,__PYX_ERR(0, 340, __pyx_L1_error))
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s__6, __pyx_n_s_format); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 340, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_ode_str); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 341, __pyx_L1_error)
+    __pyx_t_7 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_ode_str); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 340, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_interval_str); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 341, __pyx_L1_error)
+    __pyx_t_8 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_interval_str); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 340, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_9 = NULL;
     __pyx_t_10 = 0;
@@ -7244,7 +7229,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8ode_strs___get__(str
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_7, __pyx_t_8};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 340, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7254,7 +7239,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8ode_strs___get__(str
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_7, __pyx_t_8};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 340, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7262,7 +7247,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8ode_strs___get__(str
     } else
     #endif
     {
-      __pyx_t_11 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_11 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 340, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
       if (__pyx_t_9) {
         __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_9); __pyx_t_9 = NULL;
@@ -7273,38 +7258,38 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8ode_strs___get__(str
       PyTuple_SET_ITEM(__pyx_t_11, 1+__pyx_t_10, __pyx_t_8);
       __pyx_t_7 = 0;
       __pyx_t_8 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 341, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 340, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_PyList_Append(__pyx_v_res, __pyx_t_1); if (unlikely(__pyx_t_12 == ((int)-1))) __PYX_ERR(0, 341, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_PyList_Append(__pyx_v_res, __pyx_t_1); if (unlikely(__pyx_t_12 == ((int)-1))) __PYX_ERR(0, 340, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "flowstar/reachability.pyx":338
+    /* "flowstar/reachability.pyx":337
  *         cdef vector[string] names = self.c_reach.stateVarNames
  *         names.insert(names.begin(), "local_t")
  *         for v in self.c_reach.system.tmvOde.tms:             # <<<<<<<<<<<<<<
  *             v.expansion.toString(ode_str, names)
  *             v.remainder.toString(interval_str)
  */
-    __Pyx_TraceLine(338,0,__PYX_ERR(0, 338, __pyx_L1_error))
+    __Pyx_TraceLine(337,0,__PYX_ERR(0, 337, __pyx_L1_error))
   }
 
-  /* "flowstar/reachability.pyx":342
+  /* "flowstar/reachability.pyx":341
  *             v.remainder.toString(interval_str)
  *             res.append("({}, {})".format(ode_str, interval_str))
  *         return res             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __Pyx_TraceLine(342,0,__PYX_ERR(0, 342, __pyx_L1_error))
+  __Pyx_TraceLine(341,0,__PYX_ERR(0, 341, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_res);
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":332
+  /* "flowstar/reachability.pyx":331
  * 
  *     @property
  *     def ode_strs(self):             # <<<<<<<<<<<<<<
@@ -7330,7 +7315,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8ode_strs___get__(str
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":345
+/* "flowstar/reachability.pyx":344
  * 
  *     @property
  *     def num_odes(self):             # <<<<<<<<<<<<<<
@@ -7358,27 +7343,27 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_8num_odes___get__(str
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
-  __Pyx_TraceCall("__get__", __pyx_f[0], 345, 0, __PYX_ERR(0, 345, __pyx_L1_error));
+  __Pyx_TraceCall("__get__", __pyx_f[0], 344, 0, __PYX_ERR(0, 344, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":346
+  /* "flowstar/reachability.pyx":345
  *     @property
  *     def num_odes(self):
  *         return int(self.c_reach.system.tmvOde.tms.size())             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(346,0,__PYX_ERR(0, 346, __pyx_L1_error))
+  __Pyx_TraceLine(345,0,__PYX_ERR(0, 345, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_reach.system.tmvOde.tms.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 346, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_reach.system.tmvOde.tms.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 345, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 346, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 345, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":345
+  /* "flowstar/reachability.pyx":344
  * 
  *     @property
  *     def num_odes(self):             # <<<<<<<<<<<<<<
@@ -7514,7 +7499,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_6CReach_12__setstate_cython__
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":358
+/* "flowstar/reachability.pyx":357
  * cdef class FlowstarGlobalManager:
  *     @staticmethod
  *     def get_global_domain_var_names():             # <<<<<<<<<<<<<<
@@ -7551,18 +7536,18 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_get_g
   PyObject *__pyx_t_5 = NULL;
   __Pyx_TraceFrameInit(__pyx_codeobj__9)
   __Pyx_RefNannySetupContext("get_global_domain_var_names", 0);
-  __Pyx_TraceCall("get_global_domain_var_names", __pyx_f[0], 358, 0, __PYX_ERR(0, 358, __pyx_L1_error));
+  __Pyx_TraceCall("get_global_domain_var_names", __pyx_f[0], 357, 0, __PYX_ERR(0, 357, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":361
+  /* "flowstar/reachability.pyx":360
  *         global domainVarNames
  * 
  *         return [str(name) for name in domainVarNames]             # <<<<<<<<<<<<<<
  * 
  *     @staticmethod
  */
-  __Pyx_TraceLine(361,0,__PYX_ERR(0, 361, __pyx_L1_error))
+  __Pyx_TraceLine(360,0,__PYX_ERR(0, 360, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 361, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 360, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = flowstar::domainVarNames.begin();
   for (;;) {
@@ -7570,19 +7555,19 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_get_g
     __pyx_t_3 = *__pyx_t_2;
     ++__pyx_t_2;
     __pyx_v_name = __pyx_t_3;
-    __pyx_t_4 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_name); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 361, __pyx_L1_error)
+    __pyx_t_4 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_name); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 360, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 361, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 360, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 361, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 360, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":358
+  /* "flowstar/reachability.pyx":357
  * cdef class FlowstarGlobalManager:
  *     @staticmethod
  *     def get_global_domain_var_names():             # <<<<<<<<<<<<<<
@@ -7604,7 +7589,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_get_g
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":364
+/* "flowstar/reachability.pyx":363
  * 
  *     @staticmethod
  *     def get_global_factorial_rec():             # <<<<<<<<<<<<<<
@@ -7636,24 +7621,24 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_2get_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_TraceFrameInit(__pyx_codeobj__10)
   __Pyx_RefNannySetupContext("get_global_factorial_rec", 0);
-  __Pyx_TraceCall("get_global_factorial_rec", __pyx_f[0], 364, 0, __PYX_ERR(0, 364, __pyx_L1_error));
+  __Pyx_TraceCall("get_global_factorial_rec", __pyx_f[0], 363, 0, __PYX_ERR(0, 363, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":366
+  /* "flowstar/reachability.pyx":365
  *     def get_global_factorial_rec():
  *         global factorial_rec
  *         return interval.intervals_to_list(factorial_rec)             # <<<<<<<<<<<<<<
  * 
  *     @staticmethod
  */
-  __Pyx_TraceLine(366,0,__PYX_ERR(0, 366, __pyx_L1_error))
+  __Pyx_TraceLine(365,0,__PYX_ERR(0, 365, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_8flowstar_8interval_intervals_to_list(flowstar::factorial_rec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 366, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_8flowstar_8interval_intervals_to_list(flowstar::factorial_rec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 365, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":364
+  /* "flowstar/reachability.pyx":363
  * 
  *     @staticmethod
  *     def get_global_factorial_rec():             # <<<<<<<<<<<<<<
@@ -7673,7 +7658,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_2get_
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":369
+/* "flowstar/reachability.pyx":368
  * 
  *     @staticmethod
  *     def get_global_power_4():             # <<<<<<<<<<<<<<
@@ -7705,24 +7690,24 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_4get_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_TraceFrameInit(__pyx_codeobj__11)
   __Pyx_RefNannySetupContext("get_global_power_4", 0);
-  __Pyx_TraceCall("get_global_power_4", __pyx_f[0], 369, 0, __PYX_ERR(0, 369, __pyx_L1_error));
+  __Pyx_TraceCall("get_global_power_4", __pyx_f[0], 368, 0, __PYX_ERR(0, 368, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":371
+  /* "flowstar/reachability.pyx":370
  *     def get_global_power_4():
  *         global power_4
  *         return interval.intervals_to_list(power_4)             # <<<<<<<<<<<<<<
  * 
  *     @staticmethod
  */
-  __Pyx_TraceLine(371,0,__PYX_ERR(0, 371, __pyx_L1_error))
+  __Pyx_TraceLine(370,0,__PYX_ERR(0, 370, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_8flowstar_8interval_intervals_to_list(flowstar::power_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 371, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_8flowstar_8interval_intervals_to_list(flowstar::power_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 370, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":369
+  /* "flowstar/reachability.pyx":368
  * 
  *     @staticmethod
  *     def get_global_power_4():             # <<<<<<<<<<<<<<
@@ -7742,7 +7727,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_4get_
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":374
+/* "flowstar/reachability.pyx":373
  * 
  *     @staticmethod
  *     def get_global_double_factorial():             # <<<<<<<<<<<<<<
@@ -7774,24 +7759,24 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_6get_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_TraceFrameInit(__pyx_codeobj__12)
   __Pyx_RefNannySetupContext("get_global_double_factorial", 0);
-  __Pyx_TraceCall("get_global_double_factorial", __pyx_f[0], 374, 0, __PYX_ERR(0, 374, __pyx_L1_error));
+  __Pyx_TraceCall("get_global_double_factorial", __pyx_f[0], 373, 0, __PYX_ERR(0, 373, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":376
+  /* "flowstar/reachability.pyx":375
  *     def get_global_double_factorial():
  *         global double_factorial
  *         return interval.intervals_to_list(double_factorial)             # <<<<<<<<<<<<<<
  * 
  *     @staticmethod
  */
-  __Pyx_TraceLine(376,0,__PYX_ERR(0, 376, __pyx_L1_error))
+  __Pyx_TraceLine(375,0,__PYX_ERR(0, 375, __pyx_L1_error))
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_8flowstar_8interval_intervals_to_list(flowstar::double_factorial); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 376, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_8flowstar_8interval_intervals_to_list(flowstar::double_factorial); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 375, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/reachability.pyx":374
+  /* "flowstar/reachability.pyx":373
  * 
  *     @staticmethod
  *     def get_global_double_factorial():             # <<<<<<<<<<<<<<
@@ -7811,7 +7796,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_6get_
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":379
+/* "flowstar/reachability.pyx":378
  * 
  *     @staticmethod
  *     def clear_global():             # <<<<<<<<<<<<<<
@@ -7842,49 +7827,49 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_8clea
   __Pyx_RefNannyDeclarations
   __Pyx_TraceFrameInit(__pyx_codeobj__13)
   __Pyx_RefNannySetupContext("clear_global", 0);
-  __Pyx_TraceCall("clear_global", __pyx_f[0], 379, 0, __PYX_ERR(0, 379, __pyx_L1_error));
+  __Pyx_TraceCall("clear_global", __pyx_f[0], 378, 0, __PYX_ERR(0, 378, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":385
+  /* "flowstar/reachability.pyx":384
  *         global domainVarNames
  * 
  *         factorial_rec.clear()             # <<<<<<<<<<<<<<
  *         power_4.clear()
  *         double_factorial.clear()
  */
-  __Pyx_TraceLine(385,0,__PYX_ERR(0, 385, __pyx_L1_error))
+  __Pyx_TraceLine(384,0,__PYX_ERR(0, 384, __pyx_L1_error))
   flowstar::factorial_rec.clear();
 
-  /* "flowstar/reachability.pyx":386
+  /* "flowstar/reachability.pyx":385
  * 
  *         factorial_rec.clear()
  *         power_4.clear()             # <<<<<<<<<<<<<<
  *         double_factorial.clear()
  *         domainVarNames.clear()
  */
-  __Pyx_TraceLine(386,0,__PYX_ERR(0, 386, __pyx_L1_error))
+  __Pyx_TraceLine(385,0,__PYX_ERR(0, 385, __pyx_L1_error))
   flowstar::power_4.clear();
 
-  /* "flowstar/reachability.pyx":387
+  /* "flowstar/reachability.pyx":386
  *         factorial_rec.clear()
  *         power_4.clear()
  *         double_factorial.clear()             # <<<<<<<<<<<<<<
  *         domainVarNames.clear()
  * 
  */
-  __Pyx_TraceLine(387,0,__PYX_ERR(0, 387, __pyx_L1_error))
+  __Pyx_TraceLine(386,0,__PYX_ERR(0, 386, __pyx_L1_error))
   flowstar::double_factorial.clear();
 
-  /* "flowstar/reachability.pyx":388
+  /* "flowstar/reachability.pyx":387
  *         power_4.clear()
  *         double_factorial.clear()
  *         domainVarNames.clear()             # <<<<<<<<<<<<<<
  * 
  *     def capture(FlowstarGlobalManager self):
  */
-  __Pyx_TraceLine(388,0,__PYX_ERR(0, 388, __pyx_L1_error))
+  __Pyx_TraceLine(387,0,__PYX_ERR(0, 387, __pyx_L1_error))
   flowstar::domainVarNames.clear();
 
-  /* "flowstar/reachability.pyx":379
+  /* "flowstar/reachability.pyx":378
  * 
  *     @staticmethod
  *     def clear_global():             # <<<<<<<<<<<<<<
@@ -7905,7 +7890,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_8clea
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":390
+/* "flowstar/reachability.pyx":389
  *         domainVarNames.clear()
  * 
  *     def capture(FlowstarGlobalManager self):             # <<<<<<<<<<<<<<
@@ -7931,49 +7916,49 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_10cap
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("capture", 0);
-  __Pyx_TraceCall("capture", __pyx_f[0], 390, 0, __PYX_ERR(0, 390, __pyx_L1_error));
+  __Pyx_TraceCall("capture", __pyx_f[0], 389, 0, __PYX_ERR(0, 389, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":396
+  /* "flowstar/reachability.pyx":395
  *         global domainVarNames
  * 
  *         self.domainVarNames = domainVarNames             # <<<<<<<<<<<<<<
  *         self.factorial_rec = factorial_rec
  *         self.power_4 = power_4
  */
-  __Pyx_TraceLine(396,0,__PYX_ERR(0, 396, __pyx_L1_error))
+  __Pyx_TraceLine(395,0,__PYX_ERR(0, 395, __pyx_L1_error))
   __pyx_v_self->domainVarNames = flowstar::domainVarNames;
 
-  /* "flowstar/reachability.pyx":397
+  /* "flowstar/reachability.pyx":396
  * 
  *         self.domainVarNames = domainVarNames
  *         self.factorial_rec = factorial_rec             # <<<<<<<<<<<<<<
  *         self.power_4 = power_4
  *         self.double_factorial = double_factorial
  */
-  __Pyx_TraceLine(397,0,__PYX_ERR(0, 397, __pyx_L1_error))
+  __Pyx_TraceLine(396,0,__PYX_ERR(0, 396, __pyx_L1_error))
   __pyx_v_self->factorial_rec = flowstar::factorial_rec;
 
-  /* "flowstar/reachability.pyx":398
+  /* "flowstar/reachability.pyx":397
  *         self.domainVarNames = domainVarNames
  *         self.factorial_rec = factorial_rec
  *         self.power_4 = power_4             # <<<<<<<<<<<<<<
  *         self.double_factorial = double_factorial
  * 
  */
-  __Pyx_TraceLine(398,0,__PYX_ERR(0, 398, __pyx_L1_error))
+  __Pyx_TraceLine(397,0,__PYX_ERR(0, 397, __pyx_L1_error))
   __pyx_v_self->power_4 = flowstar::power_4;
 
-  /* "flowstar/reachability.pyx":399
+  /* "flowstar/reachability.pyx":398
  *         self.factorial_rec = factorial_rec
  *         self.power_4 = power_4
  *         self.double_factorial = double_factorial             # <<<<<<<<<<<<<<
  * 
  *     def clear(self):
  */
-  __Pyx_TraceLine(399,0,__PYX_ERR(0, 399, __pyx_L1_error))
+  __Pyx_TraceLine(398,0,__PYX_ERR(0, 398, __pyx_L1_error))
   __pyx_v_self->double_factorial = flowstar::double_factorial;
 
-  /* "flowstar/reachability.pyx":390
+  /* "flowstar/reachability.pyx":389
  *         domainVarNames.clear()
  * 
  *     def capture(FlowstarGlobalManager self):             # <<<<<<<<<<<<<<
@@ -7994,7 +7979,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_10cap
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":401
+/* "flowstar/reachability.pyx":400
  *         self.double_factorial = double_factorial
  * 
  *     def clear(self):             # <<<<<<<<<<<<<<
@@ -8020,49 +8005,49 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_12cle
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("clear", 0);
-  __Pyx_TraceCall("clear", __pyx_f[0], 401, 0, __PYX_ERR(0, 401, __pyx_L1_error));
+  __Pyx_TraceCall("clear", __pyx_f[0], 400, 0, __PYX_ERR(0, 400, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":402
+  /* "flowstar/reachability.pyx":401
  * 
  *     def clear(self):
  *         self.domainVarNames.clear()             # <<<<<<<<<<<<<<
  *         self.factorial_rec.clear()
  *         self.power_4.clear()
  */
-  __Pyx_TraceLine(402,0,__PYX_ERR(0, 402, __pyx_L1_error))
+  __Pyx_TraceLine(401,0,__PYX_ERR(0, 401, __pyx_L1_error))
   __pyx_v_self->domainVarNames.clear();
 
-  /* "flowstar/reachability.pyx":403
+  /* "flowstar/reachability.pyx":402
  *     def clear(self):
  *         self.domainVarNames.clear()
  *         self.factorial_rec.clear()             # <<<<<<<<<<<<<<
  *         self.power_4.clear()
  *         self.double_factorial.clear()
  */
-  __Pyx_TraceLine(403,0,__PYX_ERR(0, 403, __pyx_L1_error))
+  __Pyx_TraceLine(402,0,__PYX_ERR(0, 402, __pyx_L1_error))
   __pyx_v_self->factorial_rec.clear();
 
-  /* "flowstar/reachability.pyx":404
+  /* "flowstar/reachability.pyx":403
  *         self.domainVarNames.clear()
  *         self.factorial_rec.clear()
  *         self.power_4.clear()             # <<<<<<<<<<<<<<
  *         self.double_factorial.clear()
  * 
  */
-  __Pyx_TraceLine(404,0,__PYX_ERR(0, 404, __pyx_L1_error))
+  __Pyx_TraceLine(403,0,__PYX_ERR(0, 403, __pyx_L1_error))
   __pyx_v_self->power_4.clear();
 
-  /* "flowstar/reachability.pyx":405
+  /* "flowstar/reachability.pyx":404
  *         self.factorial_rec.clear()
  *         self.power_4.clear()
  *         self.double_factorial.clear()             # <<<<<<<<<<<<<<
  * 
  *     # Restore local copy of flowstar global variables
  */
-  __Pyx_TraceLine(405,0,__PYX_ERR(0, 405, __pyx_L1_error))
+  __Pyx_TraceLine(404,0,__PYX_ERR(0, 404, __pyx_L1_error))
   __pyx_v_self->double_factorial.clear();
 
-  /* "flowstar/reachability.pyx":401
+  /* "flowstar/reachability.pyx":400
  *         self.double_factorial = double_factorial
  * 
  *     def clear(self):             # <<<<<<<<<<<<<<
@@ -8083,7 +8068,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_12cle
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":408
+/* "flowstar/reachability.pyx":407
  * 
  *     # Restore local copy of flowstar global variables
  *     def restore(FlowstarGlobalManager self):             # <<<<<<<<<<<<<<
@@ -8111,53 +8096,53 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_14res
   std::vector<std::string>  __pyx_t_1;
   std::vector<flowstar::Interval>  __pyx_t_2;
   __Pyx_RefNannySetupContext("restore", 0);
-  __Pyx_TraceCall("restore", __pyx_f[0], 408, 0, __PYX_ERR(0, 408, __pyx_L1_error));
+  __Pyx_TraceCall("restore", __pyx_f[0], 407, 0, __PYX_ERR(0, 407, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":414
+  /* "flowstar/reachability.pyx":413
  *         global domainVarNames
  * 
  *         domainVarNames = self.domainVarNames             # <<<<<<<<<<<<<<
  *         factorial_rec = self.factorial_rec
  *         power_4 = self.power_4
  */
-  __Pyx_TraceLine(414,0,__PYX_ERR(0, 414, __pyx_L1_error))
+  __Pyx_TraceLine(413,0,__PYX_ERR(0, 413, __pyx_L1_error))
   __pyx_t_1 = __pyx_v_self->domainVarNames;
   flowstar::domainVarNames = __pyx_t_1;
 
-  /* "flowstar/reachability.pyx":415
+  /* "flowstar/reachability.pyx":414
  * 
  *         domainVarNames = self.domainVarNames
  *         factorial_rec = self.factorial_rec             # <<<<<<<<<<<<<<
  *         power_4 = self.power_4
  *         double_factorial = self.double_factorial
  */
-  __Pyx_TraceLine(415,0,__PYX_ERR(0, 415, __pyx_L1_error))
+  __Pyx_TraceLine(414,0,__PYX_ERR(0, 414, __pyx_L1_error))
   __pyx_t_2 = __pyx_v_self->factorial_rec;
   flowstar::factorial_rec = __pyx_t_2;
 
-  /* "flowstar/reachability.pyx":416
+  /* "flowstar/reachability.pyx":415
  *         domainVarNames = self.domainVarNames
  *         factorial_rec = self.factorial_rec
  *         power_4 = self.power_4             # <<<<<<<<<<<<<<
  *         double_factorial = self.double_factorial
  * 
  */
-  __Pyx_TraceLine(416,0,__PYX_ERR(0, 416, __pyx_L1_error))
+  __Pyx_TraceLine(415,0,__PYX_ERR(0, 415, __pyx_L1_error))
   __pyx_t_2 = __pyx_v_self->power_4;
   flowstar::power_4 = __pyx_t_2;
 
-  /* "flowstar/reachability.pyx":417
+  /* "flowstar/reachability.pyx":416
  *         factorial_rec = self.factorial_rec
  *         power_4 = self.power_4
  *         double_factorial = self.double_factorial             # <<<<<<<<<<<<<<
  * 
  *     def __enter__(self):
  */
-  __Pyx_TraceLine(417,0,__PYX_ERR(0, 417, __pyx_L1_error))
+  __Pyx_TraceLine(416,0,__PYX_ERR(0, 416, __pyx_L1_error))
   __pyx_t_2 = __pyx_v_self->double_factorial;
   flowstar::double_factorial = __pyx_t_2;
 
-  /* "flowstar/reachability.pyx":408
+  /* "flowstar/reachability.pyx":407
  * 
  *     # Restore local copy of flowstar global variables
  *     def restore(FlowstarGlobalManager self):             # <<<<<<<<<<<<<<
@@ -8178,7 +8163,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_14res
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":419
+/* "flowstar/reachability.pyx":418
  *         double_factorial = self.double_factorial
  * 
  *     def __enter__(self):             # <<<<<<<<<<<<<<
@@ -8207,17 +8192,17 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_16__e
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__enter__", 0);
-  __Pyx_TraceCall("__enter__", __pyx_f[0], 419, 0, __PYX_ERR(0, 419, __pyx_L1_error));
+  __Pyx_TraceCall("__enter__", __pyx_f[0], 418, 0, __PYX_ERR(0, 418, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":420
+  /* "flowstar/reachability.pyx":419
  * 
  *     def __enter__(self):
  *         self.restore()             # <<<<<<<<<<<<<<
  * 
  *     def __exit__(self, exc_type, exc_val, exc_tb):
  */
-  __Pyx_TraceLine(420,0,__PYX_ERR(0, 420, __pyx_L1_error))
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_restore); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 420, __pyx_L1_error)
+  __Pyx_TraceLine(419,0,__PYX_ERR(0, 419, __pyx_L1_error))
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_restore); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 419, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -8230,16 +8215,16 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_16__e
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 420, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 419, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 420, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 419, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/reachability.pyx":419
+  /* "flowstar/reachability.pyx":418
  *         double_factorial = self.double_factorial
  * 
  *     def __enter__(self):             # <<<<<<<<<<<<<<
@@ -8263,7 +8248,7 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_16__e
   return __pyx_r;
 }
 
-/* "flowstar/reachability.pyx":422
+/* "flowstar/reachability.pyx":421
  *         self.restore()
  * 
  *     def __exit__(self, exc_type, exc_val, exc_tb):             # <<<<<<<<<<<<<<
@@ -8304,17 +8289,17 @@ static PyObject *__pyx_pw_8flowstar_12reachability_21FlowstarGlobalManager_19__e
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_exc_val)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 1); __PYX_ERR(0, 422, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 1); __PYX_ERR(0, 421, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_exc_tb)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 2); __PYX_ERR(0, 422, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, 2); __PYX_ERR(0, 421, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__exit__") < 0)) __PYX_ERR(0, 422, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__exit__") < 0)) __PYX_ERR(0, 421, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -8329,7 +8314,7 @@ static PyObject *__pyx_pw_8flowstar_12reachability_21FlowstarGlobalManager_19__e
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 422, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__exit__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 421, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.reachability.FlowstarGlobalManager.__exit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -8350,15 +8335,15 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_18__e
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__exit__", 0);
-  __Pyx_TraceCall("__exit__", __pyx_f[0], 422, 0, __PYX_ERR(0, 422, __pyx_L1_error));
+  __Pyx_TraceCall("__exit__", __pyx_f[0], 421, 0, __PYX_ERR(0, 421, __pyx_L1_error));
 
-  /* "flowstar/reachability.pyx":423
+  /* "flowstar/reachability.pyx":422
  * 
  *     def __exit__(self, exc_type, exc_val, exc_tb):
  *         FlowstarGlobalManager.clear_global()             # <<<<<<<<<<<<<<
  */
-  __Pyx_TraceLine(423,0,__PYX_ERR(0, 423, __pyx_L1_error))
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager), __pyx_n_s_clear_global); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 423, __pyx_L1_error)
+  __Pyx_TraceLine(422,0,__PYX_ERR(0, 422, __pyx_L1_error))
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager), __pyx_n_s_clear_global); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 422, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -8371,16 +8356,16 @@ static PyObject *__pyx_pf_8flowstar_12reachability_21FlowstarGlobalManager_18__e
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 423, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 422, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 423, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 422, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/reachability.pyx":422
+  /* "flowstar/reachability.pyx":421
  *         self.restore()
  * 
  *     def __exit__(self, exc_type, exc_val, exc_tb):             # <<<<<<<<<<<<<<
@@ -9626,7 +9611,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_precondition, __pyx_k_precondition, sizeof(__pyx_k_precondition), 0, 0, 1, 1},
   {&__pyx_n_s_prepare, __pyx_k_prepare, sizeof(__pyx_k_prepare), 0, 0, 1, 1},
   {&__pyx_n_s_prepare_2, __pyx_k_prepare_2, sizeof(__pyx_k_prepare_2), 0, 0, 1, 1},
-  {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
   {&__pyx_n_s_qualname, __pyx_k_qualname, sizeof(__pyx_k_qualname), 0, 0, 1, 1},
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
@@ -9652,11 +9636,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_staticmethod = __Pyx_GetBuiltinName(__pyx_n_s_staticmethod); if (!__pyx_builtin_staticmethod) __PYX_ERR(0, 357, __pyx_L1_error)
+  __pyx_builtin_staticmethod = __Pyx_GetBuiltinName(__pyx_n_s_staticmethod); if (!__pyx_builtin_staticmethod) __PYX_ERR(0, 356, __pyx_L1_error)
   __pyx_builtin_min = __Pyx_GetBuiltinName(__pyx_n_s_min); if (!__pyx_builtin_min) __PYX_ERR(0, 108, __pyx_L1_error)
   __pyx_builtin_max = __Pyx_GetBuiltinName(__pyx_n_s_max); if (!__pyx_builtin_max) __PYX_ERR(0, 110, __pyx_L1_error)
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 140, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 266, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -9678,47 +9661,47 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "flowstar/reachability.pyx":267
+  /* "flowstar/reachability.pyx":266
+ *         cdef Interval I = interval.make_interval(t)
  * 
- *         print(self.global_manager)
  *         with self.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
  *             res = self.eval_interval(I)
  * 
  */
-  __pyx_tuple__2 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 267, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 266, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "flowstar/reachability.pyx":275
+  /* "flowstar/reachability.pyx":274
  *         '''Prepare for plotting / evaluating.'''
  *         if not self.ran:
  *             raise Exception('Not ran!')             # <<<<<<<<<<<<<<
  * 
  *         if not self.prepared:
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_Not_ran); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 275, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_Not_ran); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 274, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "flowstar/reachability.pyx":278
+  /* "flowstar/reachability.pyx":277
  * 
  *         if not self.prepared:
  *             with self.global_manager:  # with local globals             # <<<<<<<<<<<<<<
  *                 # if we run prepareForPlotting more than once we crash
  *                 self.c_reach.prepareForDumping()
  */
-  __pyx_tuple__4 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 278, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 277, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
-  /* "flowstar/reachability.pyx":285
+  /* "flowstar/reachability.pyx":284
  *     def run(self):
  *         if self.ran:
  *             raise Exception('Already ran')             # <<<<<<<<<<<<<<
  *         try:
  *             FlowstarGlobalManager.clear_global()
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s_Already_ran); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 285, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s_Already_ran); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 284, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
@@ -9760,53 +9743,53 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
 
-  /* "flowstar/reachability.pyx":358
+  /* "flowstar/reachability.pyx":357
  * cdef class FlowstarGlobalManager:
  *     @staticmethod
  *     def get_global_domain_var_names():             # <<<<<<<<<<<<<<
  *         global domainVarNames
  * 
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_n_s_name_2); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 358, __pyx_L1_error)
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_n_s_name_2); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 357, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_domain_var_names, 358, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 358, __pyx_L1_error)
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_domain_var_names, 357, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 357, __pyx_L1_error)
 
-  /* "flowstar/reachability.pyx":364
+  /* "flowstar/reachability.pyx":363
  * 
  *     @staticmethod
  *     def get_global_factorial_rec():             # <<<<<<<<<<<<<<
  *         global factorial_rec
  *         return interval.intervals_to_list(factorial_rec)
  */
-  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_factorial_rec, 364, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 364, __pyx_L1_error)
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_factorial_rec, 363, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 363, __pyx_L1_error)
 
-  /* "flowstar/reachability.pyx":369
+  /* "flowstar/reachability.pyx":368
  * 
  *     @staticmethod
  *     def get_global_power_4():             # <<<<<<<<<<<<<<
  *         global power_4
  *         return interval.intervals_to_list(power_4)
  */
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_power_4, 369, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 369, __pyx_L1_error)
+  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_power_4, 368, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 368, __pyx_L1_error)
 
-  /* "flowstar/reachability.pyx":374
+  /* "flowstar/reachability.pyx":373
  * 
  *     @staticmethod
  *     def get_global_double_factorial():             # <<<<<<<<<<<<<<
  *         global double_factorial
  *         return interval.intervals_to_list(double_factorial)
  */
-  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_double_factorial, 374, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 374, __pyx_L1_error)
+  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_get_global_double_factorial, 373, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 373, __pyx_L1_error)
 
-  /* "flowstar/reachability.pyx":379
+  /* "flowstar/reachability.pyx":378
  * 
  *     @staticmethod
  *     def clear_global():             # <<<<<<<<<<<<<<
  *         global factorial_rec
  *         global power_4
  */
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_clear_global, 379, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_reachability_pyx, __pyx_n_s_clear_global, 378, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 378, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -9877,13 +9860,13 @@ static int __Pyx_modinit_type_init_code(void) {
   if (PyObject_SetAttrString(__pyx_m, "CReach", (PyObject *)&__pyx_type_8flowstar_12reachability_CReach) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
   if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_12reachability_CReach) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
   __pyx_ptype_8flowstar_12reachability_CReach = &__pyx_type_8flowstar_12reachability_CReach;
-  if (PyType_Ready(&__pyx_type_8flowstar_12reachability_FlowstarGlobalManager) < 0) __PYX_ERR(0, 356, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_8flowstar_12reachability_FlowstarGlobalManager) < 0) __PYX_ERR(0, 355, __pyx_L1_error)
   __pyx_type_8flowstar_12reachability_FlowstarGlobalManager.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_12reachability_FlowstarGlobalManager.tp_dictoffset && __pyx_type_8flowstar_12reachability_FlowstarGlobalManager.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_12reachability_FlowstarGlobalManager.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (PyObject_SetAttrString(__pyx_m, "FlowstarGlobalManager", (PyObject *)&__pyx_type_8flowstar_12reachability_FlowstarGlobalManager) < 0) __PYX_ERR(0, 356, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_12reachability_FlowstarGlobalManager) < 0) __PYX_ERR(0, 356, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "FlowstarGlobalManager", (PyObject *)&__pyx_type_8flowstar_12reachability_FlowstarGlobalManager) < 0) __PYX_ERR(0, 355, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_12reachability_FlowstarGlobalManager) < 0) __PYX_ERR(0, 355, __pyx_L1_error)
   __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = &__pyx_type_8flowstar_12reachability_FlowstarGlobalManager;
   if (PyType_Ready(&__pyx_type_8flowstar_12reachability___pyx_scope_struct____cinit__) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
   __pyx_type_8flowstar_12reachability___pyx_scope_struct____cinit__.tp_print = 0;
@@ -10218,15 +10201,15 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_sage, __pyx_t_1) < 0) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/reachability.pyx":349
+  /* "flowstar/reachability.pyx":348
  * 
  * 
  * class Reach(plotting.FlowstarPlotMixin,             # <<<<<<<<<<<<<<
  *             plotting.SagePlotMixin,
  *             plotting.SageTubePlotMixin,
  */
-  __Pyx_TraceLine(349,0,__PYX_ERR(0, 349, __pyx_L1_error))
-  __pyx_t_1 = PyTuple_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 349, __pyx_L1_error)
+  __Pyx_TraceLine(348,0,__PYX_ERR(0, 348, __pyx_L1_error))
+  __pyx_t_1 = PyTuple_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(((PyObject *)__pyx_ptype_8flowstar_8plotting_FlowstarPlotMixin));
   __Pyx_GIVEREF(((PyObject *)__pyx_ptype_8flowstar_8plotting_FlowstarPlotMixin));
@@ -10240,170 +10223,170 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(((PyObject *)__pyx_ptype_8flowstar_12reachability_CReach));
   __Pyx_GIVEREF(((PyObject *)__pyx_ptype_8flowstar_12reachability_CReach));
   PyTuple_SET_ITEM(__pyx_t_1, 3, ((PyObject *)__pyx_ptype_8flowstar_12reachability_CReach));
-  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_Reach, __pyx_n_s_Reach, (PyObject *) NULL, __pyx_n_s_flowstar_reachability, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 349, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_Reach, __pyx_n_s_Reach, (PyObject *) NULL, __pyx_n_s_flowstar_reachability, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_Reach, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 349, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_Reach, __pyx_t_1, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Reach, __pyx_t_4) < 0) __PYX_ERR(0, 349, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Reach, __pyx_t_4) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/reachability.pyx":358
+  /* "flowstar/reachability.pyx":357
  * cdef class FlowstarGlobalManager:
  *     @staticmethod
  *     def get_global_domain_var_names():             # <<<<<<<<<<<<<<
  *         global domainVarNames
  * 
  */
-  __Pyx_TraceLine(358,0,__PYX_ERR(0, 358, __pyx_L1_error))
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_1get_global_domain_var_names, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 358, __pyx_L1_error)
+  __Pyx_TraceLine(357,0,__PYX_ERR(0, 357, __pyx_L1_error))
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_1get_global_domain_var_names, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 357, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_domain_var_names, __pyx_t_1) < 0) __PYX_ERR(0, 358, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_domain_var_names, __pyx_t_1) < 0) __PYX_ERR(0, 357, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":357
+  /* "flowstar/reachability.pyx":356
  * 
  * cdef class FlowstarGlobalManager:
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def get_global_domain_var_names():
  *         global domainVarNames
  */
-  __Pyx_TraceLine(357,0,__PYX_ERR(0, 357, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_domain_var_names); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 358, __pyx_L1_error)
+  __Pyx_TraceLine(356,0,__PYX_ERR(0, 356, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_domain_var_names); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 357, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 357, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_domain_var_names, __pyx_t_2) < 0) __PYX_ERR(0, 358, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_domain_var_names, __pyx_t_2) < 0) __PYX_ERR(0, 357, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":364
+  /* "flowstar/reachability.pyx":363
  * 
  *     @staticmethod
  *     def get_global_factorial_rec():             # <<<<<<<<<<<<<<
  *         global factorial_rec
  *         return interval.intervals_to_list(factorial_rec)
  */
-  __Pyx_TraceLine(364,0,__PYX_ERR(0, 364, __pyx_L1_error))
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_3get_global_factorial_rec, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 364, __pyx_L1_error)
+  __Pyx_TraceLine(363,0,__PYX_ERR(0, 363, __pyx_L1_error))
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_3get_global_factorial_rec, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 363, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_factorial_rec, __pyx_t_2) < 0) __PYX_ERR(0, 364, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_factorial_rec, __pyx_t_2) < 0) __PYX_ERR(0, 363, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":363
+  /* "flowstar/reachability.pyx":362
  *         return [str(name) for name in domainVarNames]
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def get_global_factorial_rec():
  *         global factorial_rec
  */
-  __Pyx_TraceLine(363,0,__PYX_ERR(0, 363, __pyx_L1_error))
-  __pyx_t_2 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_factorial_rec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 364, __pyx_L1_error)
+  __Pyx_TraceLine(362,0,__PYX_ERR(0, 362, __pyx_L1_error))
+  __pyx_t_2 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_factorial_rec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 363, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 363, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 362, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_factorial_rec, __pyx_t_1) < 0) __PYX_ERR(0, 364, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_factorial_rec, __pyx_t_1) < 0) __PYX_ERR(0, 363, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":369
+  /* "flowstar/reachability.pyx":368
  * 
  *     @staticmethod
  *     def get_global_power_4():             # <<<<<<<<<<<<<<
  *         global power_4
  *         return interval.intervals_to_list(power_4)
  */
-  __Pyx_TraceLine(369,0,__PYX_ERR(0, 369, __pyx_L1_error))
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_5get_global_power_4, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 369, __pyx_L1_error)
+  __Pyx_TraceLine(368,0,__PYX_ERR(0, 368, __pyx_L1_error))
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_5get_global_power_4, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 368, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_power_4, __pyx_t_1) < 0) __PYX_ERR(0, 369, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_power_4, __pyx_t_1) < 0) __PYX_ERR(0, 368, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":368
+  /* "flowstar/reachability.pyx":367
  *         return interval.intervals_to_list(factorial_rec)
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def get_global_power_4():
  *         global power_4
  */
-  __Pyx_TraceLine(368,0,__PYX_ERR(0, 368, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_power_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 369, __pyx_L1_error)
+  __Pyx_TraceLine(367,0,__PYX_ERR(0, 367, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_power_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 368, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 368, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 367, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_power_4, __pyx_t_2) < 0) __PYX_ERR(0, 369, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_power_4, __pyx_t_2) < 0) __PYX_ERR(0, 368, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":374
+  /* "flowstar/reachability.pyx":373
  * 
  *     @staticmethod
  *     def get_global_double_factorial():             # <<<<<<<<<<<<<<
  *         global double_factorial
  *         return interval.intervals_to_list(double_factorial)
  */
-  __Pyx_TraceLine(374,0,__PYX_ERR(0, 374, __pyx_L1_error))
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_7get_global_double_factorial, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 374, __pyx_L1_error)
+  __Pyx_TraceLine(373,0,__PYX_ERR(0, 373, __pyx_L1_error))
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_7get_global_double_factorial, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 373, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_double_factorial, __pyx_t_2) < 0) __PYX_ERR(0, 374, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_double_factorial, __pyx_t_2) < 0) __PYX_ERR(0, 373, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":373
+  /* "flowstar/reachability.pyx":372
  *         return interval.intervals_to_list(power_4)
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def get_global_double_factorial():
  *         global double_factorial
  */
-  __Pyx_TraceLine(373,0,__PYX_ERR(0, 373, __pyx_L1_error))
-  __pyx_t_2 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_double_factorial); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 374, __pyx_L1_error)
+  __Pyx_TraceLine(372,0,__PYX_ERR(0, 372, __pyx_L1_error))
+  __pyx_t_2 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_get_global_double_factorial); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 373, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 373, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 372, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_double_factorial, __pyx_t_1) < 0) __PYX_ERR(0, 374, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_get_global_double_factorial, __pyx_t_1) < 0) __PYX_ERR(0, 373, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":379
+  /* "flowstar/reachability.pyx":378
  * 
  *     @staticmethod
  *     def clear_global():             # <<<<<<<<<<<<<<
  *         global factorial_rec
  *         global power_4
  */
-  __Pyx_TraceLine(379,0,__PYX_ERR(0, 379, __pyx_L1_error))
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_9clear_global, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __Pyx_TraceLine(378,0,__PYX_ERR(0, 378, __pyx_L1_error))
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_12reachability_21FlowstarGlobalManager_9clear_global, NULL, __pyx_n_s_flowstar_reachability); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 378, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_clear_global, __pyx_t_1) < 0) __PYX_ERR(0, 379, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_clear_global, __pyx_t_1) < 0) __PYX_ERR(0, 378, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 
-  /* "flowstar/reachability.pyx":378
+  /* "flowstar/reachability.pyx":377
  *         return interval.intervals_to_list(double_factorial)
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def clear_global():
  *         global factorial_rec
  */
-  __Pyx_TraceLine(378,0,__PYX_ERR(0, 378, __pyx_L1_error))
-  __pyx_t_1 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_clear_global); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 379, __pyx_L1_error)
+  __Pyx_TraceLine(377,0,__PYX_ERR(0, 377, __pyx_L1_error))
+  __pyx_t_1 = __Pyx_GetNameInClass((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager, __pyx_n_s_clear_global); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 378, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 378, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_clear_global, __pyx_t_2) < 0) __PYX_ERR(0, 379, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict, __pyx_n_s_clear_global, __pyx_t_2) < 0) __PYX_ERR(0, 378, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager);
 

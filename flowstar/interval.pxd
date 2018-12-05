@@ -4,6 +4,7 @@ from flowstar.Interval cimport Interval
 from libcpp.vector cimport vector
 from libcpp cimport bool as cbool
 
+cdef str as_str(const Interval &)
 cdef void set_precision(int prec)
 cdef int get_precision()
 cdef Interval make_interval(object i)

@@ -2,6 +2,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 import collections
 import operator
+import sage.all as sage
 
 from flowstar.Polynomial cimport Polynomial
 from flowstar.interval cimport make_interval
@@ -56,21 +57,6 @@ cdef class Poly:
 
     @staticmethod
     def from_sage(p):
-        '''
-        >>> R, (x, y) = sage.PolynomialRing(sage.RIF, 'x, y').objgens()
-        >>> Poly.from_sage(x*y + x + R(3))
-        (([3.0000000000e+00 , 3.0000000000e+00]) + ([1.0000000000e+00 , 1.0000000000e+00] * x) + ([1.0000000000e+00 , 1.0000000000e+00] * x * y))
-        >>> R, (t,) = sage.PolynomialRing(sage.RIF, 't').objgens()
-        >>> Poly(t - 0.5)
-        (([-5.0000000000e-01 , -5.0000000000e-01]) + ([1.0000000000e+00 , 1.0000000000e+00] * t))
-        >>> Poly(t + sage.RIF(-1,1))
-        (([-1.0000000000e+00 , 1.0000000000e+00]) + ([1.0000000000e+00 , 1.0000000000e+00] * t))
-        >>> Poly(t**2 - 2)
-        (([-2.0000000000e+00 , -2.0000000000e+00]) + ([1.0000000000e+00 , 1.0000000000e+00] * t^2))
-        '''
-        # print(p)
-        # print(p.coefficients())
-        # print(p.exponents())
         vars = list(map(str, p.parent().gens()))
         zero = Poly(vars)
         if hasattr(p, 'list'):

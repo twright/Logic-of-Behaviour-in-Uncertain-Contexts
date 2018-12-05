@@ -14,7 +14,7 @@ from libcpp cimport bool as cbool
 
 from flowstar.reachability import Reach
 from flowstar.reachability cimport CReach
-from flowstar.interval cimport interval_fn
+from flowstar.interval cimport interval_fn, as_str
 cimport flowstar.interval as interval
 from flowstar.poly cimport poly_fn, Poly
 import sage.all as sage
@@ -124,7 +124,7 @@ def work3():
     # print("f = {} / {}\nf' = {} / {}".format(f_fn.call(test).as_str(), f.call(test).as_str(), fprime_fn.call(test).as_str(), fprime.call(test).as_str()))
     cdef interval_fn f_fn = poly_fn(Poly(3.0 - y).c_poly)
     cdef interval_fn fprime_fn = poly_fn(Poly(-x).c_poly)
-    print("f = {} / {}\nf' = {} / {}".format(f_fn.call(test).as_str(), 1.0, fprime_fn.call(test).as_str(), -1.0))
+    print("f = {} / {}\nf' = {} / {}".format(as_str(f_fn.call(test)), 1.0, as_str(fprime_fn.call(test)), -1.0))
 
     # cdef interval_fn f_fn = poly_fn(Poly(x - 3.0).c_poly)
     # cdef interval_fn fprime_fn = poly_fn(Poly(-y).c_poly)
@@ -189,7 +189,7 @@ def main():
     test.push_back(Interval())
     test.push_back(Interval(1.0))
     test.push_back(Interval(3.0))
-    print("f = {}, f' = {}".format(f.call(test).as_str(), fprime.call(test).as_str()))
+    print("f = {}, f' = {}".format(as_str(f.call(test)), as_str(fprime.call(test))))
     print("Finding roots manually wrapping")
     D.prepare()
     cdef vector[Interval] roots = (<CReach?>D).c_roots(f, fprime)

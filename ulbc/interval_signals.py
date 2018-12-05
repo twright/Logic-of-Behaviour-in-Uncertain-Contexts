@@ -1,15 +1,15 @@
+from builtins import *  # NOQA
 from functools import partial, reduce
 import warnings
-from builtins import *
 
 from sage.all import RIF, region_plot
 # from sage.all import *
 
 # from interval_utils import *
-from interval_root_isolation import isolate_roots
+# from interval_root_isolation import isolate_roots
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
-           'Signal', 'C', 'ctx', 'to_signal_piecewise', 'signal_given_roots']
+           'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots']
 
 
 def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):

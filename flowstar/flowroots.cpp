@@ -897,7 +897,6 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "flowstar/flowroots.pyx",
-  "stringsource",
   "./flowstar/reachability.pxd",
   "./flowstar/poly.pxd",
 };
@@ -1284,6 +1283,9 @@ static PyObject *__Pyx_ImportModule(const char *name);
 /* TypeImport.proto */
 static PyTypeObject *__Pyx_ImportType(const char *module_name, const char *class_name, size_t size, int strict);
 
+/* FunctionImport.proto */
+static int __Pyx_ImportFunction(PyObject *module, const char *funcname, void (**f)(void), const char *sig);
+
 /* InitStrings.proto */
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
@@ -1315,6 +1317,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 /* Module declarations from 'flowstar.Continuous' */
 
 /* Module declarations from 'flowstar.interval' */
+static PyObject *(*__pyx_f_8flowstar_8interval_as_str)(flowstar::Interval const &); /*proto*/
 
 /* Module declarations from 'flowstar.reachability' */
 static PyTypeObject *__pyx_ptype_8flowstar_12reachability_CReach = 0;
@@ -1324,11 +1327,6 @@ static PyTypeObject *__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager 
 static PyTypeObject *__pyx_ptype_8flowstar_4poly_Poly = 0;
 
 /* Module declarations from 'flowstar.flowroots' */
-static CYTHON_INLINE PyObject *__pyx_convert_PyObject_string_to_py_std__in_string(std::string const &); /*proto*/
-static CYTHON_INLINE PyObject *__pyx_convert_PyUnicode_string_to_py_std__in_string(std::string const &); /*proto*/
-static CYTHON_INLINE PyObject *__pyx_convert_PyStr_string_to_py_std__in_string(std::string const &); /*proto*/
-static CYTHON_INLINE PyObject *__pyx_convert_PyBytes_string_to_py_std__in_string(std::string const &); /*proto*/
-static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_string(std::string const &); /*proto*/
 #define __Pyx_MODULE_NAME "flowstar.flowroots"
 extern int __pyx_module_is_main_flowstar__flowroots;
 int __pyx_module_is_main_flowstar__flowroots = 0;
@@ -3589,7 +3587,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_4work3(CYTHON_UNUSED PyObject *__
  *     # print("f = {} / {}\nf' = {} / {}".format(f_fn.call(test).as_str(), f.call(test).as_str(), fprime_fn.call(test).as_str(), fprime.call(test).as_str()))
  *     cdef interval_fn f_fn = poly_fn(Poly(3.0 - y).c_poly)             # <<<<<<<<<<<<<<
  *     cdef interval_fn fprime_fn = poly_fn(Poly(-x).c_poly)
- *     print("f = {} / {}\nf' = {} / {}".format(f_fn.call(test).as_str(), 1.0, fprime_fn.call(test).as_str(), -1.0))
+ *     print("f = {} / {}\nf' = {} / {}".format(as_str(f_fn.call(test)), 1.0, as_str(fprime_fn.call(test)), -1.0))
  */
   __pyx_t_5 = __Pyx_PyFloat_SubtractCObj(__pyx_float_3_0, __pyx_v_y, 3.0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
@@ -3603,7 +3601,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_4work3(CYTHON_UNUSED PyObject *__
  *     # print("f = {} / {}\nf' = {} / {}".format(f_fn.call(test).as_str(), f.call(test).as_str(), fprime_fn.call(test).as_str(), fprime.call(test).as_str()))
  *     cdef interval_fn f_fn = poly_fn(Poly(3.0 - y).c_poly)
  *     cdef interval_fn fprime_fn = poly_fn(Poly(-x).c_poly)             # <<<<<<<<<<<<<<
- *     print("f = {} / {}\nf' = {} / {}".format(f_fn.call(test).as_str(), 1.0, fprime_fn.call(test).as_str(), -1.0))
+ *     print("f = {} / {}\nf' = {} / {}".format(as_str(f_fn.call(test)), 1.0, as_str(fprime_fn.call(test)), -1.0))
  * 
  */
   __pyx_t_4 = PyNumber_Negative(__pyx_v_x); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 126, __pyx_L1_error)
@@ -3617,15 +3615,15 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_4work3(CYTHON_UNUSED PyObject *__
   /* "flowstar/flowroots.pyx":127
  *     cdef interval_fn f_fn = poly_fn(Poly(3.0 - y).c_poly)
  *     cdef interval_fn fprime_fn = poly_fn(Poly(-x).c_poly)
- *     print("f = {} / {}\nf' = {} / {}".format(f_fn.call(test).as_str(), 1.0, fprime_fn.call(test).as_str(), -1.0))             # <<<<<<<<<<<<<<
+ *     print("f = {} / {}\nf' = {} / {}".format(as_str(f_fn.call(test)), 1.0, as_str(fprime_fn.call(test)), -1.0))             # <<<<<<<<<<<<<<
  * 
  *     # cdef interval_fn f_fn = poly_fn(Poly(x - 3.0).c_poly)
  */
   __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_f_f, __pyx_n_s_format); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_f_fn.operator()(__pyx_v_test).as_str()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_f_fn.operator()(__pyx_v_test)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_fprime_fn.operator()(__pyx_v_test).as_str()); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_7 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_fprime_fn.operator()(__pyx_v_test)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_1 = NULL;
   __pyx_t_6 = 0;
@@ -5230,7 +5228,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_8main(CYTHON_UNUSED PyObject *__p
  *     test.push_back(Interval())
  *     test.push_back(Interval(1.0))             # <<<<<<<<<<<<<<
  *     test.push_back(Interval(3.0))
- *     print("f = {}, f' = {}".format(f.call(test).as_str(), fprime.call(test).as_str()))
+ *     print("f = {}, f' = {}".format(as_str(f.call(test)), as_str(fprime.call(test))))
  */
   try {
     __pyx_v_test.push_back(flowstar::Interval(1.0));
@@ -5243,7 +5241,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_8main(CYTHON_UNUSED PyObject *__p
  *     test.push_back(Interval())
  *     test.push_back(Interval(1.0))
  *     test.push_back(Interval(3.0))             # <<<<<<<<<<<<<<
- *     print("f = {}, f' = {}".format(f.call(test).as_str(), fprime.call(test).as_str()))
+ *     print("f = {}, f' = {}".format(as_str(f.call(test)), as_str(fprime.call(test))))
  *     print("Finding roots manually wrapping")
  */
   try {
@@ -5256,15 +5254,15 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_8main(CYTHON_UNUSED PyObject *__p
   /* "flowstar/flowroots.pyx":192
  *     test.push_back(Interval(1.0))
  *     test.push_back(Interval(3.0))
- *     print("f = {}, f' = {}".format(f.call(test).as_str(), fprime.call(test).as_str()))             # <<<<<<<<<<<<<<
+ *     print("f = {}, f' = {}".format(as_str(f.call(test)), as_str(fprime.call(test))))             # <<<<<<<<<<<<<<
  *     print("Finding roots manually wrapping")
  *     D.prepare()
  */
   __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_f_f_2, __pyx_n_s_format); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(f.operator()(__pyx_v_test).as_str()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 192, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_8flowstar_8interval_as_str(f.operator()(__pyx_v_test)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __pyx_convert_PyBytes_string_to_py_std__in_string(fprime.operator()(__pyx_v_test).as_str()); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 192, __pyx_L1_error)
+  __pyx_t_7 = __pyx_f_8flowstar_8interval_as_str(fprime.operator()(__pyx_v_test)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_1 = NULL;
   __pyx_t_6 = 0;
@@ -5320,7 +5318,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_8main(CYTHON_UNUSED PyObject *__p
 
   /* "flowstar/flowroots.pyx":193
  *     test.push_back(Interval(3.0))
- *     print("f = {}, f' = {}".format(f.call(test).as_str(), fprime.call(test).as_str()))
+ *     print("f = {}, f' = {}".format(as_str(f.call(test)), as_str(fprime.call(test))))
  *     print("Finding roots manually wrapping")             # <<<<<<<<<<<<<<
  *     D.prepare()
  *     cdef vector[Interval] roots = (<CReach?>D).c_roots(f, fprime)
@@ -5328,7 +5326,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_8main(CYTHON_UNUSED PyObject *__p
   if (__Pyx_PrintOne(0, __pyx_kp_s_Finding_roots_manually_wrapping) < 0) __PYX_ERR(0, 193, __pyx_L1_error)
 
   /* "flowstar/flowroots.pyx":194
- *     print("f = {}, f' = {}".format(f.call(test).as_str(), fprime.call(test).as_str()))
+ *     print("f = {}, f' = {}".format(as_str(f.call(test)), as_str(fprime.call(test))))
  *     print("Finding roots manually wrapping")
  *     D.prepare()             # <<<<<<<<<<<<<<
  *     cdef vector[Interval] roots = (<CReach?>D).c_roots(f, fprime)
@@ -5718,240 +5716,6 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_8main(CYTHON_UNUSED PyObject *__p
   return __pyx_r;
 }
 
-/* "string.to_py":31
- * 
- * @cname("__pyx_convert_PyObject_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyObject_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyObject_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-static CYTHON_INLINE PyObject *__pyx_convert_PyObject_string_to_py_std__in_string(std::string const &__pyx_v_s) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("__pyx_convert_PyObject_string_to_py_std__in_string", 0);
-
-  /* "string.to_py":32
- * @cname("__pyx_convert_PyObject_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyObject_string_to_py_std__in_string(const string& s):
- *     return __Pyx_PyObject_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
- * cdef extern from *:
- *     cdef object __Pyx_PyUnicode_FromStringAndSize(const char*, size_t)
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 32, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "string.to_py":31
- * 
- * @cname("__pyx_convert_PyObject_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyObject_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyObject_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyObject_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "string.to_py":37
- * 
- * @cname("__pyx_convert_PyUnicode_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyUnicode_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyUnicode_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-static CYTHON_INLINE PyObject *__pyx_convert_PyUnicode_string_to_py_std__in_string(std::string const &__pyx_v_s) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("__pyx_convert_PyUnicode_string_to_py_std__in_string", 0);
-
-  /* "string.to_py":38
- * @cname("__pyx_convert_PyUnicode_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyUnicode_string_to_py_std__in_string(const string& s):
- *     return __Pyx_PyUnicode_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
- * cdef extern from *:
- *     cdef object __Pyx_PyStr_FromStringAndSize(const char*, size_t)
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyUnicode_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 38, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "string.to_py":37
- * 
- * @cname("__pyx_convert_PyUnicode_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyUnicode_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyUnicode_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyUnicode_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "string.to_py":43
- * 
- * @cname("__pyx_convert_PyStr_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyStr_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyStr_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-static CYTHON_INLINE PyObject *__pyx_convert_PyStr_string_to_py_std__in_string(std::string const &__pyx_v_s) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("__pyx_convert_PyStr_string_to_py_std__in_string", 0);
-
-  /* "string.to_py":44
- * @cname("__pyx_convert_PyStr_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyStr_string_to_py_std__in_string(const string& s):
- *     return __Pyx_PyStr_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
- * cdef extern from *:
- *     cdef object __Pyx_PyBytes_FromStringAndSize(const char*, size_t)
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyStr_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 44, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "string.to_py":43
- * 
- * @cname("__pyx_convert_PyStr_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyStr_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyStr_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyStr_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "string.to_py":49
- * 
- * @cname("__pyx_convert_PyBytes_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyBytes_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyBytes_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-static CYTHON_INLINE PyObject *__pyx_convert_PyBytes_string_to_py_std__in_string(std::string const &__pyx_v_s) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("__pyx_convert_PyBytes_string_to_py_std__in_string", 0);
-
-  /* "string.to_py":50
- * @cname("__pyx_convert_PyBytes_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyBytes_string_to_py_std__in_string(const string& s):
- *     return __Pyx_PyBytes_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
- * cdef extern from *:
- *     cdef object __Pyx_PyByteArray_FromStringAndSize(const char*, size_t)
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBytes_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 50, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "string.to_py":49
- * 
- * @cname("__pyx_convert_PyBytes_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyBytes_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyBytes_FromStringAndSize(s.data(), s.size())
- * cdef extern from *:
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyBytes_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "string.to_py":55
- * 
- * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())
- * 
- */
-
-static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_string(std::string const &__pyx_v_s) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("__pyx_convert_PyByteArray_string_to_py_std__in_string", 0);
-
-  /* "string.to_py":56
- * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):
- *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())             # <<<<<<<<<<<<<<
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyByteArray_FromStringAndSize(__pyx_v_s.data(), __pyx_v_s.size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 56, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "string.to_py":55
- * 
- * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("string.to_py.__pyx_convert_PyByteArray_string_to_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
 static PyMethodDef __pyx_methods[] = {
   {0, 0, 0, 0}
 };
@@ -6259,10 +6023,10 @@ static int __Pyx_modinit_type_import_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(2, 12, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(2, 12, __pyx_L1_error)
-  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(2, 24, __pyx_L1_error)
-  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(3, 35, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(1, 24, __pyx_L1_error)
+  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(2, 35, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -6280,10 +6044,18 @@ static int __Pyx_modinit_variable_import_code(void) {
 
 static int __Pyx_modinit_function_import_code(void) {
   __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_import_code", 0);
   /*--- Function import code ---*/
+  __pyx_t_1 = __Pyx_ImportModule("flowstar.interval"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "as_str", (void (**)(void))&__pyx_f_8flowstar_8interval_as_str, "PyObject *(flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_RefNannyFinishContext();
+  return -1;
 }
 
 
@@ -6454,7 +6226,7 @@ if (!__Pyx_RefNanny) {
   (void)__Pyx_modinit_type_init_code();
   if (unlikely(__Pyx_modinit_type_import_code() != 0)) goto __pyx_L1_error;
   (void)__Pyx_modinit_variable_import_code();
-  (void)__Pyx_modinit_function_import_code();
+  if (unlikely(__Pyx_modinit_function_import_code() != 0)) goto __pyx_L1_error;
   /*--- Execution code ---*/
   #if defined(__Pyx_Generator_USED) || defined(__Pyx_Coroutine_USED)
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
@@ -6465,7 +6237,7 @@ if (!__Pyx_RefNanny) {
  * 
  * from flowstar.reachability import Reach             # <<<<<<<<<<<<<<
  * from flowstar.reachability cimport CReach
- * from flowstar.interval cimport interval_fn
+ * from flowstar.interval cimport interval_fn, as_str
  */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -6568,14 +6340,6 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_test_2, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "string.to_py":55
- * 
- * @cname("__pyx_convert_PyByteArray_string_to_py_std__in_string")
- * cdef inline object __pyx_convert_PyByteArray_string_to_py_std__in_string(const string& s):             # <<<<<<<<<<<<<<
- *     return __Pyx_PyByteArray_FromStringAndSize(s.data(), s.size())
- * 
- */
 
   /*--- Wrapped vars code ---*/
 
@@ -8232,6 +7996,60 @@ bad:
     Py_XDECREF(py_module);
     Py_XDECREF(result);
     return NULL;
+}
+#endif
+
+/* FunctionImport */
+          #ifndef __PYX_HAVE_RT_ImportFunction
+#define __PYX_HAVE_RT_ImportFunction
+static int __Pyx_ImportFunction(PyObject *module, const char *funcname, void (**f)(void), const char *sig) {
+    PyObject *d = 0;
+    PyObject *cobj = 0;
+    union {
+        void (*fp)(void);
+        void *p;
+    } tmp;
+    d = PyObject_GetAttrString(module, (char *)"__pyx_capi__");
+    if (!d)
+        goto bad;
+    cobj = PyDict_GetItemString(d, funcname);
+    if (!cobj) {
+        PyErr_Format(PyExc_ImportError,
+            "%.200s does not export expected C function %.200s",
+                PyModule_GetName(module), funcname);
+        goto bad;
+    }
+#if PY_VERSION_HEX >= 0x02070000
+    if (!PyCapsule_IsValid(cobj, sig)) {
+        PyErr_Format(PyExc_TypeError,
+            "C function %.200s.%.200s has wrong signature (expected %.500s, got %.500s)",
+             PyModule_GetName(module), funcname, sig, PyCapsule_GetName(cobj));
+        goto bad;
+    }
+    tmp.p = PyCapsule_GetPointer(cobj, sig);
+#else
+    {const char *desc, *s1, *s2;
+    desc = (const char *)PyCObject_GetDesc(cobj);
+    if (!desc)
+        goto bad;
+    s1 = desc; s2 = sig;
+    while (*s1 != '\0' && *s1 == *s2) { s1++; s2++; }
+    if (*s1 != *s2) {
+        PyErr_Format(PyExc_TypeError,
+            "C function %.200s.%.200s has wrong signature (expected %.500s, got %.500s)",
+             PyModule_GetName(module), funcname, sig, desc);
+        goto bad;
+    }
+    tmp.p = PyCObject_AsVoidPtr(cobj);}
+#endif
+    *f = tmp.fp;
+    if (!(*f))
+        goto bad;
+    Py_DECREF(d);
+    return 0;
+bad:
+    Py_XDECREF(d);
+    return -1;
 }
 #endif
 
