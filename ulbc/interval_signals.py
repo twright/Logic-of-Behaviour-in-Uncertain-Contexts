@@ -3,10 +3,11 @@ from functools import partial, reduce
 import warnings
 
 from sage.all import RIF, region_plot
+from flowstar.interval import py_int_dist as int_dist
+from interval_root_isolation import isolate_roots
 # from sage.all import *
 
 # from interval_utils import *
-# from interval_root_isolation import isolate_roots
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
            'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots']
@@ -30,69 +31,69 @@ def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
     print "roots =", roots
     for root in roots:
         if a < root.lower('RNDD'):
-            I = RIF(a, root.lower('RNDD'))
-            print "  I  = {}\nf(I) = {}".format(
-                RIF(I).str(style='brackets'),
-                RIF(f(I)).str(style='brackets'))
+            J = RIF(a, root.lower('RNDD'))
+            print "  J  = {}\nf(J) = {}".format(
+                RIF(J).str(style='brackets'),
+                RIF(f(J)).str(style='brackets'))
             # if 0 not in RIF(f(I)):
-            values += [(I, RIF(f(I.center())) > 0)]
+            values += [(J, RIF(f(J.center())).lower() > 0)]
         a = root.upper('RNDU')
     b = domain.upper('RNDU')
-    I = RIF(a, b)
+    J = RIF(a, b)
     if 0 not in RIF(f(RIF(b))):
-        values += [(I, RIF(f(I.center())) > 0)]
+        values += [(J, RIF(f(J.center())).lower() > 0)]
     return Signal(domain, values)
 
 
 def to_signal_bisection(f, domain, epsilon=0.1):
-    I = f(domain)
+    J = f(domain)
 
-    if I > 0:
+    if J > 0:
         return true_signal(domain)
-    elif I < 0:
+    elif J < 0:
         return false_signal(domain)
     elif domain.absolute_diameter() < epsilon:
         return Signal(domain, [])
     else:
-        J, K = domain.bisection()
-        return to_signal_bisection(f, J, epsilon).union(
-            to_signal_bisection(f, K, epsilon))
+        L, M = domain.bisection()
+        return to_signal_bisection(f, L, epsilon).union(
+            to_signal_bisection(f, M, epsilon))
 
 
-def shift_F(J, (I, b)):
-    il, iu = I.endpoints()
+def shift_F(J, (K, b)):
+    il, iu = K.endpoints()
     if J not in RIF:
         J = RIF(J)
     tl, tu = J.endpoints()
 
     if b:
-        return I - J, True
-    elif (I - tl).overlaps(I - tu):
-        return (I - tl).intersection(I - tu), False
+        return K - J, True
+    elif (K - tl).overlaps(K - tu):
+        return (K - tl).intersection(K - tu), False
     else:
         return None
 
 
-def shift_G(J, (I, b)):
-    il, iu = I.endpoints()
+def shift_G(J, (K, b)):
+    il, iu = K.endpoints()
     if J not in RIF:
         J = RIF(J)
     tl, tu = J.endpoints()
 
     if not b:
-        return I - J, False
-    elif (I - tl).overlaps(I - tu):
-        return (I - tl).intersection(I - tu), True
+        return K - J, False
+    elif (K - tl).overlaps(K - tu):
+        return (K - tl).intersection(K - tu), True
     else:
         return None
 
 
-def true_signal(I):
-    return Signal(I, [(I, True)])
+def true_signal(J):
+    return Signal(J, [(J, True)])
 
 
-def false_signal(I):
-    return Signal(I, [(I, False)])
+def false_signal(J):
+    return Signal(J, [(J, False)])
 
 
 class Signal(object):
@@ -130,6 +131,17 @@ class Signal(object):
 
     def decompose(self):
         return (Signal(self.domain, [v]) for v in self.values)
+
+    def approx_eq(self, other, epsilon=1e-6):
+        if int_dist(self.domain, other.domain) > epsilon:
+            return False
+
+        if len(self.values) != len(other.values):
+            return False
+
+        return all(int_dist(I, J) < epsilon and a == b
+                   for ((I, a), (J, b))
+                   in zip(self.values, other.values))
 
     @property
     def domain(self):
@@ -185,23 +197,23 @@ class Signal(object):
     def __or__(self, other):
         return ~((~self) & (~other))
 
-    def F(self, I):
-        I = RIF(I)
-        return Signal(self.domain - I, map(partial(shift_F, I), self.values))
+    def F(self, J):
+        J = RIF(J)
+        return Signal(self.domain - J, map(partial(shift_F, J), self.values))
 
-    def G(self, I):
-        I = RIF(I)
-        return Signal(self.domain - I, map(partial(shift_G, I), self.values))
+    def G(self, J):
+        J = RIF(J)
+        return Signal(self.domain - J, map(partial(shift_G, J), self.values))
 
-    def U(self, I, other):
-        I = RIF(I)
-        if (other.domain - I).overlaps(self.domain):
+    def U(self, J, other):
+        J = RIF(J)
+        if (other.domain - J).overlaps(self.domain):
             # J = (other.domain - I).intersection(self.domain)
             return reduce(Signal.__or__,
-                          (s & (s & other).F(I) for s in self.decompose()))
+                          (s & (s & other).F(J) for s in self.decompose()))
         else:
             raise Exception("Incompatible domains: {} {} {}!".format(
-                self.domain, I, other.domain))
+                self.domain, J, other.domain))
 
     def __call__(self, y):
         if any(y in x for (x, b) in self.values if b):
@@ -230,63 +242,32 @@ def to_signal_piecewise(f, fprime, time, step):
     return sig
 
 
-def C(I, ctx, phi, f, g, epsilon=1):
-    # phi :: solution -> {True, False, None}
-    # f(t) assumed to be the trace,
-    # ctx(x) places state x in context
-    # g(x)(t) a `continuation function` which computes the evolution of
-    # the system from a given starting set
-    d = I.absolute_diameter()
-
-    fI = RIF(f(I))
-    # print 'I  =', I.str(style='brackets')
-    h = g(ctx(fI))
-    # print 'C || f(I) =', RIF(ctx(fI)).str(style='brackets')
-    print 'h  =', h
-    # print "h' =", hprime
-    res = phi(h)
-
-    if res is None and d > epsilon:
-        J, K = I.bisection()
-        print "bisecting {} -> {}, {}".format(
-            I.str(style='brackets'),
-            J.str(style='brackets'),
-            K.str(style='brackets'),
-        )
-        return Signal.union(C(J, ctx, phi, f, g, epsilon),
-                            C(K, ctx, phi, f, g, epsilon))
-
-    # print 'returning res =', repr(res)
-    return Signal(I, [(I, res)])
-
-
-def ctx(I, C, phi, f, g, epsilon=1):
+def ctx(domain, C, phi, f, epsilon=0.1, verbosity=0):
     # I is the time interval
     # C(x) places state x in context
-    # phi :: solution -> {True, False, None}
+    # phi :: initial_set -> {True, False, None}
     # f(t) assumed to be the trace,
-    # g(x)(t) a `continuation function` which computes the evolution of
-    # the system from a given starting set
     # Note: states are now presumed to be n-dimensional
-    d = I.absolute_diameter()
+    d = domain.absolute_diameter()
 
-    fI = [RIF(x) for x in f(I)]
-    # print 'I  =', I.str(style='brackets')
-    h = g(C(fI))
-    # print 'C || f(I) =', [x.str(style='brackets') for x in C(fI)]
-    # print 'h  =', h
+    fI = [RIF(x) for x in f(domain)]
+    h = C(fI)
     res = phi(h)
-    print(res)
+    if verbosity >= 2:
+        print('I  =', domain.str(style='brackets'))
+        print('fI =', [x.str(style='brackets') for x in fI])
+        print('C || f(I) =', [x.str(style='brackets') for x in C(fI)])
+        print('phi(C || f(I)) =', res)
 
     if res is None and d > epsilon:
-        J, K = I.bisection()
-        print "bisecting {} -> {}, {}".format(
-            I.str(style='brackets'),
-            J.str(style='brackets'),
-            K.str(style='brackets'),
-        )
-        return Signal.union(ctx(J, C, phi, f, g, epsilon),
-                            ctx(K, C, phi, f, g, epsilon))
-
-    # print 'returning res =', repr(res)
-    return Signal(I, [(I, res)])
+        J, K = domain.bisection()
+        if verbosity >= 1:
+            print("bisecting {} -> {}, {}".format(
+                domain.str(style='brackets'),
+                J.str(style='brackets'),
+                K.str(style='brackets'),
+            ))
+        return Signal.union(ctx(J, C, phi, f, epsilon),
+                            ctx(K, C, phi, f, epsilon))
+    else:
+        return Signal(domain, [(domain, res)])

@@ -7,6 +7,7 @@ from cython.operator cimport preincrement as inc
 from libcpp.vector cimport vector
 from libcpp cimport bool as cbool
 
+
 cdef str as_str(const Interval & I):
     # This is a test 3
     return "[{}..{}]".format(I.inf(), I.sup())
@@ -66,12 +67,17 @@ cdef list intervals_to_list(vector[Interval] & intervals):
     return [interval_to_tuple(I) for I in intervals]
 
 
-cdef double int_dist(Interval & I, Interval & J) nogil:
+cdef double int_dist(const Interval & I, const Interval & J) nogil:
     cdef double il, iu, jl, ju
-    il, iu = I.inf(), J.sup()
+    il, iu = I.inf(), I.sup()
     jl, ju = J.inf(), J.sup()
     # Round up/down endpoints so as to overapproximate the real distance
     return cmax(cabs(il - jl), cabs(iu - ju))
+
+
+def py_int_dist(I, J):
+    return float(int_dist(make_interval(I),
+                          make_interval(J)))
 
 
 # Interval difference separating upper and lower

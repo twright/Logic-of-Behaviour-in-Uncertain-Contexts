@@ -10,10 +10,10 @@ from flowstar.TaylorModel cimport TaylorModelVec
 
 
 cdef class CReach:
-    cdef FlowstarGlobalManager global_manager
+    cdef public FlowstarGlobalManager global_manager
 
     cdef ContinuousReachability c_reach
-    cdef bint ran
+    cdef public bint ran
     cdef bint prepared
     cdef int result
 

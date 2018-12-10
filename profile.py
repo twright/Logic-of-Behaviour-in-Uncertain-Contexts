@@ -1,13 +1,10 @@
-import pstats, cProfile
-# import pyximport
-# pyximport.install()
+import pstats
+import cProfile
 
-import flowstar.flowroots as fr
+import flowstar.flowroots as fr  # NOQA
 
-# cProfile.runctx('fr.work()', globals(), locals(), "profile.prof")
-# s = pstats.Stats('profile.prof')
-# s.strip_dirs().sort_stats("time").print_stats()
 if __name__ == '__main__':
-    cProfile.runctx('fr.work_without_intEval()', globals(), locals(), "profile_without_intEval.prof")
+    cProfile.runctx('fr.work_without_intEval()', globals(), locals(),
+                    "profile_without_intEval.prof")
     s = pstats.Stats('profile_without_intEval.prof')
     s.strip_dirs().sort_stats("time").print_stats()

@@ -12,7 +12,7 @@
             "flowstar/flowstar-2.1.0/include.h"
         ], 
         "extra_compile_args": [
-            "-O0", 
+            "-O3", 
             "-std=c++17", 
             "-Wno-register"
         ], 
@@ -897,8 +897,8 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "flowstar/flowroots.pyx",
-  "./flowstar/reachability.pxd",
-  "./flowstar/poly.pxd",
+  "flowstar/reachability.pxd",
+  "flowstar/poly.pxd",
 };
 
 /*--- Type declarations ---*/
@@ -910,7 +910,7 @@ struct __pyx_obj_8flowstar_4poly_Poly;
  * 
  * 
  * cdef class CReach:             # <<<<<<<<<<<<<<
- *     cdef FlowstarGlobalManager global_manager
+ *     cdef public FlowstarGlobalManager global_manager
  * 
  */
 struct __pyx_obj_8flowstar_12reachability_CReach {
@@ -959,7 +959,7 @@ struct __pyx_obj_8flowstar_4poly_Poly {
  * 
  * 
  * cdef class CReach:             # <<<<<<<<<<<<<<
- *     cdef FlowstarGlobalManager global_manager
+ *     cdef public FlowstarGlobalManager global_manager
  * 
  */
 

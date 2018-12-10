@@ -49,7 +49,8 @@ cdef class CReach:
         max_remainder_queue=200,
         maxNumSteps=100,
         vars=None,
-        run=True):
+        run=True,
+        **kwargs):
         cdef ContinuousReachability * C = &self.c_reach
         self.ran = False
         self.prepared = False

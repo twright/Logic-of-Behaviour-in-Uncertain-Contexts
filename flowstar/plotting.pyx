@@ -6,6 +6,9 @@ from subprocess import call
 from flowstar.Polynomial cimport Polynomial
 from flowstar.Continuous cimport ContinuousReachability
 from flowstar.reachability cimport CReach
+from flowstar.poly cimport Poly
+from flowstar.poly import index_fn
+from flowstar.Interval cimport Interval
 
 
 cdef class FlowstarPlotMixin:
@@ -75,14 +78,14 @@ cdef class SagePlotMixin:
 
         return plot([fl, fu],
                     duration,
-                    plot_points=self.c_reach.time//step)
+                    plot_points=self.time//step)
 
     def sage_parametric_plot(self, str x, str y, double step=1e-2):
         from sage.all import parametric_plot, RIF
         from functools import partial
 
-        cdef int var_id_x = self.c_reach.getIDForStateVar(x)
-        cdef int var_id_y = self.c_reach.getIDForStateVar(y)
+        cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
+        cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
 
         def f(t):
             return self((t, t+step))[var_id_x].center()
@@ -95,12 +98,12 @@ cdef class SagePlotMixin:
         from sage.all import Graphics, line
 
         p = Graphics()
-        cdef int var_id = self.c_reach.getIDForStateVar(x)
+        cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
         res1 = self((-1e-7,1e-7))[var_id]
         lo1, hi1 = res1.lower(), res1.upper()
         cdef double t = 0
 
-        for i in range(int(self.c_reach.time/step)):
+        for i in range(int(self.time/step)):
             t = step*i
             res = self((t, t+step))
             try:
@@ -116,15 +119,16 @@ cdef class SagePlotMixin:
 
         return p
 
-    def sage_interval_plot(self, str x, str y, double step=1e-1, **kwargs):
+    def sage_interval_plot(self, str x, str y, double step=1e-1, poly = None, **kwargs):
         from sage.all import Graphics, polygon
 
         p = Graphics()
-        cdef int var_id_x = self.c_reach.getIDForStateVar(x)
-        cdef int var_id_y = self.c_reach.getIDForStateVar(y)
+        cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
+        cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
         cdef double t = 0
+        # cdef Interval pres
 
-        for i in range(int(self.c_reach.time/step)):
+        for i in range(int(self.time/step)):
             t = step*i
             res = self((t, t+step))
             try:
@@ -132,8 +136,21 @@ cdef class SagePlotMixin:
                 (ylo, yhi) = res[var_id_y].endpoints()
             except:
                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+            
+            # Choose colour based on p
+            # col = 'default'
+            col = kwargs.get('color', None)
+            if poly is not None:
+                pres = index_fn(poly)(res) 
+                if pres.lower() > 0:
+                    col = 'green'
+                if pres.upper() < 0:
+                    col = 'red'
+
             p += polygon([(xlo, ylo), (xlo, yhi), (xhi, yhi), (xhi, ylo)],
-                         fill=False, **kwargs)
+                         fill=False,
+                         **(kwargs if col is None
+                                   else dict(color=col, **kwargs)))
 
         return p
 
@@ -146,8 +163,8 @@ cdef class SageTubePlotMixin:
         from sage.all import line, Graphics, RIF, sqrt, arctan, tan, cos, sin, arrow, point, pi, vector
 
         p = Graphics()
-        var_id_x = self.c_reach.getIDForStateVar(x)
-        var_id_y = self.c_reach.getIDForStateVar(y)
+        var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
+        var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
         cx0 = cy0 = None
         cx = cy = None
         tx = ty = None
@@ -155,7 +172,7 @@ cdef class SageTubePlotMixin:
         dx = dy = None
         r00 = r0 = r = None
 
-        n = int(self.c_reach.time//step)
+        n = int(self.time//step)
         for i in range(n + 1):
             t = step*i
             if i < n:

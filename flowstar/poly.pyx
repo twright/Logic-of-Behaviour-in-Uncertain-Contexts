@@ -2,10 +2,20 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 import collections
 import operator
+import itertools
 import sage.all as sage
 
 from flowstar.Polynomial cimport Polynomial
 from flowstar.interval cimport make_interval
+
+
+def index_fn(p):
+    R = p.parent()
+    gs = R.gens()
+    return lambda xs: sage.RIF(p.subs(
+        {g: x for g, x in zip(gs,
+                              itertools.chain(xs, itertools.cycle([0])))}))
+
 
 cdef class Poly:
     # Constructor makes a univariate monomial -- should combine using

@@ -1251,7 +1251,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'flowstar.interval' */
 static flowstar::Interval (*__pyx_f_8flowstar_8interval_make_interval)(PyObject *); /*proto*/
-static double (*__pyx_f_8flowstar_8interval_int_dist)(flowstar::Interval &, flowstar::Interval &); /*proto*/
+static double (*__pyx_f_8flowstar_8interval_int_dist)(flowstar::Interval const &, flowstar::Interval const &); /*proto*/
 static bool (*__pyx_f_8flowstar_8interval_extdiv)(flowstar::Interval &, flowstar::Interval &, bool &, flowstar::Interval const &, flowstar::Interval const &, flowstar::Interval const &); /*proto*/
 
 /* Module declarations from 'flowstar.poly' */
@@ -3135,7 +3135,7 @@ static int __Pyx_modinit_function_import_code(void) {
   /*--- Function import code ---*/
   __pyx_t_1 = __Pyx_ImportModule("flowstar.interval"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_1, "make_interval", (void (**)(void))&__pyx_f_8flowstar_8interval_make_interval, "flowstar::Interval (PyObject *)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "int_dist", (void (**)(void))&__pyx_f_8flowstar_8interval_int_dist, "double (flowstar::Interval &, flowstar::Interval &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "int_dist", (void (**)(void))&__pyx_f_8flowstar_8interval_int_dist, "double (flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_1, "extdiv", (void (**)(void))&__pyx_f_8flowstar_8interval_extdiv, "bool (flowstar::Interval &, flowstar::Interval &, bool &, flowstar::Interval const &, flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();

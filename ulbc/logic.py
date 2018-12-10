@@ -9,8 +9,9 @@ import itertools
 import time
 
 from ulbc.interval_signals import (true_signal, false_signal,
-                                   signal_given_roots, Signal)
+                                   signal_given_roots, Signal, ctx)
 from flowstar.reachability import Reach
+from flowstar.poly import index_fn
 
 
 def convert_mat(m):
@@ -71,16 +72,20 @@ class Logic(object):
         reach = Reach(
             odes,
             initials,
-            self.duration + duration,
+            # Run for a little extra time to account for rounding
+            # errors and temporal quantifiers
+            self.duration + duration + 1e-3,
             **kwargs
         )
+        if not reach.ran:
+            raise Exception('Did not run successfully!')
         t1 = time.time()
         print("Computed {} flowpipes in {} sec".format(
             reach.num_flowpipes, t1 - t0))
         reach.prepare()
         t2 = time.time()
         print("Prepared for plotting in {} sec".format(t2 - t1))
-        res = self.signal(reach, odes).to_domain(RIF(0, duration))
+        res = self.signal(reach, odes, **kwargs).to_domain(RIF(0, duration))
         t3 = time.time()
         print("Monitored signal {} sec".format(t3 - t2))
         return res
@@ -104,7 +109,7 @@ class Logic(object):
             return "({})".format(self)
 
     @abstractmethod
-    def signal(self, R, odes):
+    def signal(self, R, odes, **kwargs):
         pass
 
     @abstractmethod
@@ -143,12 +148,6 @@ class Logic(object):
     @abstractproperty
     def atomic_propositions(self):
         pass
-
-
-def index_fn(p):
-    R = p.parent()
-    gs = R.gens()
-    return lambda xs: RIF(p.subs({g: x for g, x in zip(gs, itertools.chain(xs, itertools.cycle([0])))}))
 
 
 class Atomic(Logic):
@@ -191,7 +190,31 @@ class Atomic(Logic):
 
         return sage.plot((lo, up), (0, R.time))
 
-    def signal(self, R, odes):
+    def signal_for_system(self, odes, initials, duration, **kwargs):
+        '''
+        >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+        >>> odes = [-y, x]
+        >>> initials = [RIF(1, 2), RIF(3, 4)]
+        >>> Atomic(x-1.5).signal_for_system(odes, initials, 0)(0)
+        >>> Atomic(x-0.5).signal_for_system(odes, initials, 0)(0)
+        True
+        >>> Atomic(x-2.5).signal_for_system(odes, initials, 0)(0)
+        False
+        '''
+        # Do the smart thing in the case of duration 0
+        if duration == 0:
+            res = index_fn(self.p)(initials)
+            if res.lower() > 0:
+                return true_signal(RIF(0, 0))
+            elif res.upper() < 0:
+                return false_signal(RIF(0, 0))
+            else:
+                return Signal(RIF(0, 0), [])
+        else:
+            return super(Atomic, self).signal_for_system(odes, initials,
+                                                         duration, **kwargs)
+
+    def signal(self, R, odes, **kwargs):
         roots = R.roots(self.p, self.dpdt(odes))
         ip = index_fn(self.p)
         return signal_given_roots((lambda t: ip(R(t))),
@@ -283,9 +306,10 @@ class And(Logic):
     def duration(self):
         return max(t.duration for t in self.terms)
 
-    def signal(self, reach, odes):
+    def signal(self, reach, odes, **kwargs):
         return reduce(operator.and_,
-                      (t.signal(reach, odes) for t in self.terms),
+                      (t.signal(reach, odes, **kwargs)
+                       for t in self.terms),
                       true_signal(RIF(0, reach.time)))
 
     def __repr__(self):
@@ -362,9 +386,10 @@ class Or(Logic):
     def __str__(self):
         return ' | '.join(t.bstr(self.priority) for t in self.terms)
 
-    def signal(self, reach, odes):
+    def signal(self, reach, odes, **kwargs):
         return reduce(operator.or_,
-                      (t.signal(reach, odes) for t in self.terms),
+                      (t.signal(reach, odes, **kwargs)
+                       for t in self.terms),
                       false_signal(RIF(0, reach.time)))
 
     @property
@@ -416,8 +441,8 @@ class Neg(Logic):
     def __str__(self):
         return "~{}".format(self.p.bstr(self.priority))
 
-    def signal(self, reach, odes):
-        return ~self.p.signal(reach, odes)
+    def signal(self, reach, odes, **kwargs):
+        return ~self.p.signal(reach, odes, **kwargs)
 
     @property
     def atomic_propositions(self):
@@ -457,6 +482,8 @@ class C(Logic):
     ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) | y^2 + 3 > 0
     >>> ({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)).duration
     0
+    >>> ({x: RIF(1,2), y: RIF(3,4)} >> G(RIF(3,4), Atomic(x**3 - 2))).duration
+    0
     '''
     priority = 40
 
@@ -476,7 +503,10 @@ class C(Logic):
 
     @property
     def duration(self):
-        return self.phi.duration
+        # The duration should be zero, since we need no more info
+        # from the system itself but should consult the composed
+        # system
+        return 0
 
     @property
     def ctx(self):
@@ -495,8 +525,34 @@ class C(Logic):
         # after it
         return [self]
 
-    def signal(self, reach, odes):
-        raise NotImplementedError()
+    def context_jump(self, xs):
+        '''
+        >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+        >>> [y.str(style='brackets') for y in
+        ... ({x: RIF(0.1,0.5)} >>
+        ... Atomic(x)).context_jump([RIF(3,4), RIF(4,5)])] # doctest: +NORMALIZE_WHITESPACE
+        ['[3.0999999999999996 .. 4.5000000000000000]',
+         '[4.0000000000000000 .. 5.0000000000000000]']
+        '''
+        return [(x + self.ctx[k] if k in self.ctx else x)
+                for k, x in zip(self.R.gens(), xs)]
+
+    def signal(self, reach, odes, **kwargs):
+        def phi(xs):
+            return self.phi.signal_for_system(odes, xs, 0, **kwargs)(0)
+            # order=5, step=(0.001, 0.1),
+            # precondition=1,
+            # estimation=1e-3,
+            # integrationScheme=2,
+            # cutoff_threshold=1e-5,
+
+        return ctx(
+            domain=RIF(0, reach.time),
+            C=self.context_jump,
+            phi=phi,
+            f=reach,
+            epsilon=kwargs.get('epsilon_ctx', 0.5),
+        )
 
     def numerical_signal(self, f, events, duration):
         raise NotImplementedError()
@@ -539,8 +595,8 @@ class G(Logic):
     def __str__(self):
         return 'G({}, {})'.format(finterval(self.interval), str(self.phi))
 
-    def signal(self, reach, odes):
-        return self.phi.signal(reach, odes).G(self.interval)
+    def signal(self, reach, odes, **kwargs):
+        return self.phi.signal(reach, odes, **kwargs).G(self.interval)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).G(self.interval)
@@ -585,8 +641,8 @@ class F(Logic):
     def __str__(self):
         return 'F({}, {})'.format(finterval(self.interval), str(self.phi))
 
-    def signal(self, reach, odes):
-        return self.phi.signal(reach, odes).F(self.interval)
+    def signal(self, reach, odes, **kwargs):
+        return self.phi.signal(reach, odes, **kwargs).F(self.interval)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).F(self.interval)
