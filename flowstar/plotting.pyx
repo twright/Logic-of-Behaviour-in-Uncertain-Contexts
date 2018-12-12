@@ -63,7 +63,7 @@ cdef class SagePlotMixin:
         if duration is None:
             duration = (0, float(self.c_reach.time))
 
-        cdef int var_id = self.c_reach.getIDForStateVar(x)
+        cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
         # Cache the evaluations
         ress = dict()
 

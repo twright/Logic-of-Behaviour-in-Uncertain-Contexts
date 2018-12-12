@@ -905,6 +905,20 @@ static const char *__pyx_f[] = {
 struct __pyx_obj_8flowstar_12reachability_CReach;
 struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager;
 struct __pyx_obj_8flowstar_4poly_Poly;
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots;
+
+/* "flowstar/reachability.pxd":20
+ *     cdef public int result
+ * 
+ *     cdef vector[Interval] c_roots(CReach, interval_fn, interval_fn, double epsilon=?, int verbosity=?)             # <<<<<<<<<<<<<<
+ *     cdef vector[Interval] eval_interval(CReach, Interval)
+ * 
+ */
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots {
+  int __pyx_n;
+  double epsilon;
+  int verbosity;
+};
 
 /* "flowstar/reachability.pxd":12
  * 
@@ -964,7 +978,7 @@ struct __pyx_obj_8flowstar_4poly_Poly {
  */
 
 struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
-  std::vector<flowstar::Interval>  (*c_roots)(struct __pyx_obj_8flowstar_12reachability_CReach *, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>);
+  std::vector<flowstar::Interval>  (*c_roots)(struct __pyx_obj_8flowstar_12reachability_CReach *, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots *__pyx_optional_args);
   std::vector<flowstar::Interval>  (*eval_interval)(struct __pyx_obj_8flowstar_12reachability_CReach *, flowstar::Interval);
 };
 static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
@@ -4470,7 +4484,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_6work_without_intEval(CYTHON_UNUS
  *     for root in roots:
  */
   if (!(likely(__Pyx_TypeTest(__pyx_v_D, __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 165, __pyx_L1_error)
-  __pyx_v_roots = ((struct __pyx_vtabstruct_8flowstar_12reachability_CReach *)((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D)->__pyx_vtab)->c_roots(((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D), f, fprime);
+  __pyx_v_roots = ((struct __pyx_vtabstruct_8flowstar_12reachability_CReach *)((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D)->__pyx_vtab)->c_roots(((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D), f, fprime, NULL);
 
   /* "flowstar/flowroots.pyx":166
  *     resd = D.prepare()
@@ -5362,7 +5376,7 @@ static PyObject *__pyx_pf_8flowstar_9flowroots_8main(CYTHON_UNUSED PyObject *__p
  *     for root in roots:
  */
   if (!(likely(__Pyx_TypeTest(__pyx_v_D, __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 195, __pyx_L1_error)
-  __pyx_v_roots = ((struct __pyx_vtabstruct_8flowstar_12reachability_CReach *)((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D)->__pyx_vtab)->c_roots(((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D), f, fprime);
+  __pyx_v_roots = ((struct __pyx_vtabstruct_8flowstar_12reachability_CReach *)((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D)->__pyx_vtab)->c_roots(((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_D), f, fprime, NULL);
 
   /* "flowstar/flowroots.pyx":196
  *     D.prepare()

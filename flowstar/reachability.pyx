@@ -147,17 +147,18 @@ cdef class CReach:
         if run:
             self.run()
 
-    def roots(CReach self, f, fprime):
+    def roots(CReach self, f, fprime, epsilon=0.00001, verbosity=0):
         cdef:
             interval_fn f_fn = poly_fn(Poly(f).c_poly)
             interval_fn fprime_fn = poly_fn(Poly(fprime).c_poly)
             vector[Interval] c_res
         self.prepare()
         with self.global_manager:
-            c_res = self.c_roots(f_fn, fprime_fn)
+            c_res = self.c_roots(f_fn, fprime_fn, epsilon=epsilon, verbosity=verbosity)
         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
 
-    cdef vector[Interval] c_roots(CReach self, interval_fn f, interval_fn fprime):
+    cdef vector[Interval] c_roots(CReach self, interval_fn f, interval_fn fprime,
+                                  double epsilon=0.00001, int verbosity=0):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
             clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
@@ -179,15 +180,18 @@ cdef class CReach:
 
         while (tmv != tmv_end and domain != domain_end):
             # Isolate roots for current timestep
-            # print("reached detect roots t={} + {}".format(t,
-            #       deref(domain)[0].as_str()))
+            if verbosity >= 2:
+                print("reached detect roots t={} + {}".format(t,
+                    interval.as_str(deref(domain)[0])))
             # print("f(t) = ")
             # root_iter = roots.end()
             new_roots.clear()
             T0 = deref(domain)[0]
             f_fn = interval.compose_interval_fn(f, deref(tmv), deref(domain))
             fprime_fn = interval.compose_interval_fn(fprime, deref(tmv), deref(domain))
-            root_detection.detect_roots(new_roots, f_fn, fprime_fn, T0)
+            root_detection.detect_roots(new_roots, f_fn, fprime_fn, T0,
+                                        epsilon=epsilon,
+                                        verbosity=verbosity)
             deref(domain)[0] = T0
             # print("left detect roots")
 
@@ -198,9 +202,10 @@ cdef class CReach:
                 deref(root_iter).add_assign(t)
                 if (not roots.empty()
                     and abs(deref(root_iter).inf() - roots.back().sup()) < 1e-9):
-                    # print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
-                    #       deref(root_iter).inf(), deref(root_iter).sup(),
-                    #       roots.back().inf(), roots.back().sup()))
+                    if verbosity >= 3:
+                        print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
+                            deref(root_iter).inf(), deref(root_iter).sup(),
+                            roots.back().inf(), roots.back().sup()))
                     roots.back().setSup(deref(root_iter).sup())
                 else:
                     roots.push_back(deref(root_iter))

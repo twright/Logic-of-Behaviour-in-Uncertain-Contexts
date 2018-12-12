@@ -1,10 +1,13 @@
+from __future__ import (absolute_import, division,
+                        print_function)
 from builtins import *  # NOQA
+
 from functools import partial, reduce
 import warnings
 
 from sage.all import RIF, region_plot
 from flowstar.interval import py_int_dist as int_dist
-from interval_root_isolation import isolate_roots
+from ulbc.interval_root_isolation import isolate_roots
 # from sage.all import *
 
 # from interval_utils import *
@@ -25,23 +28,30 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
 
 def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
     values = []
-    a = domain.lower('RNDD')
+    a = domain.lower()
     # while 0 in RIF(f(a)):
     #     a = theta*a + abs_inf
-    print "roots =", roots
+    print("domain = {}".format(domain.str(style='brackets')))
+    print("roots = [{}]".format(", \n ".join(a.str(style='brackets')
+                                             for a in roots)))
     for root in roots:
-        if a < root.lower('RNDD'):
-            J = RIF(a, root.lower('RNDD'))
-            print "  J  = {}\nf(J) = {}".format(
+        if a < root.lower():
+            J = RIF(a, root.lower())
+            print("  J  = {}\nf(J) = {}".format(
                 RIF(J).str(style='brackets'),
-                RIF(f(J)).str(style='brackets'))
+                RIF(f(J)).str(style='brackets')))
             # if 0 not in RIF(f(I)):
             values += [(J, RIF(f(J.center())).lower() > 0)]
-        a = root.upper('RNDU')
-    b = domain.upper('RNDU')
+        a = min(root.upper(), domain.upper())
+    b = domain.upper()
     J = RIF(a, b)
     if 0 not in RIF(f(RIF(b))):
+        print("  J  = {}\nf(J) = {}".format(
+            RIF(J).str(style='brackets'),
+            RIF(f(J)).str(style='brackets')))
         values += [(J, RIF(f(J.center())).lower() > 0)]
+    else:
+        print("0 at {}".format(b))
     return Signal(domain, values)
 
 
@@ -270,4 +280,4 @@ def ctx(domain, C, phi, f, epsilon=0.1, verbosity=0):
         return Signal.union(ctx(J, C, phi, f, epsilon),
                             ctx(K, C, phi, f, epsilon))
     else:
-        return Signal(domain, [(domain, res)])
+        return Signal(domain, [] if res is None else [(domain, res)])

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division,
+                        print_function)
 from builtins import *  # NOQA
 from sage.all import RIF
 import sage.all as sage
@@ -11,7 +13,7 @@ import time
 from ulbc.interval_signals import (true_signal, false_signal,
                                    signal_given_roots, Signal, ctx)
 from flowstar.reachability import Reach
-from flowstar.poly import index_fn
+from flowstar.poly import Poly
 
 
 def convert_mat(m):
@@ -42,6 +44,10 @@ def poly_to_numpy(R, p):
     return sympy.lambdify((t_, convert_vec(R.gens())),
                           sage.SR(p)._sympy_(),
                           modules='numpy')
+
+
+class FlowstarFailedException(Exception):
+    pass
 
 
 class Logic(object):
@@ -77,15 +83,20 @@ class Logic(object):
             self.duration + duration + 1e-3,
             **kwargs
         )
-        if not reach.ran:
-            raise Exception('Did not run successfully!')
+        # Check that flowstar ran for the whole timeframe
+        if not reach.ran or reach.result > 3:
+            raise FlowstarFailedException(
+                "Did not run successfully!\n"
+                "status = {}\nnum_flowpipes".format(reach.result,
+                                                    reach.num_flowpipes))
         t1 = time.time()
         print("Computed {} flowpipes in {} sec".format(
             reach.num_flowpipes, t1 - t0))
         reach.prepare()
         t2 = time.time()
         print("Prepared for plotting in {} sec".format(t2 - t1))
-        res = self.signal(reach, odes, **kwargs).to_domain(RIF(0, duration))
+        res = self.signal(reach, odes, **kwargs
+                          ).to_domain(RIF(0, duration))
         t3 = time.time()
         print("Monitored signal {} sec".format(t3 - t2))
         return res
@@ -180,7 +191,7 @@ class Atomic(Logic):
                 * sage.vector(odes))
 
     def sage_plot(self, R):
-        idx = index_fn(self.p)
+        idx = Poly(self.p)
 
         def up(t):
             return idx(R(t)).upper()
@@ -203,7 +214,7 @@ class Atomic(Logic):
         '''
         # Do the smart thing in the case of duration 0
         if duration == 0:
-            res = index_fn(self.p)(initials)
+            res = Poly(self.p)(initials)
             if res.lower() > 0:
                 return true_signal(RIF(0, 0))
             elif res.upper() < 0:
@@ -216,10 +227,10 @@ class Atomic(Logic):
 
     def signal(self, R, odes, **kwargs):
         roots = R.roots(self.p, self.dpdt(odes))
-        ip = index_fn(self.p)
+        ip = Poly(self.p)
         return signal_given_roots((lambda t: ip(R(t))),
                                   roots,
-                                  RIF(0, R.time))
+                                  RIF(0, R.time - 1e-3))
         # ip = index_fn(self.p)
         # idp = index_fn(self.dpdt(odes))
         # return to_signal_piecewise(
@@ -525,21 +536,25 @@ class C(Logic):
         # after it
         return [self]
 
-    def context_jump(self, xs):
+    def context_jump(self, zs):
         '''
         >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
         >>> [y.str(style='brackets') for y in
-        ... ({x: RIF(0.1,0.5)} >>
-        ... Atomic(x)).context_jump([RIF(3,4), RIF(4,5)])] # doctest: +NORMALIZE_WHITESPACE
+        ...     ({x: RIF(0.1,0.5)} >> Atomic(x)
+        ...      ).context_jump([RIF(3,4), RIF(4,5)])
+        ... ]  # doctest: +NORMALIZE_WHITESPACE
         ['[3.0999999999999996 .. 4.5000000000000000]',
          '[4.0000000000000000 .. 5.0000000000000000]']
         '''
-        return [(x + self.ctx[k] if k in self.ctx else x)
-                for k, x in zip(self.R.gens(), xs)]
+        return [z + self.ctx.get(k, 0.0) for k, z in zip(self.R.gens(), zs)]
 
     def signal(self, reach, odes, **kwargs):
         def phi(xs):
-            return self.phi.signal_for_system(odes, xs, 0, **kwargs)(0)
+            sig = self.phi.signal_for_system(odes, xs, 1e-3, **kwargs)
+            if kwargs.get('verbosity', 0) >= 3:
+                print('sig    =', sig)
+                print('sig(0) =', sig(0))
+            return sig(0)
             # order=5, step=(0.001, 0.1),
             # precondition=1,
             # estimation=1e-3,
@@ -552,6 +567,7 @@ class C(Logic):
             phi=phi,
             f=reach,
             epsilon=kwargs.get('epsilon_ctx', 0.5),
+            verbosity=kwargs.get('verbosity', 0)
         )
 
     def numerical_signal(self, f, events, duration):

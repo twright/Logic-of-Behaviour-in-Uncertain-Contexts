@@ -15,9 +15,9 @@ cdef class CReach:
     cdef ContinuousReachability c_reach
     cdef public bint ran
     cdef bint prepared
-    cdef int result
+    cdef public int result
 
-    cdef vector[Interval] c_roots(CReach, interval_fn, interval_fn)
+    cdef vector[Interval] c_roots(CReach, interval_fn, interval_fn, double epsilon=?, int verbosity=?)
     cdef vector[Interval] eval_interval(CReach, Interval)
 
 

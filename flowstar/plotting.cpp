@@ -902,6 +902,20 @@ struct __pyx_obj_8flowstar_8plotting_SagePlotMixin;
 struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin;
 struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot;
 struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot;
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots;
+
+/* "flowstar/reachability.pxd":20
+ *     cdef public int result
+ * 
+ *     cdef vector[Interval] c_roots(CReach, interval_fn, interval_fn, double epsilon=?, int verbosity=?)             # <<<<<<<<<<<<<<
+ *     cdef vector[Interval] eval_interval(CReach, Interval)
+ * 
+ */
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots {
+  int __pyx_n;
+  double epsilon;
+  int verbosity;
+};
 
 /* "flowstar/reachability.pxd":12
  * 
@@ -1027,7 +1041,7 @@ struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot {
  */
 
 struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
-  std::vector<flowstar::Interval>  (*c_roots)(struct __pyx_obj_8flowstar_12reachability_CReach *, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>);
+  std::vector<flowstar::Interval>  (*c_roots)(struct __pyx_obj_8flowstar_12reachability_CReach *, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots *__pyx_optional_args);
   std::vector<flowstar::Interval>  (*eval_interval)(struct __pyx_obj_8flowstar_12reachability_CReach *, flowstar::Interval);
 };
 static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
@@ -1767,7 +1781,6 @@ static const char __pyx_k_sage_tube_plot[] = "sage_tube_plot";
 static const char __pyx_k_parametric_plot[] = "parametric_plot";
 static const char __pyx_k_pyx_PickleError[] = "__pyx_PickleError";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
-static const char __pyx_k_getIDForStateVar[] = "getIDForStateVar";
 static const char __pyx_k_Filename_too_long[] = "Filename too long!";
 static const char __pyx_k_absolute_diameter[] = "absolute_diameter";
 static const char __pyx_k_flowstar_plotting[] = "flowstar.plotting";
@@ -1822,7 +1835,6 @@ static PyObject *__pyx_n_s_fu;
 static PyObject *__pyx_n_s_functools;
 static PyObject *__pyx_n_s_g;
 static PyObject *__pyx_n_s_get;
-static PyObject *__pyx_n_s_getIDForStateVar;
 static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_n_s_global_manager;
 static PyObject *__pyx_n_s_gnuplot;
@@ -3701,9 +3713,9 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   PyObject *__pyx_t_2 = NULL;
   int __pyx_t_3;
   int __pyx_t_4;
-  PyObject *__pyx_t_5 = NULL;
+  std::string __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  int __pyx_t_7;
+  PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("sage_plot", 0);
   __pyx_cur_scope = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *)__pyx_tp_new_8flowstar_8plotting___pyx_scope_struct__sage_plot(__pyx_ptype_8flowstar_8plotting___pyx_scope_struct__sage_plot, __pyx_empty_tuple, NULL);
@@ -3758,7 +3770,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
  *         if duration is None:
  *             duration = (0, float(self.c_reach.time))             # <<<<<<<<<<<<<<
  * 
- *         cdef int var_id = self.c_reach.getIDForStateVar(x)
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
  */
     __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_c_reach); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -3791,64 +3803,16 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   /* "flowstar/plotting.pyx":66
  *             duration = (0, float(self.c_reach.time))
  * 
- *         cdef int var_id = self.c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
  *         # Cache the evaluations
  *         ress = dict()
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_c_reach); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_getIDForStateVar); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 66, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
-    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_5);
-    if (likely(__pyx_t_2)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-      __Pyx_INCREF(__pyx_t_2);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_5, function);
-    }
-  }
-  if (!__pyx_t_2) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-  } else {
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_5)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_x};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_x};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_GOTREF(__pyx_t_1);
-    } else
-    #endif
-    {
-      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 66, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2); __pyx_t_2 = NULL;
-      __Pyx_INCREF(__pyx_v_x);
-      __Pyx_GIVEREF(__pyx_v_x);
-      PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_v_x);
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    }
-  }
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_cur_scope->__pyx_v_var_id = __pyx_t_7;
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_5 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_cur_scope->__pyx_v_var_id = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_cur_scope->__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_5);
 
   /* "flowstar/plotting.pyx":68
- *         cdef int var_id = self.c_reach.getIDForStateVar(x)
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         # Cache the evaluations
  *         ress = dict()             # <<<<<<<<<<<<<<
  * 
@@ -3908,13 +3872,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
  *                     plot_points=self.time//step)
  * 
  */
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __Pyx_INCREF(__pyx_v_duration);
   __Pyx_GIVEREF(__pyx_v_duration);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_v_duration);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_duration);
   __pyx_t_1 = 0;
 
   /* "flowstar/plotting.pyx":81
@@ -3928,12 +3892,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_6 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_8 = PyNumber_FloorDivide(__pyx_t_6, __pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_8 = PyNumber_FloorDivide(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_plot_points, __pyx_t_8) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
@@ -3944,9 +3908,9 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
  *                     duration,
  *                     plot_points=self.time//step)
  */
-  __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_plot, __pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_plot, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_8;
   __pyx_t_8 = 0;
@@ -3964,8 +3928,8 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
@@ -12555,7 +12519,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_functools, __pyx_k_functools, sizeof(__pyx_k_functools), 0, 0, 1, 1},
   {&__pyx_n_s_g, __pyx_k_g, sizeof(__pyx_k_g), 0, 0, 1, 1},
   {&__pyx_n_s_get, __pyx_k_get, sizeof(__pyx_k_get), 0, 0, 1, 1},
-  {&__pyx_n_s_getIDForStateVar, __pyx_k_getIDForStateVar, sizeof(__pyx_k_getIDForStateVar), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
   {&__pyx_n_s_global_manager, __pyx_k_global_manager, sizeof(__pyx_k_global_manager), 0, 0, 1, 1},
   {&__pyx_n_s_gnuplot, __pyx_k_gnuplot, sizeof(__pyx_k_gnuplot), 0, 0, 1, 1},

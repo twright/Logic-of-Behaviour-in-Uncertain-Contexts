@@ -7,14 +7,14 @@ import sage.all as sage
 
 from flowstar.Polynomial cimport Polynomial
 from flowstar.interval cimport make_interval
+from flowstar.Interval cimport Interval
 
 
 def index_fn(p):
     R = p.parent()
     gs = R.gens()
     return lambda xs: sage.RIF(p.subs(
-        {g: x for g, x in zip(gs,
-                              itertools.chain(xs, itertools.cycle([0])))}))
+        dict(zip(gs, itertools.chain(xs, itertools.cycle([0]))))))
 
 
 cdef class Poly:
@@ -72,7 +72,9 @@ cdef class Poly:
         if hasattr(p, 'list'):
             # Univariate polynomials handle interval coefficients containing
             # 0 strangly so we must treat this as a special case
-            cs = (c for c in p.list() if not(c == 0 and hasattr(c, 'diameter') <= (c.diameter() == 0)))
+            cs = (c for c in p.list()
+                    if not(c == 0 
+                           and hasattr(c, 'diameter') <= (c.diameter() == 0)))
         else:
             cs = p.coefficients()
 
@@ -84,6 +86,16 @@ cdef class Poly:
                 for c, ex in zip(cs, p.exponents())),
             zero,
         )
+
+    def __call__(self, xs):
+        # Evaluate the polynomial using the flowstar intEval function
+        cdef vector[Interval] cxs
+        cdef Interval res
+        cxs.push_back(Interval(0)) # Use dummy time variable
+        for x in xs:
+            cxs.push_back(make_interval(x))
+        self.c_poly.intEval(res, cxs)
+        return sage.RIF(res.inf(), res.sup())
 
     @property
     def var_names(self):

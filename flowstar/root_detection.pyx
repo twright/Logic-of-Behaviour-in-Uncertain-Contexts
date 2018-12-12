@@ -3,6 +3,7 @@ from libcpp cimport bool as cbool
 
 from flowstar.Interval cimport Interval
 from flowstar.interval cimport make_interval, interval_time_fn, int_dist, extdiv
+cimport flowstar.interval as interval
 from flowstar.poly cimport Poly, poly_time_fn
 
 def py_detect_roots(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1):
@@ -25,7 +26,7 @@ cdef void detect_roots(vector[Interval] & roots,
                        interval_time_fn f, interval_time_fn fprime,
                        Interval & T0,
                        double epsilon=0.00001,
-                       int verbosity=1) nogil:
+                       int verbosity=0) nogil:
     cdef:
         # Interval T0 = domain[0]
         Interval T = T0
@@ -42,8 +43,16 @@ cdef void detect_roots(vector[Interval] & roots,
         Interval Told
 
     if verbosity >= 3:
-        with gil: print("T = [{}..{}]".format(T.inf(), T.sup()))
+        with gil:
+            print('detect_roots(T0={}, epsilon={}, verbosity={})'.format(
+                interval.as_str(T0),
+                epsilon,
+                verbosity,
+            ))
+
     while not (failed or bound_found):
+        if verbosity >= 3:
+            with gil: print("T = [{}..{}]".format(T.inf(), T.sup()))
         Tbak = T
         T.midpoint(M)
         fI = f.call(M)
@@ -51,13 +60,13 @@ cdef void detect_roots(vector[Interval] & roots,
         T.inv_assign()
         T.add_assign(M)
         Told=T
-        failed = not extdiv(T, Tu, split, T, fI, fP)
+        failed = not extdiv(Tu, T, split, T, fI, fP)
         if failed:
             if verbosity >= 2:
                 with gil:
                     print("failed! on:")
                     print("M=[{}..{}]".format(M.inf(), M.sup()))
-                    print("extdiv2(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(
+                    print("extdiv(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(
                         T.inf(), T.sup(),
                         Tu.inf(), Tu.sup(),
                         split,
@@ -70,18 +79,19 @@ cdef void detect_roots(vector[Interval] & roots,
         T.add_assign(M)
         T.intersect_assign(Tbak)
         if split:
+            Tu.inv_assign()
+            Tu.add_assign(M)
+            Tu.intersect_assign(Tbak)
             break
         contractive = (contractive
                     or Tbak.inf() < T.inf()
                     and T.sup() < Tbak.sup())
         bound_found = int_dist(Tbak, T) <= epsilon
-        if verbosity >= 2:
-            with gil: print("T = [{}..{}]".format(T.inf(), T.sup()))
+
+    if verbosity >= 2:
+        with gil: print("Tfinal = [{}..{}]".format(T.inf(), T.sup()))
 
     if split:
-        Tu.inv_assign()
-        Tu.add_assign(M)
-        Tu.intersect_assign(Tbak)
         if verbosity >= 2:
             with gil:
                 print("splitting! [{}..{}] -> [{}..{}] + [{}..{}]".format(
@@ -89,8 +99,8 @@ cdef void detect_roots(vector[Interval] & roots,
                     T.inf(), T.sup(),
                     Tu.inf(), Tu.sup(),
                 ))
-        detect_roots(roots, f, fprime, T, epsilon)
-        detect_roots(roots, f, fprime, Tu, epsilon)
+        detect_roots(roots, f, fprime, T, epsilon, verbosity)
+        detect_roots(roots, f, fprime, Tu, epsilon, verbosity)
         return
 
     if bound_found:
