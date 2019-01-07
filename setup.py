@@ -11,10 +11,11 @@ import os
 
 import Cython.Compiler.Options
 Cython.Compiler.Options.annotate = True
+Cython.Compiler.Options.fast_fail = True
 
 LIB_DIRS = ['.', './flowstar/', './flowstar/flowstar-2.1.0']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
-COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register']
+COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-frounding-math']
 LINK_ARGS = ['-std=c++17']
 
 extensions = [
@@ -86,7 +87,8 @@ class ChooseFlowstarCommand(Command):
         ('mode=', 'm', 'which version for flowstar to use? [upstream/debug]')
     ]
 
-    flowstar_link_path = 'flowstar/flowstar-2.1.0'
+    flowstar_link_path = os.path.join(os.getcwd(), 'flowstar',
+                                      'flowstar-2.1.0')
 
     def initialize_options(self):
         self.mode = 'debug'
@@ -95,6 +97,9 @@ class ChooseFlowstarCommand(Command):
         if self.mode == 'upstream':
             self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
                                              'flowstar-2.1.0-clean')
+        elif self.mode == 'fastintervals':
+            self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
+                                             'flowstar-2.1.0-fast-intervals')
         elif self.mode == 'debug':
             self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
                                              'flowstar-2.1.0-debug')
