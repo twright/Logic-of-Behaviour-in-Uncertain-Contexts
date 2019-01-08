@@ -16,6 +16,31 @@ cdef list intervals_to_list(vector[Interval] &)
 cdef double int_dist(const Interval &, const Interval &) nogil
 cdef cbool int_diff(Interval& L, Interval& U, cbool& split, const Interval& a, const Interval& b) nogil
 cdef cbool extdiv(Interval& L, Interval& U, cbool& split, const Interval& d, const Interval& a, const Interval& b) nogil
+# 
+# cdef extern from "<cfenv>" namespace std nogil:
+#     # Typedef the (platform dependant) floating point environment type
+#     ctypedef struct fenv_t {
+#         unsigned short int __control_word
+#         unsigned short int __glibc_reserved1
+#         unsigned short int __status_word
+#         unsigned short int __glibc_reserved2
+#         unsigned short int __tags;
+#         unsigned short int __glibc_reserved3
+#         unsigned int __eip;
+#         unsigned short int __cs_selector
+#         unsigned int __opcode
+#         unsigned int __glibc_reserved4
+#         unsigned int __data_offset
+#         unsigned short int __data_selector
+#         unsigned short int __glibc_reserved5
+#         unsigned int __mxcsr
+#     }
+#
+#     int  fegetenv(fenv_t*)
+#     int  fesetenv(const fenv_t *)
+#
+# cdef class FEManager(object):
+
 
 cdef extern from "<functional>" namespace "std" nogil:
     cdef cppclass interval_fn "std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>":

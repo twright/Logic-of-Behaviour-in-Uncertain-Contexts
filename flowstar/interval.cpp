@@ -12,7 +12,8 @@
         "extra_compile_args": [
             "-O3", 
             "-std=c++17", 
-            "-Wno-register"
+            "-Wno-register", 
+            "-frouding-math"
         ], 
         "extra_link_args": [
             "-std=c++17"
@@ -632,8 +633,34 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "Interval.h"
 #include <vector>
 #include "Monomial.h"
+
+    class MonoWrap: public flowstar::Monomial {
+        public:
+            flowstar::Interval getCoefficient() {
+                return this->coefficient;
+            }
+
+            std::vector<int> getDegrees() {
+                return this->degrees;
+            }
+    };
+    
 #include <list>
 #include "Polynomial.h"
+
+    class PolyWrap: public flowstar::Polynomial {
+        /*
+        PolyWrap(flowstar::Polynomial & P) {
+            this->monomials = P.monomials;
+        }
+        */
+
+        public:
+            std::list<flowstar::Monomial> getMonomials() {
+                return this->monomials;
+            }
+    };
+    
 #include "TaylorModel.h"
 #include <functional>
 
@@ -872,6 +899,36 @@ static const char *__pyx_f[] = {
 
 
 /*--- Type declarations ---*/
+
+/* "flowstar/Monomial.pxd":74
+ *         vector[int] getDegrees()
+ * 
+ * ctypedef MonoWrap* MonoWrapPtr             # <<<<<<<<<<<<<<
+ * ctypedef Monomial* MonomialPtr
+ */
+typedef MonoWrap *__pyx_t_8flowstar_8Monomial_MonoWrapPtr;
+
+/* "flowstar/Monomial.pxd":75
+ * 
+ * ctypedef MonoWrap* MonoWrapPtr
+ * ctypedef Monomial* MonomialPtr             # <<<<<<<<<<<<<<
+ */
+typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
+
+/* "flowstar/Polynomial.pxd":59
+ *         clist[Monomial] & getMonomials()
+ * 
+ * ctypedef PolyWrap* PolyWrapPtr             # <<<<<<<<<<<<<<
+ * ctypedef Polynomial* PolynomialPtr
+ */
+typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
+
+/* "flowstar/Polynomial.pxd":60
+ * 
+ * ctypedef PolyWrap* PolyWrapPtr
+ * ctypedef Polynomial* PolynomialPtr             # <<<<<<<<<<<<<<
+ */
+typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
 
 /* --- Runtime support code (head) --- */
 /* Refnanny.proto */
@@ -1170,6 +1227,10 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'libcpp.vector' */
 
+/* Module declarations from 'libcpp.algorithm' */
+
+/* Module declarations from 'libcpp' */
+
 /* Module declarations from 'flowstar.Monomial' */
 
 /* Module declarations from 'libcpp.list' */
@@ -1177,10 +1238,6 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 /* Module declarations from 'flowstar.Polynomial' */
 
 /* Module declarations from 'flowstar.TaylorModel' */
-
-/* Module declarations from 'libcpp.algorithm' */
-
-/* Module declarations from 'libcpp' */
 
 /* Module declarations from 'flowstar.utils' */
 

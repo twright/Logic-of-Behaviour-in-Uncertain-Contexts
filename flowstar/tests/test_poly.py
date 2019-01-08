@@ -5,7 +5,8 @@ from builtins import *  # NOQA
 import pytest
 import sage.all as sage
 
-from flowstar.poly import Poly
+from flowstar.poly import (Poly, do_compose_test, do_tm_power_test,
+                           do_tm_power_test2)
 
 
 @pytest.fixture(scope='module')
@@ -21,27 +22,44 @@ def ringxy():
 def test_two_var(ringxy):
     R, (x, y) = ringxy
     assert (str(Poly(x * y + x + R(3)))
-            == '(([3.0000000000e+00 , 3.0000000000e+00]) '
-               '+ ([1.0000000000e+00 , 1.0000000000e+00] * x) '
-               '+ ([1.0000000000e+00 , 1.0000000000e+00] * x * y))')
+            == '(([3.0000000000 , 3.0000000000]) '
+               '+ ([1.0000000000 , 1.0000000000] * x) '
+               '+ ([1.0000000000 , 1.0000000000] * x * y))')
 
 
 def test_one_var(ringt):
     R, (t,) = ringt
     assert (str(Poly(t - 0.5))
-            == '(([-5.0000000000e-01 , -5.0000000000e-01]) '
-               '+ ([1.0000000000e+00 , 1.0000000000e+00] * t))')
+            == '(([-0.5000000000 , -0.5000000000]) '
+               '+ ([1.0000000000 , 1.0000000000] * t))')
 
 
 def test_one_var_interval(ringt):
     R, (t,) = ringt
     assert (str(Poly(t + sage.RIF(-1, 1)))
-            == '(([-1.0000000000e+00 , 1.0000000000e+00])'
-               ' + ([1.0000000000e+00 , 1.0000000000e+00] * t))')
+            == '(([-1.0000000000 , 1.0000000000])'
+               ' + ([1.0000000000 , 1.0000000000] * t))')
 
 
 def test_one_var_power(ringt):
     R, (t,) = ringt
     assert (str(Poly(t**2 - 2))
-            == '(([-2.0000000000e+00 , -2.0000000000e+00]) '
-               '+ ([1.0000000000e+00 , 1.0000000000e+00] * t^2))')
+            == '(([-2.0000000000 , -2.0000000000]) '
+               '+ ([1.0000000000 , 1.0000000000] * t^2))')
+
+
+def test_tm_power():
+    assert (do_tm_power_test()
+            == '(([27.0000000000 , 27.0000000000] * x^3)) +'
+               ' [0.0000000000 , 0.0000000000]')
+
+
+def test_tm_power2():
+    assert (do_tm_power_test2()
+            == '(([2.0000000000 , 2.0000000000] * x^3)) +'
+               ' [-6.0000000000 , 6.0000000000]')
+
+
+def test_compose():
+    assert do_compose_test() == ''
+    assert False

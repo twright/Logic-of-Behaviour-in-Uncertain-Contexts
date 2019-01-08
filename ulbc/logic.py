@@ -12,7 +12,7 @@ import time
 
 from ulbc.interval_signals import (true_signal, false_signal,
                                    signal_given_roots, Signal, ctx)
-from flowstar.reachability import Reach
+from flowstar.reachability import Reach, FlowstarFailedException
 from flowstar.poly import Poly
 
 
@@ -44,10 +44,6 @@ def poly_to_numpy(R, p):
     return sympy.lambdify((t_, convert_vec(R.gens())),
                           sage.SR(p)._sympy_(),
                           modules='numpy')
-
-
-class FlowstarFailedException(Exception):
-    pass
 
 
 class Logic(object):

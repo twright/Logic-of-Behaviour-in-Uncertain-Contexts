@@ -8,6 +8,7 @@ import warnings
 from sage.all import RIF, region_plot
 from flowstar.interval import py_int_dist as int_dist
 from ulbc.interval_root_isolation import isolate_roots
+from flowstar.reachability import FlowstarFailedException
 # from sage.all import *
 
 # from interval_utils import *
@@ -260,16 +261,26 @@ def ctx(domain, C, phi, f, epsilon=0.1, verbosity=0):
     # Note: states are now presumed to be n-dimensional
     d = domain.absolute_diameter()
 
+    failed = False
+
     fI = [RIF(x) for x in f(domain)]
     h = C(fI)
-    res = phi(h)
+
+    try:
+        res = phi(h)
+    except FlowstarFailedException:
+        failed = True
+        res = None
+        if verbosity >= 1:
+            print("Flowstar failed!")
+
     if verbosity >= 2:
         print('I  =', domain.str(style='brackets'))
         print('fI =', [x.str(style='brackets') for x in fI])
         print('C || f(I) =', [x.str(style='brackets') for x in C(fI)])
         print('phi(C || f(I)) =', res)
 
-    if res is None and d > epsilon:
+    if (failed or res is None) and d > epsilon:
         J, K = domain.bisection()
         if verbosity >= 1:
             print("bisecting {} -> {}, {}".format(

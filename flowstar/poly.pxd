@@ -35,3 +35,6 @@ cdef extern from * nogil:
 cdef class Poly:
     cdef Polynomial c_poly
     cdef dict vars
+
+    @staticmethod
+    cdef Poly from_polynomial(Polynomial & P, vars)

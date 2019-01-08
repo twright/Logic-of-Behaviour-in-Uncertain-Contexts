@@ -32,6 +32,10 @@ import sage.all as sage
 from cysignals.signals cimport sig_on, sig_off, sig_check
 
 
+class FlowstarFailedException(Exception):
+    pass
+
+
 cdef class CReach:
     def __cinit__(
         self,

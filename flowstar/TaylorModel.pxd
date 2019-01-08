@@ -16,6 +16,19 @@ cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
 
     void intEval(Interval & result, const vector[Interval] & domain)
     void constant(Interval & result) const
+    void mul_ctrunc(TaylorModel & result, const TaylorModel & tm,
+                    const vector[Interval] & domain,
+                    const int order,
+                    const Interval & cutoff_threshold) const
+    void mul_ctrunc_assign(const TaylorModel & tm,
+                            const vector[Interval] & domain,
+                            const int order,
+                            const Interval & cutoff_threshold)
+    void add(TaylorModel & result, const TaylorModel & tm) const
+    void sub(TaylorModel & result, const TaylorModel & tm) const
+    void add_assign(const TaylorModel & tm)
+    void sub_assign(const TaylorModel & tm)
+    void mul_assign(const Interval & I)
 
     Polynomial expansion
     Interval remainder
