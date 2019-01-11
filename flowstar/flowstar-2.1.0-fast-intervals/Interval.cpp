@@ -71,372 +71,258 @@ inline void restoreMode() {
 
 Real::Real()
 {
-	value = 0.0;
+	mpfr_init2(value, intervalNumPrecision);
+	mpfr_set_ui(value, 0L, MPFR_RNDD);
 }
 
 Real::Real(const double v)
 {
-	value = v;
+	mpfr_init2(value, intervalNumPrecision);
+	mpfr_set_d(value, v, MPFR_RNDN);
 }
 
 Real::Real(const Real & real)
 {
-	value = real.value;
+	mpfr_init2(value, intervalNumPrecision);
+	mpfr_set(value, real.value, MPFR_RNDN);
 }
 
 Real::~Real()
 {
+	mpfr_clear(value);
 }
 
 bool Real::isZero() const
 {
-	//c++ shouldn't distinguish between positive and negative zeroes (+0.0 == -0.0)
-	return value == 0.0;
+	return mpfr_cmp_ui(value, 0L);
 }
 
 double Real::getValue_RNDD() const
 {
-	//TODO is rest of the code sensitive to rounding down
-	//(can't round down anymore here)
-	//setMode(FE_DOWNWARD);
-	return value;
+	return mpfr_get_d(value, MPFR_RNDD);
 }
 
 double Real::getValue_RNDU() const
 {
-	//TODO see RNDD
-	return value;
+	return mpfr_get_d(value, MPFR_RNDU);
 }
 
 void Real::abs(Real & real) const
 {
-	real.value = fabs(value);
+	mpfr_abs(real.value, value, MPFR_RNDU);
 }
 
 void Real::abs_assign()
 {
-	value = fabs(value);
+	mpfr_abs(value, value, MPFR_RNDU);
 }
 
 void Real::to_sym_int(Interval & I) const
 {
-	I.up = fabs(value);
-	I.lo = -I.up;
+	I.lo = getValue_RNDD();
+	I.up = getValue_RNDU();
 }
 
 void Real::exp_RNDU(Real & result) const
 {
-    throw std::runtime_error("std::exp function is not precise");
+	mpfr_exp(result.value, value, MPFR_RNDU);
 }
 
 void Real::exp_assign_RNDU()
 {
-    throw std::runtime_error("std::exp function is not precise");
+	mpfr_exp(value, value, MPFR_RNDU);
 }
 
 void Real::pow_assign_RNDU(const int n)
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	value = pow(value, n);
-	restoreMode();
+	mpfr_pow_ui(value, value, n, MPFR_RNDU);
 }
 
 void Real::rec(Real & result) const
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	result.value = 1.0/value;
-	restoreMode();
+	mpfr_ui_div(result.value, 1L, value, MPFR_RNDN);
 }
 
 void Real::add_RNDD(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	result.value = value + real.value;
-	restoreMode();
+	mpfr_add(result.value, value, real.value, MPFR_RNDD);
 }
 
 void Real::add_assign_RNDD(const Real & real)
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	value += real.value;
-	restoreMode();
+	mpfr_add(value, value, real.value, MPFR_RNDD);
 }
 
 void Real::add_RNDU(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	result.value = value + real.value;
-	restoreMode();
+	mpfr_add(result.value, value, real.value, MPFR_RNDU);
 }
 
 void Real::add_assign_RNDU(const Real & real)
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	value += real.value;
-	restoreMode();
+	mpfr_add(value, value, real.value, MPFR_RNDU);
 }
 
 void Real::add_RNDN(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	result.value = value + real.value;
-	restoreMode();
+	mpfr_add(result.value, value, real.value, MPFR_RNDN);
 }
 
 void Real::add_assign_RNDN(const Real & real)
 {
-	saveMode();
-    setMode(FE_TONEAREST);
-	value += real.value;
-	restoreMode();
+	mpfr_add(value, value, real.value, MPFR_RNDN);
 }
 
 void Real::sub_RNDD(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	result.value = value - real.value;
-	restoreMode();
+	mpfr_sub(result.value, value, real.value, MPFR_RNDD);
 }
 
 void Real::sub_assign_RNDD(const Real & real)
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	value -= real.value;
-	restoreMode();
+	mpfr_sub(value, value, real.value, MPFR_RNDD);
 }
 
 void Real::sub_RNDU(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	result.value = value - real.value;
-	restoreMode();
+	mpfr_sub(result.value, value, real.value, MPFR_RNDU);
 }
 
 void Real::sub_assign_RNDU(const Real & real)
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	value -= real.value;
-	restoreMode();
+	mpfr_sub(value, value, real.value, MPFR_RNDU);
 }
 
 void Real::mul_RNDD(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	result.value = value * real.value;
-	restoreMode();
+	mpfr_mul(result.value, value, real.value, MPFR_RNDD);
 }
 
 void Real::mul_assign_RNDD(const Real & real)
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	value *= real.value;
-	restoreMode();
+	mpfr_mul(value, value, real.value, MPFR_RNDD);
 }
 
 void Real::mul_RNDU(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	result.value = value * real.value;
-	restoreMode();
+	mpfr_mul(result.value, value, real.value, MPFR_RNDU);
 }
 
 void Real::mul_assign_RNDU(const Real & real)
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	value *= real.value;
-	restoreMode();
+	mpfr_mul(value, value, real.value, MPFR_RNDU);
 }
 
 void Real::mul_RNDD(Real & result, const int n) const
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	result.value = value * n;
-	restoreMode();
+	mpfr_mul_si(result.value, value, n, MPFR_RNDD);
 }
 
 void Real::mul_assign_RNDD(const int n)
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	value *= n;
-	restoreMode();
+	mpfr_mul_si(value, value, n, MPFR_RNDD);
 }
 
 void Real::mul_RNDU(Real & result, const int n) const
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	result.value = value * n;
-	restoreMode();
+	mpfr_mul_si(result.value, value, n, MPFR_RNDU);
 }
 
 void Real::mul_assign_RNDU(const int n)
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	value *= n;
-	restoreMode();
+	mpfr_mul_si(value, value, n, MPFR_RNDU);
 }
 
 void Real::div_RNDD(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	result.value = value / real.value;
-	restoreMode();
+	mpfr_div(result.value, value, real.value, MPFR_RNDD);
 }
 
 void Real::div_assign_RNDD(const Real & real)
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	value /= real.value;
-	restoreMode();
+	mpfr_div(value, value, real.value, MPFR_RNDD);
 }
 
 void Real::div_RNDU(Real & result, const Real & real) const
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	result.value = value / real.value;
-	restoreMode();
+	mpfr_div(result.value, value, real.value, MPFR_RNDU);
 }
 
 void Real::div_assign_RNDU(const Real & real)
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	value /= real.value;
-	restoreMode();
+	mpfr_div(value, value, real.value, MPFR_RNDU);
 }
 
 void Real::div_RNDD(Real & result, const int n) const
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	result.value = value / n;
-	restoreMode();
+	mpfr_div_si(result.value, value, n, MPFR_RNDD);
 }
 
 void Real::div_assign_RNDD(const int n)
 {
-	saveMode();
-	setMode(FE_DOWNWARD);
-	value /= n;
-	restoreMode();
+	mpfr_div_si(value, value, n, MPFR_RNDD);
 }
 
 void Real::div_RNDU(Real & result, const int n) const
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	result.value = value / n;
-	restoreMode();
+	mpfr_div_si(result.value, value, n, MPFR_RNDU);
 }
 
 void Real::div_assign_RNDU(const int n)
 {
-	saveMode();
-	setMode(FE_UPWARD);
-	value /= n;
-	restoreMode();
+	mpfr_div_si(value, value, n, MPFR_RNDU);
 }
 
 void Real::output(FILE *fp) const
 {
-	if(coefficientOutputFormatSet == false) {
-		setCoefficientFormatCStr();
-	}
-	saveMode();
-	setMode(FE_TONEAREST);
-	fprintf (fp, coefficientFormatCStr, value);
-	restoreMode();
+	mpfr_out_str(fp, 10, PN, value, MPFR_RNDN);
 }
 
 Real & Real::operator += (const Real & r)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value += r.value;
-	restoreMode();
+	mpfr_add(value, value, r.value, MPFR_RNDN);
 	return *this;
 }
 
 Real & Real::operator -= (const Real & r)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value -= r.value;
-	restoreMode();
+	mpfr_sub(value, value, r.value, MPFR_RNDN);
 	return *this;
 }
 
 Real & Real::operator *= (const Real & r)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value *= r.value;
-	restoreMode();
+	mpfr_mul(value, value, r.value, MPFR_RNDN);
 	return *this;
 }
 
 Real & Real::operator /= (const Real & r)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value /= r.value;
-	restoreMode();
+	mpfr_div(value, value, r.value, MPFR_RNDN);
 	return *this;
 }
 
 Real & Real::operator += (const double d)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value += d;
-	restoreMode();
+	mpfr_add_d(value, value, d, MPFR_RNDN);
 	return *this;
 }
 
 Real & Real::operator -= (const double d)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value -= d;
-	restoreMode();
+	mpfr_sub_d(value, value, d, MPFR_RNDN);
 	return *this;
 }
 
 Real & Real::operator *= (const double d)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value *= d;
-	restoreMode();
+	mpfr_mul_d(value, value, d, MPFR_RNDN);
 	return *this;
 }
 
 Real & Real::operator /= (const double d)
 {
-	saveMode();
-	setMode(FE_TONEAREST);
-	value /= d;
+	mpfr_div_d(value, value, d, MPFR_RNDN);
 	return *this;
 }
 
@@ -470,22 +356,50 @@ Real Real::operator / (const Real & r) const
 
 bool Real::operator == (const Real & r) const
 {
-	return value == r.value;
+	if(mpfr_cmp(value, r.value) == 0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool Real::operator != (const Real & r) const
 {
-	return value != r.value;
+	if(mpfr_cmp(value, r.value) == 0)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 bool Real::operator >= (const Real & r) const
 {
-	return r >= r.value;
+	if(mpfr_cmp(value, r.value) >= 0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool Real::operator > (const Real & r) const
 {
-	return r > r.value;
+	if(mpfr_cmp(value, r.value) > 0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 Real & Real::operator = (const Real & r)
@@ -493,10 +407,9 @@ Real & Real::operator = (const Real & r)
 	if(this == &r)
 		return *this;
 
-	value = r.value;
+	mpfr_set(value, r.value, MPFR_RNDN);
 	return *this;
 }
-//--old from 2.0
 
 
 Interval::Interval()
@@ -1490,24 +1403,24 @@ bool subseteq(const std::vector<Interval> & v1, const std::vector<Interval> & v2
 //--new from 2.1
 Interval::Interval(const Real & r)
 {
-	lo = r.value;
-	up = r.value;
+	lo = r.getValue_RNDD();
+	up = r.getValue_RNDU();
 }
 
 Interval::Interval(const Real & c, const Real & r)
 {
 	saveMode();
 	setMode(FE_DOWNWARD);
-	lo = c.value + r.value;
+	lo = c.getValue_RNDD() - r.getValue_RNDU();
 	setMode(FE_UPWARD);
-    up = c.value + r.value;
+  up = c.getValue_RNDU() + r.getValue_RNDU();
 	restoreMode();
 }
 
 Interval::Interval(const Real & l, const Real & u, const int n)
 {
-	lo = l.value;
-	up = u.value;
+	lo = l.getValue_RNDD();
+	up = u.getValue_RNDU();
 }
 
 
@@ -1527,18 +1440,18 @@ bool Interval::isZero() const
 
 void Interval::set(const Real & r)
 {
-	lo = r.value;
-	up = r.value;
+	lo = r.getValue_RNDD();
+	up = r.getValue_RNDU();
 }
 
 void Interval::sup(Real & u) const
 {
-	u.value = up;
+	mpfr_set_d(u.value, up, MPFR_RNDU);
 }
 
 void Interval::inf(Real & l) const
 {
-	l.value = lo;
+	mpfr_set_d(l.value, lo, MPFR_RNDD);
 }
 
 
@@ -1546,7 +1459,7 @@ void Interval::midpoint(Real & mid) const
 {
 	saveMode();
 	setMode(FE_TONEAREST);
-	mid.value = (lo + up) / 2.0;
+	mpfr_set_d(mid.value, (lo + up) / 2.0, MPFR_RNDN);
 	restoreMode();
 }
 
@@ -1554,10 +1467,10 @@ void Interval::toCenterForm(Real & center, Real & radius) const
 {
 	saveMode();
 	setMode(FE_TONEAREST);
-	center.value = (lo + up) / 2.0;
+	mpfr_set_d(center.value, (lo + up) / 2.0, MPFR_RNDN);
 
 	setMode(FE_UPWARD);
-	radius.value = (up - lo) / 2.0;
+	mpfr_set_d(radius.value, (up - lo) / 2.0, MPFR_RNDU);
 	restoreMode();
 }
 
@@ -1565,9 +1478,9 @@ void Interval::bloat(const Real & e)
 {
 	saveMode();
 	setMode(FE_DOWNWARD);
-    lo -= e.value;
+	lo -= e.getValue_RNDU(); //NOT sure if U or D is correct
 	setMode(FE_UPWARD);
-    lo += e.value;
+	lo += e.getValue_RNDU(); //see above comment
 	restoreMode();
 }
 
@@ -1577,17 +1490,17 @@ void Interval::mag(Real & m) const
 	double tmp1 = fabs(lo), tmp2 = fabs(up);
 
 	if(tmp1 >= tmp2) {
-		m.value = tmp1;
+		mpfr_set_d(m.value, tmp1, MPFR_RNDN);
 		return;
 	}
-	m.value = tmp2;
+	mpfr_set_d(m.value, tmp2, MPFR_RNDN);
 }
 
 
 Interval & Interval::operator = (const Real & r)
 {
-	lo = r.value;
-	up = r.value;
+	lo = r.getValue_RNDD();
+	up = r.getValue_RNDU();
 
 	return *this;
 }
@@ -1660,7 +1573,7 @@ Interval & Interval::operator /= (const double c)
 		setMode(FE_UPWARD);
 		up = temp / c;
 	}
-	saveMode();
+	restoreMode();
 
 	return *this;
 }

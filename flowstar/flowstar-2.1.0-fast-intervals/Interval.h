@@ -22,11 +22,12 @@ class Interval;
 
 inline void setMode(int mode);
 inline void restoreMode();
+inline void saveMode();
 
 class Real
 {
 protected:
-	double value;
+	mpfr_t value;
 public:
 	Real();
 	Real(const double v);
