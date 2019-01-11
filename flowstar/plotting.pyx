@@ -57,22 +57,26 @@ cdef class FlowstarPlotMixin:
         return img
 
 cdef class SagePlotMixin:
-    def sage_plot(self, x, duration=None, double step=1e-2, poly=None):
+    def sage_plot(self, poly, duration=None, double step=1e-2, **kwargs):
         from sage.all import plot
 
-        if duration is None:
-            duration = (0, float(self.c_reach.time))
+        # If passed a variable name as an argument, look it up from
+        # the field's generators
+        if isinstance(poly, str):
+            poly = Poly({str(g): g for g in self.R.gens()}[poly])
+        else:
+            poly = Poly(poly)
 
-        cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
+        if duration is None:
+            duration = (0, float((<CReach?>self).c_reach.time))
+
         # Cache the evaluations
         ress = dict()
 
         def f(t):
             if t not in ress:
-                if poly is None:
-                    ress[t] = self((t - step, t + step))[var_id]
-                else:
-                    ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
+                ress[t] = (<CReach?>self).eval_poly(poly, (t - step, t + step))[0]
+            return ress[t]
         def fl(t):
             return f(t).lower()
         def fu(t):
@@ -80,7 +84,8 @@ cdef class SagePlotMixin:
 
         return plot([fl, fu],
                     duration,
-                    plot_points=self.time//step)
+                    plot_points=self.time//step,
+                    **kwargs)
 
     def sage_parametric_plot(self, str x, str y, double step=1e-2):
         from sage.all import parametric_plot, RIF
