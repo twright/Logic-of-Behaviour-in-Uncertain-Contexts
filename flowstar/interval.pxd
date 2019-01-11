@@ -8,12 +8,13 @@ cdef str as_str(const Interval &)
 cpdef void set_precision(int prec)
 cpdef int get_precision()
 cdef Interval make_interval(object i)
-cdef cbool overlaps(Interval &, Interval &) nogil
+cdef cbool overlaps(const Interval &, const Interval &) nogil
 cdef void interval_union(Interval&, Interval&) nogil
 cdef void interval_vect_union(vector[Interval]&, vector[Interval]&) nogil
 cdef tuple interval_to_tuple(Interval & I)
 cdef list intervals_to_list(vector[Interval] &)
 cdef double int_dist(const Interval &, const Interval &) nogil
+cdef double int_min_dist(const Interval &, const Interval &) nogil
 cdef cbool int_diff(Interval& L, Interval& U, cbool& split, const Interval& a, const Interval& b) nogil
 cdef cbool extdiv(Interval& L, Interval& U, cbool& split, const Interval& d, const Interval& a, const Interval& b) nogil
 #

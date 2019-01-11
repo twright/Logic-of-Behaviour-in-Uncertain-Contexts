@@ -36,10 +36,14 @@ cdef Interval make_interval(object i):
     return Interval(<double>lo, <double>hi)
 
 
-cdef cbool overlaps(Interval & I, Interval & J) nogil:
+cdef cbool overlaps(const Interval & I, const Interval & J) nogil:
     il, iu = I.inf(), I.sup()
     jl, ju = J.inf(), J.sup()
     return not (iu < jl or ju < il)
+
+
+def py_overlaps(I, J):
+    return overlaps(make_interval(I), make_interval(J))
 
 
 cdef void interval_union(Interval & I, Interval & J) nogil:
@@ -74,10 +78,27 @@ cdef double int_dist(const Interval & I, const Interval & J) nogil:
     # Round up/down endpoints so as to overapproximate the real distance
     return cmax(cabs(il - jl), cabs(iu - ju))
 
+cdef extern from "<cmath>":
+    double INFINITY
+
+cdef double int_min_dist(const Interval & I, const Interval & J) nogil:
+    cdef double il, iu, jl, ju, d1, d2
+    if overlaps(I, J):
+        return 0.0
+
+    il, iu = I.inf(), I.sup()
+    jl, ju = J.inf(), J.sup()
+    d1 = il - ju if il >= ju else INFINITY
+    d2 = jl - iu if jl >= iu else INFINITY
+    return cmin(d1, d2)
 
 def py_int_dist(I, J):
     return float(int_dist(make_interval(I),
                           make_interval(J)))
+
+def py_int_min_dist(I, J):
+    return float(int_min_dist(make_interval(I),
+                              make_interval(J)))
 
 
 # Interval difference separating upper and lower

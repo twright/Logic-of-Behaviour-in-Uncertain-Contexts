@@ -264,12 +264,14 @@ cdef class CReach:
                 # print("shifting root")
                 deref(root_iter).add_assign(t)
                 if (not roots.empty()
-                    and abs(deref(root_iter).inf() - roots.back().sup()) < 1e-9):
+                    and interval.int_min_dist(
+                        deref(root_iter), roots.back()) < 1e-9):
                     if verbosity >= 3:
                         print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
                             deref(root_iter).inf(), deref(root_iter).sup(),
                             roots.back().inf(), roots.back().sup()))
-                    roots.back().setSup(deref(root_iter).sup())
+                    interval.interval_union(roots.back(),
+                                            deref(root_iter))
                 else:
                     roots.push_back(deref(root_iter))
                 inc(root_iter)
