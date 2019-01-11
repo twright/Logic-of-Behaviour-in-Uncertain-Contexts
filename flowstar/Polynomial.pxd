@@ -31,6 +31,9 @@ cdef extern from "Polynomial.h" namespace "flowstar" nogil:
         # Polynomial & operator -= (const Polynomial & polynomial)
         # Polynomial & operator *= (const Polynomial & polynomial)
         # Polynomial & operator *= (const Interval & I)
+        void substitute(const vector[int] & varIDs, vector[Interval] & intVals)
+        void derivative(Polynomial & result, const int varIndex) const
+        void ctrunc(Interval & remainder, const vector[Interval] & domain, const int order)
 
         void toString(string & result, const vector[string] & varNames) const
         # string & as_str()

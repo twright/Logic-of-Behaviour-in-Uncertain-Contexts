@@ -21,12 +21,15 @@
 #pragma STDC FENV_ACCESS ON
 
 #include "Interval.h"
+#define RESTORE_ROUNDING_MODE false
 
 using namespace flowstar;
 
 mpfr_prec_t intervalNumPrecision = normal_precision;
 
 int lastUsed = -1;
+int origMode = -1;
+
 bool coefficientOutputFormatSet = false;
 char coefficientFormatCStr[6];
 
@@ -36,7 +39,7 @@ void setCoefficientFormatCStr() {
 		//need to increase the size of char coefficientFormatCStr;
 		throw std::runtime_error("output only supports precision <= 99");
 	}
-  sprintf(coefficientFormatCStr, "%%.%dg", PN);
+    sprintf(coefficientFormatCStr, "%%.%dg", PN);
 	//cout << "'" << coefficientFormatCStr << "'" << endl;
 }
 
@@ -47,6 +50,22 @@ inline void setMode(int mode) {
 		std::fesetround(mode);
 		lastUsed = mode;
 	}
+}
+
+inline void saveMode() {
+	#if RESTORE_ROUNDING_MODE
+	origMode = std::fegetround();
+	#endif
+}
+
+inline void restoreMode() {
+	// Restore the original rounding mode
+	#if RESTORE_ROUNDING_MODE
+	if (lastUsed != origMode) {
+		std::fesetround(origMode);
+		lastUsed = origMode;
+	}
+	#endif
 }
 }
 
@@ -107,180 +126,236 @@ void Real::to_sym_int(Interval & I) const
 
 void Real::exp_RNDU(Real & result) const
 {
-  throw std::runtime_error("std::exp function is not precise");
+    throw std::runtime_error("std::exp function is not precise");
 }
 
 void Real::exp_assign_RNDU()
 {
-  throw std::runtime_error("std::exp function is not precise");
+    throw std::runtime_error("std::exp function is not precise");
 }
 
 void Real::pow_assign_RNDU(const int n)
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	value = pow(value, n);
+	restoreMode();
 }
 
 void Real::rec(Real & result) const
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	result.value = 1.0/value;
+	restoreMode();
 }
 
 void Real::add_RNDD(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	result.value = value + real.value;
+	restoreMode();
 }
 
 void Real::add_assign_RNDD(const Real & real)
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	value += real.value;
+	restoreMode();
 }
 
 void Real::add_RNDU(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	result.value = value + real.value;
+	restoreMode();
 }
 
 void Real::add_assign_RNDU(const Real & real)
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	value += real.value;
+	restoreMode();
 }
 
 void Real::add_RNDN(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	result.value = value + real.value;
+	restoreMode();
 }
 
 void Real::add_assign_RNDN(const Real & real)
 {
-  setMode(FE_TONEAREST);
+	saveMode();
+    setMode(FE_TONEAREST);
 	value += real.value;
+	restoreMode();
 }
 
 void Real::sub_RNDD(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	result.value = value - real.value;
+	restoreMode();
 }
 
 void Real::sub_assign_RNDD(const Real & real)
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	value -= real.value;
+	restoreMode();
 }
 
 void Real::sub_RNDU(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	result.value = value - real.value;
+	restoreMode();
 }
 
 void Real::sub_assign_RNDU(const Real & real)
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	value -= real.value;
+	restoreMode();
 }
 
 void Real::mul_RNDD(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	result.value = value * real.value;
+	restoreMode();
 }
 
 void Real::mul_assign_RNDD(const Real & real)
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	value *= real.value;
+	restoreMode();
 }
 
 void Real::mul_RNDU(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	result.value = value * real.value;
+	restoreMode();
 }
 
 void Real::mul_assign_RNDU(const Real & real)
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	value *= real.value;
+	restoreMode();
 }
 
 void Real::mul_RNDD(Real & result, const int n) const
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	result.value = value * n;
+	restoreMode();
 }
 
 void Real::mul_assign_RNDD(const int n)
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	value *= n;
+	restoreMode();
 }
 
 void Real::mul_RNDU(Real & result, const int n) const
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	result.value = value * n;
+	restoreMode();
 }
 
 void Real::mul_assign_RNDU(const int n)
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	value *= n;
+	restoreMode();
 }
 
 void Real::div_RNDD(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	result.value = value / real.value;
+	restoreMode();
 }
 
 void Real::div_assign_RNDD(const Real & real)
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	value /= real.value;
+	restoreMode();
 }
 
 void Real::div_RNDU(Real & result, const Real & real) const
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	result.value = value / real.value;
+	restoreMode();
 }
 
 void Real::div_assign_RNDU(const Real & real)
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	value /= real.value;
+	restoreMode();
 }
 
 void Real::div_RNDD(Real & result, const int n) const
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	result.value = value / n;
+	restoreMode();
 }
 
 void Real::div_assign_RNDD(const int n)
 {
+	saveMode();
 	setMode(FE_DOWNWARD);
 	value /= n;
+	restoreMode();
 }
 
 void Real::div_RNDU(Real & result, const int n) const
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	result.value = value / n;
+	restoreMode();
 }
 
 void Real::div_assign_RNDU(const int n)
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	value /= n;
+	restoreMode();
 }
 
 void Real::output(FILE *fp) const
@@ -288,61 +363,78 @@ void Real::output(FILE *fp) const
 	if(coefficientOutputFormatSet == false) {
 		setCoefficientFormatCStr();
 	}
+	saveMode();
 	setMode(FE_TONEAREST);
 	fprintf (fp, coefficientFormatCStr, value);
+	restoreMode();
 }
 
 Real & Real::operator += (const Real & r)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value += r.value;
+	restoreMode();
 	return *this;
 }
 
 Real & Real::operator -= (const Real & r)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value -= r.value;
+	restoreMode();
 	return *this;
 }
 
 Real & Real::operator *= (const Real & r)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value *= r.value;
+	restoreMode();
 	return *this;
 }
 
 Real & Real::operator /= (const Real & r)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value /= r.value;
+	restoreMode();
 	return *this;
 }
 
 Real & Real::operator += (const double d)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value += d;
+	restoreMode();
 	return *this;
 }
 
 Real & Real::operator -= (const double d)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value -= d;
+	restoreMode();
 	return *this;
 }
 
 Real & Real::operator *= (const double d)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value *= d;
+	restoreMode();
 	return *this;
 }
 
 Real & Real::operator /= (const double d)
 {
+	saveMode();
 	setMode(FE_TONEAREST);
 	value /= d;
 	return *this;
@@ -409,30 +501,32 @@ Real & Real::operator = (const Real & r)
 
 Interval::Interval()
 {
-  lo = 0.0;
-  up = 0.0;
+    lo = 0.0;
+    up = 0.0;
 }
 
 Interval::Interval(const double c)
 {
 	//std::fesetround(FE_DOWNWARD);
-  lo = c;
+    lo = c;
 	//std::fesetround(FE_UPWARD);
-  up = c;
+    up = c;
 }
 
 Interval::Interval(const double l, const double u)
 {
-  lo = l;
-  up = u;
+    lo = l;
+    up = u;
 }
 
 Interval::Interval(const char *strLo, const char *strUp)
 {
-	std::fesetround(FE_DOWNWARD);
-  lo = std::stod(strLo);
-	std::fesetround(FE_UPWARD);
-  up = std::stod(strUp);
+	saveMode();
+	setMode(FE_DOWNWARD);
+    lo = std::stod(strLo);
+	setMode(FE_UPWARD);
+	up = std::stod(strUp);
+	restoreMode();
 }
 
 Interval::Interval(const Interval & I)
@@ -449,13 +543,13 @@ Interval::~Interval() {
 void Interval::set(const double l, const double u)
 {
 	lo = l;
-  up = u;
+    up = u;
 }
 
 void Interval::set(const double c)
 {
 	lo = c;
-  up = c;
+	up = c;
 }
 
 void Interval::setInf(const double l)
@@ -480,24 +574,25 @@ void Interval::setSup(const Interval & S)
 
 void Interval::split(Interval & left, Interval & right) const
 {
+	saveMode();
 	left.lo = lo;
-	std::fesetround(FE_UPWARD);
-  left.up = (lo + up)/2.0;
-
-	std::fesetround(FE_DOWNWARD);
-  right.lo = (lo + up)/2.0;
-  right.up = up;
+	setMode(FE_UPWARD);
+	left.up = (lo + up)/2.0;
+	setMode(FE_DOWNWARD);
+	right.lo = (lo + up)/2.0;
+	right.up = up;
+	restoreMode();
 }
 
 void Interval::split(std::list<Interval> & result, const int n) const
 {
-  throw std::runtime_error("'Interval::split(list<Interval> & result, const int n) const' not ported!");
+	throw std::runtime_error("'Interval::split(list<Interval> & result, const int n) const' not ported!");
 }
 
 void Interval::set_inf()
 {
 	lo = -1;
-  up = 1;
+ 	up = 1;
 }
 
 double Interval::sup() const
@@ -513,54 +608,61 @@ double Interval::inf() const
 void Interval::sup(Interval & S) const
 {
 	S.lo = up;
-  S.up = up;
+	S.up = up;
 }
 
 void Interval::inf(Interval & I) const
 {
 	I.lo = up;
-  I.up = up;
+	I.up = up;
 }
 
 double Interval::midpoint() const
 {
-	std::fesetround(FE_TONEAREST);
+	saveMode();
+	setMode(FE_TONEAREST);
 	return (lo + up) / 2.0;
+	restoreMode();
 }
 
 void Interval::midpoint(Interval & M) const
 {
-	std::fesetround(FE_DOWNWARD);
-  M.lo = (lo + up)/2.0;
-	std::fesetround(FE_UPWARD);
-  M.up = (lo + up)/2.0;
-
+	saveMode();
+	setMode(FE_DOWNWARD);
+	M.lo = (lo + up)/2.0;
+	setMode(FE_UPWARD);
+ 	M.up = (lo + up)/2.0;
+	restoreMode();
 }
 
 void Interval::remove_midpoint(Interval & M)
 {
-	std::fesetround(FE_DOWNWARD);
-  M.lo = (lo + up)/2.0;
-	std::fesetround(FE_UPWARD);
-  M.up = (lo + up)/2.0;
+	saveMode();
+	setMode(FE_DOWNWARD);
+	M.lo = (lo + up)/2.0;
+	setMode(FE_UPWARD);
+	M.up = (lo + up)/2.0;
 	//std::fesetround(FE_UPWARD);
 	up -= M.lo;
-	std::fesetround(FE_DOWNWARD);
+	setMode(FE_DOWNWARD);
 	lo -= M.up;
+	restoreMode();
 }
 
 void Interval::remove_midpoint()
 {
 	double tmp1, tmp2;
 
-	std::fesetround(FE_DOWNWARD);
-  tmp1 = (lo + up)/2.0;
-	std::fesetround(FE_UPWARD);
-  tmp2 = (lo + up)/2.0;
+	saveMode();
+	setMode(FE_DOWNWARD);
+	tmp1 = (lo + up)/2.0;
+	setMode(FE_UPWARD);
+	tmp2 = (lo + up)/2.0;
 	//std::fesetround(FE_UPWARD);
-  up -= tmp2;
-	std::fesetround(FE_DOWNWARD);
-  lo -= tmp1;
+	up -= tmp2;
+	setMode(FE_DOWNWARD);
+	lo -= tmp1;
+	restoreMode();
 }
 
 Interval Interval::intersect(const Interval & I) const
@@ -568,15 +670,15 @@ Interval Interval::intersect(const Interval & I) const
 	Interval result;
 
 	if(lo > I.lo) {
-    result.lo = lo;
+	result.lo = lo;
 	} else {
-    result.lo = I.lo;
+	result.lo = I.lo;
 	}
 
 	if(up > I.up) {
-    result.up = I.up;
+		result.up = I.up;
 	} else {
-    result.up = up;
+		result.up = up;
 	}
 
 	return result;
@@ -595,53 +697,57 @@ void Interval::intersect_assign(const Interval & I)
 
 void Interval::bloat(const double e)
 {
-	std::fesetround(FE_DOWNWARD);
-  lo -= e;
-	std::fesetround(FE_UPWARD);
-  up += e;
+	saveMode();
+	setMode(FE_DOWNWARD);
+	lo -= e;
+	setMode(FE_UPWARD);
+	up += e;
+	restoreMode();
 }
 
 bool Interval::within(const Interval & I, const double e) const
 {
 	double d;
 
-  //TODO don't this is necessary, but leaving it here now
+	//TODO don't this is necessary, but leaving it here now
 
-	std::fesetround(FE_UPWARD);
+	saveMode();
+	setMode(FE_UPWARD);
 	if(up >= I.up) {
-    //std::fesetround(FE_UPWARD);
-    d = up - I.up;
+		//std::fesetround(FE_UPWARD);
+    	d = up - I.up;
 	} else {
-	  //std::fesetround(FE_DOWNWARD);
-    //d = up - I.up;
-    d = I.up - up;
+		//std::fesetround(FE_DOWNWARD);
+    	//d = up - I.up;
+    	d = I.up - up;
 	}
 
-  //not needed now
+	//not needed now
 	//std::fesetround(FE_UPWARD);
-  //d = fabs(d);
+	//d = fabs(d);
 
 	if(d > e) {
 		return false;
 	}
 
 	if(lo >= I.lo) {
-	  //std::fesetround(FE_UPWARD);
+		//std::fesetround(FE_UPWARD);
 		d = lo - I.lo;
 	} else {
-	  //std::fesetround(FE_DOWNWARD);
+		//std::fesetround(FE_DOWNWARD);
 		d = I.lo - lo;
 	}
 
-  //not needed now
-	std::fesetround(FE_DOWNWARD);
-  d = fabs(d);
+	//not needed now
+	setMode(FE_DOWNWARD);
+	d = fabs(d);
 
 	if(d > e) {
 		return false;
 	}
+	restoreMode();
 
-  return true;
+	return true;
 }
 
 double Interval::width() const
@@ -652,14 +758,15 @@ double Interval::width() const
 
 void Interval::width(Interval & W) const
 {
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	W.lo = up - lo;
 	W.up = W.up;
+	restoreMode();
 }
 
 double Interval::mag() const
 {
-  //I assume that fabs will only change sign bit (no rounding needed)
+	//I assume that fabs will only change sign bit (no rounding needed)
 	double inf = fabs(lo);
 	double sup = fabs(up);
 	return inf < sup ? sup : inf;
@@ -667,24 +774,24 @@ double Interval::mag() const
 
 void Interval::mag(Interval & M) const
 {
-  //I assume that fabs will only change sign bit (no rounding needed)
+	//I assume that fabs will only change sign bit (no rounding needed)
 	double tmp1 = fabs(lo);
-  double tmp2 = fabs(up);;
+    double tmp2 = fabs(up);;
 
 	if(tmp1 > tmp2) {
 		M.lo = tmp1;
-    M.up = tmp1;
+    	M.up = tmp1;
 	} else {
 		M.lo = tmp2;
-    M.up = tmp2;
+    	M.up = tmp2;
 	}
 }
 
 void Interval::abs(Interval & result) const
 {
-  //I assume that fabs will only change sign bit (no rounding needed)
+	//I assume that fabs will only change sign bit (no rounding needed)
 	double tmp1 = fabs(lo);
-  double tmp2 = fabs(up);
+	double tmp2 = fabs(up);
 
 	if(tmp1 > tmp2) {
 		result.lo = tmp2;
@@ -698,7 +805,7 @@ void Interval::abs(Interval & result) const
 void Interval::abs_assign()
 {
 	double tmp1 = fabs(lo);
-  double tmp2 = fabs(up);
+	double tmp2 = fabs(up);
 
 	if(tmp1 > tmp2) {
 		lo = tmp2;
@@ -728,7 +835,7 @@ bool Interval::valid() const
 	if(up >= lo) {
 		return true;
 	}
-  return false;
+	return false;
 }
 
 bool Interval::operator == (const Interval & I) const
@@ -753,9 +860,9 @@ bool Interval::operator < (const Interval & I) const
 
 bool Interval::operator <= (const Interval & I) const
 {
-  //why not <=?
+	//why not <=?
 	//return ( (mpfr_cmp(lo, I.lo) < 0) );
-  return lo < I.lo;
+	return lo < I.lo;
 }
 
 bool Interval::operator >= (const Interval & I) const
@@ -773,7 +880,7 @@ Interval & Interval::operator = (const Interval & I)
 	if(this == &I)
 		return *this;	// check for self assignment
 
-  lo = I.lo;
+    lo = I.lo;
 	up = I.up;
 
 	return *this;
@@ -781,35 +888,39 @@ Interval & Interval::operator = (const Interval & I)
 
 Interval & Interval::operator += (const Interval & I)
 {
-  if(lastUsed == FE_DOWNWARD) {
-    lo += I.lo;
-    std::fesetround(FE_UPWARD);
-    up += I.up;
-    lastUsed = FE_UPWARD;
-  } else {
-    if (lastUsed != FE_UPWARD) {
-      std::fesetround(FE_UPWARD);
-    }
-    up += I.up;
-	  std::fesetround(FE_DOWNWARD);
-    lo += I.lo;
-    lastUsed = FE_DOWNWARD;
-  }
+	saveMode();
+    if(lastUsed == FE_DOWNWARD) {
+    	lo += I.lo;
+    	std::fesetround(FE_UPWARD);
+    	up += I.up;
+    	lastUsed = FE_UPWARD;
+  	} else {
+    	if (lastUsed != FE_UPWARD) {
+      		std::fesetround(FE_UPWARD);
+    	}
+    	up += I.up;
+	  	std::fesetround(FE_DOWNWARD);
+    	lo += I.lo;
+    	lastUsed = FE_DOWNWARD;
+  	}
+  	restoreMode();
 
 	return *this;
 }
 
 Interval & Interval::operator -= (const Interval & I)
 {
-	std::fesetround(FE_DOWNWARD);
+	saveMode();
+	setMode(FE_DOWNWARD);
 	lo -= I.up;
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	up -= I.lo;
+	restoreMode();
 	return *this;
 }
 
 inline double Interval::mulMin(const Interval & I) const {
-  double lolo, loup, uplo, upup, min;
+	double lolo, loup, uplo, upup, min;
 	// compute the lower bound
 	lolo = lo * I.lo;
 	loup = lo * I.up;
@@ -817,61 +928,63 @@ inline double Interval::mulMin(const Interval & I) const {
 	upup = up * I.up;
 
 	min = lolo;
-	if(min > loup) {
+	if (min > loup) {
 		min = loup;
 	}
-	if(min > uplo) {
+	if (min > uplo) {
 		min = uplo;
 	}
-	if(min > upup) {
+	if (min > upup) {
 		min = upup;
 	}
-  return min;
+	return min;
 }
 
 
 inline double Interval::mulMax(const Interval & I) const {
-  double lolo, loup, uplo, upup, max;
+	double lolo, loup, uplo, upup, max;
 	lolo = lo * I.lo;
 	loup = lo * I.up;
 	uplo = up * I.lo;
 	upup = up * I.up;
 
 	max = lolo;
-	if(max < loup) {
+	if (max < loup) {
 		max = loup;
 	}
-	if(max < uplo) {
+	if (max < uplo) {
 		max = uplo;
 	}
-	if(max < upup) {
+	if (max < upup) {
 		max = upup;
 	}
-  return max;
+	return max;
 }
 
 //*
 Interval & Interval::operator *= (const Interval & I)
 {
-  double min, max;
-  if(lastUsed == FE_DOWNWARD) {
-	  //std::fesetround(FE_DOWNWARD);// can skip this one
-	  min = mulMin(I);
-    std::fesetround(FE_UPWARD);
-	  max = mulMax(I);
-    lastUsed = FE_UPWARD;
-  } else {
-    if (lastUsed != FE_UPWARD) { //can possibly skip this one
-      std::fesetround(FE_UPWARD);
-    }
-	  max = mulMax(I);
-    std::fesetround(FE_DOWNWARD);
-	  min = mulMin(I);
-    lastUsed = FE_DOWNWARD;
-  }
+	double min, max;
+	saveMode();
+    if(lastUsed == FE_DOWNWARD) {
+		//std::fesetround(FE_DOWNWARD);// can skip this one
+		min = mulMin(I);
+    	setMode(FE_UPWARD);
+		max = mulMax(I);
+    	lastUsed = FE_UPWARD;
+	} else {
+		if (lastUsed != FE_UPWARD) { //can possibly skip this one
+      		setMode(FE_UPWARD);
+    	}
+	  	max = mulMax(I);
+    	setMode(FE_DOWNWARD);
+	  	min = mulMin(I);
+		lastUsed = FE_DOWNWARD;
+  	}
 
 	lo = min;
 	up = max;
+	restoreMode();
 
 	return *this;
 }//*/
@@ -935,20 +1048,24 @@ Interval & Interval::operator /= (const Interval & I)
 
 Interval & Interval::operator ++ ()
 {
-	std::fesetround(FE_DOWNWARD);
-  lo++;
-	std::fesetround(FE_UPWARD);
-  up++;
+	saveMode();
+	setMode(FE_DOWNWARD);
+	lo++;
+	setMode(FE_UPWARD);
+	up++;
+	restoreMode();
 
 	return *this;
 }
 
 Interval & Interval::operator -- ()
 {
-	std::fesetround(FE_DOWNWARD);
-  lo--;
-	std::fesetround(FE_UPWARD);
-  up--;
+	saveMode();
+	setMode(FE_DOWNWARD);
+	lo--;
+	setMode(FE_UPWARD);
+	up--;
+	restoreMode();
 
 	return *this;
 }
@@ -987,10 +1104,12 @@ void Interval::sqrt(Interval & result) const
 		printf("Exception: Square root of a negative number.\n");
 		exit(1);
 	}
-	std::fesetround(FE_DOWNWARD);
+	saveMode();
+	setMode(FE_DOWNWARD);
 	result.lo = std::sqrt(lo);
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	result.up = std::sqrt(up);
+	restoreMode();
 }
 
 void Interval::inv(Interval & result) const
@@ -1004,27 +1123,31 @@ void Interval::inv(Interval & result) const
 
 void Interval::rec(Interval & result) const
 {
+	saveMode();
 	if (lo <= 0 && up >= 0) {
 		printf("Exception: Divided by 0.\n");
 		exit(1);
 	} else {
-	  std::fesetround(FE_DOWNWARD);
-    result.lo = 1.0/up;
-	  std::fesetround(FE_UPWARD);
-    result.up = 1.0/lo;
+		setMode(FE_DOWNWARD);
+    	result.lo = 1.0/up;
+		setMode(FE_UPWARD);
+    	result.up = 1.0/lo;
 	}
+	restoreMode();
 }
 
 void Interval::sqrt_assign()
 {
+	saveMode();
 	if(lo < 0) {
 		printf("Exception: Square root of a negative number.\n");
 		exit(1);
 	}
-	std::fesetround(FE_DOWNWARD);
+	setMode(FE_DOWNWARD);
 	lo = std::sqrt(lo);
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	up = std::sqrt(up);
+	restoreMode();
 }
 
 void Interval::inv_assign()
@@ -1043,35 +1166,41 @@ void Interval::rec_assign()
 
 void Interval::add_assign(const double c)
 {
-	std::fesetround(FE_DOWNWARD);
+	saveMode();
+	setMode(FE_DOWNWARD);
 	lo += c;
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	up += c;
+	restoreMode();
 }
 
 void Interval::sub_assign(const double c)
 {
-	std::fesetround(FE_DOWNWARD);
+	saveMode();
+	setMode(FE_DOWNWARD);
 	lo -= c;
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	up -= c;
+	restoreMode();
 }
 
 void Interval::mul_assign(const double c)
 {
 	Interval result;
 
+	saveMode();
 	if(c > 0) {
-    std::fesetround(FE_DOWNWARD);
-    result.lo = lo * c;
-    std::fesetround(FE_UPWARD);
-    result.up = up * c;
+    	setMode(FE_DOWNWARD);
+    	result.lo = lo * c;
+    	setMode(FE_UPWARD);
+    	result.up = up * c;
 	} else {
-    std::fesetround(FE_DOWNWARD);
-    result.lo = up * c;
-    std::fesetround(FE_UPWARD);
-    result.up = lo * c;
+    	setMode(FE_DOWNWARD);
+    	result.lo = up * c;
+    	setMode(FE_UPWARD);
+    	result.up = lo * c;
 	}
+	restoreMode();
 
 	*this = result;
 }
@@ -1080,17 +1209,19 @@ void Interval::div_assign(const double c)
 {
 	Interval result;
 
-	if(c > 0) {
-    std::fesetround(FE_DOWNWARD);
-    result.lo = lo / c;
-    std::fesetround(FE_UPWARD);
+	saveMode();
+	if (c > 0) {
+    	setMode(FE_DOWNWARD);
+    	result.lo = lo / c;
+    	setMode(FE_UPWARD);
     result.up = up / c;
 	} else {
-    std::fesetround(FE_DOWNWARD);
+    	setMode(FE_DOWNWARD);
     result.lo = up / c;
-    std::fesetround(FE_UPWARD);
-    result.up = lo / c;
+    	setMode(FE_UPWARD);
+    	result.up = lo / c;
 	}
+	restoreMode();
 
 	*this = result;
 }
@@ -1099,27 +1230,29 @@ Interval Interval::pow(const int n) const
 {
 	Interval result;
 
-	if(n % 2 == 1) {	// n is odd
-    std::fesetround(FE_DOWNWARD);
-    result.lo = std::pow(lo, n);
-    std::fesetround(FE_UPWARD);
-    result.up = std::pow(up, n);
+	saveMode();
+	if (n % 2 == 1) {	// n is odd
+    	setMode(FE_DOWNWARD);
+    	result.lo = std::pow(lo, n);
+    	setMode(FE_UPWARD);
+    	result.up = std::pow(up, n);
+		restoreMode();
 		return result;
 	}
 	// n is even
 	if(lo >= 0) {			// 0 <= lo <= up
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		result.lo = std::pow(lo, n);
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		result.up = std::pow(up, n);
 	} else if(up <= 0)	{	// lo <= up <= 0
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		result.lo = std::pow(up, n);
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		result.up = std::pow(lo, n);
 	} else {									// lo < 0 < up
 		double tmp1, tmp2;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		tmp1 = std::pow(lo, n);
 		tmp2 = std::pow(up, n);
 		if(tmp1 >= tmp2) {
@@ -1130,6 +1263,7 @@ Interval Interval::pow(const int n) const
 		//wasn't present in Flow* (but putting it here for being explicit)
 		result.lo = 0;
 	}
+	restoreMode();
 
 	// return [a,b]
 	return result;
@@ -1139,11 +1273,13 @@ Interval Interval::exp() const
 {
 	Interval result;
 
-  throw std::runtime_error("std::exp function is not precise");
-  std::fesetround(FE_DOWNWARD);
-  result.lo = std::exp(lo);
-  std::fesetround(FE_UPWARD);
-  result.up = std::exp(up);
+	saveMode();
+	throw std::runtime_error("std::exp function is not precise");
+	setMode(FE_DOWNWARD);
+	result.lo = std::exp(lo);
+	setMode(FE_UPWARD);
+	result.up = std::exp(up);
+	restoreMode();
 
 	return result;
 }
@@ -1166,40 +1302,45 @@ Interval Interval::log() const
 	} else {
 		Interval result;
 
-  	throw std::runtime_error("std::exp function is not precise (after 17 digits");
-  	std::fesetround(FE_DOWNWARD);
-  	result.lo = std::log(lo);
-  	std::fesetround(FE_UPWARD);
-  	result.up = std::log(up);
+		saveMode();
+	  	throw std::runtime_error("std::exp function is not precise (after 17 digits");
+	  	setMode(FE_DOWNWARD);
+	  	result.lo = std::log(lo);
+	  	setMode(FE_UPWARD);
+	  	result.up = std::log(up);
+		restoreMode();
+
 		return result;
 	}
 }
 
 void Interval::pow_assign(const int n)
 {
+	saveMode();
 	if(n % 2 == 1)		// n is odd
 	{
-    std::fesetround(FE_DOWNWARD);
-    lo = std::pow(lo, n);
-    std::fesetround(FE_UPWARD);
-    up = std::pow(up, n);
+		setMode(FE_DOWNWARD);
+		lo = std::pow(lo, n);
+		setMode(FE_UPWARD);
+		up = std::pow(up, n);
+		restoreMode();
 		return;
 	}
 	// n is even
 	if(lo >= 0) {		// 0 <= lo <= up
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		lo = std::pow(lo, n);
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		up = std::pow(up, n);
 	} else if(up <= 0) {		// lo <= up <= 0
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		double tmp = std::pow(up, n);
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		up = std::pow(lo, n);
 		lo = tmp;
 	} else {							// lo < 0 < up
 		double tmp1, tmp2;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		tmp1 = std::pow(lo, n);
 		tmp2 = std::pow(up, n);
 		if(tmp1 >= tmp2) {
@@ -1209,38 +1350,43 @@ void Interval::pow_assign(const int n)
 		}
 		lo = 0;
 	}
+	restoreMode();
 }
 
 void Interval::exp_assign()
 {
+	saveMode();
 	throw std::runtime_error("std::exp function is not precise");
-  std::fesetround(FE_DOWNWARD);
-  lo = std::exp(lo);
-  std::fesetround(FE_UPWARD);
-  up = std::exp(up);
+	setMode(FE_DOWNWARD);
+	lo = std::exp(lo);
+	setMode(FE_UPWARD);
+	up = std::exp(up);
+	restoreMode();
 }
 
 void Interval::sin_assign()
 {
-  throw std::runtime_error("'Interval::sin_assign() not ported!");
+	throw std::runtime_error("'Interval::sin_assign() not ported!");
 }
 
 void Interval::cos_assign()
 {
-  throw std::runtime_error("'Interval::cos_assign() not ported!");
+	throw std::runtime_error("'Interval::cos_assign() not ported!");
 }
 
 void Interval::log_assign()
 {
-	if(lo <= 0) {
+	if (lo <= 0) {
 		printf("Exception: Logarithm of a non-positive number.\n");
 		exit(1);
 	} else {
 		throw std::runtime_error("std::exp function is not precise (after 17 digits");
-  	std::fesetround(FE_DOWNWARD);
-  	lo = std::log(lo);
-  	std::fesetround(FE_UPWARD);
-  	up = std::log(up);
+		saveMode();
+		setMode(FE_DOWNWARD);
+		lo = std::log(lo);
+		setMode(FE_UPWARD);
+		up = std::log(up);
+		restoreMode();
 	}
 }
 
@@ -1248,11 +1394,13 @@ double Interval::widthRatio(const Interval & I) const
 {
 	double width1, width2, ratio;
 
-  std::fesetround(FE_UPWARD);
+	saveMode();
+	setMode(FE_UPWARD);
 	width1 = up - lo;
 	width2 = I.up - I.lo;
 
 	ratio = width2 / width1;		// we assume that width1 >= width2
+	restoreMode();
 
 	return ratio;
 }
@@ -1261,13 +1409,14 @@ void Interval::toString(std::string & result) const
 {
   //mlog1("(string) version");
 	char strTemp[30];
+	saveMode();
 
 	std::string strInt;
 	strInt += '[';
 
   //std::fesetround(FE_DOWNWARD);
-	setMode(FE_TONEAREST);
-  sprintf(strTemp, "%.10f", lo);
+	setMode(FE_DOWNWARD);
+	sprintf(strTemp, "%.10f", lo);
 	std::string strLo(strTemp);
 
 	strInt += strLo;
@@ -1275,18 +1424,20 @@ void Interval::toString(std::string & result) const
 	strInt += ',';
 	strInt += ' ';
 
-  //std::fesetround(FE_UPWARD);
-	setMode(FE_TONEAREST);
-  sprintf(strTemp, "%.10f", up);
+    //std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
+	sprintf(strTemp, "%.10f", up);
 	std::string strUp(strTemp);
 	strInt += strUp;
 	strInt += ']';
+	restoreMode();
 
 	result = strInt;
 }
 
 void Interval::dump(FILE *fp) const
 {
+	saveMode();
 	if(coefficientOutputFormatSet == false) {
 		setCoefficientFormatCStr();
 	}
@@ -1295,13 +1446,14 @@ void Interval::dump(FILE *fp) const
 	//15 is PN in Flow* (but it's arbitrary anyway)
   //std::fesetround(FE_DOWNWARD);
 	setMode(FE_TONEAREST);
-  fprintf (fp, coefficientFormatCStr, lo);
+	fprintf (fp, coefficientFormatCStr, lo);
 	fprintf(fp, " , ");
-  //std::fesetround(FE_UPWARD);
+	//std::fesetround(FE_UPWARD);
 	//setMode(FE_TONEAREST);
-  fprintf (fp, coefficientFormatCStr, up);
+	fprintf (fp, coefficientFormatCStr, up);
 
 	fprintf(fp, "]");
+	restoreMode();
 }
 
 void Interval::output(FILE * fp, const char * msg, const char * msg2) const
@@ -1314,24 +1466,25 @@ void Interval::output(FILE * fp, const char * msg, const char * msg2) const
 	//15 is PN in Flow* (but it's arbitrary anyway)
   //std::fesetround(FE_DOWNWARD);
 	setMode(FE_TONEAREST);
-  fprintf (fp, coefficientFormatCStr, lo);
+	fprintf (fp, coefficientFormatCStr, lo);
 	fprintf(fp, " , ");
   //std::fesetround(FE_UPWARD);
 	//setMode(FE_TONEAREST);
-  fprintf (fp, coefficientFormatCStr, up);
+	fprintf (fp, coefficientFormatCStr, up);
 
 	fprintf(fp, " ] %s", msg2);
+	saveMode();
 }
 
 bool subseteq(const std::vector<Interval> & v1, const std::vector<Interval> & v2) {
-  if(v1.size() != v2.size())
-    throw std::invalid_argument("Different domains of vectors");
-  for(int i = 0; i < v1.size(); i++) {
-    if(v1[i].subseteq(v2[i]) == false) {
-      return false;
-    }
-  }
-  return true;
+	if (v1.size() != v2.size())
+    	throw std::invalid_argument("Different domains of vectors");
+  	for (int i = 0; i < v1.size(); i++) {
+    	if (v1[i].subseteq(v2[i]) == false) {
+    		return false;
+    	}
+	}
+  	return true;
 }
 
 //--new from 2.1
@@ -1343,10 +1496,12 @@ Interval::Interval(const Real & r)
 
 Interval::Interval(const Real & c, const Real & r)
 {
-	std::fesetround(FE_DOWNWARD);
-  lo = c.value + r.value;
-	std::fesetround(FE_UPWARD);
-  up = c.value + r.value;
+	saveMode();
+	setMode(FE_DOWNWARD);
+	lo = c.value + r.value;
+	setMode(FE_UPWARD);
+    up = c.value + r.value;
+	restoreMode();
 }
 
 Interval::Interval(const Real & l, const Real & u, const int n)
@@ -1389,25 +1544,31 @@ void Interval::inf(Real & l) const
 
 void Interval::midpoint(Real & mid) const
 {
-	std::fesetround(FE_TONEAREST);
+	saveMode();
+	setMode(FE_TONEAREST);
 	mid.value = (lo + up) / 2.0;
+	restoreMode();
 }
 
 void Interval::toCenterForm(Real & center, Real & radius) const
 {
-	std::fesetround(FE_TONEAREST);
+	saveMode();
+	setMode(FE_TONEAREST);
 	center.value = (lo + up) / 2.0;
 
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	radius.value = (up - lo) / 2.0;
+	restoreMode();
 }
 
 void Interval::bloat(const Real & e)
 {
-	std::fesetround(FE_DOWNWARD);
-  lo -= e.value;
-	std::fesetround(FE_UPWARD);
-  lo += e.value;
+	saveMode();
+	setMode(FE_DOWNWARD);
+    lo -= e.value;
+	setMode(FE_UPWARD);
+    lo += e.value;
+	restoreMode();
 }
 
 
@@ -1441,20 +1602,24 @@ Interval & Interval::operator = (const double d)
 
 Interval & Interval::operator += (const double c)
 {
-	std::fesetround(FE_DOWNWARD);
+	saveMode();
+	setMode(FE_DOWNWARD);
 	lo += c;
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	up += c;
+	restoreMode();
 
 	return *this;
 }
 
 Interval & Interval::operator -= (const double c)
 {
-	std::fesetround(FE_DOWNWARD);
+	saveMode();
+	setMode(FE_DOWNWARD);
 	lo -= c;
-	std::fesetround(FE_UPWARD);
+	setMode(FE_UPWARD);
 	up -= c;
+	restoreMode();
 
 	return *this;
 }
@@ -1462,36 +1627,40 @@ Interval & Interval::operator -= (const double c)
 
 Interval & Interval::operator *= (const double c)
 {
+	saveMode();
 	if(c >= 0) {
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		lo *= c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		up *= c;
 	} else {
 		double temp = lo;
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		lo = up * c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		up = temp * c;
 	}
+	restoreMode();
 
 	return *this;
 }
 
 Interval & Interval::operator /= (const double c)
 {
+	saveMode();
 	if(c >= 0) {
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		lo /= c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		up /= c;
 	} else {
 		double temp = lo;
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		lo = up / c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		up = temp / c;
 	}
+	saveMode();
 
 	return *this;
 }
@@ -1514,17 +1683,19 @@ const Interval Interval::operator * (const double c) const
 {
 	Interval result;
 
+	saveMode();
 	if(c > 0) {
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		result.lo = lo * c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		result.up = up * c;
 	} else {
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		result.lo = up * c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		result.up = lo * c;
 	}
+	restoreMode();
 
 	return result;
 }
@@ -1533,17 +1704,19 @@ const Interval Interval::operator / (const double c) const
 {
 	Interval result;
 
+	saveMode();
 	if(c > 0) {
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		result.lo = lo / c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		result.up = up / c;
 	} else {
-		std::fesetround(FE_DOWNWARD);
+		setMode(FE_DOWNWARD);
 		result.lo = up / c;
-		std::fesetround(FE_UPWARD);
+		setMode(FE_UPWARD);
 		result.up = lo / c;
 	}
+	restoreMode();
 
 	return result;
 }
@@ -1552,66 +1725,67 @@ void Interval::mul_add(Interval *result, const Interval *intVec, const int size)
 {
 	double tmp1, tmp2, tmp_up, tmp_lo;
 
-	if(lo >= 0)
+	saveMode();
+	if (lo >= 0)
 	{
-		for(int i=0; i<size; ++i)
+		for (int i=0; i<size; ++i)
 		{
-			if(intVec[i].lo >= 0)
+			if (intVec[i].lo >= 0)
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = lo * intVec[i].lo;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = up * intVec[i].up;
 			}
 			else if(intVec[i].up <= 0)
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = up * intVec[i].lo;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = lo * intVec[i].up;
 			}
 			else
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = up * intVec[i].lo;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = up * intVec[i].up;
 			}
 
-			std::fesetround(FE_DOWNWARD);
+			setMode(FE_DOWNWARD);
 			result[i].lo = result[i].lo + tmp_lo;
-			std::fesetround(FE_UPWARD);
+			setMode(FE_UPWARD);
 			result[i].up = result[i].up + tmp_up;
 		}
 	}
-	else if(up <= 0)
+	else if (up <= 0)
 	{
-		for(int i=0; i<size; ++i)
+		for (int i=0; i<size; ++i)
 		{
-			if(intVec[i].lo >= 0)
+			if (intVec[i].lo >= 0)
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = lo * intVec[i].up;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = up * intVec[i].lo;
 			}
-			else if(intVec[i].up <= 0)
+			else if (intVec[i].up <= 0)
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = up * intVec[i].up;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = lo * intVec[i].lo;
 			}
 			else
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = lo * intVec[i].up;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = lo * intVec[i].lo;
 			}
-			std::fesetround(FE_DOWNWARD);
+			setMode(FE_DOWNWARD);
 			result[i].lo = result[i].lo + tmp_lo;
-			std::fesetround(FE_UPWARD);
+			setMode(FE_UPWARD);
 			result[i].up = result[i].up + tmp_up;
 		}
 	}
@@ -1621,21 +1795,21 @@ void Interval::mul_add(Interval *result, const Interval *intVec, const int size)
 		{
 			if(intVec[i].lo >= 0)
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = lo * intVec[i].up;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = up * intVec[i].up;
 			}
 			else if(intVec[i].up <= 0)
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp_lo = up * intVec[i].lo;
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp_up = lo * intVec[i].lo;
 			}
 			else
 			{
-				std::fesetround(FE_DOWNWARD);
+				setMode(FE_DOWNWARD);
 				tmp1 = lo * intVec[i].up;
 				tmp2 = up * intVec[i].lo;
 
@@ -1648,7 +1822,7 @@ void Interval::mul_add(Interval *result, const Interval *intVec, const int size)
 					tmp_lo = tmp1;
 				}
 
-				std::fesetround(FE_UPWARD);
+				setMode(FE_UPWARD);
 				tmp1 = lo * intVec[i].lo;
 				tmp2 = up * intVec[i].up;
 
@@ -1662,10 +1836,11 @@ void Interval::mul_add(Interval *result, const Interval *intVec, const int size)
 				}
 			}
 
-			std::fesetround(FE_DOWNWARD);
+			setMode(FE_DOWNWARD);
 			result[i].lo = result[i].lo + tmp_lo;
-			std::fesetround(FE_UPWARD);
+			setMode(FE_UPWARD);
 			result[i].up = result[i].up + tmp_up;
 		}
 	}
+	restoreMode();
 }

@@ -21,6 +21,7 @@ namespace flowstar
 class Interval;
 
 inline void setMode(int mode);
+inline void restoreMode();
 
 class Real
 {
@@ -112,8 +113,8 @@ public:
 class Interval
 {
 private:
-  inline double mulMin(const Interval & I) const;
-  inline double mulMax(const Interval & I) const;
+    inline double mulMin(const Interval & I) const;
+    inline double mulMax(const Interval & I) const;
 protected:
 	double lo;		// the lower bound
 	double up;		// the upper bound

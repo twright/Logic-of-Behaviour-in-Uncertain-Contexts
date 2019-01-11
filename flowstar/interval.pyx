@@ -122,7 +122,7 @@ def py_int_diff(a, b):
     (False, False, ..., ...)
     '''
     cdef Interval L, U, A, B
-    cdef cbool res,split
+    cdef cbool res, split = False
 
     A = make_interval(a)
     B = make_interval(b)
@@ -178,7 +178,7 @@ def py_extdiv(d, a, b):
     cdef Interval B = make_interval(b)
     cdef Interval D = make_interval(d)
     cdef Interval L, U
-    cdef cbool split
+    cdef cbool split = False
 
     res = <bint?>extdiv(L, U, split, D, A, B)
 

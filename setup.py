@@ -15,7 +15,7 @@ Cython.Compiler.Options.fast_fail = True
 
 LIB_DIRS = ['.', './flowstar/', './flowstar/flowstar-2.1.0']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
-COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-frounding-math']
+COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-march=native']
 LINK_ARGS = ['-std=c++17']
 
 extensions = [
@@ -69,16 +69,6 @@ extensions = [
         library_dirs=LIB_DIRS,
         include_dirs=LIB_DIRS,
     ),
-    Extension(
-        name='flowstar.flowroots',
-        sources=['flowstar/flowroots.pyx'],
-        language='c++',
-        libraries=LIBS,
-        extra_compile_args=COMPILE_ARGS,
-        extra_link_args=LINK_ARGS,
-        library_dirs=LIB_DIRS,
-        include_dirs=LIB_DIRS,
-    ),
 ]
 
 
@@ -124,7 +114,15 @@ class CleanFlowstarCommand(Command):
 
     def run(self):
         self.announce('Cleaning flowstar...')
-        subprocess.call(['make', 'clean'], cwd='flowstar/flowstar-2.1.0')
+        try:
+            subprocess.call('make clean', cwd='flowstar/flowstar-2.1.0',
+                shell=True)
+        except:
+            pass
+        try:
+            subprocess.call('rm -f flowstar/*.so', shell=True)
+        except:
+            pass
 
 
 class TestCommand(Command):

@@ -150,20 +150,8 @@ def work_without_intEval():
     statd = "ran successfully!" if 1 <= resd <= 3 else "failed!"
     print "{} -- {} flowpipes computed".format(statd, D.num_flowpipes)
 
-    # cdef IntervalFunc (*f_ptr)(vector[Interval])
-    # cdef IntervalFunc F
-    # f_ptr = f
-    # cdef Interval (*fprime_ptr)(vector[Interval])
-    # fprime_ptr = fprime
-
-    # cdef interval_fn f_fn = poly_fn(Poly(x - 3.0).c_poly)
-    # cdef interval_fn fprime_fn = poly_fn(Poly(-y).c_poly)
-    # roots1 = D.roots(x - 3.0, -y)
-    # for root1 in roots1:
-    #     print("[{}..{}]".format(*root1.endpoints()))
-    resd = D.prepare()
-    cdef vector[Interval] roots = (<CReach?>D).c_roots(f, fprime)
-    print("found {} roots!".format(roots.size()))
+    roots = D.roots(f, fprime)
+    print("found {} roots!".format(len(roots)))
     for root in roots:
         print("[{}..{}]".format(root.inf(), root.sup()))
 

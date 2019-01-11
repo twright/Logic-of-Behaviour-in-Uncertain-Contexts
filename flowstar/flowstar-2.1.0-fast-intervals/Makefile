@@ -1,8 +1,8 @@
 CXX = g++
 include makefile.local
 LIBS = -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
-OFLAGS = -O3 -frounding-math
-CFLAGS = -I . -I $(GMP_HOME) -g $(OFLAGS) -std=c++11 -fPIC -frounding-math
+OFLAGS = -O3 -march=native
+CFLAGS = -I . -I $(GMP_HOME) -g $(OFLAGS) -std=c++11 -fPIC -frounding-math# -ffast-math
 LINK_FLAGS = -g -L$(GMP_LIB_HOME)
 OBJS = Interval.o Matrix.o Polynomial.o Monomial.o Constraints.o Geometry.o TaylorModel.o Continuous.o Hybrid.o
 

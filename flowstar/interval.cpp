@@ -13,7 +13,7 @@
             "-O3", 
             "-std=c++17", 
             "-Wno-register", 
-            "-frouding-math"
+            "-march=native"
         ], 
         "extra_link_args": [
             "-std=c++17"
@@ -915,7 +915,7 @@ typedef MonoWrap *__pyx_t_8flowstar_8Monomial_MonoWrapPtr;
  */
 typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
 
-/* "flowstar/Polynomial.pxd":59
+/* "flowstar/Polynomial.pxd":62
  *         clist[Monomial] & getMonomials()
  * 
  * ctypedef PolyWrap* PolyWrapPtr             # <<<<<<<<<<<<<<
@@ -923,7 +923,7 @@ typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
  */
 typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
 
-/* "flowstar/Polynomial.pxd":60
+/* "flowstar/Polynomial.pxd":63
  * 
  * ctypedef PolyWrap* PolyWrapPtr
  * ctypedef Polynomial* PolynomialPtr             # <<<<<<<<<<<<<<
@@ -2837,8 +2837,17 @@ static PyObject *__pyx_pf_8flowstar_8interval_6py_int_diff(CYTHON_UNUSED PyObjec
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("py_int_diff", 0);
 
+  /* "flowstar/interval.pyx":125
+ *     '''
+ *     cdef Interval L, U, A, B
+ *     cdef cbool res, split = False             # <<<<<<<<<<<<<<
+ * 
+ *     A = make_interval(a)
+ */
+  __pyx_v_split = 0;
+
   /* "flowstar/interval.pyx":127
- *     cdef cbool res,split
+ *     cdef cbool res, split = False
  * 
  *     A = make_interval(a)             # <<<<<<<<<<<<<<
  *     B = make_interval(b)
@@ -3447,12 +3456,21 @@ static PyObject *__pyx_pf_8flowstar_8interval_8py_extdiv(CYTHON_UNUSED PyObject 
  *     cdef Interval B = make_interval(b)
  *     cdef Interval D = make_interval(d)             # <<<<<<<<<<<<<<
  *     cdef Interval L, U
- *     cdef cbool split
+ *     cdef cbool split = False
  */
   __pyx_v_D = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_d);
 
+  /* "flowstar/interval.pyx":181
+ *     cdef Interval D = make_interval(d)
+ *     cdef Interval L, U
+ *     cdef cbool split = False             # <<<<<<<<<<<<<<
+ * 
+ *     res = <bint?>extdiv(L, U, split, D, A, B)
+ */
+  __pyx_v_split = 0;
+
   /* "flowstar/interval.pyx":183
- *     cdef cbool split
+ *     cdef cbool split = False
  * 
  *     res = <bint?>extdiv(L, U, split, D, A, B)             # <<<<<<<<<<<<<<
  * 

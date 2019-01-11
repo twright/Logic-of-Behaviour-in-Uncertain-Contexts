@@ -13,7 +13,7 @@
             "-O3", 
             "-std=c++17", 
             "-Wno-register", 
-            "-frouding-math"
+            "-march=native"
         ], 
         "extra_link_args": [
             "-std=c++17"
@@ -699,9 +699,22 @@ static CYTHON_INLINE float __PYX_NAN() {
             flowstar::Interval res;
             std::vector<flowstar::Interval> v;
             v.push_back(t);
-            v.push_back(t);
+            // v.push_back(t);
             p.intEval(res, v);
             return res;
+        };
+    }
+
+    std::function<flowstar::Interval(const flowstar::Interval &)>
+    poly_domain_time_fn(
+    const flowstar::Polynomial & f,
+    std::vector<flowstar::Interval>& domain
+    ) {
+        return [f, &domain](const flowstar::Interval & t) -> flowstar::Interval {
+            flowstar::Interval I;
+            domain[0] = t;
+            f.intEval(I, domain);
+            return I;
         };
     }
     
@@ -942,7 +955,7 @@ typedef MonoWrap *__pyx_t_8flowstar_8Monomial_MonoWrapPtr;
  */
 typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
 
-/* "flowstar/Polynomial.pxd":59
+/* "flowstar/Polynomial.pxd":62
  *         clist[Monomial] & getMonomials()
  * 
  * ctypedef PolyWrap* PolyWrapPtr             # <<<<<<<<<<<<<<
@@ -950,12 +963,25 @@ typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
  */
 typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
 
-/* "flowstar/Polynomial.pxd":60
+/* "flowstar/Polynomial.pxd":63
  * 
  * ctypedef PolyWrap* PolyWrapPtr
  * ctypedef Polynomial* PolynomialPtr             # <<<<<<<<<<<<<<
  */
 typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
+struct __pyx_opt_args_8flowstar_4poly_compose;
+
+/* "flowstar/poly.pxd":12
+ *     int order, Interval & cutoff_threshold) nogil
+ * 
+ * cdef TaylorModel compose(const Polynomial & P,             # <<<<<<<<<<<<<<
+ *                          const TaylorModelVec tmv,
+ *                          const vector[Interval] & domain,
+ */
+struct __pyx_opt_args_8flowstar_4poly_compose {
+  int __pyx_n;
+  int verbosity;
+};
 struct __pyx_opt_args_8flowstar_14root_detection_detect_roots;
 
 /* "flowstar/root_detection.pxd":7
@@ -971,8 +997,8 @@ struct __pyx_opt_args_8flowstar_14root_detection_detect_roots {
   int verbosity;
 };
 
-/* "flowstar/poly.pxd":35
- *     cdef interval_time_fn poly_time_fn (const Polynomial & p)
+/* "flowstar/poly.pxd":65
+ *                                                const vector[Interval] & domain)
  * 
  * cdef class Poly:             # <<<<<<<<<<<<<<
  *     cdef Polynomial c_poly
@@ -3347,8 +3373,8 @@ static int __Pyx_modinit_type_import_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(1, 35, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(1, 35, __pyx_L1_error)
+  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(1, 65, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(1, 65, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

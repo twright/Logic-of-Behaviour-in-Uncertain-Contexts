@@ -15,7 +15,7 @@
             "-O3", 
             "-std=c++17", 
             "-Wno-register", 
-            "-frouding-math"
+            "-march=native"
         ], 
         "extra_link_args": [
             "-std=c++17"
@@ -705,12 +705,26 @@ static CYTHON_INLINE float __PYX_NAN() {
             flowstar::Interval res;
             std::vector<flowstar::Interval> v;
             v.push_back(t);
-            v.push_back(t);
+            // v.push_back(t);
             p.intEval(res, v);
             return res;
         };
     }
+
+    std::function<flowstar::Interval(const flowstar::Interval &)>
+    poly_domain_time_fn(
+    const flowstar::Polynomial & f,
+    std::vector<flowstar::Interval>& domain
+    ) {
+        return [f, &domain](const flowstar::Interval & t) -> flowstar::Interval {
+            flowstar::Interval I;
+            domain[0] = t;
+            f.intEval(I, domain);
+            return I;
+        };
+    }
     
+#include <optional>
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -916,14 +930,14 @@ static const char *__pyx_filename;
 static const char *__pyx_f[] = {
   "flowstar/plotting.pyx",
   "stringsource",
-  "flowstar/reachability.pxd",
   "flowstar/poly.pxd",
+  "flowstar/reachability.pxd",
 };
 
 /*--- Type declarations ---*/
+struct __pyx_obj_8flowstar_4poly_Poly;
 struct __pyx_obj_8flowstar_12reachability_CReach;
 struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager;
-struct __pyx_obj_8flowstar_4poly_Poly;
 struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin;
 struct __pyx_obj_8flowstar_8plotting_SagePlotMixin;
 struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin;
@@ -945,7 +959,7 @@ typedef MonoWrap *__pyx_t_8flowstar_8Monomial_MonoWrapPtr;
  */
 typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
 
-/* "flowstar/Polynomial.pxd":59
+/* "flowstar/Polynomial.pxd":62
  *         clist[Monomial] & getMonomials()
  * 
  * ctypedef PolyWrap* PolyWrapPtr             # <<<<<<<<<<<<<<
@@ -953,20 +967,34 @@ typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
  */
 typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
 
-/* "flowstar/Polynomial.pxd":60
+/* "flowstar/Polynomial.pxd":63
  * 
  * ctypedef PolyWrap* PolyWrapPtr
  * ctypedef Polynomial* PolynomialPtr             # <<<<<<<<<<<<<<
  */
 typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
-struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots;
+struct __pyx_opt_args_8flowstar_4poly_compose;
 
-/* "flowstar/reachability.pxd":20
- *     cdef public int result
+/* "flowstar/poly.pxd":12
+ *     int order, Interval & cutoff_threshold) nogil
  * 
- *     cdef vector[Interval] c_roots(CReach, interval_fn, interval_fn, double epsilon=?, int verbosity=?)             # <<<<<<<<<<<<<<
- *     cdef vector[Interval] eval_interval(CReach, Interval)
+ * cdef TaylorModel compose(const Polynomial & P,             # <<<<<<<<<<<<<<
+ *                          const TaylorModelVec tmv,
+ *                          const vector[Interval] & domain,
+ */
+struct __pyx_opt_args_8flowstar_4poly_compose {
+  int __pyx_n;
+  int verbosity;
+};
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots;
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval;
+
+/* "flowstar/reachability.pxd":54
+ *     cdef public bint symbolic_composition
  * 
+ *     cdef vector[Interval] c_roots(CReach, Polynomial & f, Polynomial & fprime,             # <<<<<<<<<<<<<<
+ *             double epsilon=?, int verbosity=?)
+ *     cdef vector[Interval] eval_interval(CReach, Interval,
  */
 struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots {
   int __pyx_n;
@@ -974,7 +1002,34 @@ struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots {
   int verbosity;
 };
 
-/* "flowstar/reachability.pxd":12
+/* "flowstar/reachability.pxd":56
+ *     cdef vector[Interval] c_roots(CReach, Polynomial & f, Polynomial & fprime,
+ *             double epsilon=?, int verbosity=?)
+ *     cdef vector[Interval] eval_interval(CReach, Interval,             # <<<<<<<<<<<<<<
+ *             optional[reference_wrapper[Polynomial]] poly=*)
+ * 
+ */
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval {
+  int __pyx_n;
+  std::optional<std::reference_wrapper<flowstar::Polynomial> >  poly;
+};
+
+/* "flowstar/poly.pxd":65
+ *                                                const vector[Interval] & domain)
+ * 
+ * cdef class Poly:             # <<<<<<<<<<<<<<
+ *     cdef Polynomial c_poly
+ *     cdef dict vars
+ */
+struct __pyx_obj_8flowstar_4poly_Poly {
+  PyObject_HEAD
+  struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtab;
+  flowstar::Polynomial c_poly;
+  PyObject *vars;
+};
+
+
+/* "flowstar/reachability.pxd":45
  * 
  * 
  * cdef class CReach:             # <<<<<<<<<<<<<<
@@ -989,10 +1044,11 @@ struct __pyx_obj_8flowstar_12reachability_CReach {
   int ran;
   int prepared;
   int result;
+  int symbolic_composition;
 };
 
 
-/* "flowstar/reachability.pxd":24
+/* "flowstar/reachability.pxd":60
  * 
  * 
  * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
@@ -1005,21 +1061,6 @@ struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager {
   std::vector<flowstar::Interval>  power_4;
   std::vector<flowstar::Interval>  double_factorial;
   std::vector<std::string>  domainVarNames;
-};
-
-
-/* "flowstar/poly.pxd":35
- *     cdef interval_time_fn poly_time_fn (const Polynomial & p)
- * 
- * cdef class Poly:             # <<<<<<<<<<<<<<
- *     cdef Polynomial c_poly
- *     cdef dict vars
- */
-struct __pyx_obj_8flowstar_4poly_Poly {
-  PyObject_HEAD
-  struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtab;
-  flowstar::Polynomial c_poly;
-  PyObject *vars;
 };
 
 
@@ -1060,12 +1101,14 @@ struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin {
 /* "flowstar/plotting.pyx":60
  * 
  * cdef class SagePlotMixin:
- *     def sage_plot(self, x, duration=None, double step=1e-2):             # <<<<<<<<<<<<<<
+ *     def sage_plot(self, x, duration=None, double step=1e-2, poly=None):             # <<<<<<<<<<<<<<
  *         from sage.all import plot
  * 
  */
 struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot {
   PyObject_HEAD
+  PyObject *__pyx_v_f;
+  PyObject *__pyx_v_poly;
   PyObject *__pyx_v_ress;
   struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self;
   double __pyx_v_step;
@@ -1073,7 +1116,7 @@ struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot {
 };
 
 
-/* "flowstar/plotting.pyx":83
+/* "flowstar/plotting.pyx":85
  *                     plot_points=self.time//step)
  * 
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):             # <<<<<<<<<<<<<<
@@ -1090,23 +1133,8 @@ struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot {
 
 
 
-/* "flowstar/reachability.pxd":12
- * 
- * 
- * cdef class CReach:             # <<<<<<<<<<<<<<
- *     cdef public FlowstarGlobalManager global_manager
- * 
- */
-
-struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
-  std::vector<flowstar::Interval>  (*c_roots)(struct __pyx_obj_8flowstar_12reachability_CReach *, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>, struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots *__pyx_optional_args);
-  std::vector<flowstar::Interval>  (*eval_interval)(struct __pyx_obj_8flowstar_12reachability_CReach *, flowstar::Interval);
-};
-static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
-
-
-/* "flowstar/poly.pxd":35
- *     cdef interval_time_fn poly_time_fn (const Polynomial & p)
+/* "flowstar/poly.pxd":65
+ *                                                const vector[Interval] & domain)
  * 
  * cdef class Poly:             # <<<<<<<<<<<<<<
  *     cdef Polynomial c_poly
@@ -1117,6 +1145,21 @@ struct __pyx_vtabstruct_8flowstar_4poly_Poly {
   struct __pyx_obj_8flowstar_4poly_Poly *(*from_polynomial)(flowstar::Polynomial &, PyObject *);
 };
 static struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtabptr_8flowstar_4poly_Poly;
+
+
+/* "flowstar/reachability.pxd":45
+ * 
+ * 
+ * cdef class CReach:             # <<<<<<<<<<<<<<
+ *     cdef public FlowstarGlobalManager global_manager
+ * 
+ */
+
+struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
+  std::vector<flowstar::Interval>  (*c_roots)(struct __pyx_obj_8flowstar_12reachability_CReach *, flowstar::Polynomial &, flowstar::Polynomial &, struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots *__pyx_optional_args);
+  std::vector<flowstar::Interval>  (*eval_interval)(struct __pyx_obj_8flowstar_12reachability_CReach *, flowstar::Interval, struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval *__pyx_optional_args);
+};
+static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
 
 /* --- Runtime support code (head) --- */
 /* Refnanny.proto */
@@ -1371,17 +1414,6 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize
 static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
 static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
                                                      int is_list, int wraparound, int boundscheck);
-
-/* DictGetItem.proto */
-#if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
-static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key);
-#define __Pyx_PyObject_Dict_GetItem(obj, name)\
-    (likely(PyDict_CheckExact(obj)) ?\
-     __Pyx_PyDict_GetItem(obj, name) : PyObject_GetItem(obj, name))
-#else
-#define __Pyx_PyDict_GetItem(d, key) PyObject_GetItem(d, key)
-#define __Pyx_PyObject_Dict_GetItem(obj, name)  PyObject_GetItem(obj, name)
-#endif
 
 /* FetchCommonType.proto */
 static PyTypeObject* __Pyx_FetchCommonType(PyTypeObject* type);
@@ -1730,12 +1762,12 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'flowstar.interval' */
 
+/* Module declarations from 'flowstar.poly' */
+static PyTypeObject *__pyx_ptype_8flowstar_4poly_Poly = 0;
+
 /* Module declarations from 'flowstar.reachability' */
 static PyTypeObject *__pyx_ptype_8flowstar_12reachability_CReach = 0;
 static PyTypeObject *__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = 0;
-
-/* Module declarations from 'flowstar.poly' */
-static PyTypeObject *__pyx_ptype_8flowstar_4poly_Poly = 0;
 
 /* Module declarations from 'flowstar.plotting' */
 static PyTypeObject *__pyx_ptype_8flowstar_8plotting_FlowstarPlotMixin = 0;
@@ -1765,7 +1797,7 @@ static const char __pyx_k_fl[] = "fl";
 static const char __pyx_k_fu[] = "fu";
 static const char __pyx_k_pi[] = "pi";
 static const char __pyx_k_RIF[] = "RIF";
-static const char __pyx_k__15[] = "--";
+static const char __pyx_k__17[] = "--";
 static const char __pyx_k_cos[] = "cos";
 static const char __pyx_k_eps[] = "eps";
 static const char __pyx_k_get[] = "get";
@@ -1830,6 +1862,7 @@ static const char __pyx_k_sage_all[] = "sage.all";
 static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_straight[] = "straight";
 static const char __pyx_k_endpoints[] = "endpoints";
+static const char __pyx_k_eval_poly[] = "eval_poly";
 static const char __pyx_k_functools[] = "functools";
 static const char __pyx_k_linestyle[] = "linestyle";
 static const char __pyx_k_plot_type[] = "plot_type";
@@ -1857,6 +1890,7 @@ static const char __pyx_k_Filename_too_long[] = "Filename too long!";
 static const char __pyx_k_absolute_diameter[] = "absolute_diameter";
 static const char __pyx_k_flowstar_plotting[] = "flowstar.plotting";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
+static const char __pyx_k_sage_plot_locals_f[] = "sage_plot.<locals>.f";
 static const char __pyx_k_sage_plot_locals_fl[] = "sage_plot.<locals>.fl";
 static const char __pyx_k_sage_plot_locals_fu[] = "sage_plot.<locals>.fu";
 static const char __pyx_k_flowstar_plotting_pyx[] = "flowstar/plotting.pyx";
@@ -1877,7 +1911,7 @@ static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0xd4;
 static PyObject *__pyx_kp_s_Not_ran;
 static PyObject *__pyx_n_s_PickleError;
 static PyObject *__pyx_n_s_RIF;
-static PyObject *__pyx_kp_s__15;
+static PyObject *__pyx_kp_s__17;
 static PyObject *__pyx_n_s_absolute_diameter;
 static PyObject *__pyx_n_s_arctan;
 static PyObject *__pyx_n_s_arrow;
@@ -1894,6 +1928,7 @@ static PyObject *__pyx_n_s_duration;
 static PyObject *__pyx_n_s_endpoints;
 static PyObject *__pyx_n_s_enter;
 static PyObject *__pyx_n_s_eps;
+static PyObject *__pyx_n_s_eval_poly;
 static PyObject *__pyx_n_s_exit;
 static PyObject *__pyx_n_s_f;
 static PyObject *__pyx_n_s_filename;
@@ -1954,6 +1989,7 @@ static PyObject *__pyx_n_s_rotate;
 static PyObject *__pyx_n_s_sage_all;
 static PyObject *__pyx_n_s_sage_parametric_plot_locals_f;
 static PyObject *__pyx_n_s_sage_parametric_plot_locals_g;
+static PyObject *__pyx_n_s_sage_plot_locals_f;
 static PyObject *__pyx_n_s_sage_plot_locals_fl;
 static PyObject *__pyx_n_s_sage_plot_locals_fu;
 static PyObject *__pyx_n_s_sage_tube_plot;
@@ -1984,9 +2020,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
 static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_2wplot(struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, int __pyx_v_plot_type, PyObject *__pyx_v_filename); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_4__reduce_cython__(struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_6__setstate_cython__(struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_fl(PyObject *__pyx_self, PyObject *__pyx_v_t); /* proto */
-static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_2fu(PyObject *__pyx_self, PyObject *__pyx_v_t); /* proto */
-static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_duration, double __pyx_v_step); /* proto */
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_f(PyObject *__pyx_self, PyObject *__pyx_v_t); /* proto */
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_2fl(PyObject *__pyx_self, PyObject *__pyx_v_t); /* proto */
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_4fu(PyObject *__pyx_self, PyObject *__pyx_v_t); /* proto */
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_duration, double __pyx_v_step, PyObject *__pyx_v_poly); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_f(PyObject *__pyx_self, PyObject *__pyx_v_t); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_2g(PyObject *__pyx_self, PyObject *__pyx_v_t); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_plot(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, double __pyx_v_step); /* proto */
@@ -2026,17 +2063,19 @@ static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_tuple__9;
 static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__13;
-static PyObject *__pyx_tuple__14;
+static PyObject *__pyx_tuple__15;
 static PyObject *__pyx_tuple__16;
 static PyObject *__pyx_tuple__18;
 static PyObject *__pyx_tuple__20;
+static PyObject *__pyx_tuple__22;
 static PyObject *__pyx_codeobj__6;
 static PyObject *__pyx_codeobj__8;
 static PyObject *__pyx_codeobj__10;
 static PyObject *__pyx_codeobj__12;
-static PyObject *__pyx_codeobj__17;
+static PyObject *__pyx_codeobj__14;
 static PyObject *__pyx_codeobj__19;
 static PyObject *__pyx_codeobj__21;
+static PyObject *__pyx_codeobj__23;
 /* Late includes */
 
 /* "flowstar/plotting.pyx":15
@@ -3260,7 +3299,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_6__setstate_cy
 /* "flowstar/plotting.pyx":60
  * 
  * cdef class SagePlotMixin:
- *     def sage_plot(self, x, duration=None, double step=1e-2):             # <<<<<<<<<<<<<<
+ *     def sage_plot(self, x, duration=None, double step=1e-2, poly=None):             # <<<<<<<<<<<<<<
  *         from sage.all import plot
  * 
  */
@@ -3271,17 +3310,21 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_1sage_plot(PyObjec
   PyObject *__pyx_v_x = 0;
   PyObject *__pyx_v_duration = 0;
   double __pyx_v_step;
+  PyObject *__pyx_v_poly = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("sage_plot (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_x,&__pyx_n_s_duration,&__pyx_n_s_step,0};
-    PyObject* values[3] = {0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_x,&__pyx_n_s_duration,&__pyx_n_s_step,&__pyx_n_s_poly,0};
+    PyObject* values[4] = {0,0,0,0};
     values[1] = ((PyObject *)Py_None);
+    values[3] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -3308,12 +3351,20 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_1sage_plot(PyObjec
           PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_step);
           if (value) { values[2] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_poly);
+          if (value) { values[3] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_plot") < 0)) __PYX_ERR(0, 60, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -3330,16 +3381,17 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_1sage_plot(PyObjec
     } else {
       __pyx_v_step = ((double)1e-2);
     }
+    __pyx_v_poly = values[3];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sage_plot", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 60, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sage_plot", 0, 1, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 60, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(((struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_duration, __pyx_v_step);
+  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(((struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_duration, __pyx_v_step, __pyx_v_poly);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
@@ -3349,26 +3401,26 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_1sage_plot(PyObjec
 /* "flowstar/plotting.pyx":70
  *         ress = dict()
  * 
- *         def fl(t):             # <<<<<<<<<<<<<<
+ *         def f(t):             # <<<<<<<<<<<<<<
  *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+ *                 if poly is None:
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1fl(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1fl = {"fl", (PyCFunction)__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1fl, METH_O, 0};
-static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1fl(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1f(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1f = {"f", (PyCFunction)__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1f, METH_O, 0};
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1f(PyObject *__pyx_self, PyObject *__pyx_v_t) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("fl (wrapper)", 0);
-  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_fl(__pyx_self, ((PyObject *)__pyx_v_t));
+  __Pyx_RefNannySetupContext("f (wrapper)", 0);
+  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_f(__pyx_self, ((PyObject *)__pyx_v_t));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_fl(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_f(PyObject *__pyx_self, PyObject *__pyx_v_t) {
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *__pyx_cur_scope;
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *__pyx_outer_scope;
   PyObject *__pyx_r = NULL;
@@ -3380,16 +3432,17 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_fl(PyOb
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
-  __Pyx_RefNannySetupContext("fl", 0);
+  int __pyx_t_8;
+  __Pyx_RefNannySetupContext("f", 0);
   __pyx_outer_scope = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *) __Pyx_CyFunction_GetClosure(__pyx_self);
   __pyx_cur_scope = __pyx_outer_scope;
 
   /* "flowstar/plotting.pyx":71
  * 
- *         def fl(t):
+ *         def f(t):
  *             if t not in ress:             # <<<<<<<<<<<<<<
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].lower()
+ *                 if poly is None:
+ *                     ress[t] = self((t - step, t + step))[var_id]
  */
   if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 71, __pyx_L1_error) }
   if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
@@ -3401,153 +3454,318 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_fl(PyOb
   if (__pyx_t_2) {
 
     /* "flowstar/plotting.pyx":72
- *         def fl(t):
+ *         def f(t):
  *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]             # <<<<<<<<<<<<<<
- *             return ress[t].lower()
- *         def fu(t):
+ *                 if poly is None:             # <<<<<<<<<<<<<<
+ *                     ress[t] = self((t - step, t + step))[var_id]
+ *                 else:
  */
-    if (unlikely(!__pyx_cur_scope->__pyx_v_self)) { __Pyx_RaiseClosureNameError("self"); __PYX_ERR(0, 72, __pyx_L1_error) }
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyNumber_Subtract(__pyx_v_t, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = PyNumber_Add(__pyx_v_t, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
-    __Pyx_GIVEREF(__pyx_t_6);
-    PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_6);
-    __pyx_t_5 = 0;
-    __pyx_t_6 = 0;
-    __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_v_self));
-    __pyx_t_6 = ((PyObject *)__pyx_cur_scope->__pyx_v_self); __pyx_t_5 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_5)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_5);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
-      }
-    }
-    if (!__pyx_t_5) {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
+    if (unlikely(!__pyx_cur_scope->__pyx_v_poly)) { __Pyx_RaiseClosureNameError("poly"); __PYX_ERR(0, 72, __pyx_L1_error) }
+    __pyx_t_2 = (__pyx_cur_scope->__pyx_v_poly == Py_None);
+    __pyx_t_1 = (__pyx_t_2 != 0);
+    if (__pyx_t_1) {
+
+      /* "flowstar/plotting.pyx":73
+ *             if t not in ress:
+ *                 if poly is None:
+ *                     ress[t] = self((t - step, t + step))[var_id]             # <<<<<<<<<<<<<<
+ *                 else:
+ *                     ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
+ */
+      if (unlikely(!__pyx_cur_scope->__pyx_v_self)) { __Pyx_RaiseClosureNameError("self"); __PYX_ERR(0, 73, __pyx_L1_error) }
+      __pyx_t_4 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_5 = PyNumber_Subtract(__pyx_v_t, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GOTREF(__pyx_t_3);
-    } else {
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_6)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_4 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_6 = PyNumber_Add(__pyx_v_t, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_GIVEREF(__pyx_t_5);
+      PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
+      __Pyx_GIVEREF(__pyx_t_6);
+      PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_6);
+      __pyx_t_5 = 0;
+      __pyx_t_6 = 0;
+      __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_v_self));
+      __pyx_t_6 = ((PyObject *)__pyx_cur_scope->__pyx_v_self); __pyx_t_5 = NULL;
+      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+        __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_6);
+        if (likely(__pyx_t_5)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+          __Pyx_INCREF(__pyx_t_5);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_6, function);
+        }
+      }
+      if (!__pyx_t_5) {
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __Pyx_GOTREF(__pyx_t_3);
+      } else {
+        #if CYTHON_FAST_PYCALL
+        if (PyFunction_Check(__pyx_t_6)) {
+          PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
+          __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+          __Pyx_GOTREF(__pyx_t_3);
+          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        } else
+        #endif
+        #if CYTHON_FAST_PYCCALL
+        if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
+          PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
+          __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+          __Pyx_GOTREF(__pyx_t_3);
+          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        } else
+        #endif
+        {
+          __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 73, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_7);
+          __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
+          __Pyx_GIVEREF(__pyx_t_4);
+          PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_4);
+          __pyx_t_4 = 0;
+          __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_3);
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __pyx_t_6 = __Pyx_GetItemInt(__pyx_t_3, __pyx_cur_scope->__pyx_v_var_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 73, __pyx_L1_error) }
+      if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
+        PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+        __PYX_ERR(0, 73, __pyx_L1_error)
+      }
+      if (unlikely(PyDict_SetItem(__pyx_cur_scope->__pyx_v_ress, __pyx_v_t, __pyx_t_6) < 0)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+      /* "flowstar/plotting.pyx":72
+ *         def f(t):
+ *             if t not in ress:
+ *                 if poly is None:             # <<<<<<<<<<<<<<
+ *                     ress[t] = self((t - step, t + step))[var_id]
+ *                 else:
+ */
+      goto __pyx_L4;
+    }
+
+    /* "flowstar/plotting.pyx":75
+ *                     ress[t] = self((t - step, t + step))[var_id]
+ *                 else:
+ *                     ress[t] = self.eval_poly(poly, (t - step, t + step))[0]             # <<<<<<<<<<<<<<
+ *         def fl(t):
+ *             return f(t).lower()
+ */
+    /*else*/ {
+      if (unlikely(!__pyx_cur_scope->__pyx_v_self)) { __Pyx_RaiseClosureNameError("self"); __PYX_ERR(0, 75, __pyx_L1_error) }
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_eval_poly); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      if (unlikely(!__pyx_cur_scope->__pyx_v_poly)) { __Pyx_RaiseClosureNameError("poly"); __PYX_ERR(0, 75, __pyx_L1_error) }
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_7);
+      __pyx_t_4 = PyNumber_Subtract(__pyx_v_t, __pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_7);
+      __pyx_t_5 = PyNumber_Add(__pyx_v_t, __pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GIVEREF(__pyx_t_4);
+      PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
+      __Pyx_GIVEREF(__pyx_t_5);
+      PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_5);
+      __pyx_t_4 = 0;
+      __pyx_t_5 = 0;
+      __pyx_t_5 = NULL;
+      __pyx_t_8 = 0;
+      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+        __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
+        if (likely(__pyx_t_5)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+          __Pyx_INCREF(__pyx_t_5);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_3, function);
+          __pyx_t_8 = 1;
+        }
+      }
+      #if CYTHON_FAST_PYCALL
+      if (PyFunction_Check(__pyx_t_3)) {
+        PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_cur_scope->__pyx_v_poly, __pyx_t_7};
+        __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
+        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       } else
       #endif
       #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
+      if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
+        PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_cur_scope->__pyx_v_poly, __pyx_t_7};
+        __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       } else
       #endif
       {
-        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 72, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
-        __Pyx_GIVEREF(__pyx_t_4);
-        PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_4);
-        __pyx_t_4 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __pyx_t_4 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        if (__pyx_t_5) {
+          __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5); __pyx_t_5 = NULL;
+        }
+        __Pyx_INCREF(__pyx_cur_scope->__pyx_v_poly);
+        __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_poly);
+        PyTuple_SET_ITEM(__pyx_t_4, 0+__pyx_t_8, __pyx_cur_scope->__pyx_v_poly);
+        __Pyx_GIVEREF(__pyx_t_7);
+        PyTuple_SET_ITEM(__pyx_t_4, 1+__pyx_t_8, __pyx_t_7);
+        __pyx_t_7 = 0;
+        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       }
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_6, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 75, __pyx_L1_error) }
+      if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
+        PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+        __PYX_ERR(0, 75, __pyx_L1_error)
+      }
+      if (unlikely(PyDict_SetItem(__pyx_cur_scope->__pyx_v_ress, __pyx_v_t, __pyx_t_3) < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = __Pyx_GetItemInt(__pyx_t_3, __pyx_cur_scope->__pyx_v_var_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 72, __pyx_L1_error) }
-    if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 72, __pyx_L1_error)
-    }
-    if (unlikely(PyDict_SetItem(__pyx_cur_scope->__pyx_v_ress, __pyx_v_t, __pyx_t_6) < 0)) __PYX_ERR(0, 72, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_L4:;
 
     /* "flowstar/plotting.pyx":71
  * 
- *         def fl(t):
+ *         def f(t):
  *             if t not in ress:             # <<<<<<<<<<<<<<
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].lower()
+ *                 if poly is None:
+ *                     ress[t] = self((t - step, t + step))[var_id]
  */
   }
-
-  /* "flowstar/plotting.pyx":73
- *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].lower()             # <<<<<<<<<<<<<<
- *         def fu(t):
- *             if t not in ress:
- */
-  __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 73, __pyx_L1_error) }
-  if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
-    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 73, __pyx_L1_error)
-  }
-  __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_cur_scope->__pyx_v_ress, __pyx_v_t); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_lower); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 73, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
-    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_7);
-    if (likely(__pyx_t_3)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
-      __Pyx_INCREF(__pyx_t_3);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_7, function);
-    }
-  }
-  if (__pyx_t_3) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  } else {
-    __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
-  }
-  __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_r = __pyx_t_6;
-  __pyx_t_6 = 0;
-  goto __pyx_L0;
 
   /* "flowstar/plotting.pyx":70
  *         ress = dict()
  * 
- *         def fl(t):             # <<<<<<<<<<<<<<
+ *         def f(t):             # <<<<<<<<<<<<<<
  *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+ *                 if poly is None:
  */
 
   /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_plot.f", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/plotting.pyx":76
+ *                 else:
+ *                     ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
+ *         def fl(t):             # <<<<<<<<<<<<<<
+ *             return f(t).lower()
+ *         def fu(t):
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fl(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fl = {"fl", (PyCFunction)__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fl, METH_O, 0};
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fl(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("fl (wrapper)", 0);
+  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_2fl(__pyx_self, ((PyObject *)__pyx_v_t));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_2fl(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+  struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *__pyx_cur_scope;
+  struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *__pyx_outer_scope;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  __Pyx_RefNannySetupContext("fl", 0);
+  __pyx_outer_scope = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *) __Pyx_CyFunction_GetClosure(__pyx_self);
+  __pyx_cur_scope = __pyx_outer_scope;
+
+  /* "flowstar/plotting.pyx":77
+ *                     ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
+ *         def fl(t):
+ *             return f(t).lower()             # <<<<<<<<<<<<<<
+ *         def fu(t):
+ *             return f(t).upper()
+ */
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_cur_scope->__pyx_v_f)) { __Pyx_RaiseClosureNameError("f"); __PYX_ERR(0, 77, __pyx_L1_error) }
+  __pyx_t_2 = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_f(__pyx_cur_scope->__pyx_v_f, __pyx_v_t); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_lower); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  if (__pyx_t_2) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
+  }
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "flowstar/plotting.pyx":76
+ *                 else:
+ *                     ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
+ *         def fl(t):             # <<<<<<<<<<<<<<
+ *             return f(t).lower()
+ *         def fu(t):
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_plot.fl", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -3556,208 +3774,89 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_fl(PyOb
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":74
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].lower()
+/* "flowstar/plotting.pyx":78
+ *         def fl(t):
+ *             return f(t).lower()
  *         def fu(t):             # <<<<<<<<<<<<<<
- *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+ *             return f(t).upper()
+ * 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fu(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fu = {"fu", (PyCFunction)__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fu, METH_O, 0};
-static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fu(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_5fu(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_5fu = {"fu", (PyCFunction)__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_5fu, METH_O, 0};
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_9sage_plot_5fu(PyObject *__pyx_self, PyObject *__pyx_v_t) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("fu (wrapper)", 0);
-  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_2fu(__pyx_self, ((PyObject *)__pyx_v_t));
+  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_4fu(__pyx_self, ((PyObject *)__pyx_v_t));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_2fu(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_4fu(PyObject *__pyx_self, PyObject *__pyx_v_t) {
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *__pyx_cur_scope;
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *__pyx_outer_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
-  int __pyx_t_2;
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("fu", 0);
   __pyx_outer_scope = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *) __Pyx_CyFunction_GetClosure(__pyx_self);
   __pyx_cur_scope = __pyx_outer_scope;
 
-  /* "flowstar/plotting.pyx":75
- *             return ress[t].lower()
+  /* "flowstar/plotting.pyx":79
+ *             return f(t).lower()
  *         def fu(t):
- *             if t not in ress:             # <<<<<<<<<<<<<<
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].upper()
- */
-  if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 75, __pyx_L1_error) }
-  if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
-    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-    __PYX_ERR(0, 75, __pyx_L1_error)
-  }
-  __pyx_t_1 = (__Pyx_PyDict_ContainsTF(__pyx_v_t, __pyx_cur_scope->__pyx_v_ress, Py_NE)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
-  __pyx_t_2 = (__pyx_t_1 != 0);
-  if (__pyx_t_2) {
-
-    /* "flowstar/plotting.pyx":76
- *         def fu(t):
- *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]             # <<<<<<<<<<<<<<
- *             return ress[t].upper()
- * 
- */
-    if (unlikely(!__pyx_cur_scope->__pyx_v_self)) { __Pyx_RaiseClosureNameError("self"); __PYX_ERR(0, 76, __pyx_L1_error) }
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 76, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyNumber_Subtract(__pyx_v_t, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 76, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = PyNumber_Add(__pyx_v_t, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 76, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 76, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
-    __Pyx_GIVEREF(__pyx_t_6);
-    PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_6);
-    __pyx_t_5 = 0;
-    __pyx_t_6 = 0;
-    __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_v_self));
-    __pyx_t_6 = ((PyObject *)__pyx_cur_scope->__pyx_v_self); __pyx_t_5 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_5)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_5);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
-      }
-    }
-    if (!__pyx_t_5) {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GOTREF(__pyx_t_3);
-    } else {
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_6)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
-        PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 76, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
-        __Pyx_GIVEREF(__pyx_t_4);
-        PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_4);
-        __pyx_t_4 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      }
-    }
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = __Pyx_GetItemInt(__pyx_t_3, __pyx_cur_scope->__pyx_v_var_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 76, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 76, __pyx_L1_error) }
-    if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 76, __pyx_L1_error)
-    }
-    if (unlikely(PyDict_SetItem(__pyx_cur_scope->__pyx_v_ress, __pyx_v_t, __pyx_t_6) < 0)) __PYX_ERR(0, 76, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-
-    /* "flowstar/plotting.pyx":75
- *             return ress[t].lower()
- *         def fu(t):
- *             if t not in ress:             # <<<<<<<<<<<<<<
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].upper()
- */
-  }
-
-  /* "flowstar/plotting.pyx":77
- *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].upper()             # <<<<<<<<<<<<<<
+ *             return f(t).upper()             # <<<<<<<<<<<<<<
  * 
  *         return plot([fl, fu],
  */
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_cur_scope->__pyx_v_ress)) { __Pyx_RaiseClosureNameError("ress"); __PYX_ERR(0, 77, __pyx_L1_error) }
-  if (unlikely(__pyx_cur_scope->__pyx_v_ress == Py_None)) {
-    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 77, __pyx_L1_error)
-  }
-  __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_cur_scope->__pyx_v_ress, __pyx_v_t); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 77, __pyx_L1_error)
+  if (unlikely(!__pyx_cur_scope->__pyx_v_f)) { __Pyx_RaiseClosureNameError("f"); __PYX_ERR(0, 79, __pyx_L1_error) }
+  __pyx_t_2 = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_f(__pyx_cur_scope->__pyx_v_f, __pyx_v_t); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_upper); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_upper); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 77, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
-    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_7);
-    if (likely(__pyx_t_3)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
-      __Pyx_INCREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_7, function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
     }
   }
-  if (__pyx_t_3) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 77, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (__pyx_t_2) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
-    __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 77, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
   }
-  __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_r = __pyx_t_6;
-  __pyx_t_6 = 0;
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/plotting.pyx":74
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].lower()
+  /* "flowstar/plotting.pyx":78
+ *         def fl(t):
+ *             return f(t).lower()
  *         def fu(t):             # <<<<<<<<<<<<<<
- *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+ *             return f(t).upper()
+ * 
  */
 
   /* function exit code */
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_plot.fu", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -3769,12 +3868,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_9sage_plot_2fu(PyO
 /* "flowstar/plotting.pyx":60
  * 
  * cdef class SagePlotMixin:
- *     def sage_plot(self, x, duration=None, double step=1e-2):             # <<<<<<<<<<<<<<
+ *     def sage_plot(self, x, duration=None, double step=1e-2, poly=None):             # <<<<<<<<<<<<<<
  *         from sage.all import plot
  * 
  */
 
-static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_duration, double __pyx_v_step) {
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_duration, double __pyx_v_step, PyObject *__pyx_v_poly) {
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *__pyx_cur_scope;
   PyObject *__pyx_v_plot = NULL;
   PyObject *__pyx_v_fl = 0;
@@ -3802,11 +3901,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __pyx_cur_scope->__pyx_v_step = __pyx_v_step;
+  __pyx_cur_scope->__pyx_v_poly = __pyx_v_poly;
+  __Pyx_INCREF(__pyx_cur_scope->__pyx_v_poly);
+  __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_poly);
   __Pyx_INCREF(__pyx_v_duration);
 
   /* "flowstar/plotting.pyx":61
  * cdef class SagePlotMixin:
- *     def sage_plot(self, x, duration=None, double step=1e-2):
+ *     def sage_plot(self, x, duration=None, double step=1e-2, poly=None):
  *         from sage.all import plot             # <<<<<<<<<<<<<<
  * 
  *         if duration is None:
@@ -3888,7 +3990,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
  *         # Cache the evaluations
  *         ress = dict()             # <<<<<<<<<<<<<<
  * 
- *         def fl(t):
+ *         def f(t):
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -3899,36 +4001,49 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   /* "flowstar/plotting.pyx":70
  *         ress = dict()
  * 
- *         def fl(t):             # <<<<<<<<<<<<<<
+ *         def f(t):             # <<<<<<<<<<<<<<
  *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+ *                 if poly is None:
  */
-  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1fl, 0, __pyx_n_s_sage_plot_locals_fl, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_1f, 0, __pyx_n_s_sage_plot_locals_f, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_1);
+  __pyx_cur_scope->__pyx_v_f = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "flowstar/plotting.pyx":76
+ *                 else:
+ *                     ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
+ *         def fl(t):             # <<<<<<<<<<<<<<
+ *             return f(t).lower()
+ *         def fu(t):
+ */
+  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fl, 0, __pyx_n_s_sage_plot_locals_fl, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__8)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_fl = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":74
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].lower()
+  /* "flowstar/plotting.pyx":78
+ *         def fl(t):
+ *             return f(t).lower()
  *         def fu(t):             # <<<<<<<<<<<<<<
- *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+ *             return f(t).upper()
+ * 
  */
-  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_3fu, 0, __pyx_n_s_sage_plot_locals_fu, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__8)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_9sage_plot_5fu, 0, __pyx_n_s_sage_plot_locals_fu, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__10)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_fu = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":79
- *             return ress[t].upper()
+  /* "flowstar/plotting.pyx":81
+ *             return f(t).upper()
  * 
  *         return plot([fl, fu],             # <<<<<<<<<<<<<<
  *                     duration,
  *                     plot_points=self.time//step)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_fl);
   __Pyx_GIVEREF(__pyx_v_fl);
@@ -3937,14 +4052,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   __Pyx_GIVEREF(__pyx_v_fu);
   PyList_SET_ITEM(__pyx_t_1, 1, __pyx_v_fu);
 
-  /* "flowstar/plotting.pyx":80
+  /* "flowstar/plotting.pyx":82
  * 
  *         return plot([fl, fu],
  *                     duration,             # <<<<<<<<<<<<<<
  *                     plot_points=self.time//step)
  * 
  */
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -3953,34 +4068,34 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_duration);
   __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":81
+  /* "flowstar/plotting.pyx":83
  *         return plot([fl, fu],
  *                     duration,
  *                     plot_points=self.time//step)             # <<<<<<<<<<<<<<
  * 
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = PyNumber_FloorDivide(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_8 = PyNumber_FloorDivide(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_plot_points, __pyx_t_8) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_plot_points, __pyx_t_8) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-  /* "flowstar/plotting.pyx":79
- *             return ress[t].upper()
+  /* "flowstar/plotting.pyx":81
+ *             return f(t).upper()
  * 
  *         return plot([fl, fu],             # <<<<<<<<<<<<<<
  *                     duration,
  *                     plot_points=self.time//step)
  */
-  __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_plot, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_plot, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -3991,7 +4106,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   /* "flowstar/plotting.pyx":60
  * 
  * cdef class SagePlotMixin:
- *     def sage_plot(self, x, duration=None, double step=1e-2):             # <<<<<<<<<<<<<<
+ *     def sage_plot(self, x, duration=None, double step=1e-2, poly=None):             # <<<<<<<<<<<<<<
  *         from sage.all import plot
  * 
  */
@@ -4016,7 +4131,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_sage_plot(struct _
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":83
+/* "flowstar/plotting.pyx":85
  *                     plot_points=self.time//step)
  * 
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):             # <<<<<<<<<<<<<<
@@ -4058,7 +4173,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_3sage_parametric_p
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sage_parametric_plot", 0, 2, 3, 1); __PYX_ERR(0, 83, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sage_parametric_plot", 0, 2, 3, 1); __PYX_ERR(0, 85, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -4068,7 +4183,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_3sage_parametric_p
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_parametric_plot") < 0)) __PYX_ERR(0, 83, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_parametric_plot") < 0)) __PYX_ERR(0, 85, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4083,21 +4198,21 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_3sage_parametric_p
     __pyx_v_x = ((PyObject*)values[0]);
     __pyx_v_y = ((PyObject*)values[1]);
     if (values[2]) {
-      __pyx_v_step = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 83, __pyx_L3_error)
+      __pyx_v_step = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 85, __pyx_L3_error)
     } else {
       __pyx_v_step = ((double)1e-2);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sage_parametric_plot", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 83, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sage_parametric_plot", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 85, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_parametric_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 83, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyString_Type), 1, "y", 1))) __PYX_ERR(0, 83, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 85, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyString_Type), 1, "y", 1))) __PYX_ERR(0, 85, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_plot(((struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_y, __pyx_v_step);
 
   /* function exit code */
@@ -4109,7 +4224,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_3sage_parametric_p
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":90
+/* "flowstar/plotting.pyx":92
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  * 
  *         def f(t):             # <<<<<<<<<<<<<<
@@ -4146,170 +4261,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_
   __pyx_outer_scope = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *) __Pyx_CyFunction_GetClosure(__pyx_self);
   __pyx_cur_scope = __pyx_outer_scope;
 
-  /* "flowstar/plotting.pyx":91
+  /* "flowstar/plotting.pyx":93
  * 
  *         def f(t):
  *             return self((t, t+step))[var_id_x].center()             # <<<<<<<<<<<<<<
  *         def g(t):
  *             return self((t, t+step))[var_id_y].center()
- */
-  __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_cur_scope->__pyx_v_self)) { __Pyx_RaiseClosureNameError("self"); __PYX_ERR(0, 91, __pyx_L1_error) }
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyNumber_Add(__pyx_v_t, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_INCREF(__pyx_v_t);
-  __Pyx_GIVEREF(__pyx_v_t);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_t);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_v_self));
-  __pyx_t_4 = ((PyObject *)__pyx_cur_scope->__pyx_v_self); __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-    }
-  }
-  if (!__pyx_t_5) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_GOTREF(__pyx_t_2);
-  } else {
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_4)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
-      __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
-      __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 91, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_3);
-      __pyx_t_3 = 0;
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    }
-  }
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_2, __pyx_cur_scope->__pyx_v_var_id_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_center); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-    }
-  }
-  if (__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 91, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 91, __pyx_L1_error)
-  }
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "flowstar/plotting.pyx":90
- *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
- * 
- *         def f(t):             # <<<<<<<<<<<<<<
- *             return self((t, t+step))[var_id_x].center()
- *         def g(t):
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_parametric_plot.f", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "flowstar/plotting.pyx":92
- *         def f(t):
- *             return self((t, t+step))[var_id_x].center()
- *         def g(t):             # <<<<<<<<<<<<<<
- *             return self((t, t+step))[var_id_y].center()
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g = {"g", (PyCFunction)__pyx_pw_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g, METH_O, 0};
-static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g(PyObject *__pyx_self, PyObject *__pyx_v_t) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("g (wrapper)", 0);
-  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_2g(__pyx_self, ((PyObject *)__pyx_v_t));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_2g(PyObject *__pyx_self, PyObject *__pyx_v_t) {
-  struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *__pyx_cur_scope;
-  struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *__pyx_outer_scope;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  PyObject *__pyx_t_6 = NULL;
-  __Pyx_RefNannySetupContext("g", 0);
-  __pyx_outer_scope = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *) __Pyx_CyFunction_GetClosure(__pyx_self);
-  __pyx_cur_scope = __pyx_outer_scope;
-
-  /* "flowstar/plotting.pyx":93
- *             return self((t, t+step))[var_id_x].center()
- *         def g(t):
- *             return self((t, t+step))[var_id_y].center()             # <<<<<<<<<<<<<<
- * 
- *         return parametric_plot((f, g), (0, float(self.c_reach.time)))
  */
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_cur_scope->__pyx_v_self)) { __Pyx_RaiseClosureNameError("self"); __PYX_ERR(0, 93, __pyx_L1_error) }
@@ -4373,7 +4330,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_
     }
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_2, __pyx_cur_scope->__pyx_v_var_id_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_2, __pyx_cur_scope->__pyx_v_var_id_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_center); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 93, __pyx_L1_error)
@@ -4402,6 +4359,164 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_
   goto __pyx_L0;
 
   /* "flowstar/plotting.pyx":92
+ *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ * 
+ *         def f(t):             # <<<<<<<<<<<<<<
+ *             return self((t, t+step))[var_id_x].center()
+ *         def g(t):
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_parametric_plot.f", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/plotting.pyx":94
+ *         def f(t):
+ *             return self((t, t+step))[var_id_x].center()
+ *         def g(t):             # <<<<<<<<<<<<<<
+ *             return self((t, t+step))[var_id_y].center()
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g(PyObject *__pyx_self, PyObject *__pyx_v_t); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g = {"g", (PyCFunction)__pyx_pw_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g, METH_O, 0};
+static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("g (wrapper)", 0);
+  __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_2g(__pyx_self, ((PyObject *)__pyx_v_t));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_2g(PyObject *__pyx_self, PyObject *__pyx_v_t) {
+  struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *__pyx_cur_scope;
+  struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *__pyx_outer_scope;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  __Pyx_RefNannySetupContext("g", 0);
+  __pyx_outer_scope = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *) __Pyx_CyFunction_GetClosure(__pyx_self);
+  __pyx_cur_scope = __pyx_outer_scope;
+
+  /* "flowstar/plotting.pyx":95
+ *             return self((t, t+step))[var_id_x].center()
+ *         def g(t):
+ *             return self((t, t+step))[var_id_y].center()             # <<<<<<<<<<<<<<
+ * 
+ *         return parametric_plot((f, g), (0, float(self.c_reach.time)))
+ */
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_cur_scope->__pyx_v_self)) { __Pyx_RaiseClosureNameError("self"); __PYX_ERR(0, 95, __pyx_L1_error) }
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_cur_scope->__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyNumber_Add(__pyx_v_t, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_INCREF(__pyx_v_t);
+  __Pyx_GIVEREF(__pyx_v_t);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_t);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
+  __pyx_t_4 = 0;
+  __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_v_self));
+  __pyx_t_4 = ((PyObject *)__pyx_cur_scope->__pyx_v_self); __pyx_t_5 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+    }
+  }
+  if (!__pyx_t_5) {
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_GOTREF(__pyx_t_2);
+  } else {
+    #if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(__pyx_t_4)) {
+      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
+      __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    } else
+    #endif
+    #if CYTHON_FAST_PYCCALL
+    if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
+      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
+      __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    } else
+    #endif
+    {
+      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 95, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
+      __Pyx_GIVEREF(__pyx_t_3);
+      PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_3);
+      __pyx_t_3 = 0;
+      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    }
+  }
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_2, __pyx_cur_scope->__pyx_v_var_id_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_center); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  if (__pyx_t_4) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+  }
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "flowstar/plotting.pyx":94
  *         def f(t):
  *             return self((t, t+step))[var_id_x].center()
  *         def g(t):             # <<<<<<<<<<<<<<
@@ -4425,7 +4540,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":83
+/* "flowstar/plotting.pyx":85
  *                     plot_points=self.time//step)
  * 
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):             # <<<<<<<<<<<<<<
@@ -4455,7 +4570,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 83, __pyx_L1_error)
+    __PYX_ERR(0, 85, __pyx_L1_error)
   } else {
     __Pyx_GOTREF(__pyx_cur_scope);
   }
@@ -4464,14 +4579,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
   __pyx_cur_scope->__pyx_v_step = __pyx_v_step;
 
-  /* "flowstar/plotting.pyx":84
+  /* "flowstar/plotting.pyx":86
  * 
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):
  *         from sage.all import parametric_plot, RIF             # <<<<<<<<<<<<<<
  *         from functools import partial
  * 
  */
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_parametric_plot);
   __Pyx_GIVEREF(__pyx_n_s_parametric_plot);
@@ -4479,90 +4594,90 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   __Pyx_INCREF(__pyx_n_s_RIF);
   __Pyx_GIVEREF(__pyx_n_s_RIF);
   PyList_SET_ITEM(__pyx_t_1, 1, __pyx_n_s_RIF);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_parametric_plot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_parametric_plot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_parametric_plot = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RIF); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RIF); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_RIF = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":85
+  /* "flowstar/plotting.pyx":87
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):
  *         from sage.all import parametric_plot, RIF
  *         from functools import partial             # <<<<<<<<<<<<<<
  * 
  *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
  */
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s_partial);
   __Pyx_GIVEREF(__pyx_n_s_partial);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_partial);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_functools, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_functools, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_partial); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_partial); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_t_2);
   __pyx_v_partial = __pyx_t_2;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":87
+  /* "flowstar/plotting.pyx":89
  *         from functools import partial
  * 
  *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  * 
  */
-  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 87, __pyx_L1_error)
-  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 89, __pyx_L1_error)
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 89, __pyx_L1_error)
   __pyx_cur_scope->__pyx_v_var_id_x = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_cur_scope->__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_3);
 
-  /* "flowstar/plotting.pyx":88
+  /* "flowstar/plotting.pyx":90
  * 
  *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)             # <<<<<<<<<<<<<<
  * 
  *         def f(t):
  */
-  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 88, __pyx_L1_error)
-  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 88, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 90, __pyx_L1_error)
   __pyx_cur_scope->__pyx_v_var_id_y = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_cur_scope->__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_3);
 
-  /* "flowstar/plotting.pyx":90
+  /* "flowstar/plotting.pyx":92
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  * 
  *         def f(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_x].center()
  *         def g(t):
  */
-  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_1f, 0, __pyx_n_s_sage_parametric_plot_locals_f, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__10)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_1f, 0, __pyx_n_s_sage_parametric_plot_locals_f, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__12)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 92, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_f = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":92
+  /* "flowstar/plotting.pyx":94
  *         def f(t):
  *             return self((t, t+step))[var_id_x].center()
  *         def g(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_y].center()
  * 
  */
-  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g, 0, __pyx_n_s_sage_parametric_plot_locals_g, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__12)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_plot_3g, 0, __pyx_n_s_sage_parametric_plot_locals_g, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_plotting, __pyx_d, ((PyObject *)__pyx_codeobj__14)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 94, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_g = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":95
+  /* "flowstar/plotting.pyx":97
  *             return self((t, t+step))[var_id_y].center()
  * 
  *         return parametric_plot((f, g), (0, float(self.c_reach.time)))             # <<<<<<<<<<<<<<
@@ -4570,7 +4685,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
  *     def sage_plot_manual(self, x, double step=1e-1):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_f);
   __Pyx_GIVEREF(__pyx_v_f);
@@ -4578,15 +4693,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   __Pyx_INCREF(__pyx_v_g);
   __Pyx_GIVEREF(__pyx_v_g);
   PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_g);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_c_reach); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_n_s_c_reach); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_time); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_time); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyNumber_Float(__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyNumber_Float(__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -4610,7 +4725,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_6, __pyx_t_2, __pyx_t_5};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 97, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -4620,7 +4735,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_6, __pyx_t_2, __pyx_t_5};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 97, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -4628,7 +4743,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   } else
   #endif
   {
-    __pyx_t_8 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 97, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     if (__pyx_t_6) {
       __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_6); __pyx_t_6 = NULL;
@@ -4639,7 +4754,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
     PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_7, __pyx_t_5);
     __pyx_t_2 = 0;
     __pyx_t_5 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 97, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   }
@@ -4648,7 +4763,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/plotting.pyx":83
+  /* "flowstar/plotting.pyx":85
  *                     plot_points=self.time//step)
  * 
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):             # <<<<<<<<<<<<<<
@@ -4678,7 +4793,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":97
+/* "flowstar/plotting.pyx":99
  *         return parametric_plot((f, g), (0, float(self.c_reach.time)))
  * 
  *     def sage_plot_manual(self, x, double step=1e-1):             # <<<<<<<<<<<<<<
@@ -4721,7 +4836,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_5sage_plot_manual(
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_plot_manual") < 0)) __PYX_ERR(0, 97, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_plot_manual") < 0)) __PYX_ERR(0, 99, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4734,14 +4849,14 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_5sage_plot_manual(
     }
     __pyx_v_x = values[0];
     if (values[1]) {
-      __pyx_v_step = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L3_error)
+      __pyx_v_step = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L3_error)
     } else {
       __pyx_v_step = ((double)1e-1);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sage_plot_manual", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 97, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sage_plot_manual", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 99, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_plot_manual", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4790,14 +4905,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   PyObject *__pyx_t_19 = NULL;
   __Pyx_RefNannySetupContext("sage_plot_manual", 0);
 
-  /* "flowstar/plotting.pyx":98
+  /* "flowstar/plotting.pyx":100
  * 
  *     def sage_plot_manual(self, x, double step=1e-1):
  *         from sage.all import Graphics, line             # <<<<<<<<<<<<<<
  * 
  *         p = Graphics()
  */
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_Graphics);
   __Pyx_GIVEREF(__pyx_n_s_Graphics);
@@ -4805,22 +4920,22 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   __Pyx_INCREF(__pyx_n_s_line);
   __Pyx_GIVEREF(__pyx_n_s_line);
   PyList_SET_ITEM(__pyx_t_1, 1, __pyx_n_s_line);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Graphics); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Graphics); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_Graphics = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_line); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_line); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_line = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":100
+  /* "flowstar/plotting.pyx":102
  *         from sage.all import Graphics, line
  * 
  *         p = Graphics()             # <<<<<<<<<<<<<<
@@ -4839,50 +4954,50 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_p = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":101
+  /* "flowstar/plotting.pyx":103
  * 
  *         p = Graphics()
  *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
  *         res1 = self((-1e-7,1e-7))[var_id]
  *         lo1, hi1 = res1.lower(), res1.upper()
  */
-  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 101, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
   __pyx_v_var_id = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
-  /* "flowstar/plotting.pyx":102
+  /* "flowstar/plotting.pyx":104
  *         p = Graphics()
  *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         res1 = self((-1e-7,1e-7))[var_id]             # <<<<<<<<<<<<<<
  *         lo1, hi1 = res1.lower(), res1.upper()
  *         cdef double t = 0
  */
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_v_self), __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_v_self), __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 104, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_var_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_var_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_res1 = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":103
+  /* "flowstar/plotting.pyx":105
  *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         res1 = self((-1e-7,1e-7))[var_id]
  *         lo1, hi1 = res1.lower(), res1.upper()             # <<<<<<<<<<<<<<
  *         cdef double t = 0
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_res1, __pyx_n_s_lower); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_res1, __pyx_n_s_lower); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -4895,14 +5010,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_res1, __pyx_n_s_upper); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_res1, __pyx_n_s_upper); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_5 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -4915,10 +5030,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     }
   }
   if (__pyx_t_5) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -4927,7 +5042,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   __pyx_v_hi1 = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":104
+  /* "flowstar/plotting.pyx":106
  *         res1 = self((-1e-7,1e-7))[var_id]
  *         lo1, hi1 = res1.lower(), res1.upper()
  *         cdef double t = 0             # <<<<<<<<<<<<<<
@@ -4936,34 +5051,34 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
  */
   __pyx_v_t = 0.0;
 
-  /* "flowstar/plotting.pyx":106
+  /* "flowstar/plotting.pyx":108
  *         cdef double t = 0
  * 
  *         for i in range(int(self.time/step)):             # <<<<<<<<<<<<<<
  *             t = step*i
  *             res = self((t, t+step))
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
     __pyx_t_1 = __pyx_t_3; __Pyx_INCREF(__pyx_t_1); __pyx_t_6 = 0;
     __pyx_t_7 = NULL;
   } else {
-    __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 108, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   for (;;) {
@@ -4971,17 +5086,17 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 106, __pyx_L1_error)
+        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 108, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       } else {
         if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 106, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 108, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 106, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       }
@@ -4991,7 +5106,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 106, __pyx_L1_error)
+          else __PYX_ERR(0, 108, __pyx_L1_error)
         }
         break;
       }
@@ -5000,34 +5115,34 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":107
+    /* "flowstar/plotting.pyx":109
  * 
  *         for i in range(int(self.time/step)):
  *             t = step*i             # <<<<<<<<<<<<<<
  *             res = self((t, t+step))
  *             try:
  */
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
+    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 107, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
+    __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_v_t = __pyx_t_8;
 
-    /* "flowstar/plotting.pyx":108
+    /* "flowstar/plotting.pyx":110
  *         for i in range(int(self.time/step)):
  *             t = step*i
  *             res = self((t, t+step))             # <<<<<<<<<<<<<<
  *             try:
  *                 (lo, hi) = res[var_id].endpoints()
  */
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 110, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 110, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 110, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_GIVEREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3);
@@ -5047,14 +5162,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       }
     }
     if (!__pyx_t_3) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_2);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_9};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -5063,20 +5178,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_9};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       } else
       #endif
       {
-        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 108, __pyx_L1_error)
+        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 110, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_3); __pyx_t_3 = NULL;
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_9);
         __pyx_t_9 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       }
@@ -5085,7 +5200,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     __Pyx_XDECREF_SET(__pyx_v_res, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "flowstar/plotting.pyx":109
+    /* "flowstar/plotting.pyx":111
  *             t = step*i
  *             res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -5101,16 +5216,16 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       __Pyx_XGOTREF(__pyx_t_13);
       /*try:*/ {
 
-        /* "flowstar/plotting.pyx":110
+        /* "flowstar/plotting.pyx":112
  *             res = self((t, t+step))
  *             try:
  *                 (lo, hi) = res[var_id].endpoints()             # <<<<<<<<<<<<<<
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
  */
-        __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 110, __pyx_L5_error)
+        __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 112, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_endpoints); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 110, __pyx_L5_error)
+        __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_endpoints); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 112, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         __pyx_t_5 = NULL;
@@ -5124,10 +5239,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
           }
         }
         if (__pyx_t_5) {
-          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L5_error)
+          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 112, __pyx_L5_error)
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         } else {
-          __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L5_error)
+          __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 112, __pyx_L5_error)
         }
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -5137,7 +5252,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 110, __pyx_L5_error)
+            __PYX_ERR(0, 112, __pyx_L5_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -5150,15 +5265,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
           __Pyx_INCREF(__pyx_t_10);
           __Pyx_INCREF(__pyx_t_5);
           #else
-          __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 110, __pyx_L5_error)
+          __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 112, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_10);
-          __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 110, __pyx_L5_error)
+          __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 112, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_5);
           #endif
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 110, __pyx_L5_error)
+          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 112, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __pyx_t_14 = Py_TYPE(__pyx_t_9)->tp_iternext;
@@ -5166,7 +5281,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
           __Pyx_GOTREF(__pyx_t_10);
           index = 1; __pyx_t_5 = __pyx_t_14(__pyx_t_9); if (unlikely(!__pyx_t_5)) goto __pyx_L13_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_5);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_9), 2) < 0) __PYX_ERR(0, 110, __pyx_L5_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_9), 2) < 0) __PYX_ERR(0, 112, __pyx_L5_error)
           __pyx_t_14 = NULL;
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           goto __pyx_L14_unpacking_done;
@@ -5174,7 +5289,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           __pyx_t_14 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 110, __pyx_L5_error)
+          __PYX_ERR(0, 112, __pyx_L5_error)
           __pyx_L14_unpacking_done:;
         }
         __Pyx_XDECREF_SET(__pyx_v_lo, __pyx_t_10);
@@ -5182,7 +5297,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
         __Pyx_XDECREF_SET(__pyx_v_hi, __pyx_t_5);
         __pyx_t_5 = 0;
 
-        /* "flowstar/plotting.pyx":109
+        /* "flowstar/plotting.pyx":111
  *             t = step*i
  *             res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -5201,7 +5316,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "flowstar/plotting.pyx":111
+      /* "flowstar/plotting.pyx":113
  *             try:
  *                 (lo, hi) = res[var_id].endpoints()
  *             except:             # <<<<<<<<<<<<<<
@@ -5210,23 +5325,23 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
  */
       /*except:*/ {
         __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_plot_manual", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_5, &__pyx_t_10) < 0) __PYX_ERR(0, 111, __pyx_L7_except_error)
+        if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_5, &__pyx_t_10) < 0) __PYX_ERR(0, 113, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_GOTREF(__pyx_t_10);
 
-        /* "flowstar/plotting.pyx":112
+        /* "flowstar/plotting.pyx":114
  *                 (lo, hi) = res[var_id].endpoints()
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))             # <<<<<<<<<<<<<<
  *             p += line([(t, lo), (t+step, lo)])
  *             p += line([(t, lo1), (t, lo)])
  */
-        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_warning_eval_failed_for_t_in, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_warning_eval_failed_for_t_in, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_15 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+        __pyx_t_15 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 114, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_15);
-        __pyx_t_16 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+        __pyx_t_16 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 114, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_16);
         __pyx_t_17 = NULL;
         __pyx_t_18 = 0;
@@ -5243,7 +5358,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[3] = {__pyx_t_17, __pyx_t_15, __pyx_t_16};
-          __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+          __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 114, __pyx_L7_except_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -5253,7 +5368,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[3] = {__pyx_t_17, __pyx_t_15, __pyx_t_16};
-          __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+          __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 114, __pyx_L7_except_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -5261,7 +5376,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
         } else
         #endif
         {
-          __pyx_t_19 = PyTuple_New(2+__pyx_t_18); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+          __pyx_t_19 = PyTuple_New(2+__pyx_t_18); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 114, __pyx_L7_except_error)
           __Pyx_GOTREF(__pyx_t_19);
           if (__pyx_t_17) {
             __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_17); __pyx_t_17 = NULL;
@@ -5272,12 +5387,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
           PyTuple_SET_ITEM(__pyx_t_19, 1+__pyx_t_18, __pyx_t_16);
           __pyx_t_15 = 0;
           __pyx_t_16 = 0;
-          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_19, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_19, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 114, __pyx_L7_except_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
         }
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L7_except_error)
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -5288,7 +5403,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       }
       __pyx_L7_except_error:;
 
-      /* "flowstar/plotting.pyx":109
+      /* "flowstar/plotting.pyx":111
  *             t = step*i
  *             res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -5308,17 +5423,17 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       __pyx_L12_try_end:;
     }
 
-    /* "flowstar/plotting.pyx":113
+    /* "flowstar/plotting.pyx":115
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
  *             p += line([(t, lo), (t+step, lo)])             # <<<<<<<<<<<<<<
  *             p += line([(t, lo1), (t, lo)])
  *             p += line([(t, hi), (t+step, hi)], color='#3bcc00')
  */
-    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 113, __pyx_L1_error)
+    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 113, __pyx_L1_error) }
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 113, __pyx_L1_error)
+    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 115, __pyx_L1_error) }
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
@@ -5326,10 +5441,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     __Pyx_GIVEREF(__pyx_v_lo);
     PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_lo);
     __pyx_t_5 = 0;
-    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 113, __pyx_L1_error)
+    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 113, __pyx_L1_error) }
-    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
+    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 115, __pyx_L1_error) }
+    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
@@ -5337,7 +5452,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     __Pyx_GIVEREF(__pyx_v_lo);
     PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_lo);
     __pyx_t_5 = 0;
-    __pyx_t_5 = PyList_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 113, __pyx_L1_error)
+    __pyx_t_5 = PyList_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_2);
     PyList_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
@@ -5357,14 +5472,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       }
     }
     if (!__pyx_t_2) {
-      __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 113, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_10);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_5};
-        __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 115, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -5373,41 +5488,41 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_5};
-        __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 115, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       } else
       #endif
       {
-        __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 115, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_2); __pyx_t_2 = NULL;
         __Pyx_GIVEREF(__pyx_t_5);
         PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_5);
         __pyx_t_5 = 0;
-        __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 113, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 115, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       }
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_10); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_10); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":114
+    /* "flowstar/plotting.pyx":116
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
  *             p += line([(t, lo), (t+step, lo)])
  *             p += line([(t, lo1), (t, lo)])             # <<<<<<<<<<<<<<
  *             p += line([(t, hi), (t+step, hi)], color='#3bcc00')
  *             p += line([(t, hi1), (t, hi)], color='#3bcc00')
  */
-    __pyx_t_10 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_10 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
-    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_GIVEREF(__pyx_t_10);
     PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_10);
@@ -5415,10 +5530,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     __Pyx_GIVEREF(__pyx_v_lo1);
     PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_v_lo1);
     __pyx_t_10 = 0;
-    __pyx_t_10 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_10 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
-    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 114, __pyx_L1_error) }
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 114, __pyx_L1_error)
+    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 116, __pyx_L1_error) }
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_10);
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_10);
@@ -5426,7 +5541,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     __Pyx_GIVEREF(__pyx_v_lo);
     PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_v_lo);
     __pyx_t_10 = 0;
-    __pyx_t_10 = PyList_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_10 = PyList_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_GIVEREF(__pyx_t_9);
     PyList_SET_ITEM(__pyx_t_10, 0, __pyx_t_9);
@@ -5446,14 +5561,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       }
     }
     if (!__pyx_t_9) {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_10); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_10); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_10};
-        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -5462,133 +5577,24 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_10};
-        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       } else
       #endif
       {
-        __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 116, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_9); __pyx_t_9 = NULL;
         __Pyx_GIVEREF(__pyx_t_10);
         PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_t_10);
         __pyx_t_10 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       }
     }
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 114, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_5);
-    __pyx_t_5 = 0;
-
-    /* "flowstar/plotting.pyx":115
- *             p += line([(t, lo), (t+step, lo)])
- *             p += line([(t, lo1), (t, lo)])
- *             p += line([(t, hi), (t+step, hi)], color='#3bcc00')             # <<<<<<<<<<<<<<
- *             p += line([(t, hi1), (t, hi)], color='#3bcc00')
- *             lo1 = lo
- */
-    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 115, __pyx_L1_error) }
-    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
-    __Pyx_INCREF(__pyx_v_hi);
-    __Pyx_GIVEREF(__pyx_v_hi);
-    PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_hi);
-    __pyx_t_5 = 0;
-    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 115, __pyx_L1_error) }
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
-    __Pyx_INCREF(__pyx_v_hi);
-    __Pyx_GIVEREF(__pyx_v_hi);
-    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_hi);
-    __pyx_t_5 = 0;
-    __pyx_t_5 = PyList_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_GIVEREF(__pyx_t_3);
-    PyList_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_2);
-    PyList_SET_ITEM(__pyx_t_5, 1, __pyx_t_2);
-    __pyx_t_3 = 0;
-    __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
-    __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_color, __pyx_kp_s_3bcc00) < 0) __PYX_ERR(0, 115, __pyx_L1_error)
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_5);
-    __pyx_t_5 = 0;
-
-    /* "flowstar/plotting.pyx":116
- *             p += line([(t, lo1), (t, lo)])
- *             p += line([(t, hi), (t+step, hi)], color='#3bcc00')
- *             p += line([(t, hi1), (t, hi)], color='#3bcc00')             # <<<<<<<<<<<<<<
- *             lo1 = lo
- *             hi1 = hi
- */
-    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
-    __Pyx_INCREF(__pyx_v_hi1);
-    __Pyx_GIVEREF(__pyx_v_hi1);
-    PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_hi1);
-    __pyx_t_5 = 0;
-    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 116, __pyx_L1_error) }
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
-    __Pyx_INCREF(__pyx_v_hi);
-    __Pyx_GIVEREF(__pyx_v_hi);
-    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_hi);
-    __pyx_t_5 = 0;
-    __pyx_t_5 = PyList_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_GIVEREF(__pyx_t_3);
-    PyList_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_2);
-    PyList_SET_ITEM(__pyx_t_5, 1, __pyx_t_2);
-    __pyx_t_3 = 0;
-    __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
-    __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_color, __pyx_kp_s_3bcc00) < 0) __PYX_ERR(0, 116, __pyx_L1_error)
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
@@ -5597,28 +5603,137 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
     __pyx_t_5 = 0;
 
     /* "flowstar/plotting.pyx":117
+ *             p += line([(t, lo), (t+step, lo)])
+ *             p += line([(t, lo1), (t, lo)])
+ *             p += line([(t, hi), (t+step, hi)], color='#3bcc00')             # <<<<<<<<<<<<<<
+ *             p += line([(t, hi1), (t, hi)], color='#3bcc00')
+ *             lo1 = lo
+ */
+    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 117, __pyx_L1_error) }
+    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
+    __Pyx_INCREF(__pyx_v_hi);
+    __Pyx_GIVEREF(__pyx_v_hi);
+    PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_hi);
+    __pyx_t_5 = 0;
+    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 117, __pyx_L1_error) }
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
+    __Pyx_INCREF(__pyx_v_hi);
+    __Pyx_GIVEREF(__pyx_v_hi);
+    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_hi);
+    __pyx_t_5 = 0;
+    __pyx_t_5 = PyList_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyList_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_2);
+    PyList_SET_ITEM(__pyx_t_5, 1, __pyx_t_2);
+    __pyx_t_3 = 0;
+    __pyx_t_2 = 0;
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
+    __pyx_t_5 = 0;
+    __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_color, __pyx_kp_s_3bcc00) < 0) __PYX_ERR(0, 117, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_5);
+    __pyx_t_5 = 0;
+
+    /* "flowstar/plotting.pyx":118
+ *             p += line([(t, lo1), (t, lo)])
+ *             p += line([(t, hi), (t+step, hi)], color='#3bcc00')
+ *             p += line([(t, hi1), (t, hi)], color='#3bcc00')             # <<<<<<<<<<<<<<
+ *             lo1 = lo
+ *             hi1 = hi
+ */
+    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
+    __Pyx_INCREF(__pyx_v_hi1);
+    __Pyx_GIVEREF(__pyx_v_hi1);
+    PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_hi1);
+    __pyx_t_5 = 0;
+    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 118, __pyx_L1_error) }
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
+    __Pyx_INCREF(__pyx_v_hi);
+    __Pyx_GIVEREF(__pyx_v_hi);
+    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_hi);
+    __pyx_t_5 = 0;
+    __pyx_t_5 = PyList_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyList_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_2);
+    PyList_SET_ITEM(__pyx_t_5, 1, __pyx_t_2);
+    __pyx_t_3 = 0;
+    __pyx_t_2 = 0;
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
+    __pyx_t_5 = 0;
+    __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_color, __pyx_kp_s_3bcc00) < 0) __PYX_ERR(0, 118, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_5);
+    __pyx_t_5 = 0;
+
+    /* "flowstar/plotting.pyx":119
  *             p += line([(t, hi), (t+step, hi)], color='#3bcc00')
  *             p += line([(t, hi1), (t, hi)], color='#3bcc00')
  *             lo1 = lo             # <<<<<<<<<<<<<<
  *             hi1 = hi
  * 
  */
-    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 117, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_lo)) { __Pyx_RaiseUnboundLocalError("lo"); __PYX_ERR(0, 119, __pyx_L1_error) }
     __Pyx_INCREF(__pyx_v_lo);
     __Pyx_DECREF_SET(__pyx_v_lo1, __pyx_v_lo);
 
-    /* "flowstar/plotting.pyx":118
+    /* "flowstar/plotting.pyx":120
  *             p += line([(t, hi1), (t, hi)], color='#3bcc00')
  *             lo1 = lo
  *             hi1 = hi             # <<<<<<<<<<<<<<
  * 
  *         return p
  */
-    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 118, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_hi)) { __Pyx_RaiseUnboundLocalError("hi"); __PYX_ERR(0, 120, __pyx_L1_error) }
     __Pyx_INCREF(__pyx_v_hi);
     __Pyx_DECREF_SET(__pyx_v_hi1, __pyx_v_hi);
 
-    /* "flowstar/plotting.pyx":106
+    /* "flowstar/plotting.pyx":108
  *         cdef double t = 0
  * 
  *         for i in range(int(self.time/step)):             # <<<<<<<<<<<<<<
@@ -5628,7 +5743,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":120
+  /* "flowstar/plotting.pyx":122
  *             hi1 = hi
  * 
  *         return p             # <<<<<<<<<<<<<<
@@ -5640,7 +5755,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   __pyx_r = __pyx_v_p;
   goto __pyx_L0;
 
-  /* "flowstar/plotting.pyx":97
+  /* "flowstar/plotting.pyx":99
  *         return parametric_plot((f, g), (0, float(self.c_reach.time)))
  * 
  *     def sage_plot_manual(self, x, double step=1e-1):             # <<<<<<<<<<<<<<
@@ -5678,7 +5793,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":122
+/* "flowstar/plotting.pyx":124
  *         return p
  * 
  *     def sage_interval_plot(self, str x, str y, double step=1e-1, poly = None, **kwargs):             # <<<<<<<<<<<<<<
@@ -5727,7 +5842,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_7sage_interval_plo
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sage_interval_plot", 0, 2, 4, 1); __PYX_ERR(0, 122, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sage_interval_plot", 0, 2, 4, 1); __PYX_ERR(0, 124, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -5743,7 +5858,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_7sage_interval_plo
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "sage_interval_plot") < 0)) __PYX_ERR(0, 122, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "sage_interval_plot") < 0)) __PYX_ERR(0, 124, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5760,7 +5875,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_7sage_interval_plo
     __pyx_v_x = ((PyObject*)values[0]);
     __pyx_v_y = ((PyObject*)values[1]);
     if (values[2]) {
-      __pyx_v_step = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L3_error)
+      __pyx_v_step = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 124, __pyx_L3_error)
     } else {
       __pyx_v_step = ((double)1e-1);
     }
@@ -5768,15 +5883,15 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_7sage_interval_plo
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sage_interval_plot", 0, 2, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 122, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sage_interval_plot", 0, 2, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 124, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_kwargs); __pyx_v_kwargs = 0;
   __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_interval_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 122, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyString_Type), 1, "y", 1))) __PYX_ERR(0, 122, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 124, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyString_Type), 1, "y", 1))) __PYX_ERR(0, 124, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plot(((struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_y, __pyx_v_step, __pyx_v_poly, __pyx_v_kwargs);
 
   /* function exit code */
@@ -5829,14 +5944,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
   int __pyx_t_21;
   __Pyx_RefNannySetupContext("sage_interval_plot", 0);
 
-  /* "flowstar/plotting.pyx":123
+  /* "flowstar/plotting.pyx":125
  * 
  *     def sage_interval_plot(self, str x, str y, double step=1e-1, poly = None, **kwargs):
  *         from sage.all import Graphics, polygon             # <<<<<<<<<<<<<<
  * 
  *         p = Graphics()
  */
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_Graphics);
   __Pyx_GIVEREF(__pyx_n_s_Graphics);
@@ -5844,22 +5959,22 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
   __Pyx_INCREF(__pyx_n_s_polygon);
   __Pyx_GIVEREF(__pyx_n_s_polygon);
   PyList_SET_ITEM(__pyx_t_1, 1, __pyx_n_s_polygon);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Graphics); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Graphics); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_Graphics = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_polygon); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_polygon); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_polygon = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":125
+  /* "flowstar/plotting.pyx":127
  *         from sage.all import Graphics, polygon
  * 
  *         p = Graphics()             # <<<<<<<<<<<<<<
@@ -5878,39 +5993,39 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_p = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":126
+  /* "flowstar/plotting.pyx":128
  * 
  *         p = Graphics()
  *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  *         cdef double t = 0
  */
-  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 126, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 128, __pyx_L1_error)
   __pyx_v_var_id_x = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
-  /* "flowstar/plotting.pyx":127
+  /* "flowstar/plotting.pyx":129
  *         p = Graphics()
  *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)             # <<<<<<<<<<<<<<
  *         cdef double t = 0
  *         # cdef Interval pres
  */
-  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 127, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 129, __pyx_L1_error)
   __pyx_v_var_id_y = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
-  /* "flowstar/plotting.pyx":128
+  /* "flowstar/plotting.pyx":130
  *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  *         cdef double t = 0             # <<<<<<<<<<<<<<
@@ -5919,34 +6034,34 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
  */
   __pyx_v_t = 0.0;
 
-  /* "flowstar/plotting.pyx":131
+  /* "flowstar/plotting.pyx":133
  *         # cdef Interval pres
  * 
  *         for i in range(int(self.time/step)):             # <<<<<<<<<<<<<<
  *             t = step*i
  *             res = self((t, t+step))
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
     __pyx_t_1 = __pyx_t_3; __Pyx_INCREF(__pyx_t_1); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
   } else {
-    __pyx_t_5 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
+    __pyx_t_5 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 131, __pyx_L1_error)
+    __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 133, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   for (;;) {
@@ -5954,17 +6069,17 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 131, __pyx_L1_error)
+        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 133, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       } else {
         if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 131, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 133, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       }
@@ -5974,7 +6089,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 131, __pyx_L1_error)
+          else __PYX_ERR(0, 133, __pyx_L1_error)
         }
         break;
       }
@@ -5983,34 +6098,34 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":132
+    /* "flowstar/plotting.pyx":134
  * 
  *         for i in range(int(self.time/step)):
  *             t = step*i             # <<<<<<<<<<<<<<
  *             res = self((t, t+step))
  *             try:
  */
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 132, __pyx_L1_error)
+    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 132, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 132, __pyx_L1_error)
+    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 134, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_v_t = __pyx_t_7;
 
-    /* "flowstar/plotting.pyx":133
+    /* "flowstar/plotting.pyx":135
  *         for i in range(int(self.time/step)):
  *             t = step*i
  *             res = self((t, t+step))             # <<<<<<<<<<<<<<
  *             try:
  *                 (xlo, xhi) = res[var_id_x].endpoints()
  */
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_8 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_8 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_GIVEREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3);
@@ -6030,14 +6145,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       }
     }
     if (!__pyx_t_3) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_2);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_8)) {
         PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_9};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -6046,20 +6161,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
         PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_9};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       } else
       #endif
       {
-        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 135, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_3); __pyx_t_3 = NULL;
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_9);
         __pyx_t_9 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       }
@@ -6068,7 +6183,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __Pyx_XDECREF_SET(__pyx_v_res, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "flowstar/plotting.pyx":134
+    /* "flowstar/plotting.pyx":136
  *             t = step*i
  *             res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -6084,16 +6199,16 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       __Pyx_XGOTREF(__pyx_t_13);
       /*try:*/ {
 
-        /* "flowstar/plotting.pyx":135
+        /* "flowstar/plotting.pyx":137
  *             res = self((t, t+step))
  *             try:
  *                 (xlo, xhi) = res[var_id_x].endpoints()             # <<<<<<<<<<<<<<
  *                 (ylo, yhi) = res[var_id_y].endpoints()
  *             except:
  */
-        __pyx_t_8 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 135, __pyx_L5_error)
+        __pyx_t_8 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 137, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_endpoints); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 135, __pyx_L5_error)
+        __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_endpoints); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 137, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_t_8 = NULL;
@@ -6107,10 +6222,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L5_error)
+          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 137, __pyx_L5_error)
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L5_error)
+          __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 137, __pyx_L5_error)
         }
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -6120,7 +6235,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 135, __pyx_L5_error)
+            __PYX_ERR(0, 137, __pyx_L5_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -6133,15 +6248,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           __Pyx_INCREF(__pyx_t_10);
           __Pyx_INCREF(__pyx_t_8);
           #else
-          __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 135, __pyx_L5_error)
+          __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 137, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_10);
-          __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 135, __pyx_L5_error)
+          __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 137, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 135, __pyx_L5_error)
+          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 137, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __pyx_t_14 = Py_TYPE(__pyx_t_9)->tp_iternext;
@@ -6149,7 +6264,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           __Pyx_GOTREF(__pyx_t_10);
           index = 1; __pyx_t_8 = __pyx_t_14(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L13_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_8);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_9), 2) < 0) __PYX_ERR(0, 135, __pyx_L5_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_9), 2) < 0) __PYX_ERR(0, 137, __pyx_L5_error)
           __pyx_t_14 = NULL;
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           goto __pyx_L14_unpacking_done;
@@ -6157,7 +6272,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           __pyx_t_14 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 135, __pyx_L5_error)
+          __PYX_ERR(0, 137, __pyx_L5_error)
           __pyx_L14_unpacking_done:;
         }
         __Pyx_XDECREF_SET(__pyx_v_xlo, __pyx_t_10);
@@ -6165,16 +6280,16 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         __Pyx_XDECREF_SET(__pyx_v_xhi, __pyx_t_8);
         __pyx_t_8 = 0;
 
-        /* "flowstar/plotting.pyx":136
+        /* "flowstar/plotting.pyx":138
  *             try:
  *                 (xlo, xhi) = res[var_id_x].endpoints()
  *                 (ylo, yhi) = res[var_id_y].endpoints()             # <<<<<<<<<<<<<<
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
  */
-        __pyx_t_8 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 136, __pyx_L5_error)
+        __pyx_t_8 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 138, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_endpoints); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 136, __pyx_L5_error)
+        __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_endpoints); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 138, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_t_8 = NULL;
@@ -6188,10 +6303,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 136, __pyx_L5_error)
+          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L5_error)
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 136, __pyx_L5_error)
+          __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L5_error)
         }
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -6201,7 +6316,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 136, __pyx_L5_error)
+            __PYX_ERR(0, 138, __pyx_L5_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -6214,15 +6329,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           __Pyx_INCREF(__pyx_t_10);
           __Pyx_INCREF(__pyx_t_8);
           #else
-          __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 136, __pyx_L5_error)
+          __pyx_t_10 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 138, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_10);
-          __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 136, __pyx_L5_error)
+          __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 138, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 136, __pyx_L5_error)
+          __pyx_t_9 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 138, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __pyx_t_14 = Py_TYPE(__pyx_t_9)->tp_iternext;
@@ -6230,7 +6345,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           __Pyx_GOTREF(__pyx_t_10);
           index = 1; __pyx_t_8 = __pyx_t_14(__pyx_t_9); if (unlikely(!__pyx_t_8)) goto __pyx_L15_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_8);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_9), 2) < 0) __PYX_ERR(0, 136, __pyx_L5_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_9), 2) < 0) __PYX_ERR(0, 138, __pyx_L5_error)
           __pyx_t_14 = NULL;
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           goto __pyx_L16_unpacking_done;
@@ -6238,7 +6353,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           __pyx_t_14 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 136, __pyx_L5_error)
+          __PYX_ERR(0, 138, __pyx_L5_error)
           __pyx_L16_unpacking_done:;
         }
         __Pyx_XDECREF_SET(__pyx_v_ylo, __pyx_t_10);
@@ -6246,7 +6361,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         __Pyx_XDECREF_SET(__pyx_v_yhi, __pyx_t_8);
         __pyx_t_8 = 0;
 
-        /* "flowstar/plotting.pyx":134
+        /* "flowstar/plotting.pyx":136
  *             t = step*i
  *             res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -6265,7 +6380,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "flowstar/plotting.pyx":137
+      /* "flowstar/plotting.pyx":139
  *                 (xlo, xhi) = res[var_id_x].endpoints()
  *                 (ylo, yhi) = res[var_id_y].endpoints()
  *             except:             # <<<<<<<<<<<<<<
@@ -6274,23 +6389,23 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
  */
       /*except:*/ {
         __Pyx_AddTraceback("flowstar.plotting.SagePlotMixin.sage_interval_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_8, &__pyx_t_10) < 0) __PYX_ERR(0, 137, __pyx_L7_except_error)
+        if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_8, &__pyx_t_10) < 0) __PYX_ERR(0, 139, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_GOTREF(__pyx_t_10);
 
-        /* "flowstar/plotting.pyx":138
+        /* "flowstar/plotting.pyx":140
  *                 (ylo, yhi) = res[var_id_y].endpoints()
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))             # <<<<<<<<<<<<<<
  * 
  *             # Choose colour based on p
  */
-        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_warning_eval_failed_for_t_in, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_warning_eval_failed_for_t_in, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 140, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_15 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+        __pyx_t_15 = PyFloat_FromDouble(__pyx_v_t); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 140, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_15);
-        __pyx_t_16 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+        __pyx_t_16 = PyFloat_FromDouble((__pyx_v_t + __pyx_v_step)); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 140, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_16);
         __pyx_t_17 = NULL;
         __pyx_t_18 = 0;
@@ -6307,7 +6422,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[3] = {__pyx_t_17, __pyx_t_15, __pyx_t_16};
-          __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+          __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 140, __pyx_L7_except_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -6317,7 +6432,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[3] = {__pyx_t_17, __pyx_t_15, __pyx_t_16};
-          __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+          __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_18, 2+__pyx_t_18); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 140, __pyx_L7_except_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -6325,7 +6440,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         } else
         #endif
         {
-          __pyx_t_19 = PyTuple_New(2+__pyx_t_18); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+          __pyx_t_19 = PyTuple_New(2+__pyx_t_18); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 140, __pyx_L7_except_error)
           __Pyx_GOTREF(__pyx_t_19);
           if (__pyx_t_17) {
             __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_17); __pyx_t_17 = NULL;
@@ -6336,12 +6451,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
           PyTuple_SET_ITEM(__pyx_t_19, 1+__pyx_t_18, __pyx_t_16);
           __pyx_t_15 = 0;
           __pyx_t_16 = 0;
-          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_19, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_19, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 140, __pyx_L7_except_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
         }
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 138, __pyx_L7_except_error)
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 140, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -6352,7 +6467,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       }
       __pyx_L7_except_error:;
 
-      /* "flowstar/plotting.pyx":134
+      /* "flowstar/plotting.pyx":136
  *             t = step*i
  *             res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -6372,19 +6487,19 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       __pyx_L12_try_end:;
     }
 
-    /* "flowstar/plotting.pyx":142
+    /* "flowstar/plotting.pyx":144
  *             # Choose colour based on p
  *             # col = 'default'
  *             col = kwargs.get('color', None)             # <<<<<<<<<<<<<<
  *             if poly is not None:
  *                 pres = index_fn(poly)(res)
  */
-    __pyx_t_10 = __Pyx_PyDict_GetItemDefault(__pyx_v_kwargs, __pyx_n_s_color, Py_None); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 142, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyDict_GetItemDefault(__pyx_v_kwargs, __pyx_n_s_color, Py_None); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 144, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_XDECREF_SET(__pyx_v_col, __pyx_t_10);
     __pyx_t_10 = 0;
 
-    /* "flowstar/plotting.pyx":143
+    /* "flowstar/plotting.pyx":145
  *             # col = 'default'
  *             col = kwargs.get('color', None)
  *             if poly is not None:             # <<<<<<<<<<<<<<
@@ -6395,14 +6510,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __pyx_t_21 = (__pyx_t_20 != 0);
     if (__pyx_t_21) {
 
-      /* "flowstar/plotting.pyx":144
+      /* "flowstar/plotting.pyx":146
  *             col = kwargs.get('color', None)
  *             if poly is not None:
  *                 pres = index_fn(poly)(res)             # <<<<<<<<<<<<<<
  *                 if pres.lower() > 0:
  *                     col = 'green'
  */
-      __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_index_fn); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 144, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_index_fn); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 146, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __pyx_t_3 = NULL;
       if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -6415,13 +6530,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         }
       }
       if (!__pyx_t_3) {
-        __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_poly); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 144, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_poly); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 146, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_2)) {
           PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_v_poly};
-          __pyx_t_8 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_8 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_GOTREF(__pyx_t_8);
         } else
@@ -6429,19 +6544,19 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
           PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_v_poly};
-          __pyx_t_8 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_8 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_GOTREF(__pyx_t_8);
         } else
         #endif
         {
-          __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3); __pyx_t_3 = NULL;
           __Pyx_INCREF(__pyx_v_poly);
           __Pyx_GIVEREF(__pyx_v_poly);
           PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_v_poly);
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_9, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_9, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
@@ -6458,13 +6573,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         }
       }
       if (!__pyx_t_2) {
-        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_v_res); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 144, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_v_res); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 146, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_8)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_res};
-          __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_10);
         } else
@@ -6472,19 +6587,19 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_res};
-          __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_10);
         } else
         #endif
         {
-          __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_2); __pyx_t_2 = NULL;
           __Pyx_INCREF(__pyx_v_res);
           __Pyx_GIVEREF(__pyx_v_res);
           PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_v_res);
-          __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_9, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 144, __pyx_L1_error)
+          __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_9, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 146, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
@@ -6493,14 +6608,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       __Pyx_XDECREF_SET(__pyx_v_pres, __pyx_t_10);
       __pyx_t_10 = 0;
 
-      /* "flowstar/plotting.pyx":145
+      /* "flowstar/plotting.pyx":147
  *             if poly is not None:
  *                 pres = index_fn(poly)(res)
  *                 if pres.lower() > 0:             # <<<<<<<<<<<<<<
  *                     col = 'green'
  *                 if pres.upper() < 0:
  */
-      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_pres, __pyx_n_s_lower); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 145, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_pres, __pyx_n_s_lower); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 147, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __pyx_t_9 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_8))) {
@@ -6513,20 +6628,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         }
       }
       if (__pyx_t_9) {
-        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 145, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 147, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       } else {
-        __pyx_t_10 = __Pyx_PyObject_CallNoArg(__pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 145, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyObject_CallNoArg(__pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 147, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_8 = PyObject_RichCompare(__pyx_t_10, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 145, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_t_10, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 147, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-      __pyx_t_21 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_21 < 0)) __PYX_ERR(0, 145, __pyx_L1_error)
+      __pyx_t_21 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_21 < 0)) __PYX_ERR(0, 147, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_21) {
 
-        /* "flowstar/plotting.pyx":146
+        /* "flowstar/plotting.pyx":148
  *                 pres = index_fn(poly)(res)
  *                 if pres.lower() > 0:
  *                     col = 'green'             # <<<<<<<<<<<<<<
@@ -6536,7 +6651,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         __Pyx_INCREF(__pyx_n_s_green);
         __Pyx_DECREF_SET(__pyx_v_col, __pyx_n_s_green);
 
-        /* "flowstar/plotting.pyx":145
+        /* "flowstar/plotting.pyx":147
  *             if poly is not None:
  *                 pres = index_fn(poly)(res)
  *                 if pres.lower() > 0:             # <<<<<<<<<<<<<<
@@ -6545,14 +6660,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
  */
       }
 
-      /* "flowstar/plotting.pyx":147
+      /* "flowstar/plotting.pyx":149
  *                 if pres.lower() > 0:
  *                     col = 'green'
  *                 if pres.upper() < 0:             # <<<<<<<<<<<<<<
  *                     col = 'red'
  * 
  */
-      __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_v_pres, __pyx_n_s_upper); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 147, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_v_pres, __pyx_n_s_upper); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 149, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __pyx_t_9 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_10))) {
@@ -6565,20 +6680,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         }
       }
       if (__pyx_t_9) {
-        __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 147, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 149, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       } else {
-        __pyx_t_8 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 147, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 149, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-      __pyx_t_10 = PyObject_RichCompare(__pyx_t_8, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_10); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 147, __pyx_L1_error)
+      __pyx_t_10 = PyObject_RichCompare(__pyx_t_8, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_10); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 149, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_21 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely(__pyx_t_21 < 0)) __PYX_ERR(0, 147, __pyx_L1_error)
+      __pyx_t_21 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely(__pyx_t_21 < 0)) __PYX_ERR(0, 149, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       if (__pyx_t_21) {
 
-        /* "flowstar/plotting.pyx":148
+        /* "flowstar/plotting.pyx":150
  *                     col = 'green'
  *                 if pres.upper() < 0:
  *                     col = 'red'             # <<<<<<<<<<<<<<
@@ -6588,7 +6703,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
         __Pyx_INCREF(__pyx_n_s_red);
         __Pyx_DECREF_SET(__pyx_v_col, __pyx_n_s_red);
 
-        /* "flowstar/plotting.pyx":147
+        /* "flowstar/plotting.pyx":149
  *                 if pres.lower() > 0:
  *                     col = 'green'
  *                 if pres.upper() < 0:             # <<<<<<<<<<<<<<
@@ -6597,7 +6712,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
  */
       }
 
-      /* "flowstar/plotting.pyx":143
+      /* "flowstar/plotting.pyx":145
  *             # col = 'default'
  *             col = kwargs.get('color', None)
  *             if poly is not None:             # <<<<<<<<<<<<<<
@@ -6606,16 +6721,16 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
  */
     }
 
-    /* "flowstar/plotting.pyx":150
+    /* "flowstar/plotting.pyx":152
  *                     col = 'red'
  * 
  *             p += polygon([(xlo, ylo), (xlo, yhi), (xhi, yhi), (xhi, ylo)],             # <<<<<<<<<<<<<<
  *                          fill=False,
  *                          **(kwargs if col is None
  */
-    if (unlikely(!__pyx_v_xlo)) { __Pyx_RaiseUnboundLocalError("xlo"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    if (unlikely(!__pyx_v_ylo)) { __Pyx_RaiseUnboundLocalError("ylo"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    __pyx_t_10 = PyTuple_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 150, __pyx_L1_error)
+    if (unlikely(!__pyx_v_xlo)) { __Pyx_RaiseUnboundLocalError("xlo"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_ylo)) { __Pyx_RaiseUnboundLocalError("ylo"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    __pyx_t_10 = PyTuple_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_INCREF(__pyx_v_xlo);
     __Pyx_GIVEREF(__pyx_v_xlo);
@@ -6623,9 +6738,9 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __Pyx_INCREF(__pyx_v_ylo);
     __Pyx_GIVEREF(__pyx_v_ylo);
     PyTuple_SET_ITEM(__pyx_t_10, 1, __pyx_v_ylo);
-    if (unlikely(!__pyx_v_xlo)) { __Pyx_RaiseUnboundLocalError("xlo"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    if (unlikely(!__pyx_v_yhi)) { __Pyx_RaiseUnboundLocalError("yhi"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 150, __pyx_L1_error)
+    if (unlikely(!__pyx_v_xlo)) { __Pyx_RaiseUnboundLocalError("xlo"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_yhi)) { __Pyx_RaiseUnboundLocalError("yhi"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(__pyx_v_xlo);
     __Pyx_GIVEREF(__pyx_v_xlo);
@@ -6633,9 +6748,9 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __Pyx_INCREF(__pyx_v_yhi);
     __Pyx_GIVEREF(__pyx_v_yhi);
     PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_v_yhi);
-    if (unlikely(!__pyx_v_xhi)) { __Pyx_RaiseUnboundLocalError("xhi"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    if (unlikely(!__pyx_v_yhi)) { __Pyx_RaiseUnboundLocalError("yhi"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 150, __pyx_L1_error)
+    if (unlikely(!__pyx_v_xhi)) { __Pyx_RaiseUnboundLocalError("xhi"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_yhi)) { __Pyx_RaiseUnboundLocalError("yhi"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_INCREF(__pyx_v_xhi);
     __Pyx_GIVEREF(__pyx_v_xhi);
@@ -6643,9 +6758,9 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __Pyx_INCREF(__pyx_v_yhi);
     __Pyx_GIVEREF(__pyx_v_yhi);
     PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_v_yhi);
-    if (unlikely(!__pyx_v_xhi)) { __Pyx_RaiseUnboundLocalError("xhi"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    if (unlikely(!__pyx_v_ylo)) { __Pyx_RaiseUnboundLocalError("ylo"); __PYX_ERR(0, 150, __pyx_L1_error) }
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 150, __pyx_L1_error)
+    if (unlikely(!__pyx_v_xhi)) { __Pyx_RaiseUnboundLocalError("xhi"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_ylo)) { __Pyx_RaiseUnboundLocalError("ylo"); __PYX_ERR(0, 152, __pyx_L1_error) }
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_v_xhi);
     __Pyx_GIVEREF(__pyx_v_xhi);
@@ -6653,7 +6768,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __Pyx_INCREF(__pyx_v_ylo);
     __Pyx_GIVEREF(__pyx_v_ylo);
     PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_ylo);
-    __pyx_t_3 = PyList_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 150, __pyx_L1_error)
+    __pyx_t_3 = PyList_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_10);
     PyList_SET_ITEM(__pyx_t_3, 0, __pyx_t_10);
@@ -6667,26 +6782,26 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
     __pyx_t_8 = 0;
     __pyx_t_9 = 0;
     __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 150, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_3);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":151
+    /* "flowstar/plotting.pyx":153
  * 
  *             p += polygon([(xlo, ylo), (xlo, yhi), (xhi, yhi), (xhi, ylo)],
  *                          fill=False,             # <<<<<<<<<<<<<<
  *                          **(kwargs if col is None
  *                                    else dict(color=col, **kwargs)))
  */
-    __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 151, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 153, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
-    if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_fill, Py_False) < 0) __PYX_ERR(0, 151, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_fill, Py_False) < 0) __PYX_ERR(0, 153, __pyx_L1_error)
     __pyx_t_3 = __pyx_t_9;
     __pyx_t_9 = 0;
 
-    /* "flowstar/plotting.pyx":152
+    /* "flowstar/plotting.pyx":154
  *             p += polygon([(xlo, ylo), (xlo, yhi), (xhi, yhi), (xhi, ylo)],
  *                          fill=False,
  *                          **(kwargs if col is None             # <<<<<<<<<<<<<<
@@ -6699,27 +6814,27 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
       __pyx_t_9 = __pyx_v_kwargs;
     } else {
 
-      /* "flowstar/plotting.pyx":153
+      /* "flowstar/plotting.pyx":155
  *                          fill=False,
  *                          **(kwargs if col is None
  *                                    else dict(color=col, **kwargs)))             # <<<<<<<<<<<<<<
  * 
  *         return p
  */
-      __pyx_t_10 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 153, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 155, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
-      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_color, __pyx_v_col) < 0) __PYX_ERR(0, 153, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_10, __pyx_n_s_color, __pyx_v_col) < 0) __PYX_ERR(0, 155, __pyx_L1_error)
       __pyx_t_8 = __pyx_t_10;
       __pyx_t_10 = 0;
-      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_v_kwargs) < 0) __PYX_ERR(0, 153, __pyx_L1_error)
-      __pyx_t_10 = __Pyx_PyObject_Call(((PyObject *)(&PyDict_Type)), __pyx_empty_tuple, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 153, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_8, __pyx_v_kwargs) < 0) __PYX_ERR(0, 155, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_Call(((PyObject *)(&PyDict_Type)), __pyx_empty_tuple, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 155, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __pyx_t_9 = __pyx_t_10;
       __pyx_t_10 = 0;
     }
 
-    /* "flowstar/plotting.pyx":152
+    /* "flowstar/plotting.pyx":154
  *             p += polygon([(xlo, ylo), (xlo, yhi), (xhi, yhi), (xhi, ylo)],
  *                          fill=False,
  *                          **(kwargs if col is None             # <<<<<<<<<<<<<<
@@ -6728,29 +6843,29 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
  */
     if (unlikely(__pyx_t_9 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-      __PYX_ERR(0, 152, __pyx_L1_error)
+      __PYX_ERR(0, 154, __pyx_L1_error)
     }
-    if (__Pyx_MergeKeywords(__pyx_t_3, __pyx_t_9) < 0) __PYX_ERR(0, 152, __pyx_L1_error)
+    if (__Pyx_MergeKeywords(__pyx_t_3, __pyx_t_9) < 0) __PYX_ERR(0, 154, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "flowstar/plotting.pyx":150
+    /* "flowstar/plotting.pyx":152
  *                     col = 'red'
  * 
  *             p += polygon([(xlo, ylo), (xlo, yhi), (xhi, yhi), (xhi, ylo)],             # <<<<<<<<<<<<<<
  *                          fill=False,
  *                          **(kwargs if col is None
  */
-    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_v_polygon, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 150, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_v_polygon, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 150, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":131
+    /* "flowstar/plotting.pyx":133
  *         # cdef Interval pres
  * 
  *         for i in range(int(self.time/step)):             # <<<<<<<<<<<<<<
@@ -6760,7 +6875,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":155
+  /* "flowstar/plotting.pyx":157
  *                                    else dict(color=col, **kwargs)))
  * 
  *         return p             # <<<<<<<<<<<<<<
@@ -6772,7 +6887,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plo
   __pyx_r = __pyx_v_p;
   goto __pyx_L0;
 
-  /* "flowstar/plotting.pyx":122
+  /* "flowstar/plotting.pyx":124
  *         return p
  * 
  *     def sage_interval_plot(self, str x, str y, double step=1e-1, poly = None, **kwargs):             # <<<<<<<<<<<<<<
@@ -7092,7 +7207,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_10__setstate_cytho
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":159
+/* "flowstar/plotting.pyx":161
  * 
  * cdef class SageTubePlotMixin:
  *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):             # <<<<<<<<<<<<<<
@@ -7145,7 +7260,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_1sage_time_tub
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_time_tube_plot") < 0)) __PYX_ERR(0, 159, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_time_tube_plot") < 0)) __PYX_ERR(0, 161, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -7160,7 +7275,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_1sage_time_tub
     }
     __pyx_v_x = ((PyObject*)values[0]);
     if (values[1]) {
-      __pyx_v_step = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L3_error)
+      __pyx_v_step = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L3_error)
     } else {
       __pyx_v_step = ((double)1e-1);
     }
@@ -7168,13 +7283,13 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_1sage_time_tub
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sage_time_tube_plot", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 159, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sage_time_tube_plot", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 161, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.plotting.SageTubePlotMixin.sage_time_tube_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 159, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 161, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube_plot(((struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_step, __pyx_v_joins);
 
   /* function exit code */
@@ -7195,7 +7310,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("sage_time_tube_plot", 0);
 
-  /* "flowstar/plotting.pyx":160
+  /* "flowstar/plotting.pyx":162
  * cdef class SageTubePlotMixin:
  *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):
  *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)             # <<<<<<<<<<<<<<
@@ -7203,11 +7318,11 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False, straight=False, tight=False, boundaries=True, joins=True, **kwargs):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_sage_tube_plot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_sage_tube_plot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_n_s_t);
   __Pyx_GIVEREF(__pyx_n_s_t);
@@ -7218,11 +7333,11 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_straight, Py_True) < 0) __PYX_ERR(0, 160, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_joins, __pyx_v_joins) < 0) __PYX_ERR(0, 160, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 160, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_straight, Py_True) < 0) __PYX_ERR(0, 162, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_joins, __pyx_v_joins) < 0) __PYX_ERR(0, 162, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -7231,7 +7346,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/plotting.pyx":159
+  /* "flowstar/plotting.pyx":161
  * 
  * cdef class SageTubePlotMixin:
  *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):             # <<<<<<<<<<<<<<
@@ -7253,7 +7368,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
   return __pyx_r;
 }
 
-/* "flowstar/plotting.pyx":162
+/* "flowstar/plotting.pyx":164
  *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
  * 
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False, straight=False, tight=False, boundaries=True, joins=True, **kwargs):             # <<<<<<<<<<<<<<
@@ -7317,7 +7432,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_3sage_tube_plo
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("sage_tube_plot", 0, 2, 8, 1); __PYX_ERR(0, 162, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("sage_tube_plot", 0, 2, 8, 1); __PYX_ERR(0, 164, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -7357,7 +7472,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_3sage_tube_plo
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "sage_tube_plot") < 0)) __PYX_ERR(0, 162, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "sage_tube_plot") < 0)) __PYX_ERR(0, 164, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -7382,12 +7497,12 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_3sage_tube_plo
     __pyx_v_x = ((PyObject*)values[0]);
     __pyx_v_y = ((PyObject*)values[1]);
     if (values[2]) {
-      __pyx_v_step = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 162, __pyx_L3_error)
+      __pyx_v_step = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 164, __pyx_L3_error)
     } else {
       __pyx_v_step = ((double)1e-1);
     }
     if (values[3]) {
-      __pyx_v_arrows = __Pyx_PyObject_IsTrue(values[3]); if (unlikely((__pyx_v_arrows == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 162, __pyx_L3_error)
+      __pyx_v_arrows = __Pyx_PyObject_IsTrue(values[3]); if (unlikely((__pyx_v_arrows == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 164, __pyx_L3_error)
     } else {
       __pyx_v_arrows = ((int)0);
     }
@@ -7398,15 +7513,15 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_3sage_tube_plo
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sage_tube_plot", 0, 2, 8, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 162, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sage_tube_plot", 0, 2, 8, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 164, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_kwargs); __pyx_v_kwargs = 0;
   __Pyx_AddTraceback("flowstar.plotting.SageTubePlotMixin.sage_tube_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 162, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyString_Type), 1, "y", 1))) __PYX_ERR(0, 162, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyString_Type), 1, "x", 1))) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyString_Type), 1, "y", 1))) __PYX_ERR(0, 164, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plot(((struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_y, __pyx_v_step, __pyx_v_arrows, __pyx_v_straight, __pyx_v_tight, __pyx_v_boundaries, __pyx_v_joins, __pyx_v_kwargs);
 
   /* function exit code */
@@ -7486,14 +7601,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   int __pyx_t_18;
   __Pyx_RefNannySetupContext("sage_tube_plot", 0);
 
-  /* "flowstar/plotting.pyx":163
+  /* "flowstar/plotting.pyx":165
  * 
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False, straight=False, tight=False, boundaries=True, joins=True, **kwargs):
  *         from sage.all import line, Graphics, RIF, sqrt, arctan, tan, cos, sin, arrow, point, pi, vector             # <<<<<<<<<<<<<<
  * 
  *         p = Graphics()
  */
-  __pyx_t_1 = PyList_New(12); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(12); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_line);
   __Pyx_GIVEREF(__pyx_n_s_line);
@@ -7531,72 +7646,72 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __Pyx_INCREF(__pyx_n_s_vector);
   __Pyx_GIVEREF(__pyx_n_s_vector);
   PyList_SET_ITEM(__pyx_t_1, 11, __pyx_n_s_vector);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_line); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_line); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_line = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Graphics); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Graphics); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_Graphics = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RIF); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RIF); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_RIF = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_sqrt = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_arctan); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_arctan); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_arctan = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_tan); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_tan); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_tan = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_cos); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_cos); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_cos = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_sin); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_sin); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_sin = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_arrow); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_arrow); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_arrow = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_point); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_point); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_point = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_pi); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_pi); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_pi = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_vector); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_vector); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_vector = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":165
+  /* "flowstar/plotting.pyx":167
  *         from sage.all import line, Graphics, RIF, sqrt, arctan, tan, cos, sin, arrow, point, pi, vector
  * 
  *         p = Graphics()             # <<<<<<<<<<<<<<
@@ -7615,39 +7730,39 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 167, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 167, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_p = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "flowstar/plotting.pyx":166
+  /* "flowstar/plotting.pyx":168
  * 
  *         p = Graphics()
  *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
  *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  *         cx0 = cy0 = None
  */
-  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 166, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 166, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 168, __pyx_L1_error)
   __pyx_v_var_id_x = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
-  /* "flowstar/plotting.pyx":167
+  /* "flowstar/plotting.pyx":169
  *         p = Graphics()
  *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)             # <<<<<<<<<<<<<<
  *         cx0 = cy0 = None
  *         cx = cy = None
  */
-  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 167, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 167, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L1_error)
   __pyx_v_var_id_y = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
-  /* "flowstar/plotting.pyx":168
+  /* "flowstar/plotting.pyx":170
  *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  *         cx0 = cy0 = None             # <<<<<<<<<<<<<<
@@ -7659,7 +7774,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __Pyx_INCREF(Py_None);
   __pyx_v_cy0 = Py_None;
 
-  /* "flowstar/plotting.pyx":169
+  /* "flowstar/plotting.pyx":171
  *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  *         cx0 = cy0 = None
  *         cx = cy = None             # <<<<<<<<<<<<<<
@@ -7671,7 +7786,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __Pyx_INCREF(Py_None);
   __pyx_v_cy = Py_None;
 
-  /* "flowstar/plotting.pyx":170
+  /* "flowstar/plotting.pyx":172
  *         cx0 = cy0 = None
  *         cx = cy = None
  *         tx = ty = None             # <<<<<<<<<<<<<<
@@ -7683,7 +7798,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __Pyx_INCREF(Py_None);
   __pyx_v_ty = Py_None;
 
-  /* "flowstar/plotting.pyx":171
+  /* "flowstar/plotting.pyx":173
  *         cx = cy = None
  *         tx = ty = None
  *         rx = ry = None             # <<<<<<<<<<<<<<
@@ -7695,7 +7810,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __Pyx_INCREF(Py_None);
   __pyx_v_ry = Py_None;
 
-  /* "flowstar/plotting.pyx":172
+  /* "flowstar/plotting.pyx":174
  *         tx = ty = None
  *         rx = ry = None
  *         dx = dy = None             # <<<<<<<<<<<<<<
@@ -7707,7 +7822,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __Pyx_INCREF(Py_None);
   __pyx_v_dy = Py_None;
 
-  /* "flowstar/plotting.pyx":173
+  /* "flowstar/plotting.pyx":175
  *         rx = ry = None
  *         dx = dy = None
  *         r00 = r0 = r = None             # <<<<<<<<<<<<<<
@@ -7721,46 +7836,46 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __Pyx_INCREF(Py_None);
   __pyx_v_r = Py_None;
 
-  /* "flowstar/plotting.pyx":175
+  /* "flowstar/plotting.pyx":177
  *         r00 = r0 = r = None
  * 
  *         n = int(self.time//step)             # <<<<<<<<<<<<<<
  *         for i in range(n + 1):
  *             t = step*i
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyNumber_FloorDivide(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_FloorDivide(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_n = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":176
+  /* "flowstar/plotting.pyx":178
  * 
  *         n = int(self.time//step)
  *         for i in range(n + 1):             # <<<<<<<<<<<<<<
  *             t = step*i
  *             if i < n:
  */
-  __pyx_t_1 = __Pyx_PyInt_AddObjC(__pyx_v_n, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 176, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_AddObjC(__pyx_v_n, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 178, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
     __pyx_t_1 = __pyx_t_3; __Pyx_INCREF(__pyx_t_1); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
   } else {
-    __pyx_t_5 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 176, __pyx_L1_error)
+    __pyx_t_5 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 176, __pyx_L1_error)
+    __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 178, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   for (;;) {
@@ -7768,17 +7883,17 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 176, __pyx_L1_error)
+        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 178, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       } else {
         if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 176, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_5); __Pyx_INCREF(__pyx_t_3); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 178, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       }
@@ -7788,7 +7903,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 176, __pyx_L1_error)
+          else __PYX_ERR(0, 178, __pyx_L1_error)
         }
         break;
       }
@@ -7797,46 +7912,46 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":177
+    /* "flowstar/plotting.pyx":179
  *         n = int(self.time//step)
  *         for i in range(n + 1):
  *             t = step*i             # <<<<<<<<<<<<<<
  *             if i < n:
  *                 res = self((t, t+step))
  */
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_XDECREF_SET(__pyx_v_t, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "flowstar/plotting.pyx":178
+    /* "flowstar/plotting.pyx":180
  *         for i in range(n + 1):
  *             t = step*i
  *             if i < n:             # <<<<<<<<<<<<<<
  *                 res = self((t, t+step))
  *             try:
  */
-    __pyx_t_2 = PyObject_RichCompare(__pyx_v_i, __pyx_v_n, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 178, __pyx_L1_error)
+    __pyx_t_2 = PyObject_RichCompare(__pyx_v_i, __pyx_v_n, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 180, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 180, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     if (__pyx_t_7) {
 
-      /* "flowstar/plotting.pyx":179
+      /* "flowstar/plotting.pyx":181
  *             t = step*i
  *             if i < n:
  *                 res = self((t, t+step))             # <<<<<<<<<<<<<<
  *             try:
  *                 Ix = RIF(res[var_id_x])
  */
-      __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
+      __pyx_t_3 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 181, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_8 = PyNumber_Add(__pyx_v_t, __pyx_t_3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 179, __pyx_L1_error)
+      __pyx_t_8 = PyNumber_Add(__pyx_v_t, __pyx_t_3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 181, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 181, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_INCREF(__pyx_v_t);
       __Pyx_GIVEREF(__pyx_v_t);
@@ -7856,14 +7971,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
       }
       if (!__pyx_t_9) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_GOTREF(__pyx_t_2);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_8)) {
           PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_3};
-          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -7872,20 +7987,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
           PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_3};
-          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         } else
         #endif
         {
-          __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 179, __pyx_L1_error)
+          __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 181, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_9); __pyx_t_9 = NULL;
           __Pyx_GIVEREF(__pyx_t_3);
           PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_3);
           __pyx_t_3 = 0;
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
         }
@@ -7894,7 +8009,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __Pyx_XDECREF_SET(__pyx_v_res, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "flowstar/plotting.pyx":178
+      /* "flowstar/plotting.pyx":180
  *         for i in range(n + 1):
  *             t = step*i
  *             if i < n:             # <<<<<<<<<<<<<<
@@ -7903,7 +8018,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
     }
 
-    /* "flowstar/plotting.pyx":180
+    /* "flowstar/plotting.pyx":182
  *             if i < n:
  *                 res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -7919,15 +8034,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __Pyx_XGOTREF(__pyx_t_13);
       /*try:*/ {
 
-        /* "flowstar/plotting.pyx":181
+        /* "flowstar/plotting.pyx":183
  *                 res = self((t, t+step))
  *             try:
  *                 Ix = RIF(res[var_id_x])             # <<<<<<<<<<<<<<
  *                 Iy = RIF(res[var_id_y])
  *             except:
  */
-        if (unlikely(!__pyx_v_res)) { __Pyx_RaiseUnboundLocalError("res"); __PYX_ERR(0, 181, __pyx_L6_error) }
-        __pyx_t_8 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 181, __pyx_L6_error)
+        if (unlikely(!__pyx_v_res)) { __Pyx_RaiseUnboundLocalError("res"); __PYX_ERR(0, 183, __pyx_L6_error) }
+        __pyx_t_8 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_x, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 183, __pyx_L6_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_v_RIF);
         __pyx_t_10 = __pyx_v_RIF; __pyx_t_3 = NULL;
@@ -7941,14 +8056,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_3) {
-          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L6_error)
+          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 183, __pyx_L6_error)
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           __Pyx_GOTREF(__pyx_t_2);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_10)) {
             PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_8};
-            __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L6_error)
+            __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 183, __pyx_L6_error)
             __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -7957,20 +8072,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_10)) {
             PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_8};
-            __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L6_error)
+            __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 183, __pyx_L6_error)
             __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           } else
           #endif
           {
-            __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 181, __pyx_L6_error)
+            __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 183, __pyx_L6_error)
             __Pyx_GOTREF(__pyx_t_9);
             __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3); __pyx_t_3 = NULL;
             __Pyx_GIVEREF(__pyx_t_8);
             PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_8);
             __pyx_t_8 = 0;
-            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L6_error)
+            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 183, __pyx_L6_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           }
@@ -7979,15 +8094,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_XDECREF_SET(__pyx_v_Ix, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "flowstar/plotting.pyx":182
+        /* "flowstar/plotting.pyx":184
  *             try:
  *                 Ix = RIF(res[var_id_x])
  *                 Iy = RIF(res[var_id_y])             # <<<<<<<<<<<<<<
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
  */
-        if (unlikely(!__pyx_v_res)) { __Pyx_RaiseUnboundLocalError("res"); __PYX_ERR(0, 182, __pyx_L6_error) }
-        __pyx_t_10 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 182, __pyx_L6_error)
+        if (unlikely(!__pyx_v_res)) { __Pyx_RaiseUnboundLocalError("res"); __PYX_ERR(0, 184, __pyx_L6_error) }
+        __pyx_t_10 = __Pyx_GetItemInt(__pyx_v_res, __pyx_v_var_id_y, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 184, __pyx_L6_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_INCREF(__pyx_v_RIF);
         __pyx_t_9 = __pyx_v_RIF; __pyx_t_8 = NULL;
@@ -8001,14 +8116,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_8) {
-          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 182, __pyx_L6_error)
+          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L6_error)
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_GOTREF(__pyx_t_2);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_10};
-            __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 182, __pyx_L6_error)
+            __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L6_error)
             __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -8017,20 +8132,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_10};
-            __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 182, __pyx_L6_error)
+            __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L6_error)
             __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           } else
           #endif
           {
-            __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 182, __pyx_L6_error)
+            __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 184, __pyx_L6_error)
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_8); __pyx_t_8 = NULL;
             __Pyx_GIVEREF(__pyx_t_10);
             PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_10);
             __pyx_t_10 = 0;
-            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 182, __pyx_L6_error)
+            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L6_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           }
@@ -8039,7 +8154,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_XDECREF_SET(__pyx_v_Iy, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "flowstar/plotting.pyx":180
+        /* "flowstar/plotting.pyx":182
  *             if i < n:
  *                 res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -8058,7 +8173,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "flowstar/plotting.pyx":183
+      /* "flowstar/plotting.pyx":185
  *                 Ix = RIF(res[var_id_x])
  *                 Iy = RIF(res[var_id_y])
  *             except:             # <<<<<<<<<<<<<<
@@ -8067,23 +8182,23 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
       /*except:*/ {
         __Pyx_AddTraceback("flowstar.plotting.SageTubePlotMixin.sage_tube_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 183, __pyx_L8_except_error)
+        if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 185, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_GOTREF(__pyx_t_3);
 
-        /* "flowstar/plotting.pyx":184
+        /* "flowstar/plotting.pyx":186
  *                 Iy = RIF(res[var_id_y])
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))             # <<<<<<<<<<<<<<
  *             cx00, cy00 = cx0, cy0
  *             cx0, cy0 = cx, cy
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_warning_eval_failed_for_t_in, __pyx_n_s_format); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_warning_eval_failed_for_t_in, __pyx_n_s_format); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 186, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_14 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+        __pyx_t_14 = PyFloat_FromDouble(__pyx_v_step); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 186, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_14);
-        __pyx_t_15 = PyNumber_Add(__pyx_v_t, __pyx_t_14); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+        __pyx_t_15 = PyNumber_Add(__pyx_v_t, __pyx_t_14); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 186, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_15);
         __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
         __pyx_t_14 = NULL;
@@ -8101,7 +8216,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_8)) {
           PyObject *__pyx_temp[3] = {__pyx_t_14, __pyx_v_t, __pyx_t_15};
-          __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+          __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 186, __pyx_L8_except_error)
           __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -8110,14 +8225,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
           PyObject *__pyx_temp[3] = {__pyx_t_14, __pyx_v_t, __pyx_t_15};
-          __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+          __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_16, 2+__pyx_t_16); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 186, __pyx_L8_except_error)
           __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
         } else
         #endif
         {
-          __pyx_t_17 = PyTuple_New(2+__pyx_t_16); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+          __pyx_t_17 = PyTuple_New(2+__pyx_t_16); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 186, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_17);
           if (__pyx_t_14) {
             __Pyx_GIVEREF(__pyx_t_14); PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_14); __pyx_t_14 = NULL;
@@ -8128,12 +8243,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __Pyx_GIVEREF(__pyx_t_15);
           PyTuple_SET_ITEM(__pyx_t_17, 1+__pyx_t_16, __pyx_t_15);
           __pyx_t_15 = 0;
-          __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_17, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+          __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_17, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 186, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
         }
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_10); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 184, __pyx_L8_except_error)
+        __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_10); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 186, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -8144,7 +8259,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       }
       __pyx_L8_except_error:;
 
-      /* "flowstar/plotting.pyx":180
+      /* "flowstar/plotting.pyx":182
  *             if i < n:
  *                 res = self((t, t+step))
  *             try:             # <<<<<<<<<<<<<<
@@ -8164,7 +8279,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __pyx_L13_try_end:;
     }
 
-    /* "flowstar/plotting.pyx":185
+    /* "flowstar/plotting.pyx":187
  *             except:
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
  *             cx00, cy00 = cx0, cy0             # <<<<<<<<<<<<<<
@@ -8180,7 +8295,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_XDECREF_SET(__pyx_v_cy00, __pyx_t_9);
     __pyx_t_9 = 0;
 
-    /* "flowstar/plotting.pyx":186
+    /* "flowstar/plotting.pyx":188
  *                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
  *             cx00, cy00 = cx0, cy0
  *             cx0, cy0 = cx, cy             # <<<<<<<<<<<<<<
@@ -8196,7 +8311,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_DECREF_SET(__pyx_v_cy0, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":187
+    /* "flowstar/plotting.pyx":189
  *             cx00, cy00 = cx0, cy0
  *             cx0, cy0 = cx, cy
  *             tx0, ty0 = tx, ty             # <<<<<<<<<<<<<<
@@ -8212,27 +8327,27 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_XDECREF_SET(__pyx_v_ty0, __pyx_t_9);
     __pyx_t_9 = 0;
 
-    /* "flowstar/plotting.pyx":188
+    /* "flowstar/plotting.pyx":190
  *             cx0, cy0 = cx, cy
  *             tx0, ty0 = tx, ty
  *             if i < n:             # <<<<<<<<<<<<<<
  *                 cx, cy = Ix.center(), Iy.center()
  *                 if cx0 is not None:
  */
-    __pyx_t_9 = PyObject_RichCompare(__pyx_v_i, __pyx_v_n, Py_LT); __Pyx_XGOTREF(__pyx_t_9); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 188, __pyx_L1_error)
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 188, __pyx_L1_error)
+    __pyx_t_9 = PyObject_RichCompare(__pyx_v_i, __pyx_v_n, Py_LT); __Pyx_XGOTREF(__pyx_t_9); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 190, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 190, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     if (__pyx_t_7) {
 
-      /* "flowstar/plotting.pyx":189
+      /* "flowstar/plotting.pyx":191
  *             tx0, ty0 = tx, ty
  *             if i < n:
  *                 cx, cy = Ix.center(), Iy.center()             # <<<<<<<<<<<<<<
  *                 if cx0 is not None:
  *                     dx0, dy0 = dx, dy
  */
-      if (unlikely(!__pyx_v_Ix)) { __Pyx_RaiseUnboundLocalError("Ix"); __PYX_ERR(0, 189, __pyx_L1_error) }
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_Ix, __pyx_n_s_center); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
+      if (unlikely(!__pyx_v_Ix)) { __Pyx_RaiseUnboundLocalError("Ix"); __PYX_ERR(0, 191, __pyx_L1_error) }
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_Ix, __pyx_n_s_center); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 191, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_2 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -8245,15 +8360,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
       }
       if (__pyx_t_2) {
-        __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 189, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 191, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       } else {
-        __pyx_t_9 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 189, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 191, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      if (unlikely(!__pyx_v_Iy)) { __Pyx_RaiseUnboundLocalError("Iy"); __PYX_ERR(0, 189, __pyx_L1_error) }
-      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_Iy, __pyx_n_s_center); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 189, __pyx_L1_error)
+      if (unlikely(!__pyx_v_Iy)) { __Pyx_RaiseUnboundLocalError("Iy"); __PYX_ERR(0, 191, __pyx_L1_error) }
+      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_Iy, __pyx_n_s_center); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 191, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __pyx_t_8 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -8266,10 +8381,10 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
       }
       if (__pyx_t_8) {
-        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 191, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       } else {
-        __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 191, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -8278,7 +8393,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __Pyx_DECREF_SET(__pyx_v_cy, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "flowstar/plotting.pyx":190
+      /* "flowstar/plotting.pyx":192
  *             if i < n:
  *                 cx, cy = Ix.center(), Iy.center()
  *                 if cx0 is not None:             # <<<<<<<<<<<<<<
@@ -8289,7 +8404,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __pyx_t_18 = (__pyx_t_7 != 0);
       if (__pyx_t_18) {
 
-        /* "flowstar/plotting.pyx":191
+        /* "flowstar/plotting.pyx":193
  *                 cx, cy = Ix.center(), Iy.center()
  *                 if cx0 is not None:
  *                     dx0, dy0 = dx, dy             # <<<<<<<<<<<<<<
@@ -8305,32 +8420,32 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_XDECREF_SET(__pyx_v_dy0, __pyx_t_9);
         __pyx_t_9 = 0;
 
-        /* "flowstar/plotting.pyx":192
+        /* "flowstar/plotting.pyx":194
  *                 if cx0 is not None:
  *                     dx0, dy0 = dx, dy
  *                     dx, dy = (cx - cx0), (cy - cy0)             # <<<<<<<<<<<<<<
  *                     theta = pi/2 - arctan(dy/dx)
  * 
  */
-        __pyx_t_9 = PyNumber_Subtract(__pyx_v_cx, __pyx_v_cx0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 192, __pyx_L1_error)
+        __pyx_t_9 = PyNumber_Subtract(__pyx_v_cx, __pyx_v_cx0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 194, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_3 = PyNumber_Subtract(__pyx_v_cy, __pyx_v_cy0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 192, __pyx_L1_error)
+        __pyx_t_3 = PyNumber_Subtract(__pyx_v_cy, __pyx_v_cy0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 194, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF_SET(__pyx_v_dx, __pyx_t_9);
         __pyx_t_9 = 0;
         __Pyx_DECREF_SET(__pyx_v_dy, __pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "flowstar/plotting.pyx":193
+        /* "flowstar/plotting.pyx":195
  *                     dx0, dy0 = dx, dy
  *                     dx, dy = (cx - cx0), (cy - cy0)
  *                     theta = pi/2 - arctan(dy/dx)             # <<<<<<<<<<<<<<
  * 
  *             r000 = r00
  */
-        __pyx_t_3 = __Pyx_PyInt_TrueDivideObjC(__pyx_v_pi, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 193, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyInt_TrueDivideObjC(__pyx_v_pi, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 195, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_v_dy, __pyx_v_dx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_v_dy, __pyx_v_dx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_INCREF(__pyx_v_arctan);
         __pyx_t_8 = __pyx_v_arctan; __pyx_t_10 = NULL;
@@ -8344,14 +8459,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_10) {
-          __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 193, __pyx_L1_error)
+          __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 195, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_9);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_8)) {
             PyObject *__pyx_temp[2] = {__pyx_t_10, __pyx_t_2};
-            __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 193, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 195, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
             __Pyx_GOTREF(__pyx_t_9);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -8360,33 +8475,33 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
             PyObject *__pyx_temp[2] = {__pyx_t_10, __pyx_t_2};
-            __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 193, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 195, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
             __Pyx_GOTREF(__pyx_t_9);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           } else
           #endif
           {
-            __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 193, __pyx_L1_error)
+            __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 195, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_GIVEREF(__pyx_t_10); PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_10); __pyx_t_10 = NULL;
             __Pyx_GIVEREF(__pyx_t_2);
             PyTuple_SET_ITEM(__pyx_t_17, 0+1, __pyx_t_2);
             __pyx_t_2 = 0;
-            __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_17, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 193, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_17, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 195, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_9);
             __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __pyx_t_8 = PyNumber_Subtract(__pyx_t_3, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 193, __pyx_L1_error)
+        __pyx_t_8 = PyNumber_Subtract(__pyx_t_3, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 195, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_XDECREF_SET(__pyx_v_theta, __pyx_t_8);
         __pyx_t_8 = 0;
 
-        /* "flowstar/plotting.pyx":190
+        /* "flowstar/plotting.pyx":192
  *             if i < n:
  *                 cx, cy = Ix.center(), Iy.center()
  *                 if cx0 is not None:             # <<<<<<<<<<<<<<
@@ -8395,7 +8510,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
       }
 
-      /* "flowstar/plotting.pyx":188
+      /* "flowstar/plotting.pyx":190
  *             cx0, cy0 = cx, cy
  *             tx0, ty0 = tx, ty
  *             if i < n:             # <<<<<<<<<<<<<<
@@ -8404,7 +8519,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
     }
 
-    /* "flowstar/plotting.pyx":195
+    /* "flowstar/plotting.pyx":197
  *                     theta = pi/2 - arctan(dy/dx)
  * 
  *             r000 = r00             # <<<<<<<<<<<<<<
@@ -8414,7 +8529,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_INCREF(__pyx_v_r00);
     __Pyx_XDECREF_SET(__pyx_v_r000, __pyx_v_r00);
 
-    /* "flowstar/plotting.pyx":196
+    /* "flowstar/plotting.pyx":198
  * 
  *             r000 = r00
  *             r00 = r0             # <<<<<<<<<<<<<<
@@ -8424,7 +8539,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_INCREF(__pyx_v_r0);
     __Pyx_DECREF_SET(__pyx_v_r00, __pyx_v_r0);
 
-    /* "flowstar/plotting.pyx":197
+    /* "flowstar/plotting.pyx":199
  *             r000 = r00
  *             r00 = r0
  *             r0 = r             # <<<<<<<<<<<<<<
@@ -8434,7 +8549,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_INCREF(__pyx_v_r);
     __Pyx_DECREF_SET(__pyx_v_r0, __pyx_v_r);
 
-    /* "flowstar/plotting.pyx":198
+    /* "flowstar/plotting.pyx":200
  *             r00 = r0
  *             r0 = r
  *             rx0, ry0 = rx, ry             # <<<<<<<<<<<<<<
@@ -8450,15 +8565,15 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_XDECREF_SET(__pyx_v_ry0, __pyx_t_9);
     __pyx_t_9 = 0;
 
-    /* "flowstar/plotting.pyx":199
+    /* "flowstar/plotting.pyx":201
  *             r0 = r
  *             rx0, ry0 = rx, ry
  *             rx, ry = Ix.absolute_diameter()/2, Iy.absolute_diameter()/2             # <<<<<<<<<<<<<<
  *             r = sqrt(rx**2 + ry**2)
  * 
  */
-    if (unlikely(!__pyx_v_Ix)) { __Pyx_RaiseUnboundLocalError("Ix"); __PYX_ERR(0, 199, __pyx_L1_error) }
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_Ix, __pyx_n_s_absolute_diameter); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 199, __pyx_L1_error)
+    if (unlikely(!__pyx_v_Ix)) { __Pyx_RaiseUnboundLocalError("Ix"); __PYX_ERR(0, 201, __pyx_L1_error) }
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_Ix, __pyx_n_s_absolute_diameter); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 201, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_3 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_8))) {
@@ -8471,18 +8586,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       }
     }
     if (__pyx_t_3) {
-      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 199, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 201, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else {
-      __pyx_t_9 = __Pyx_PyObject_CallNoArg(__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 199, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_CallNoArg(__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 201, __pyx_L1_error)
     }
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_9, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 199, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_9, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 201, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    if (unlikely(!__pyx_v_Iy)) { __Pyx_RaiseUnboundLocalError("Iy"); __PYX_ERR(0, 199, __pyx_L1_error) }
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_Iy, __pyx_n_s_absolute_diameter); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 199, __pyx_L1_error)
+    if (unlikely(!__pyx_v_Iy)) { __Pyx_RaiseUnboundLocalError("Iy"); __PYX_ERR(0, 201, __pyx_L1_error) }
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_Iy, __pyx_n_s_absolute_diameter); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 201, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_17 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -8495,14 +8610,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       }
     }
     if (__pyx_t_17) {
-      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_17); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 199, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_17); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 201, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
     } else {
-      __pyx_t_9 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 199, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 201, __pyx_L1_error)
     }
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_9, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 199, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_9, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 201, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     __Pyx_DECREF_SET(__pyx_v_rx, __pyx_t_8);
@@ -8510,18 +8625,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_DECREF_SET(__pyx_v_ry, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":200
+    /* "flowstar/plotting.pyx":202
  *             rx0, ry0 = rx, ry
  *             rx, ry = Ix.absolute_diameter()/2, Iy.absolute_diameter()/2
  *             r = sqrt(rx**2 + ry**2)             # <<<<<<<<<<<<<<
  * 
  *             if rx0 is None:
  */
-    __pyx_t_8 = PyNumber_Power(__pyx_v_rx, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 200, __pyx_L1_error)
+    __pyx_t_8 = PyNumber_Power(__pyx_v_rx, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 202, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_9 = PyNumber_Power(__pyx_v_ry, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 200, __pyx_L1_error)
+    __pyx_t_9 = PyNumber_Power(__pyx_v_ry, __pyx_int_2, Py_None); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 202, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
-    __pyx_t_17 = PyNumber_Add(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 200, __pyx_L1_error)
+    __pyx_t_17 = PyNumber_Add(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 202, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_17);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -8537,14 +8652,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       }
     }
     if (!__pyx_t_8) {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_17); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 200, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_17); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 202, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_9)) {
         PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_17};
-        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 200, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 202, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
@@ -8553,20 +8668,20 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
         PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_17};
-        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 200, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 202, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
       } else
       #endif
       {
-        __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 200, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 202, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_8); __pyx_t_8 = NULL;
         __Pyx_GIVEREF(__pyx_t_17);
         PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_t_17);
         __pyx_t_17 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 200, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 202, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       }
@@ -8575,7 +8690,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __Pyx_DECREF_SET(__pyx_v_r, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/plotting.pyx":202
+    /* "flowstar/plotting.pyx":204
  *             r = sqrt(rx**2 + ry**2)
  * 
  *             if rx0 is None:             # <<<<<<<<<<<<<<
@@ -8588,17 +8703,17 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       goto __pyx_L18;
     }
 
-    /* "flowstar/plotting.pyx":204
+    /* "flowstar/plotting.pyx":206
  *             if rx0 is None:
  *                 pass
  *             elif straight:             # <<<<<<<<<<<<<<
  *                 tx = 0
  *                 ty = ry0
  */
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_straight); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 204, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_straight); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 206, __pyx_L1_error)
     if (__pyx_t_7) {
 
-      /* "flowstar/plotting.pyx":205
+      /* "flowstar/plotting.pyx":207
  *                 pass
  *             elif straight:
  *                 tx = 0             # <<<<<<<<<<<<<<
@@ -8608,7 +8723,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __Pyx_INCREF(__pyx_int_0);
       __Pyx_DECREF_SET(__pyx_v_tx, __pyx_int_0);
 
-      /* "flowstar/plotting.pyx":206
+      /* "flowstar/plotting.pyx":208
  *             elif straight:
  *                 tx = 0
  *                 ty = ry0             # <<<<<<<<<<<<<<
@@ -8618,7 +8733,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __Pyx_INCREF(__pyx_v_ry0);
       __Pyx_DECREF_SET(__pyx_v_ty, __pyx_v_ry0);
 
-      /* "flowstar/plotting.pyx":204
+      /* "flowstar/plotting.pyx":206
  *             if rx0 is None:
  *                 pass
  *             elif straight:             # <<<<<<<<<<<<<<
@@ -8628,24 +8743,24 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       goto __pyx_L18;
     }
 
-    /* "flowstar/plotting.pyx":207
+    /* "flowstar/plotting.pyx":209
  *                 tx = 0
  *                 ty = ry0
  *             elif tight:             # <<<<<<<<<<<<<<
  *                 # This finds where we hit the bounding box -- does not work
  *                 # well due to the edges interseTruecting
  */
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_tight); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 207, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_tight); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 209, __pyx_L1_error)
     if (__pyx_t_7) {
 
-      /* "flowstar/plotting.pyx":210
+      /* "flowstar/plotting.pyx":212
  *                 # This finds where we hit the bounding box -- does not work
  *                 # well due to the edges interseTruecting
  *                 if abs(tan(theta)) < 100 and (rx0 < ry0 or abs(tan(theta)) < 0.01):             # <<<<<<<<<<<<<<
  *                     print("A:", rx0, ry0, float(tan(theta)))
  *                     tx = rx0
  */
-      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 210, __pyx_L1_error) }
+      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 212, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_v_tan);
       __pyx_t_9 = __pyx_v_tan; __pyx_t_2 = NULL;
       if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
@@ -8658,13 +8773,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
       }
       if (!__pyx_t_2) {
-        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-          __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_3);
         } else
@@ -8672,45 +8787,45 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-          __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_3);
         } else
         #endif
         {
-          __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_2); __pyx_t_2 = NULL;
           __Pyx_INCREF(__pyx_v_theta);
           __Pyx_GIVEREF(__pyx_v_theta);
           PyTuple_SET_ITEM(__pyx_t_17, 0+1, __pyx_v_theta);
-          __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
         }
       }
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-      __pyx_t_9 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 210, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyObject_RichCompare(__pyx_t_9, __pyx_int_100, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+      __pyx_t_3 = PyObject_RichCompare(__pyx_t_9, __pyx_int_100, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 210, __pyx_L1_error)
+      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       if (__pyx_t_18) {
       } else {
         __pyx_t_7 = __pyx_t_18;
         goto __pyx_L20_bool_binop_done;
       }
-      __pyx_t_3 = PyObject_RichCompare(__pyx_v_rx0, __pyx_v_ry0, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
-      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 210, __pyx_L1_error)
+      __pyx_t_3 = PyObject_RichCompare(__pyx_v_rx0, __pyx_v_ry0, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
+      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       if (!__pyx_t_18) {
       } else {
         __pyx_t_7 = __pyx_t_18;
         goto __pyx_L20_bool_binop_done;
       }
-      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 210, __pyx_L1_error) }
+      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 212, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_v_tan);
       __pyx_t_9 = __pyx_v_tan; __pyx_t_17 = NULL;
       if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
@@ -8723,13 +8838,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
       }
       if (!__pyx_t_17) {
-        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-          __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_3);
         } else
@@ -8737,43 +8852,43 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-          __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_3);
         } else
         #endif
         {
-          __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_17); __pyx_t_17 = NULL;
           __Pyx_INCREF(__pyx_v_theta);
           __Pyx_GIVEREF(__pyx_v_theta);
           PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_v_theta);
-          __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         }
       }
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-      __pyx_t_9 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 210, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyObject_RichCompare(__pyx_t_9, __pyx_float_0_01, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+      __pyx_t_3 = PyObject_RichCompare(__pyx_t_9, __pyx_float_0_01, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 210, __pyx_L1_error)
+      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_7 = __pyx_t_18;
       __pyx_L20_bool_binop_done:;
       if (__pyx_t_7) {
 
-        /* "flowstar/plotting.pyx":211
+        /* "flowstar/plotting.pyx":213
  *                 # well due to the edges interseTruecting
  *                 if abs(tan(theta)) < 100 and (rx0 < ry0 or abs(tan(theta)) < 0.01):
  *                     print("A:", rx0, ry0, float(tan(theta)))             # <<<<<<<<<<<<<<
  *                     tx = rx0
  *                     ty = tx*tan(theta)
  */
-        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 211, __pyx_L1_error) }
+        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 213, __pyx_L1_error) }
         __Pyx_INCREF(__pyx_v_tan);
         __pyx_t_9 = __pyx_v_tan; __pyx_t_2 = NULL;
         if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
@@ -8786,13 +8901,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_2) {
-          __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-            __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_GOTREF(__pyx_t_3);
           } else
@@ -8800,28 +8915,28 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-            __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_GOTREF(__pyx_t_3);
           } else
           #endif
           {
-            __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 211, __pyx_L1_error)
+            __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 213, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_2); __pyx_t_2 = NULL;
             __Pyx_INCREF(__pyx_v_theta);
             __Pyx_GIVEREF(__pyx_v_theta);
             PyTuple_SET_ITEM(__pyx_t_17, 0+1, __pyx_v_theta);
-            __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        __pyx_t_9 = __Pyx_PyNumber_Float(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 211, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyNumber_Float(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 213, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_INCREF(__pyx_kp_s_A);
         __Pyx_GIVEREF(__pyx_kp_s_A);
@@ -8835,12 +8950,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_3, 3, __pyx_t_9);
         __pyx_t_9 = 0;
-        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 211, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 213, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-        /* "flowstar/plotting.pyx":212
+        /* "flowstar/plotting.pyx":214
  *                 if abs(tan(theta)) < 100 and (rx0 < ry0 or abs(tan(theta)) < 0.01):
  *                     print("A:", rx0, ry0, float(tan(theta)))
  *                     tx = rx0             # <<<<<<<<<<<<<<
@@ -8850,14 +8965,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_INCREF(__pyx_v_rx0);
         __Pyx_DECREF_SET(__pyx_v_tx, __pyx_v_rx0);
 
-        /* "flowstar/plotting.pyx":213
+        /* "flowstar/plotting.pyx":215
  *                     print("A:", rx0, ry0, float(tan(theta)))
  *                     tx = rx0
  *                     ty = tx*tan(theta)             # <<<<<<<<<<<<<<
  *                 else:
  *                     print("B:", rx0, ry0, float(tan(theta)))
  */
-        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 213, __pyx_L1_error) }
+        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 215, __pyx_L1_error) }
         __Pyx_INCREF(__pyx_v_tan);
         __pyx_t_3 = __pyx_v_tan; __pyx_t_17 = NULL;
         if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -8870,13 +8985,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_17) {
-          __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_theta); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 213, __pyx_L1_error)
+          __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_theta); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 215, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_3)) {
             PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-            __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 213, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 215, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
             __Pyx_GOTREF(__pyx_t_9);
           } else
@@ -8884,31 +8999,31 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
             PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-            __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 213, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 215, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
             __Pyx_GOTREF(__pyx_t_9);
           } else
           #endif
           {
-            __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 213, __pyx_L1_error)
+            __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 215, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_17); __pyx_t_17 = NULL;
             __Pyx_INCREF(__pyx_v_theta);
             __Pyx_GIVEREF(__pyx_v_theta);
             PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_v_theta);
-            __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 213, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 215, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_9);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = PyNumber_Multiply(__pyx_v_tx, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 213, __pyx_L1_error)
+        __pyx_t_3 = PyNumber_Multiply(__pyx_v_tx, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_DECREF_SET(__pyx_v_ty, __pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "flowstar/plotting.pyx":210
+        /* "flowstar/plotting.pyx":212
  *                 # This finds where we hit the bounding box -- does not work
  *                 # well due to the edges interseTruecting
  *                 if abs(tan(theta)) < 100 and (rx0 < ry0 or abs(tan(theta)) < 0.01):             # <<<<<<<<<<<<<<
@@ -8918,7 +9033,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         goto __pyx_L19;
       }
 
-      /* "flowstar/plotting.pyx":215
+      /* "flowstar/plotting.pyx":217
  *                     ty = tx*tan(theta)
  *                 else:
  *                     print("B:", rx0, ry0, float(tan(theta)))             # <<<<<<<<<<<<<<
@@ -8926,7 +9041,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  *                     tx = ty*tan(theta)
  */
       /*else*/ {
-        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 215, __pyx_L1_error) }
+        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 217, __pyx_L1_error) }
         __Pyx_INCREF(__pyx_v_tan);
         __pyx_t_9 = __pyx_v_tan; __pyx_t_2 = NULL;
         if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
@@ -8939,13 +9054,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_2) {
-          __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-            __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_GOTREF(__pyx_t_3);
           } else
@@ -8953,28 +9068,28 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-            __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_GOTREF(__pyx_t_3);
           } else
           #endif
           {
-            __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 215, __pyx_L1_error)
+            __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 217, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_2); __pyx_t_2 = NULL;
             __Pyx_INCREF(__pyx_v_theta);
             __Pyx_GIVEREF(__pyx_v_theta);
             PyTuple_SET_ITEM(__pyx_t_17, 0+1, __pyx_v_theta);
-            __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        __pyx_t_9 = __Pyx_PyNumber_Float(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 215, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyNumber_Float(__pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 217, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_INCREF(__pyx_kp_s_B);
         __Pyx_GIVEREF(__pyx_kp_s_B);
@@ -8988,12 +9103,12 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_3, 3, __pyx_t_9);
         __pyx_t_9 = 0;
-        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 215, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_3, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 217, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-        /* "flowstar/plotting.pyx":216
+        /* "flowstar/plotting.pyx":218
  *                 else:
  *                     print("B:", rx0, ry0, float(tan(theta)))
  *                     ty = ry0             # <<<<<<<<<<<<<<
@@ -9003,14 +9118,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_INCREF(__pyx_v_ry0);
         __Pyx_DECREF_SET(__pyx_v_ty, __pyx_v_ry0);
 
-        /* "flowstar/plotting.pyx":217
+        /* "flowstar/plotting.pyx":219
  *                     print("B:", rx0, ry0, float(tan(theta)))
  *                     ty = ry0
  *                     tx = ty*tan(theta)             # <<<<<<<<<<<<<<
  *             else:
  *                 tx = r0 * cos(theta)
  */
-        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 217, __pyx_L1_error) }
+        if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 219, __pyx_L1_error) }
         __Pyx_INCREF(__pyx_v_tan);
         __pyx_t_3 = __pyx_v_tan; __pyx_t_17 = NULL;
         if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -9023,13 +9138,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_17) {
-          __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_theta); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 217, __pyx_L1_error)
+          __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_theta); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 219, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_3)) {
             PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-            __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 217, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 219, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
             __Pyx_GOTREF(__pyx_t_9);
           } else
@@ -9037,25 +9152,25 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
             PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-            __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 217, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 219, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
             __Pyx_GOTREF(__pyx_t_9);
           } else
           #endif
           {
-            __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 217, __pyx_L1_error)
+            __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 219, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_17); __pyx_t_17 = NULL;
             __Pyx_INCREF(__pyx_v_theta);
             __Pyx_GIVEREF(__pyx_v_theta);
             PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_v_theta);
-            __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 217, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 219, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_9);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = PyNumber_Multiply(__pyx_v_ty, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
+        __pyx_t_3 = PyNumber_Multiply(__pyx_v_ty, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 219, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_DECREF_SET(__pyx_v_tx, __pyx_t_3);
@@ -9063,7 +9178,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       }
       __pyx_L19:;
 
-      /* "flowstar/plotting.pyx":207
+      /* "flowstar/plotting.pyx":209
  *                 tx = 0
  *                 ty = ry0
  *             elif tight:             # <<<<<<<<<<<<<<
@@ -9073,7 +9188,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       goto __pyx_L18;
     }
 
-    /* "flowstar/plotting.pyx":219
+    /* "flowstar/plotting.pyx":221
  *                     tx = ty*tan(theta)
  *             else:
  *                 tx = r0 * cos(theta)             # <<<<<<<<<<<<<<
@@ -9081,7 +9196,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  *             # if theta > pi/2:
  */
     /*else*/ {
-      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 219, __pyx_L1_error) }
+      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 221, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_v_cos);
       __pyx_t_9 = __pyx_v_cos; __pyx_t_2 = NULL;
       if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
@@ -9094,13 +9209,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
       }
       if (!__pyx_t_2) {
-        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 219, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_v_theta); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-          __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 219, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_3);
         } else
@@ -9108,38 +9223,38 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_theta};
-          __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 219, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_3);
         } else
         #endif
         {
-          __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 219, __pyx_L1_error)
+          __pyx_t_17 = PyTuple_New(1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 221, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_2); __pyx_t_2 = NULL;
           __Pyx_INCREF(__pyx_v_theta);
           __Pyx_GIVEREF(__pyx_v_theta);
           PyTuple_SET_ITEM(__pyx_t_17, 0+1, __pyx_v_theta);
-          __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 219, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_17, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
         }
       }
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-      __pyx_t_9 = PyNumber_Multiply(__pyx_v_r0, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 219, __pyx_L1_error)
+      __pyx_t_9 = PyNumber_Multiply(__pyx_v_r0, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 221, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_DECREF_SET(__pyx_v_tx, __pyx_t_9);
       __pyx_t_9 = 0;
 
-      /* "flowstar/plotting.pyx":220
+      /* "flowstar/plotting.pyx":222
  *             else:
  *                 tx = r0 * cos(theta)
  *                 ty = r0 * sin(theta)             # <<<<<<<<<<<<<<
  *             # if theta > pi/2:
  *             #     tx = -tx
  */
-      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 220, __pyx_L1_error) }
+      if (unlikely(!__pyx_v_theta)) { __Pyx_RaiseUnboundLocalError("theta"); __PYX_ERR(0, 222, __pyx_L1_error) }
       __Pyx_INCREF(__pyx_v_sin);
       __pyx_t_3 = __pyx_v_sin; __pyx_t_17 = NULL;
       if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -9152,13 +9267,13 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
       }
       if (!__pyx_t_17) {
-        __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_theta); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 220, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_theta); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 222, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-          __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 220, __pyx_L1_error)
+          __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 222, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_9);
         } else
@@ -9166,25 +9281,25 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
           PyObject *__pyx_temp[2] = {__pyx_t_17, __pyx_v_theta};
-          __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 220, __pyx_L1_error)
+          __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 222, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_GOTREF(__pyx_t_9);
         } else
         #endif
         {
-          __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 220, __pyx_L1_error)
+          __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 222, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_17); __pyx_t_17 = NULL;
           __Pyx_INCREF(__pyx_v_theta);
           __Pyx_GIVEREF(__pyx_v_theta);
           PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_v_theta);
-          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 220, __pyx_L1_error)
+          __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 222, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         }
       }
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyNumber_Multiply(__pyx_v_r0, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 220, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_Multiply(__pyx_v_r0, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 222, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_DECREF_SET(__pyx_v_ty, __pyx_t_3);
@@ -9192,7 +9307,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     }
     __pyx_L18:;
 
-    /* "flowstar/plotting.pyx":231
+    /* "flowstar/plotting.pyx":233
  *             #     tx = ty/tan(theta)
  * 
  *             if cx00 is not None:             # <<<<<<<<<<<<<<
@@ -9203,28 +9318,28 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __pyx_t_18 = (__pyx_t_7 != 0);
     if (__pyx_t_18) {
 
-      /* "flowstar/plotting.pyx":233
+      /* "flowstar/plotting.pyx":235
  *             if cx00 is not None:
  *                 # Draw width
  *                 if joins:             # <<<<<<<<<<<<<<
  *                     p += line([(cx00 - tx0, cy00 + ty0),
  *                                (cx00 + tx0, cy00 - ty0)], linestyle='--',
  */
-      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_joins); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 233, __pyx_L1_error)
+      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_joins); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 235, __pyx_L1_error)
       if (__pyx_t_18) {
 
-        /* "flowstar/plotting.pyx":234
+        /* "flowstar/plotting.pyx":236
  *                 # Draw width
  *                 if joins:
  *                     p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                (cx00 + tx0, cy00 - ty0)], linestyle='--',
  *                                **kwargs)
  */
-        __pyx_t_3 = PyNumber_Subtract(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 234, __pyx_L1_error)
+        __pyx_t_3 = PyNumber_Subtract(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_9 = PyNumber_Add(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 234, __pyx_L1_error)
+        __pyx_t_9 = PyNumber_Add(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 236, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 234, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 236, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GIVEREF(__pyx_t_3);
         PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
@@ -9233,18 +9348,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __pyx_t_3 = 0;
         __pyx_t_9 = 0;
 
-        /* "flowstar/plotting.pyx":235
+        /* "flowstar/plotting.pyx":237
  *                 if joins:
  *                     p += line([(cx00 - tx0, cy00 + ty0),
  *                                (cx00 + tx0, cy00 - ty0)], linestyle='--',             # <<<<<<<<<<<<<<
  *                                **kwargs)
  * 
  */
-        __pyx_t_9 = PyNumber_Add(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 235, __pyx_L1_error)
+        __pyx_t_9 = PyNumber_Add(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 237, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_3 = PyNumber_Subtract(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 235, __pyx_L1_error)
+        __pyx_t_3 = PyNumber_Subtract(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 235, __pyx_L1_error)
+        __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 237, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_17);
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_9);
@@ -9253,14 +9368,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __pyx_t_9 = 0;
         __pyx_t_3 = 0;
 
-        /* "flowstar/plotting.pyx":234
+        /* "flowstar/plotting.pyx":236
  *                 # Draw width
  *                 if joins:
  *                     p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                (cx00 + tx0, cy00 - ty0)], linestyle='--',
  *                                **kwargs)
  */
-        __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 234, __pyx_L1_error)
+        __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_GIVEREF(__pyx_t_2);
         PyList_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
@@ -9268,52 +9383,52 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         PyList_SET_ITEM(__pyx_t_3, 1, __pyx_t_17);
         __pyx_t_2 = 0;
         __pyx_t_17 = 0;
-        __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 234, __pyx_L1_error)
+        __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 236, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_17);
         __Pyx_GIVEREF(__pyx_t_3);
         PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "flowstar/plotting.pyx":235
+        /* "flowstar/plotting.pyx":237
  *                 if joins:
  *                     p += line([(cx00 - tx0, cy00 + ty0),
  *                                (cx00 + tx0, cy00 - ty0)], linestyle='--',             # <<<<<<<<<<<<<<
  *                                **kwargs)
  * 
  */
-        __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 235, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 237, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
-        if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_linestyle, __pyx_kp_s__15) < 0) __PYX_ERR(0, 235, __pyx_L1_error)
+        if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_linestyle, __pyx_kp_s__17) < 0) __PYX_ERR(0, 237, __pyx_L1_error)
         __pyx_t_3 = __pyx_t_2;
         __pyx_t_2 = 0;
 
-        /* "flowstar/plotting.pyx":236
+        /* "flowstar/plotting.pyx":238
  *                     p += line([(cx00 - tx0, cy00 + ty0),
  *                                (cx00 + tx0, cy00 - ty0)], linestyle='--',
  *                                **kwargs)             # <<<<<<<<<<<<<<
  * 
  *                 # Connect subsequent lines (draw lines between their endpoints
  */
-        if (__Pyx_MergeKeywords(__pyx_t_3, __pyx_v_kwargs) < 0) __PYX_ERR(0, 236, __pyx_L1_error)
+        if (__Pyx_MergeKeywords(__pyx_t_3, __pyx_v_kwargs) < 0) __PYX_ERR(0, 238, __pyx_L1_error)
 
-        /* "flowstar/plotting.pyx":234
+        /* "flowstar/plotting.pyx":236
  *                 # Draw width
  *                 if joins:
  *                     p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                (cx00 + tx0, cy00 - ty0)], linestyle='--',
  *                                **kwargs)
  */
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 234, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 236, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 234, __pyx_L1_error)
+        __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "flowstar/plotting.pyx":233
+        /* "flowstar/plotting.pyx":235
  *             if cx00 is not None:
  *                 # Draw width
  *                 if joins:             # <<<<<<<<<<<<<<
@@ -9322,28 +9437,28 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
       }
 
-      /* "flowstar/plotting.pyx":241
+      /* "flowstar/plotting.pyx":243
  *                 # chosing the pairs of endpoints which make the most
  *                 # parallel lines)
  *                 if boundaries:             # <<<<<<<<<<<<<<
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
  */
-      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_boundaries); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 241, __pyx_L1_error)
+      __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_boundaries); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 243, __pyx_L1_error)
       if (__pyx_t_18) {
 
-        /* "flowstar/plotting.pyx":242
+        /* "flowstar/plotting.pyx":244
  *                 # parallel lines)
  *                 if boundaries:
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])             # <<<<<<<<<<<<<<
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  */
-        __pyx_t_2 = PyNumber_Subtract(__pyx_v_tx0, __pyx_v_tx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
+        __pyx_t_2 = PyNumber_Subtract(__pyx_v_tx0, __pyx_v_tx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 244, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_17 = PyNumber_Subtract(__pyx_v_ty, __pyx_v_ty0); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 242, __pyx_L1_error)
+        __pyx_t_17 = PyNumber_Subtract(__pyx_v_ty, __pyx_v_ty0); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 244, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_17);
-        __pyx_t_9 = PyList_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 242, __pyx_L1_error)
+        __pyx_t_9 = PyList_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 244, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_GIVEREF(__pyx_t_2);
         PyList_SET_ITEM(__pyx_t_9, 0, __pyx_t_2);
@@ -9363,14 +9478,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_2) {
-          __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_17, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_17, __pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_3);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_17)) {
             PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_9};
-            __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_17, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_17, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -9379,30 +9494,30 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_17)) {
             PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_9};
-            __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_17, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_17, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           } else
           #endif
           {
-            __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_8);
             __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_2); __pyx_t_2 = NULL;
             __Pyx_GIVEREF(__pyx_t_9);
             PyTuple_SET_ITEM(__pyx_t_8, 0+1, __pyx_t_9);
             __pyx_t_9 = 0;
-            __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_17, __pyx_t_8, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_17, __pyx_t_8, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-        __pyx_t_8 = PyNumber_Subtract(__pyx_v_tx, __pyx_v_tx0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 242, __pyx_L1_error)
+        __pyx_t_8 = PyNumber_Subtract(__pyx_v_tx, __pyx_v_tx0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 244, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_9 = PyNumber_Subtract(__pyx_v_ty0, __pyx_v_ty); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 242, __pyx_L1_error)
+        __pyx_t_9 = PyNumber_Subtract(__pyx_v_ty0, __pyx_v_ty); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 244, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
+        __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 244, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GIVEREF(__pyx_t_8);
         PyList_SET_ITEM(__pyx_t_2, 0, __pyx_t_8);
@@ -9422,14 +9537,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_8) {
-          __pyx_t_17 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 242, __pyx_L1_error)
+          __pyx_t_17 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 244, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_17);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_2};
-            __pyx_t_17 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_17 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -9438,45 +9553,45 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
             PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_2};
-            __pyx_t_17 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_17 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           } else
           #endif
           {
-            __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_10);
             __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
             __Pyx_GIVEREF(__pyx_t_2);
             PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_2);
             __pyx_t_2 = 0;
-            __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_10, NULL); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 242, __pyx_L1_error)
+            __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_10, NULL); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 244, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        __pyx_t_9 = PyNumber_Multiply(__pyx_t_3, __pyx_t_17); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 242, __pyx_L1_error)
+        __pyx_t_9 = PyNumber_Multiply(__pyx_t_3, __pyx_t_17); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 244, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
 
-        /* "flowstar/plotting.pyx":243
+        /* "flowstar/plotting.pyx":245
  *                 if boundaries:
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):             # <<<<<<<<<<<<<<
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  */
-        __pyx_t_3 = PyNumber_Add(__pyx_v_tx0, __pyx_v_tx); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_3 = PyNumber_Add(__pyx_v_tx0, __pyx_v_tx); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_10 = PyNumber_Negative(__pyx_v_ty); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_10 = PyNumber_Negative(__pyx_v_ty); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
-        __pyx_t_2 = PyNumber_Subtract(__pyx_t_10, __pyx_v_ty0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_2 = PyNumber_Subtract(__pyx_t_10, __pyx_v_ty0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __pyx_t_10 = PyList_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_10 = PyList_New(2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_GIVEREF(__pyx_t_3);
         PyList_SET_ITEM(__pyx_t_10, 0, __pyx_t_3);
@@ -9496,14 +9611,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_3) {
-          __pyx_t_17 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_10); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 243, __pyx_L1_error)
+          __pyx_t_17 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_10); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 245, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_GOTREF(__pyx_t_17);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_2)) {
             PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_10};
-            __pyx_t_17 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_17 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -9512,33 +9627,33 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
             PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_10};
-            __pyx_t_17 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_17 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           } else
           #endif
           {
-            __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_8);
             __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_3); __pyx_t_3 = NULL;
             __Pyx_GIVEREF(__pyx_t_10);
             PyTuple_SET_ITEM(__pyx_t_8, 0+1, __pyx_t_10);
             __pyx_t_10 = 0;
-            __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, NULL); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, NULL); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_17);
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __pyx_t_8 = PyNumber_Negative(__pyx_v_tx); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_8 = PyNumber_Negative(__pyx_v_tx); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_10 = PyNumber_Subtract(__pyx_t_8, __pyx_v_tx0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_10 = PyNumber_Subtract(__pyx_t_8, __pyx_v_tx0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __pyx_t_8 = PyNumber_Add(__pyx_v_ty, __pyx_v_ty0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_8 = PyNumber_Add(__pyx_v_ty, __pyx_v_ty0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_GIVEREF(__pyx_t_10);
         PyList_SET_ITEM(__pyx_t_3, 0, __pyx_t_10);
@@ -9558,14 +9673,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           }
         }
         if (!__pyx_t_10) {
-          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 243, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_GOTREF(__pyx_t_2);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_8)) {
             PyObject *__pyx_temp[2] = {__pyx_t_10, __pyx_t_3};
-            __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -9574,36 +9689,36 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
             PyObject *__pyx_temp[2] = {__pyx_t_10, __pyx_t_3};
-            __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           } else
           #endif
           {
-            __pyx_t_15 = PyTuple_New(1+1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_15 = PyTuple_New(1+1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_15);
             __Pyx_GIVEREF(__pyx_t_10); PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_10); __pyx_t_10 = NULL;
             __Pyx_GIVEREF(__pyx_t_3);
             PyTuple_SET_ITEM(__pyx_t_15, 0+1, __pyx_t_3);
             __pyx_t_3 = 0;
-            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_15, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 243, __pyx_L1_error)
+            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_15, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
           }
         }
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __pyx_t_8 = PyNumber_Multiply(__pyx_t_17, __pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_8 = PyNumber_Multiply(__pyx_t_17, __pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __pyx_t_2 = PyObject_RichCompare(__pyx_t_9, __pyx_t_8, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_2 = PyObject_RichCompare(__pyx_t_9, __pyx_t_8, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 243, __pyx_L1_error)
+        __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 245, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-        /* "flowstar/plotting.pyx":242
+        /* "flowstar/plotting.pyx":244
  *                 # parallel lines)
  *                 if boundaries:
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])             # <<<<<<<<<<<<<<
@@ -9612,18 +9727,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
         if (__pyx_t_18) {
 
-          /* "flowstar/plotting.pyx":244
+          /* "flowstar/plotting.pyx":246
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
  *                         p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  */
-          __pyx_t_2 = PyNumber_Subtract(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 244, __pyx_L1_error)
+          __pyx_t_2 = PyNumber_Subtract(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_8 = PyNumber_Add(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 244, __pyx_L1_error)
+          __pyx_t_8 = PyNumber_Add(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 246, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 244, __pyx_L1_error)
+          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 246, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_GIVEREF(__pyx_t_2);
           PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_2);
@@ -9632,18 +9747,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_2 = 0;
           __pyx_t_8 = 0;
 
-          /* "flowstar/plotting.pyx":245
+          /* "flowstar/plotting.pyx":247
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)             # <<<<<<<<<<<<<<
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  */
-          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 245, __pyx_L1_error)
+          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 247, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_2 = PyNumber_Add(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 245, __pyx_L1_error)
+          __pyx_t_2 = PyNumber_Add(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 245, __pyx_L1_error)
+          __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 247, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_GIVEREF(__pyx_t_8);
           PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_8);
@@ -9652,14 +9767,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_8 = 0;
           __pyx_t_2 = 0;
 
-          /* "flowstar/plotting.pyx":244
+          /* "flowstar/plotting.pyx":246
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
  *                         p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  */
-          __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 244, __pyx_L1_error)
+          __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GIVEREF(__pyx_t_9);
           PyList_SET_ITEM(__pyx_t_2, 0, __pyx_t_9);
@@ -9667,48 +9782,48 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           PyList_SET_ITEM(__pyx_t_2, 1, __pyx_t_17);
           __pyx_t_9 = 0;
           __pyx_t_17 = 0;
-          __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 244, __pyx_L1_error)
+          __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 246, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_GIVEREF(__pyx_t_2);
           PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_2);
           __pyx_t_2 = 0;
 
-          /* "flowstar/plotting.pyx":245
+          /* "flowstar/plotting.pyx":247
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)             # <<<<<<<<<<<<<<
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  */
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_v_kwargs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 244, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_v_kwargs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
 
-          /* "flowstar/plotting.pyx":244
+          /* "flowstar/plotting.pyx":246
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])
  *                        > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
  *                         p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  */
-          __pyx_t_17 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 244, __pyx_L1_error)
+          __pyx_t_17 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 246, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_17);
           __pyx_t_17 = 0;
 
-          /* "flowstar/plotting.pyx":246
+          /* "flowstar/plotting.pyx":248
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                     else:
  */
-          __pyx_t_17 = PyNumber_Add(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 246, __pyx_L1_error)
+          __pyx_t_17 = PyNumber_Add(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 248, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
-          __pyx_t_2 = PyNumber_Subtract(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
+          __pyx_t_2 = PyNumber_Subtract(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 248, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 246, __pyx_L1_error)
+          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 248, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_GIVEREF(__pyx_t_17);
           PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_17);
@@ -9717,18 +9832,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_17 = 0;
           __pyx_t_2 = 0;
 
-          /* "flowstar/plotting.pyx":247
+          /* "flowstar/plotting.pyx":249
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)             # <<<<<<<<<<<<<<
  *                     else:
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  */
-          __pyx_t_2 = PyNumber_Add(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
+          __pyx_t_2 = PyNumber_Add(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_17 = PyNumber_Subtract(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 247, __pyx_L1_error)
+          __pyx_t_17 = PyNumber_Subtract(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 249, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
-          __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 247, __pyx_L1_error)
+          __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 249, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_GIVEREF(__pyx_t_2);
           PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_2);
@@ -9737,14 +9852,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_2 = 0;
           __pyx_t_17 = 0;
 
-          /* "flowstar/plotting.pyx":246
+          /* "flowstar/plotting.pyx":248
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                     else:
  */
-          __pyx_t_17 = PyList_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 246, __pyx_L1_error)
+          __pyx_t_17 = PyList_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 248, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_GIVEREF(__pyx_t_9);
           PyList_SET_ITEM(__pyx_t_17, 0, __pyx_t_9);
@@ -9752,37 +9867,37 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           PyList_SET_ITEM(__pyx_t_17, 1, __pyx_t_8);
           __pyx_t_9 = 0;
           __pyx_t_8 = 0;
-          __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 246, __pyx_L1_error)
+          __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 248, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_GIVEREF(__pyx_t_17);
           PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_17);
           __pyx_t_17 = 0;
 
-          /* "flowstar/plotting.pyx":247
+          /* "flowstar/plotting.pyx":249
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)             # <<<<<<<<<<<<<<
  *                     else:
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  */
-          __pyx_t_17 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_8, __pyx_v_kwargs); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 246, __pyx_L1_error)
+          __pyx_t_17 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_8, __pyx_v_kwargs); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 248, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-          /* "flowstar/plotting.pyx":246
+          /* "flowstar/plotting.pyx":248
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                     else:
  */
-          __pyx_t_8 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_17); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 246, __pyx_L1_error)
+          __pyx_t_8 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_17); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 248, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
           __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_8);
           __pyx_t_8 = 0;
 
-          /* "flowstar/plotting.pyx":242
+          /* "flowstar/plotting.pyx":244
  *                 # parallel lines)
  *                 if boundaries:
  *                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])             # <<<<<<<<<<<<<<
@@ -9792,7 +9907,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           goto __pyx_L26;
         }
 
-        /* "flowstar/plotting.pyx":249
+        /* "flowstar/plotting.pyx":251
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                     else:
  *                         p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
@@ -9800,11 +9915,11 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  */
         /*else*/ {
-          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 249, __pyx_L1_error)
+          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 251, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_17 = PyNumber_Add(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 249, __pyx_L1_error)
+          __pyx_t_17 = PyNumber_Add(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 251, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
-          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 249, __pyx_L1_error)
+          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 251, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_GIVEREF(__pyx_t_8);
           PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8);
@@ -9813,18 +9928,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_8 = 0;
           __pyx_t_17 = 0;
 
-          /* "flowstar/plotting.pyx":250
+          /* "flowstar/plotting.pyx":252
  *                     else:
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)             # <<<<<<<<<<<<<<
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  */
-          __pyx_t_17 = PyNumber_Add(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 250, __pyx_L1_error)
+          __pyx_t_17 = PyNumber_Add(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 252, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
-          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 250, __pyx_L1_error)
+          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 252, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 250, __pyx_L1_error)
+          __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 252, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GIVEREF(__pyx_t_17);
           PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_17);
@@ -9833,14 +9948,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_17 = 0;
           __pyx_t_8 = 0;
 
-          /* "flowstar/plotting.pyx":249
+          /* "flowstar/plotting.pyx":251
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                     else:
  *                         p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  */
-          __pyx_t_8 = PyList_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 249, __pyx_L1_error)
+          __pyx_t_8 = PyList_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 251, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_GIVEREF(__pyx_t_9);
           PyList_SET_ITEM(__pyx_t_8, 0, __pyx_t_9);
@@ -9848,48 +9963,48 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           PyList_SET_ITEM(__pyx_t_8, 1, __pyx_t_2);
           __pyx_t_9 = 0;
           __pyx_t_2 = 0;
-          __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
+          __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 251, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GIVEREF(__pyx_t_8);
           PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_8);
           __pyx_t_8 = 0;
 
-          /* "flowstar/plotting.pyx":250
+          /* "flowstar/plotting.pyx":252
  *                     else:
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)             # <<<<<<<<<<<<<<
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  */
-          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_2, __pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 249, __pyx_L1_error)
+          __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_2, __pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 251, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-          /* "flowstar/plotting.pyx":249
+          /* "flowstar/plotting.pyx":251
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                     else:
  *                         p += line([(cx00 - tx0, cy00 + ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  */
-          __pyx_t_2 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
+          __pyx_t_2 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 251, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_2);
           __pyx_t_2 = 0;
 
-          /* "flowstar/plotting.pyx":251
+          /* "flowstar/plotting.pyx":253
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  * 
  */
-          __pyx_t_2 = PyNumber_Add(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 251, __pyx_L1_error)
+          __pyx_t_2 = PyNumber_Add(__pyx_v_cx00, __pyx_v_tx0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 253, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 251, __pyx_L1_error)
+          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cy00, __pyx_v_ty0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 253, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 251, __pyx_L1_error)
+          __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 253, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_GIVEREF(__pyx_t_2);
           PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_2);
@@ -9898,18 +10013,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_2 = 0;
           __pyx_t_8 = 0;
 
-          /* "flowstar/plotting.pyx":252
+          /* "flowstar/plotting.pyx":254
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)             # <<<<<<<<<<<<<<
  * 
  *                 # Draw arrows in the plotting direction
  */
-          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 252, __pyx_L1_error)
+          __pyx_t_8 = PyNumber_Subtract(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 254, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_2 = PyNumber_Add(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 252, __pyx_L1_error)
+          __pyx_t_2 = PyNumber_Add(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 254, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 252, __pyx_L1_error)
+          __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 254, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_GIVEREF(__pyx_t_8);
           PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_8);
@@ -9918,14 +10033,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           __pyx_t_8 = 0;
           __pyx_t_2 = 0;
 
-          /* "flowstar/plotting.pyx":251
+          /* "flowstar/plotting.pyx":253
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  * 
  */
-          __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 251, __pyx_L1_error)
+          __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 253, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GIVEREF(__pyx_t_9);
           PyList_SET_ITEM(__pyx_t_2, 0, __pyx_t_9);
@@ -9933,31 +10048,31 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
           PyList_SET_ITEM(__pyx_t_2, 1, __pyx_t_17);
           __pyx_t_9 = 0;
           __pyx_t_17 = 0;
-          __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 251, __pyx_L1_error)
+          __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 253, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_GIVEREF(__pyx_t_2);
           PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_2);
           __pyx_t_2 = 0;
 
-          /* "flowstar/plotting.pyx":252
+          /* "flowstar/plotting.pyx":254
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)             # <<<<<<<<<<<<<<
  * 
  *                 # Draw arrows in the plotting direction
  */
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_v_kwargs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 251, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_v_kwargs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 253, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
 
-          /* "flowstar/plotting.pyx":251
+          /* "flowstar/plotting.pyx":253
  *                         p += line([(cx00 - tx0, cy00 + ty0),
  *                                    (cx0 + tx, cy0 - ty)], **kwargs)
  *                         p += line([(cx00 + tx0, cy00 - ty0),             # <<<<<<<<<<<<<<
  *                                    (cx0 - tx, cy0 + ty)], **kwargs)
  * 
  */
-          __pyx_t_17 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 251, __pyx_L1_error)
+          __pyx_t_17 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 253, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_17);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_17);
@@ -9965,7 +10080,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         }
         __pyx_L26:;
 
-        /* "flowstar/plotting.pyx":241
+        /* "flowstar/plotting.pyx":243
  *                 # chosing the pairs of endpoints which make the most
  *                 # parallel lines)
  *                 if boundaries:             # <<<<<<<<<<<<<<
@@ -9974,7 +10089,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
       }
 
-      /* "flowstar/plotting.pyx":255
+      /* "flowstar/plotting.pyx":257
  * 
  *                 # Draw arrows in the plotting direction
  *                 if arrows:             # <<<<<<<<<<<<<<
@@ -9984,14 +10099,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
       __pyx_t_18 = (__pyx_v_arrows != 0);
       if (__pyx_t_18) {
 
-        /* "flowstar/plotting.pyx":256
+        /* "flowstar/plotting.pyx":258
  *                 # Draw arrows in the plotting direction
  *                 if arrows:
  *                     p += point((cx00, cy00), size=100, **kwargs)             # <<<<<<<<<<<<<<
  *                     p += arrow((cx00, cy00),
  *                                (cx00 + 2*dx0/3, cy00 + 2*dy0/3),
  */
-        __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 256, __pyx_L1_error)
+        __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 258, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_17);
         __Pyx_INCREF(__pyx_v_cx00);
         __Pyx_GIVEREF(__pyx_v_cx00);
@@ -9999,35 +10114,35 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_INCREF(__pyx_v_cy00);
         __Pyx_GIVEREF(__pyx_v_cy00);
         PyTuple_SET_ITEM(__pyx_t_17, 1, __pyx_v_cy00);
-        __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 256, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 258, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GIVEREF(__pyx_t_17);
         PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_17);
         __pyx_t_17 = 0;
-        __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 256, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 258, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_size, __pyx_int_100) < 0) __PYX_ERR(0, 256, __pyx_L1_error)
+        if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_size, __pyx_int_100) < 0) __PYX_ERR(0, 258, __pyx_L1_error)
         __pyx_t_17 = __pyx_t_9;
         __pyx_t_9 = 0;
-        if (__Pyx_MergeKeywords(__pyx_t_17, __pyx_v_kwargs) < 0) __PYX_ERR(0, 256, __pyx_L1_error)
-        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_v_point, __pyx_t_2, __pyx_t_17); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 256, __pyx_L1_error)
+        if (__Pyx_MergeKeywords(__pyx_t_17, __pyx_v_kwargs) < 0) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_v_point, __pyx_t_2, __pyx_t_17); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 258, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-        __pyx_t_17 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_9); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 256, __pyx_L1_error)
+        __pyx_t_17 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_9); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 258, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_17);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_17);
         __pyx_t_17 = 0;
 
-        /* "flowstar/plotting.pyx":257
+        /* "flowstar/plotting.pyx":259
  *                 if arrows:
  *                     p += point((cx00, cy00), size=100, **kwargs)
  *                     p += arrow((cx00, cy00),             # <<<<<<<<<<<<<<
  *                                (cx00 + 2*dx0/3, cy00 + 2*dy0/3),
  *                                **kwargs)
  */
-        __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 257, __pyx_L1_error)
+        __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 259, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_17);
         __Pyx_INCREF(__pyx_v_cx00);
         __Pyx_GIVEREF(__pyx_v_cx00);
@@ -10036,32 +10151,32 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __Pyx_GIVEREF(__pyx_v_cy00);
         PyTuple_SET_ITEM(__pyx_t_17, 1, __pyx_v_cy00);
 
-        /* "flowstar/plotting.pyx":258
+        /* "flowstar/plotting.pyx":260
  *                     p += point((cx00, cy00), size=100, **kwargs)
  *                     p += arrow((cx00, cy00),
  *                                (cx00 + 2*dx0/3, cy00 + 2*dy0/3),             # <<<<<<<<<<<<<<
  *                                **kwargs)
  * 
  */
-        if (unlikely(!__pyx_v_dx0)) { __Pyx_RaiseUnboundLocalError("dx0"); __PYX_ERR(0, 258, __pyx_L1_error) }
-        __pyx_t_9 = PyNumber_Multiply(__pyx_int_2, __pyx_v_dx0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 258, __pyx_L1_error)
+        if (unlikely(!__pyx_v_dx0)) { __Pyx_RaiseUnboundLocalError("dx0"); __PYX_ERR(0, 260, __pyx_L1_error) }
+        __pyx_t_9 = PyNumber_Multiply(__pyx_int_2, __pyx_v_dx0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 260, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_2 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_9, __pyx_int_3, 3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_9, __pyx_int_3, 3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 260, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        __pyx_t_9 = PyNumber_Add(__pyx_v_cx00, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_9 = PyNumber_Add(__pyx_v_cx00, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 260, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        if (unlikely(!__pyx_v_dy0)) { __Pyx_RaiseUnboundLocalError("dy0"); __PYX_ERR(0, 258, __pyx_L1_error) }
-        __pyx_t_2 = PyNumber_Multiply(__pyx_int_2, __pyx_v_dy0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 258, __pyx_L1_error)
+        if (unlikely(!__pyx_v_dy0)) { __Pyx_RaiseUnboundLocalError("dy0"); __PYX_ERR(0, 260, __pyx_L1_error) }
+        __pyx_t_2 = PyNumber_Multiply(__pyx_int_2, __pyx_v_dy0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 260, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_8 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_2, __pyx_int_3, 3, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_2, __pyx_int_3, 3, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __pyx_t_2 = PyNumber_Add(__pyx_v_cy00, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_2 = PyNumber_Add(__pyx_v_cy00, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 260, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_9);
@@ -10070,14 +10185,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __pyx_t_9 = 0;
         __pyx_t_2 = 0;
 
-        /* "flowstar/plotting.pyx":257
+        /* "flowstar/plotting.pyx":259
  *                 if arrows:
  *                     p += point((cx00, cy00), size=100, **kwargs)
  *                     p += arrow((cx00, cy00),             # <<<<<<<<<<<<<<
  *                                (cx00 + 2*dx0/3, cy00 + 2*dy0/3),
  *                                **kwargs)
  */
-        __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 257, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 259, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_GIVEREF(__pyx_t_17);
         PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_17);
@@ -10086,31 +10201,31 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
         __pyx_t_17 = 0;
         __pyx_t_8 = 0;
 
-        /* "flowstar/plotting.pyx":259
+        /* "flowstar/plotting.pyx":261
  *                     p += arrow((cx00, cy00),
  *                                (cx00 + 2*dx0/3, cy00 + 2*dy0/3),
  *                                **kwargs)             # <<<<<<<<<<<<<<
  * 
  *         if joins:
  */
-        __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_arrow, __pyx_t_2, __pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 257, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_arrow, __pyx_t_2, __pyx_v_kwargs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 259, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-        /* "flowstar/plotting.pyx":257
+        /* "flowstar/plotting.pyx":259
  *                 if arrows:
  *                     p += point((cx00, cy00), size=100, **kwargs)
  *                     p += arrow((cx00, cy00),             # <<<<<<<<<<<<<<
  *                                (cx00 + 2*dx0/3, cy00 + 2*dy0/3),
  *                                **kwargs)
  */
-        __pyx_t_2 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 257, __pyx_L1_error)
+        __pyx_t_2 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 259, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "flowstar/plotting.pyx":255
+        /* "flowstar/plotting.pyx":257
  * 
  *                 # Draw arrows in the plotting direction
  *                 if arrows:             # <<<<<<<<<<<<<<
@@ -10119,7 +10234,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
       }
 
-      /* "flowstar/plotting.pyx":231
+      /* "flowstar/plotting.pyx":233
  *             #     tx = ty/tan(theta)
  * 
  *             if cx00 is not None:             # <<<<<<<<<<<<<<
@@ -10128,7 +10243,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
     }
 
-    /* "flowstar/plotting.pyx":176
+    /* "flowstar/plotting.pyx":178
  * 
  *         n = int(self.time//step)
  *         for i in range(n + 1):             # <<<<<<<<<<<<<<
@@ -10138,28 +10253,28 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/plotting.pyx":261
+  /* "flowstar/plotting.pyx":263
  *                                **kwargs)
  * 
  *         if joins:             # <<<<<<<<<<<<<<
  *             p += line([(cx0 - tx, cy0 + ty),
  *                        (cx0 + tx, cy0 - ty)], linestyle='--', **kwargs)
  */
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_joins); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 261, __pyx_L1_error)
+  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_joins); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 263, __pyx_L1_error)
   if (__pyx_t_18) {
 
-    /* "flowstar/plotting.pyx":262
+    /* "flowstar/plotting.pyx":264
  * 
  *         if joins:
  *             p += line([(cx0 - tx, cy0 + ty),             # <<<<<<<<<<<<<<
  *                        (cx0 + tx, cy0 - ty)], linestyle='--', **kwargs)
  * 
  */
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 262, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Subtract(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyNumber_Add(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 262, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Add(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 262, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_1);
@@ -10168,18 +10283,18 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __pyx_t_1 = 0;
     __pyx_t_2 = 0;
 
-    /* "flowstar/plotting.pyx":263
+    /* "flowstar/plotting.pyx":265
  *         if joins:
  *             p += line([(cx0 - tx, cy0 + ty),
  *                        (cx0 + tx, cy0 - ty)], linestyle='--', **kwargs)             # <<<<<<<<<<<<<<
  * 
  *         return p
  */
-    __pyx_t_2 = PyNumber_Add(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 263, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Add(__pyx_v_cx0, __pyx_v_tx); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyNumber_Subtract(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 263, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Subtract(__pyx_v_cy0, __pyx_v_ty); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 263, __pyx_L1_error)
+    __pyx_t_17 = PyTuple_New(2); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_17);
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_2);
@@ -10188,14 +10303,14 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     __pyx_t_2 = 0;
     __pyx_t_1 = 0;
 
-    /* "flowstar/plotting.pyx":262
+    /* "flowstar/plotting.pyx":264
  * 
  *         if joins:
  *             p += line([(cx0 - tx, cy0 + ty),             # <<<<<<<<<<<<<<
  *                        (cx0 + tx, cy0 - ty)], linestyle='--', **kwargs)
  * 
  */
-    __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 262, __pyx_L1_error)
+    __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_8);
     PyList_SET_ITEM(__pyx_t_1, 0, __pyx_t_8);
@@ -10203,44 +10318,44 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
     PyList_SET_ITEM(__pyx_t_1, 1, __pyx_t_17);
     __pyx_t_8 = 0;
     __pyx_t_17 = 0;
-    __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 262, __pyx_L1_error)
+    __pyx_t_17 = PyTuple_New(1); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_17);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_17, 0, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "flowstar/plotting.pyx":263
+    /* "flowstar/plotting.pyx":265
  *         if joins:
  *             p += line([(cx0 - tx, cy0 + ty),
  *                        (cx0 + tx, cy0 - ty)], linestyle='--', **kwargs)             # <<<<<<<<<<<<<<
  * 
  *         return p
  */
-    __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 263, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_linestyle, __pyx_kp_s__15) < 0) __PYX_ERR(0, 263, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_linestyle, __pyx_kp_s__17) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
     __pyx_t_1 = __pyx_t_8;
     __pyx_t_8 = 0;
-    if (__Pyx_MergeKeywords(__pyx_t_1, __pyx_v_kwargs) < 0) __PYX_ERR(0, 263, __pyx_L1_error)
+    if (__Pyx_MergeKeywords(__pyx_t_1, __pyx_v_kwargs) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
 
-    /* "flowstar/plotting.pyx":262
+    /* "flowstar/plotting.pyx":264
  * 
  *         if joins:
  *             p += line([(cx0 - tx, cy0 + ty),             # <<<<<<<<<<<<<<
  *                        (cx0 + tx, cy0 - ty)], linestyle='--', **kwargs)
  * 
  */
-    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 262, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_v_line, __pyx_t_17, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 262, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_InPlaceAdd(__pyx_v_p, __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "flowstar/plotting.pyx":261
+    /* "flowstar/plotting.pyx":263
  *                                **kwargs)
  * 
  *         if joins:             # <<<<<<<<<<<<<<
@@ -10249,7 +10364,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  */
   }
 
-  /* "flowstar/plotting.pyx":265
+  /* "flowstar/plotting.pyx":267
  *                        (cx0 + tx, cy0 - ty)], linestyle='--', **kwargs)
  * 
  *         return p             # <<<<<<<<<<<<<<
@@ -10259,7 +10374,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __pyx_r = __pyx_v_p;
   goto __pyx_L0;
 
-  /* "flowstar/plotting.pyx":162
+  /* "flowstar/plotting.pyx":164
  *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
  * 
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False, straight=False, tight=False, boundaries=True, joins=True, **kwargs):             # <<<<<<<<<<<<<<
@@ -12319,6 +12434,8 @@ static PyObject *__pyx_tp_new_8flowstar_8plotting___pyx_scope_struct__sage_plot(
 static void __pyx_tp_dealloc_8flowstar_8plotting___pyx_scope_struct__sage_plot(PyObject *o) {
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *p = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *)o;
   PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_v_f);
+  Py_CLEAR(p->__pyx_v_poly);
   Py_CLEAR(p->__pyx_v_ress);
   Py_CLEAR(p->__pyx_v_self);
   if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_8flowstar_8plotting___pyx_scope_struct__sage_plot < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot)))) {
@@ -12331,6 +12448,12 @@ static void __pyx_tp_dealloc_8flowstar_8plotting___pyx_scope_struct__sage_plot(P
 static int __pyx_tp_traverse_8flowstar_8plotting___pyx_scope_struct__sage_plot(PyObject *o, visitproc v, void *a) {
   int e;
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *p = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *)o;
+  if (p->__pyx_v_f) {
+    e = (*v)(p->__pyx_v_f, a); if (e) return e;
+  }
+  if (p->__pyx_v_poly) {
+    e = (*v)(p->__pyx_v_poly, a); if (e) return e;
+  }
   if (p->__pyx_v_ress) {
     e = (*v)(p->__pyx_v_ress, a); if (e) return e;
   }
@@ -12343,6 +12466,12 @@ static int __pyx_tp_traverse_8flowstar_8plotting___pyx_scope_struct__sage_plot(P
 static int __pyx_tp_clear_8flowstar_8plotting___pyx_scope_struct__sage_plot(PyObject *o) {
   PyObject* tmp;
   struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *p = (struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct__sage_plot *)o;
+  tmp = ((PyObject*)p->__pyx_v_f);
+  p->__pyx_v_f = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  tmp = ((PyObject*)p->__pyx_v_poly);
+  p->__pyx_v_poly = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
   tmp = ((PyObject*)p->__pyx_v_ress);
   p->__pyx_v_ress = ((PyObject*)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
@@ -12561,7 +12690,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Not_ran, __pyx_k_Not_ran, sizeof(__pyx_k_Not_ran), 0, 0, 1, 0},
   {&__pyx_n_s_PickleError, __pyx_k_PickleError, sizeof(__pyx_k_PickleError), 0, 0, 1, 1},
   {&__pyx_n_s_RIF, __pyx_k_RIF, sizeof(__pyx_k_RIF), 0, 0, 1, 1},
-  {&__pyx_kp_s__15, __pyx_k__15, sizeof(__pyx_k__15), 0, 0, 1, 0},
+  {&__pyx_kp_s__17, __pyx_k__17, sizeof(__pyx_k__17), 0, 0, 1, 0},
   {&__pyx_n_s_absolute_diameter, __pyx_k_absolute_diameter, sizeof(__pyx_k_absolute_diameter), 0, 0, 1, 1},
   {&__pyx_n_s_arctan, __pyx_k_arctan, sizeof(__pyx_k_arctan), 0, 0, 1, 1},
   {&__pyx_n_s_arrow, __pyx_k_arrow, sizeof(__pyx_k_arrow), 0, 0, 1, 1},
@@ -12578,6 +12707,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_endpoints, __pyx_k_endpoints, sizeof(__pyx_k_endpoints), 0, 0, 1, 1},
   {&__pyx_n_s_enter, __pyx_k_enter, sizeof(__pyx_k_enter), 0, 0, 1, 1},
   {&__pyx_n_s_eps, __pyx_k_eps, sizeof(__pyx_k_eps), 0, 0, 1, 1},
+  {&__pyx_n_s_eval_poly, __pyx_k_eval_poly, sizeof(__pyx_k_eval_poly), 0, 0, 1, 1},
   {&__pyx_n_s_exit, __pyx_k_exit, sizeof(__pyx_k_exit), 0, 0, 1, 1},
   {&__pyx_n_s_f, __pyx_k_f, sizeof(__pyx_k_f), 0, 0, 1, 1},
   {&__pyx_n_s_filename, __pyx_k_filename, sizeof(__pyx_k_filename), 0, 0, 1, 1},
@@ -12638,6 +12768,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_sage_all, __pyx_k_sage_all, sizeof(__pyx_k_sage_all), 0, 0, 1, 1},
   {&__pyx_n_s_sage_parametric_plot_locals_f, __pyx_k_sage_parametric_plot_locals_f, sizeof(__pyx_k_sage_parametric_plot_locals_f), 0, 0, 1, 1},
   {&__pyx_n_s_sage_parametric_plot_locals_g, __pyx_k_sage_parametric_plot_locals_g, sizeof(__pyx_k_sage_parametric_plot_locals_g), 0, 0, 1, 1},
+  {&__pyx_n_s_sage_plot_locals_f, __pyx_k_sage_plot_locals_f, sizeof(__pyx_k_sage_plot_locals_f), 0, 0, 1, 1},
   {&__pyx_n_s_sage_plot_locals_fl, __pyx_k_sage_plot_locals_fl, sizeof(__pyx_k_sage_plot_locals_fl), 0, 0, 1, 1},
   {&__pyx_n_s_sage_plot_locals_fu, __pyx_k_sage_plot_locals_fu, sizeof(__pyx_k_sage_plot_locals_fu), 0, 0, 1, 1},
   {&__pyx_n_s_sage_tube_plot, __pyx_k_sage_tube_plot, sizeof(__pyx_k_sage_tube_plot), 0, 0, 1, 1},
@@ -12667,8 +12798,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 106, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 112, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 114, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -12725,82 +12856,94 @@ static int __Pyx_InitCachedConstants(void) {
   /* "flowstar/plotting.pyx":70
  *         ress = dict()
  * 
- *         def fl(t):             # <<<<<<<<<<<<<<
+ *         def f(t):             # <<<<<<<<<<<<<<
  *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+ *                 if poly is None:
  */
   __pyx_tuple__5 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_fl, 70, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_f, 70, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 70, __pyx_L1_error)
 
-  /* "flowstar/plotting.pyx":74
- *                 ress[t] = self((t - step, t + step))[var_id]
- *             return ress[t].lower()
- *         def fu(t):             # <<<<<<<<<<<<<<
- *             if t not in ress:
- *                 ress[t] = self((t - step, t + step))[var_id]
+  /* "flowstar/plotting.pyx":76
+ *                 else:
+ *                     ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
+ *         def fl(t):             # <<<<<<<<<<<<<<
+ *             return f(t).lower()
+ *         def fu(t):
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_fu, 74, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_fl, 76, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 76, __pyx_L1_error)
 
-  /* "flowstar/plotting.pyx":90
+  /* "flowstar/plotting.pyx":78
+ *         def fl(t):
+ *             return f(t).lower()
+ *         def fu(t):             # <<<<<<<<<<<<<<
+ *             return f(t).upper()
+ * 
+ */
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_fu, 78, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 78, __pyx_L1_error)
+
+  /* "flowstar/plotting.pyx":92
  *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
  * 
  *         def f(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_x].center()
  *         def g(t):
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 90, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
-  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_f, 90, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_f, 92, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 92, __pyx_L1_error)
 
-  /* "flowstar/plotting.pyx":92
+  /* "flowstar/plotting.pyx":94
  *         def f(t):
  *             return self((t, t+step))[var_id_x].center()
  *         def g(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_y].center()
  * 
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 92, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
-  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_g, 92, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_n_s_t); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 94, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_g, 94, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 94, __pyx_L1_error)
 
-  /* "flowstar/plotting.pyx":102
+  /* "flowstar/plotting.pyx":104
  *         p = Graphics()
  *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
  *         res1 = self((-1e-7,1e-7))[var_id]             # <<<<<<<<<<<<<<
  *         lo1, hi1 = res1.lower(), res1.upper()
  *         cdef double t = 0
  */
-  __pyx_tuple__13 = PyTuple_Pack(2, __pyx_float_neg_1eneg_7, __pyx_float_1eneg_7); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 102, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_tuple__13); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 102, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__14);
-  __Pyx_GIVEREF(__pyx_tuple__14);
+  __pyx_tuple__15 = PyTuple_Pack(2, __pyx_float_neg_1eneg_7, __pyx_float_1eneg_7); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_tuple__15); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__16);
+  __Pyx_GIVEREF(__pyx_tuple__16);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_FlowstarPlotMixin(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     if __pyx_checksum != 0xd41d8cd:
  *         from pickle import PickleError as __pyx_PickleError
  */
-  __pyx_tuple__16 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__16);
-  __Pyx_GIVEREF(__pyx_tuple__16);
-  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_FlowstarPlotMixin, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(1, 1, __pyx_L1_error)
   __pyx_tuple__18 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
-  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_SagePlotMixin, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_FlowstarPlotMixin, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(1, 1, __pyx_L1_error)
   __pyx_tuple__20 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
-  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_SageTubePlotMixin, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_SagePlotMixin, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_tuple__22 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__22);
+  __Pyx_GIVEREF(__pyx_tuple__22);
+  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_SageTubePlotMixin, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -12878,13 +13021,13 @@ static int __Pyx_modinit_type_init_code(void) {
   if (PyObject_SetAttrString(__pyx_m, "SagePlotMixin", (PyObject *)&__pyx_type_8flowstar_8plotting_SagePlotMixin) < 0) __PYX_ERR(0, 59, __pyx_L1_error)
   if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_8plotting_SagePlotMixin) < 0) __PYX_ERR(0, 59, __pyx_L1_error)
   __pyx_ptype_8flowstar_8plotting_SagePlotMixin = &__pyx_type_8flowstar_8plotting_SagePlotMixin;
-  if (PyType_Ready(&__pyx_type_8flowstar_8plotting_SageTubePlotMixin) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_8flowstar_8plotting_SageTubePlotMixin) < 0) __PYX_ERR(0, 160, __pyx_L1_error)
   __pyx_type_8flowstar_8plotting_SageTubePlotMixin.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_8plotting_SageTubePlotMixin.tp_dictoffset && __pyx_type_8flowstar_8plotting_SageTubePlotMixin.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_8plotting_SageTubePlotMixin.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (PyObject_SetAttrString(__pyx_m, "SageTubePlotMixin", (PyObject *)&__pyx_type_8flowstar_8plotting_SageTubePlotMixin) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_8plotting_SageTubePlotMixin) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "SageTubePlotMixin", (PyObject *)&__pyx_type_8flowstar_8plotting_SageTubePlotMixin) < 0) __PYX_ERR(0, 160, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_8plotting_SageTubePlotMixin) < 0) __PYX_ERR(0, 160, __pyx_L1_error)
   __pyx_ptype_8flowstar_8plotting_SageTubePlotMixin = &__pyx_type_8flowstar_8plotting_SageTubePlotMixin;
   if (PyType_Ready(&__pyx_type_8flowstar_8plotting___pyx_scope_struct__sage_plot) < 0) __PYX_ERR(0, 60, __pyx_L1_error)
   __pyx_type_8flowstar_8plotting___pyx_scope_struct__sage_plot.tp_print = 0;
@@ -12892,7 +13035,7 @@ static int __Pyx_modinit_type_init_code(void) {
     __pyx_type_8flowstar_8plotting___pyx_scope_struct__sage_plot.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
   }
   __pyx_ptype_8flowstar_8plotting___pyx_scope_struct__sage_plot = &__pyx_type_8flowstar_8plotting___pyx_scope_struct__sage_plot;
-  if (PyType_Ready(&__pyx_type_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot) < 0) __PYX_ERR(0, 85, __pyx_L1_error)
   __pyx_type_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot.tp_dictoffset && __pyx_type_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
@@ -12909,11 +13052,11 @@ static int __Pyx_modinit_type_import_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(2, 12, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(2, 12, __pyx_L1_error)
-  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(2, 24, __pyx_L1_error)
-  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(3, 35, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(3, 35, __pyx_L1_error)
+  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(3, 45, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(3, 45, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(3, 60, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -14127,25 +14270,6 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
 #endif
     return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 }
-
-/* DictGetItem */
-      #if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
-static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key) {
-    PyObject *value;
-    value = PyDict_GetItemWithError(d, key);
-    if (unlikely(!value)) {
-        if (!PyErr_Occurred()) {
-            PyObject* args = PyTuple_Pack(1, key);
-            if (likely(args))
-                PyErr_SetObject(PyExc_KeyError, args);
-            Py_XDECREF(args);
-        }
-        return NULL;
-    }
-    Py_INCREF(value);
-    return value;
-}
-#endif
 
 /* FetchCommonType */
       static PyTypeObject* __Pyx_FetchCommonType(PyTypeObject* type) {

@@ -7,9 +7,9 @@ from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
 from flowstar.Interval cimport Interval, intervalNumPrecision
 # from reachability cimport interval_fn, Reach, poly_fn
 from flowstar.Polynomial cimport Polynomial, factorial_rec, power_4, double_factorial
-from flowstar.poly cimport Poly, poly_fn
+from flowstar.poly cimport Poly, poly_fn, compose, poly_time_fn
 cimport flowstar.interval as interval
-from flowstar.interval cimport make_interval
+from flowstar.interval cimport make_interval, interval_time_fn
 cimport flowstar.root_detection as root_detection
 cimport flowstar.plotting as plotting
 # import flowstar.plotting as plotting
@@ -35,6 +35,39 @@ from cysignals.signals cimport sig_on, sig_off, sig_check
 class FlowstarFailedException(Exception):
     pass
 
+# Defined in this module rather than in poly due to Cython bug
+# https://github.com/cython/cython/issues/1427
+cdef (interval_time_fn, interval_time_fn) observable(
+    Polynomial & f, TaylorModelVec & tmv, vector[Interval] & domain,
+    int order, Interval & cutoff_threshold) nogil:
+    cdef:
+        interval_fn f_fn
+        TaylorModel f1, f2
+        vector[Interval] space_domain
+        vector[int] varIDs
+        Interval R
+        Polynomial p, p_deriv
+
+    # Compose
+    f1 = compose(f, tmv, domain, order + 1, cutoff_threshold)
+
+    # Separate off space variables from time
+    for i in range(1, domain.size()):
+        varIDs.push_back(i)
+        space_domain.push_back(domain[i])
+
+    # Substitute domain variables
+    f1.substitute(f2, varIDs, space_domain)
+
+    # return poly_domain_time_fn(f1.expansion
+    #                                + Polynomial(f1.remainder, domain.size()),
+    #                            domain)
+    p = f2.expansion + Polynomial(f2.remainder, 1)
+    p.derivative(p_deriv, 0)
+    p.ctrunc(R, domain, order)
+
+    return (poly_time_fn(p + Polynomial(R, 1)), poly_time_fn(p_deriv))
+
 
 cdef class CReach:
     def __cinit__(
@@ -54,11 +87,13 @@ cdef class CReach:
         maxNumSteps=100,
         vars=None,
         run=True,
+        symbolic_composition=False,
         **kwargs):
         cdef ContinuousReachability * C = &self.c_reach
         self.ran = False
         self.prepared = False
         self.result = 0
+        self.symbolic_composition = symbolic_composition
 
         # Create global variable manager
         self.global_manager = FlowstarGlobalManager()
@@ -153,15 +188,17 @@ cdef class CReach:
 
     def roots(CReach self, f, fprime, epsilon=0.00001, verbosity=0):
         cdef:
-            interval_fn f_fn = poly_fn(Poly(f).c_poly)
-            interval_fn fprime_fn = poly_fn(Poly(fprime).c_poly)
+            Polynomial f_poly = Poly(f).c_poly
+            Polynomial fprime_poly = Poly(fprime).c_poly
             vector[Interval] c_res
         self.prepare()
         with self.global_manager:
-            c_res = self.c_roots(f_fn, fprime_fn, epsilon=epsilon, verbosity=verbosity)
+            c_res = self.c_roots(f_poly, fprime_poly,
+                                 epsilon=epsilon, verbosity=verbosity)
         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
 
-    cdef vector[Interval] c_roots(CReach self, interval_fn f, interval_fn fprime,
+    cdef vector[Interval] c_roots(CReach self, Polynomial& f,
+                                  Polynomial& fprime,
                                   double epsilon=0.00001, int verbosity=0):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
@@ -173,8 +210,9 @@ cdef class CReach:
             vector[Interval].iterator root_iter = roots.begin()
             cdef Interval T0
             double t = 0.0
-            interval.interval_time_fn f_fn
-            interval.interval_time_fn fprime_fn
+            interval.interval_time_fn f_fn, fprime_fn, f_fn_compo
+            Interval f_domain
+            vector[Interval] tmv_domain
 
         cdef vector[Interval] domainCopy
         cdef vector[Interval] final_res
@@ -187,17 +225,38 @@ cdef class CReach:
             if verbosity >= 2:
                 print("reached detect roots t={} + {}".format(t,
                     interval.as_str(deref(domain)[0])))
-            # print("f(t) = ")
-            # root_iter = roots.end()
             new_roots.clear()
             T0 = deref(domain)[0]
-            f_fn = interval.compose_interval_fn(f, deref(tmv), deref(domain))
-            fprime_fn = interval.compose_interval_fn(fprime, deref(tmv), deref(domain))
-            root_detection.detect_roots(new_roots, f_fn, fprime_fn, T0,
-                                        epsilon=epsilon,
-                                        verbosity=verbosity)
+
+            # Compose interval functions to compute f
+            f_fn = interval.compose_interval_fn(poly_fn(f),
+                                                deref(tmv),
+                                                deref(domain))
+            f_domain = f_fn.call(T0)
+
+            # Only do anything if there is a chance of a root
+            if f_domain.inf() <= 0 and 0 <= f_domain.sup():
+                if self.symbolic_composition:
+                    # Define f and fprime by symbolically composing polynomials
+                    (f_fn, fprime_fn) = observable(
+                        f, deref(tmv), deref(domain),
+                        self.c_reach.globalMaxOrder,
+                        self.c_reach.cutoff_threshold,
+                    )
+                else:
+                    # Define fprime as a composition, and use f as defined
+                    # similarly above
+                    fprime_fn = interval.compose_interval_fn(poly_fn(fprime),
+                                                             deref(tmv),
+                                                             deref(domain))
+
+
+
+                root_detection.detect_roots(new_roots, f_fn, fprime_fn, T0,
+                                            epsilon=epsilon,
+                                            verbosity=verbosity)
+
             deref(domain)[0] = T0
-            # print("left detect roots")
 
             # Shift roots by current time
             root_iter = new_roots.begin()
@@ -222,13 +281,15 @@ cdef class CReach:
 
         return roots
 
-    cdef vector[Interval] eval_interval(CReach self, Interval & I):
+    cdef vector[Interval] eval_interval(CReach self, Interval & I,
+            optional[reference_wrapper[Polynomial]] poly=optional[reference_wrapper[Polynomial]]()):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
             clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
             clist[vector[Interval]].iterator domain = self.c_reach.domains.begin()
             clist[vector[Interval]].iterator domain_end = self.c_reach.domains.end()
             vector[Interval] res
+            interval_time_fn f_fn
             vector[int] varIDs # state variable ids
             double t = 0.0
             Interval T
@@ -247,10 +308,36 @@ cdef class CReach:
             T = deref(domain).at(var_id_t)
             T.add_assign(t)
             if interval.overlaps(I, T):
+                # Restrict the time domain of the flowpipe to that portion
+                # which intersects the time interval we are evaluating at
                 domainCopy = deref(domain)
                 domainCopy[var_id_t] = T.intersect(I) # No bounds checking!
                 domainCopy[var_id_t].add_assign(-t)
-                deref(tmv).intEval(res, domainCopy, varIDs)
+
+                if not poly.has_value():
+                    # In the normal case we directly evaulate the intervals for
+                    # each component of the system
+                    deref(tmv).intEval(res, domainCopy, varIDs)
+                else:
+                    # If a polynomial poly is specified, we evaluate that over
+                    # the system instead
+                    res.clear()
+                    if self.symbolic_composition:
+                        # Evaluate by symbolically compositing the polynomial
+                        # with the system
+                        (f_fn, _) = observable(
+                            poly.value().get(), deref(tmv), domainCopy,
+                            self.c_reach.globalMaxOrder,
+                            self.c_reach.cutoff_threshold,
+                        )
+                    else:
+                        # Evaluate by two-step functional composition
+                        f_fn = interval.compose_interval_fn(
+                            poly_fn(poly.value().get()),
+                            deref(tmv),
+                            domainCopy,
+                        )
+                    res.push_back(f_fn.call(domainCopy.at(0)))
 
                 if initialized:
                     interval.interval_vect_union(final_res, res)
@@ -275,6 +362,22 @@ cdef class CReach:
 
         with self.global_manager: #  Use captured globals
             res = self.eval_interval(I)
+
+        return [RIF(I.inf(), I.sup()) for I in res]
+
+    def eval_poly(self, Poly p, t):
+        from sage.all import RIF
+
+        self.prepare()
+
+        # Convert python interval to flow* interval
+        cdef vector[Interval] res
+        cdef Interval I = interval.make_interval(t)
+
+        with self.global_manager: #  Use captured globals
+            res = self.eval_interval(I,
+                poly=optional[reference_wrapper[Polynomial]](
+                    reference_wrapper[Polynomial](p.c_poly)))
 
         return [RIF(I.inf(), I.sup()) for I in res]
 

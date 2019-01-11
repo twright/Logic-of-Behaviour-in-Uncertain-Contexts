@@ -57,7 +57,7 @@ cdef class FlowstarPlotMixin:
         return img
 
 cdef class SagePlotMixin:
-    def sage_plot(self, x, duration=None, double step=1e-2):
+    def sage_plot(self, x, duration=None, double step=1e-2, poly=None):
         from sage.all import plot
 
         if duration is None:
@@ -67,14 +67,16 @@ cdef class SagePlotMixin:
         # Cache the evaluations
         ress = dict()
 
+        def f(t):
+            if t not in ress:
+                if poly is None:
+                    ress[t] = self((t - step, t + step))[var_id]
+                else:
+                    ress[t] = self.eval_poly(poly, (t - step, t + step))[0]
         def fl(t):
-            if t not in ress:
-                ress[t] = self((t - step, t + step))[var_id]
-            return ress[t].lower()
+            return f(t).lower()
         def fu(t):
-            if t not in ress:
-                ress[t] = self((t - step, t + step))[var_id]
-            return ress[t].upper()
+            return f(t).upper()
 
         return plot([fl, fu],
                     duration,
@@ -136,12 +138,12 @@ cdef class SagePlotMixin:
                 (ylo, yhi) = res[var_id_y].endpoints()
             except:
                 print("warning: eval failed for t in [{}, {}]".format(t, t+step))
-            
+
             # Choose colour based on p
             # col = 'default'
             col = kwargs.get('color', None)
             if poly is not None:
-                pres = index_fn(poly)(res) 
+                pres = index_fn(poly)(res)
                 if pres.lower() > 0:
                     col = 'green'
                 if pres.upper() < 0:

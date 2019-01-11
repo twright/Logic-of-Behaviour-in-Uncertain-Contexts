@@ -5,8 +5,8 @@ from libcpp.vector cimport vector
 from libcpp cimport bool as cbool
 
 cdef str as_str(const Interval &)
-cdef void set_precision(int prec)
-cdef int get_precision()
+cpdef void set_precision(int prec)
+cpdef int get_precision()
 cdef Interval make_interval(object i)
 cdef cbool overlaps(Interval &, Interval &) nogil
 cdef void interval_union(Interval&, Interval&) nogil
@@ -16,7 +16,7 @@ cdef list intervals_to_list(vector[Interval] &)
 cdef double int_dist(const Interval &, const Interval &) nogil
 cdef cbool int_diff(Interval& L, Interval& U, cbool& split, const Interval& a, const Interval& b) nogil
 cdef cbool extdiv(Interval& L, Interval& U, cbool& split, const Interval& d, const Interval& a, const Interval& b) nogil
-# 
+#
 # cdef extern from "<cfenv>" namespace std nogil:
 #     # Typedef the (platform dependant) floating point environment type
 #     ctypedef struct fenv_t {
@@ -67,4 +67,6 @@ cdef extern from * nogil:
         };
     }
     '''
-    interval_time_fn compose_interval_fn(interval_fn, TaylorModelVec &, vector[Interval] &)
+    interval_time_fn compose_interval_fn(interval_fn f,
+                                         TaylorModelVec & tmv,
+                                         vector[Interval] & domain)

@@ -29,7 +29,9 @@ cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
     void add_assign(const TaylorModel & tm)
     void sub_assign(const TaylorModel & tm)
     void mul_assign(const Interval & I)
-
+    void substitute(TaylorModel & result, const vector[int] & varIDs,
+    
+                    const vector[Interval] & intVals) const
     Polynomial expansion
     Interval remainder
 
@@ -39,7 +41,9 @@ cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
 
     TaylorModelVec & operator = (const TaylorModelVec & tm)
 
-    void intEval(vector[Interval] & result, const vector[Interval] & domain, const vector[int] & varIDs) const
-    void intEval(vector[Interval] & result, const vector[Interval] & domain) const
+    void intEval(vector[Interval] & result, const vector[Interval] & domain,
+                 const vector[int] & varIDs) const
+    void intEval(vector[Interval] & result,
+                 const vector[Interval] & domain) const
 
     vector[TaylorModel] tms
