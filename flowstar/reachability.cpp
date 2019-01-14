@@ -997,6 +997,7 @@ typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
  */
 typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
 struct __pyx_opt_args_8flowstar_4poly_compose;
+struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial;
 
 /* "flowstar/poly.pxd":12
  *     int order, Interval & cutoff_threshold) nogil
@@ -1008,6 +1009,16 @@ struct __pyx_opt_args_8flowstar_4poly_compose;
 struct __pyx_opt_args_8flowstar_4poly_compose {
   int __pyx_n;
   int verbosity;
+};
+
+/* "flowstar/poly.pxd":71
+ * 
+ *     @staticmethod
+ *     cdef Poly from_polynomial(Polynomial & P, vars, explicit_time=?)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial {
+  int __pyx_n;
+  PyObject *explicit_time;
 };
 struct __pyx_opt_args_8flowstar_14root_detection_detect_roots;
 
@@ -1086,6 +1097,7 @@ struct __pyx_obj_8flowstar_4poly_Poly {
   struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtab;
   flowstar::Polynomial c_poly;
   PyObject *vars;
+  int explicit_time;
 };
 
 
@@ -1215,7 +1227,7 @@ struct __pyx_obj_8flowstar_12reachability___pyx_scope_struct_2_genexpr {
  */
 
 struct __pyx_vtabstruct_8flowstar_4poly_Poly {
-  struct __pyx_obj_8flowstar_4poly_Poly *(*from_polynomial)(flowstar::Polynomial &, PyObject *);
+  struct __pyx_obj_8flowstar_4poly_Poly *(*from_polynomial)(flowstar::Polynomial &, PyObject *, struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtabptr_8flowstar_4poly_Poly;
 

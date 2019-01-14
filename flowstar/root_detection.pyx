@@ -11,11 +11,11 @@ def py_detect_roots(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1
     cdef interval_time_fn F = poly_time_fn(f.c_poly)
     cdef interval_time_fn Fprime = poly_time_fn(fprime.c_poly)
     cdef vector[Interval] roots
-    # cdef Interval R = F.call(Interval(0.0))
-    # cdef Interval Rprime = Fprime.call(Interval(0.0))
+    cdef Interval R = F.call(Interval(0.0))
+    cdef Interval Rprime = Fprime.call(Interval(0.0))
 
-    # print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))
-    # print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
+    print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))
+    print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
 
     detect_roots(roots, F, Fprime, T, epsilon, verbosity)
 
@@ -55,7 +55,11 @@ cdef void detect_roots(vector[Interval] & roots,
             with gil: print("T = [{}..{}]".format(T.inf(), T.sup()))
         Tbak = T
         T.midpoint(M)
+        if verbosity >= 3:
+            with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))
         fI = f.call(M)
+        if verbosity >= 3:
+            with gil: print("fI = [{}..{}]".format(fI.inf(), fI.sup()))
         fP = fprime.call(T)
         T.inv_assign()
         T.add_assign(M)

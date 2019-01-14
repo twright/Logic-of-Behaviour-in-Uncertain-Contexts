@@ -244,14 +244,21 @@ cdef (interval_time_fn, interval_time_fn) observable(
 cdef class Poly:
     # Constructor makes a univariate monomial -- should combine using
     # arithmetic operations
-    def __cinit__(self, *args):
+    def __cinit__(self, *args, explicit_time=False):
+        self.explicit_time = explicit_time
+        # print('Poly({}, explicit_time={})'.format(
+        #     ', '.join(map(str, args)),
+        #     explicit_time
+        # ))
         if len(args) == 4:
             # print("explicit")
             coeff, var_name, expn, vars = args
 
             # start var ids from 1 to take TM time var into account
-            self.vars = {v: i for i,v in enumerate(vars, 1)}
-            self.vars['local_t'] = 0
+            self.vars = {v: i for i,v in enumerate(vars,
+                                                   int(not explicit_time))}
+            if not explicit_time:
+                self.vars['local_t'] = 0
             num_vars = len(self.vars)
 
             self.c_poly = Polynomial(self.vars[var_name], expn, num_vars)
@@ -259,20 +266,24 @@ cdef class Poly:
         elif len(args) == 2:
             # print("from constant")
             coeff, vars = args
-            self.vars = {v: i for i,v in enumerate(vars, 1)}
-            self.vars['local_t'] = 0
+            self.vars = {v: i for i,v in enumerate(vars,
+                                                   int(not explicit_time))}
+            if not explicit_time:
+                self.vars['local_t'] = 0
             num_vars = len(self.vars)
             self.c_poly = Polynomial(make_interval(coeff), num_vars)
         elif len(args) == 1 and hasattr(args[0], 'exponents'):
             # print("from sage")
-            p = <Poly?>Poly.from_sage(args[0])
+            p = <Poly?>Poly.from_sage(args[0], explicit_time=explicit_time)
             self.vars = p.vars
             self.c_poly = p.c_poly
         elif len(args) == 1:
             # print("from vars")
             vars, = args
-            self.vars = {v: i for i,v in enumerate(vars, 1)}
-            self.vars['local_t'] = 0
+            self.vars = {v: i for i,v in enumerate(vars,
+                                                   int(not explicit_time))}
+            if not self.explicit_time:
+                self.vars['local_t'] = 0
             num_vars = len(self.vars)
             self.c_poly = Polynomial(make_interval(0), num_vars)
             # self.vars = vars
@@ -280,25 +291,26 @@ cdef class Poly:
             raise Exception("Invalid args for Poly")
 
     @staticmethod
-    def from_monomial(coeff, mono, vars):
+    def from_monomial(coeff, mono, vars, explicit_time=False):
         # print("coeff =", coeff)
         # print("mono =", mono)
-        c = Poly(coeff, vars)
+        c = Poly(coeff, vars, explicit_time=explicit_time)
         # ts = [Poly(1, k, 1, vars) for k in vars]
         return reduce(operator.mul,
-                      (Poly(1, k, n, vars) for k, n in zip(vars, mono)),
+                      (Poly(1, k, n, vars, explicit_time=explicit_time)
+                            for k, n in zip(vars, mono)),
                       c)
 
     @staticmethod
-    cdef Poly from_polynomial(Polynomial & P, vars):
-        Q = Poly(vars)
+    cdef Poly from_polynomial(Polynomial & P, vars, explicit_time=False):
+        Q = Poly(vars, explicit_time=explicit_time)
         Q.c_poly = P
         return Q
 
     @staticmethod
-    def from_sage(p):
+    def from_sage(p, explicit_time=False):
         vars = list(map(str, p.parent().gens()))
-        zero = Poly(vars)
+        zero = Poly(vars, explicit_time=explicit_time)
         if hasattr(p, 'list'):
             # Univariate polynomials handle interval coefficients containing
             # 0 strangly so we must treat this as a special case
@@ -312,7 +324,8 @@ cdef class Poly:
             (Poly.from_monomial(c,
                                 ex if isinstance(ex, collections.Iterable)
                                 else (ex,),
-                                vars)
+                                vars,
+                                explicit_time=explicit_time)
                 for c, ex in zip(cs, p.exponents())),
             zero,
         )
@@ -321,7 +334,8 @@ cdef class Poly:
         # Evaluate the polynomial using the flowstar intEval function
         cdef vector[Interval] cxs
         cdef Interval res
-        cxs.push_back(Interval(0)) # Use dummy time variable
+        if 'local_t' in self.vars:
+            cxs.push_back(Interval(0)) # Use dummy time variable
         for x in xs:
             cxs.push_back(make_interval(x))
         self.c_poly.intEval(res, cxs)
@@ -335,37 +349,43 @@ cdef class Poly:
 
     def __add__(self, other):
         if isinstance(self, Poly) and isinstance(other, Poly):
-            p = Poly((<Poly>self).var_names)
+            assert self.explicit_time == other.explicit_time
+            p = Poly((<Poly>self).var_names, explicit_time=self.explicit_time)
             p.c_poly = (<Poly>self).c_poly + (<Poly>other).c_poly
             return p
         elif isinstance(self, Poly):
             # We assume other is some kind of interval
             # CAREFUL: explicit NotImplemented case may be needed
-            return <Poly>self + Poly(other, self.var_names)
+            return <Poly>self + Poly(other, self.var_names,
+                                     explicit_time=self.explicit_time)
         elif isinstance(other, Poly):
             # We assume other is some kind of interval
             # CAREFUL: explicit NotImplemented case may be needed
-            return Poly(self, other.var_names) + <Poly>other
+            return Poly(self, other.var_names,
+                        explicit_time=other.explicit_time) + <Poly>other
         else:
             return NotImplemented
 
     def __mul__(self, other):
         if isinstance(self, Poly) and isinstance(other, Poly):
             # print("case p * p")
-            p = Poly((<Poly>self).var_names)
+            assert self.explicit_time == other.explicit_time
+            p = Poly((<Poly>self).var_names, explicit_time=self.explicit_time)
             p.c_poly = (<Poly>self).c_poly * (<Poly>other).c_poly
             return p
         elif isinstance(self, Poly):
             # print("case p * o")
             # We assume other is some kind of interval
             # CAREFUL: explicit NotImplemented case may be needed
-            return <Poly>self * Poly(other, self.var_names)
+            return <Poly>self * Poly(other, self.var_names,
+                                     explicit_time=self.explicit_time)
             # p.c_poly = <Polynomial?>self.c_poly * make_interval(other)
         elif isinstance(other, Poly):
             # print("case o * p")
             # We assume other is some kind of interval
             # CAREFUL: explicit NotImplemented case may be needed
-            return Poly(self, other.var_names) * <Poly>other
+            return Poly(self, other.var_names,
+                       explicit_time=other.explicit_time) * <Poly>other
         else:
             # print("not implemented")
             return NotImplemented
@@ -377,3 +397,10 @@ cdef class Poly:
         cdef string res
         self.c_poly.toString(res, var_names)
         return str(res)
+
+
+def poly_eval(Poly poly, i):
+    cdef interval_time_fn p = poly_time_fn(poly.c_poly)
+    I = make_interval(i)
+    res = p.call(I)
+    return sage.RIF(res.inf(), res.sup())

@@ -6,7 +6,7 @@ import pytest
 import sage.all as sage
 
 from flowstar.poly import (Poly, do_compose_test, do_tm_power_test,
-                           do_tm_power_test2)
+                           do_tm_power_test2, poly_eval)
 
 
 @pytest.fixture(scope='module')
@@ -61,5 +61,11 @@ def test_tm_power2():
 
 
 def test_compose():
-    assert do_compose_test() == ''
-    assert False
+    assert (do_compose_test() == '(([9.0000000000 , 9.0000000000])) +'
+                                 ' [-8.0000000000 , 8.0000000000]')
+
+
+def test_time_fn_eval(ringt):
+    R, (t,) = ringt
+    assert (poly_eval(Poly(t - 0.5, explicit_time=True), sage.RIF(0.5, 0.5))
+            == sage.RIF(0, 0))

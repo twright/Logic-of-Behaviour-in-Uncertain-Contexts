@@ -162,13 +162,16 @@ cdef cbool extdiv(Interval & L, Interval & U, cbool & split, const Interval & d,
     al, au = a.inf(), a.sup()
     bl, bu = b.inf(), b.sup()
     if not (bl <= 0 <= bu):
-        # print("div a")
+        # with gil:
+        #     print("div a")
         ratio = a / b
         (&split)[0]=False
         (&L)[0] = d
         if overlaps(ratio, L):
             L.intersect_assign(ratio)
             (&U)[0] = L
+            # with gil:
+            #     print("no overlap")
             return True
         else:
             return False
@@ -181,6 +184,8 @@ cdef cbool extdiv(Interval & L, Interval & U, cbool & split, const Interval & d,
                         Interval(d.inf() if bu == 0 else au/bu,
                                  d.sup() if bl == 0 else au/bl))
     else:
+        # with gil:
+        #     print("catchall")
         (&L)[0] = (&U)[0] = d
         (&split)[0] = False
         return True

@@ -970,6 +970,7 @@ typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
  */
 typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
 struct __pyx_opt_args_8flowstar_4poly_compose;
+struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial;
 
 /* "flowstar/poly.pxd":12
  *     int order, Interval & cutoff_threshold) nogil
@@ -981,6 +982,16 @@ struct __pyx_opt_args_8flowstar_4poly_compose;
 struct __pyx_opt_args_8flowstar_4poly_compose {
   int __pyx_n;
   int verbosity;
+};
+
+/* "flowstar/poly.pxd":71
+ * 
+ *     @staticmethod
+ *     cdef Poly from_polynomial(Polynomial & P, vars, explicit_time=?)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial {
+  int __pyx_n;
+  PyObject *explicit_time;
 };
 struct __pyx_opt_args_8flowstar_14root_detection_detect_roots;
 
@@ -1009,12 +1020,13 @@ struct __pyx_obj_8flowstar_4poly_Poly {
   struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtab;
   flowstar::Polynomial c_poly;
   PyObject *vars;
+  int explicit_time;
 };
 
 
 
 struct __pyx_vtabstruct_8flowstar_4poly_Poly {
-  struct __pyx_obj_8flowstar_4poly_Poly *(*from_polynomial)(flowstar::Polynomial &, PyObject *);
+  struct __pyx_obj_8flowstar_4poly_Poly *(*from_polynomial)(flowstar::Polynomial &, PyObject *, struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtabptr_8flowstar_4poly_Poly;
 
@@ -1100,23 +1112,6 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
         __Pyx__ArgTypeTest(obj, type, name, exact))
 static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
 
-/* ListCompAppend.proto */
-#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
-static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
-    PyListObject* L = (PyListObject*) list;
-    Py_ssize_t len = Py_SIZE(list);
-    if (likely(L->allocated > len)) {
-        Py_INCREF(x);
-        PyList_SET_ITEM(list, len, x);
-        Py_SIZE(list) = len+1;
-        return 0;
-    }
-    return PyList_Append(list, x);
-}
-#else
-#define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
-#endif
-
 /* PyObjectGetAttrStr.proto */
 #if CYTHON_USE_TYPE_SLOTS
 static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject* attr_name);
@@ -1147,6 +1142,23 @@ static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObje
 static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
 #else
 #define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+#endif
+
+/* ListCompAppend.proto */
+#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
+static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
+    PyListObject* L = (PyListObject*) list;
+    Py_ssize_t len = Py_SIZE(list);
+    if (likely(L->allocated > len)) {
+        Py_INCREF(x);
+        PyList_SET_ITEM(list, len, x);
+        Py_SIZE(list) = len+1;
+        return 0;
+    }
+    return PyList_Append(list, x);
+}
+#else
+#define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
 #endif
 
 /* PyThreadStateGet.proto */
@@ -1219,15 +1231,15 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object);
 static void __Pyx_AddTraceback(const char *funcname, int c_line,
                                int py_line, const char *filename);
 
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
-
 /* Print.proto */
 static int __Pyx_Print(PyObject*, PyObject *, int);
 #if CYTHON_COMPILING_IN_PYPY || PY_MAJOR_VERSION >= 3
 static PyObject* __pyx_print = 0;
 static PyObject* __pyx_print_kwargs = 0;
 #endif
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
 /* CppExceptionConversion.proto */
 #ifndef __Pyx_CppExn2PyErr
@@ -1362,19 +1374,25 @@ int __pyx_module_is_main_flowstar__root_detection = 0;
 
 /* Implementation of 'flowstar.root_detection' */
 static const char __pyx_k_F[] = "F";
-static const char __pyx_k_M[] = "M=[{}..{}]";
+static const char __pyx_k_M[] = "M = [{}..{}]";
+static const char __pyx_k_R[] = "R";
 static const char __pyx_k_T[] = "T = [{}..{}]";
 static const char __pyx_k_f[] = "f";
 static const char __pyx_k_r[] = "r";
 static const char __pyx_k_t[] = "t";
+static const char __pyx_k_fI[] = "fI = [{}..{}]";
+static const char __pyx_k_F_0[] = "F(0)  = [{}..{}]";
+static const char __pyx_k_M_2[] = "M=[{}..{}]";
 static const char __pyx_k_T_2[] = "T";
 static const char __pyx_k_end[] = "end";
 static const char __pyx_k_file[] = "file";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_test[] = "__test__";
+static const char __pyx_k_F_0_2[] = "F'(0) = [{}..{}]";
 static const char __pyx_k_print[] = "print";
 static const char __pyx_k_roots[] = "roots";
 static const char __pyx_k_Fprime[] = "Fprime";
+static const char __pyx_k_Rprime[] = "Rprime";
 static const char __pyx_k_Tfinal[] = "Tfinal = [{}..{}]";
 static const char __pyx_k_format[] = "format";
 static const char __pyx_k_fprime[] = "fprime";
@@ -1393,8 +1411,13 @@ static const char __pyx_k_flowstar_root_detection_pyx[] = "flowstar/root_detecti
 static const char __pyx_k_failed_to_verify_contractive[] = "failed to verify contractive!";
 static const char __pyx_k_detect_roots_T0_epsilon_verbosit[] = "detect_roots(T0={}, epsilon={}, verbosity={})";
 static PyObject *__pyx_n_s_F;
+static PyObject *__pyx_kp_s_F_0;
+static PyObject *__pyx_kp_s_F_0_2;
 static PyObject *__pyx_n_s_Fprime;
 static PyObject *__pyx_kp_s_M;
+static PyObject *__pyx_kp_s_M_2;
+static PyObject *__pyx_n_s_R;
+static PyObject *__pyx_n_s_Rprime;
 static PyObject *__pyx_kp_s_T;
 static PyObject *__pyx_n_s_T_2;
 static PyObject *__pyx_kp_s_Tfinal;
@@ -1404,6 +1427,7 @@ static PyObject *__pyx_n_s_end;
 static PyObject *__pyx_n_s_epsilon;
 static PyObject *__pyx_kp_s_extdiv_T_Tu_split_T_fI_fP;
 static PyObject *__pyx_n_s_f;
+static PyObject *__pyx_kp_s_fI;
 static PyObject *__pyx_kp_s_failed_on;
 static PyObject *__pyx_kp_s_failed_to_verify_contractive;
 static PyObject *__pyx_n_s_file;
@@ -1554,16 +1578,21 @@ static PyObject *__pyx_pf_8flowstar_14root_detection_py_detect_roots(CYTHON_UNUS
   std::function<flowstar::Interval(const flowstar::Interval &)> __pyx_v_F;
   std::function<flowstar::Interval(const flowstar::Interval &)> __pyx_v_Fprime;
   std::vector<flowstar::Interval>  __pyx_v_roots;
+  flowstar::Interval __pyx_v_R;
+  flowstar::Interval __pyx_v_Rprime;
   flowstar::Interval __pyx_v_r;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  struct __pyx_opt_args_8flowstar_14root_detection_detect_roots __pyx_t_1;
+  PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  std::vector<flowstar::Interval> ::iterator __pyx_t_3;
-  flowstar::Interval __pyx_t_4;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
-  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
+  struct __pyx_opt_args_8flowstar_14root_detection_detect_roots __pyx_t_8;
+  std::vector<flowstar::Interval> ::iterator __pyx_t_9;
+  flowstar::Interval __pyx_t_10;
   __Pyx_RefNannySetupContext("py_detect_roots", 0);
 
   /* "flowstar/root_detection.pyx":10
@@ -1589,21 +1618,169 @@ static PyObject *__pyx_pf_8flowstar_14root_detection_py_detect_roots(CYTHON_UNUS
  *     cdef interval_time_fn F = poly_time_fn(f.c_poly)
  *     cdef interval_time_fn Fprime = poly_time_fn(fprime.c_poly)             # <<<<<<<<<<<<<<
  *     cdef vector[Interval] roots
- *     # cdef Interval R = F.call(Interval(0.0))
+ *     cdef Interval R = F.call(Interval(0.0))
  */
   __pyx_v_Fprime = poly_time_fn(__pyx_v_fprime->c_poly);
 
+  /* "flowstar/root_detection.pyx":14
+ *     cdef interval_time_fn Fprime = poly_time_fn(fprime.c_poly)
+ *     cdef vector[Interval] roots
+ *     cdef Interval R = F.call(Interval(0.0))             # <<<<<<<<<<<<<<
+ *     cdef Interval Rprime = Fprime.call(Interval(0.0))
+ * 
+ */
+  __pyx_v_R = __pyx_v_F.operator()(flowstar::Interval(0.0));
+
+  /* "flowstar/root_detection.pyx":15
+ *     cdef vector[Interval] roots
+ *     cdef Interval R = F.call(Interval(0.0))
+ *     cdef Interval Rprime = Fprime.call(Interval(0.0))             # <<<<<<<<<<<<<<
+ * 
+ *     print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))
+ */
+  __pyx_v_Rprime = __pyx_v_Fprime.operator()(flowstar::Interval(0.0));
+
+  /* "flowstar/root_detection.pyx":17
+ *     cdef Interval Rprime = Fprime.call(Interval(0.0))
+ * 
+ *     print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))             # <<<<<<<<<<<<<<
+ *     print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
+ * 
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_F_0, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_R.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_R.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #if CYTHON_FAST_PYCALL
+  if (PyFunction_Check(__pyx_t_2)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_3, __pyx_t_4};
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else
+  #endif
+  #if CYTHON_FAST_PYCCALL
+  if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_3, __pyx_t_4};
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else
+  #endif
+  {
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 17, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    if (__pyx_t_5) {
+      __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
+    }
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_4);
+    PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_4);
+    __pyx_t_3 = 0;
+    __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "flowstar/root_detection.pyx":18
+ * 
+ *     print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))
+ *     print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))             # <<<<<<<<<<<<<<
+ * 
+ *     detect_roots(roots, F, Fprime, T, epsilon, verbosity)
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_F_0_2, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_7 = PyFloat_FromDouble(__pyx_v_Rprime.inf()); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_Rprime.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_3 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #if CYTHON_FAST_PYCALL
+  if (PyFunction_Check(__pyx_t_2)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_t_7, __pyx_t_4};
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else
+  #endif
+  #if CYTHON_FAST_PYCCALL
+  if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_t_7, __pyx_t_4};
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else
+  #endif
+  {
+    __pyx_t_5 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 18, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (__pyx_t_3) {
+      __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3); __pyx_t_3 = NULL;
+    }
+    __Pyx_GIVEREF(__pyx_t_7);
+    PyTuple_SET_ITEM(__pyx_t_5, 0+__pyx_t_6, __pyx_t_7);
+    __Pyx_GIVEREF(__pyx_t_4);
+    PyTuple_SET_ITEM(__pyx_t_5, 1+__pyx_t_6, __pyx_t_4);
+    __pyx_t_7 = 0;
+    __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
   /* "flowstar/root_detection.pyx":20
- *     # print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
+ *     print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
  * 
  *     detect_roots(roots, F, Fprime, T, epsilon, verbosity)             # <<<<<<<<<<<<<<
  * 
  *     return [(r.inf(), r.sup()) for r in roots]
  */
-  __pyx_t_1.__pyx_n = 2;
-  __pyx_t_1.epsilon = __pyx_v_epsilon;
-  __pyx_t_1.verbosity = __pyx_v_verbosity;
-  __pyx_f_8flowstar_14root_detection_detect_roots(__pyx_v_roots, __pyx_v_F, __pyx_v_Fprime, __pyx_v_T, &__pyx_t_1); 
+  __pyx_t_8.__pyx_n = 2;
+  __pyx_t_8.epsilon = __pyx_v_epsilon;
+  __pyx_t_8.verbosity = __pyx_v_verbosity;
+  __pyx_f_8flowstar_14root_detection_detect_roots(__pyx_v_roots, __pyx_v_F, __pyx_v_Fprime, __pyx_v_T, &__pyx_t_8); 
 
   /* "flowstar/root_detection.pyx":22
  *     detect_roots(roots, F, Fprime, T, epsilon, verbosity)
@@ -1613,31 +1790,31 @@ static PyObject *__pyx_pf_8flowstar_14root_detection_py_detect_roots(CYTHON_UNUS
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __pyx_v_roots.begin();
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_9 = __pyx_v_roots.begin();
   for (;;) {
-    if (!(__pyx_t_3 != __pyx_v_roots.end())) break;
-    __pyx_t_4 = *__pyx_t_3;
-    ++__pyx_t_3;
-    __pyx_v_r = __pyx_t_4;
-    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_r.inf()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 22, __pyx_L1_error)
+    if (!(__pyx_t_9 != __pyx_v_roots.end())) break;
+    __pyx_t_10 = *__pyx_t_9;
+    ++__pyx_t_9;
+    __pyx_v_r = __pyx_t_10;
+    __pyx_t_2 = PyFloat_FromDouble(__pyx_v_r.inf()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_5 = PyFloat_FromDouble(__pyx_v_r.sup()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 22, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyFloat_FromDouble(__pyx_v_r.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 22, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 22, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
+    __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 22, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_GIVEREF(__pyx_t_2);
+    PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5);
-    __Pyx_GIVEREF(__pyx_t_6);
-    PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_6);
+    PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_5);
+    __pyx_t_2 = 0;
     __pyx_t_5 = 0;
-    __pyx_t_6 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_7))) __PYX_ERR(0, 22, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 22, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* "flowstar/root_detection.pyx":9
@@ -1650,9 +1827,11 @@ static PyObject *__pyx_pf_8flowstar_14root_detection_py_detect_roots(CYTHON_UNUS
 
   /* function exit code */
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("flowstar.root_detection.py_detect_roots", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
@@ -2056,7 +2235,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  *             with gil: print("T = [{}..{}]".format(T.inf(), T.sup()))
  *         Tbak = T             # <<<<<<<<<<<<<<
  *         T.midpoint(M)
- *         fI = f.call(M)
+ *         if verbosity >= 3:
  */
       __pyx_v_Tbak = __pyx_v_T;
 
@@ -2064,31 +2243,243 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  *             with gil: print("T = [{}..{}]".format(T.inf(), T.sup()))
  *         Tbak = T
  *         T.midpoint(M)             # <<<<<<<<<<<<<<
- *         fI = f.call(M)
- *         fP = fprime.call(T)
+ *         if verbosity >= 3:
+ *             with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))
  */
       __pyx_v_T.midpoint(__pyx_v_M);
 
       /* "flowstar/root_detection.pyx":58
  *         Tbak = T
  *         T.midpoint(M)
+ *         if verbosity >= 3:             # <<<<<<<<<<<<<<
+ *             with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))
+ *         fI = f.call(M)
+ */
+      __pyx_t_10 = ((__pyx_v_verbosity >= 3) != 0);
+      if (__pyx_t_10) {
+
+        /* "flowstar/root_detection.pyx":59
+ *         T.midpoint(M)
+ *         if verbosity >= 3:
+ *             with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))             # <<<<<<<<<<<<<<
+ *         fI = f.call(M)
+ *         if verbosity >= 3:
+ */
+        {
+            #ifdef WITH_THREAD
+            PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+            #endif
+            /*try:*/ {
+              __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_M, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L24_error)
+              __Pyx_GOTREF(__pyx_t_3);
+              __pyx_t_4 = PyFloat_FromDouble(__pyx_v_M.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L24_error)
+              __Pyx_GOTREF(__pyx_t_4);
+              __pyx_t_6 = PyFloat_FromDouble(__pyx_v_M.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L24_error)
+              __Pyx_GOTREF(__pyx_t_6);
+              __pyx_t_9 = NULL;
+              __pyx_t_8 = 0;
+              if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+                __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_3);
+                if (likely(__pyx_t_9)) {
+                  PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+                  __Pyx_INCREF(__pyx_t_9);
+                  __Pyx_INCREF(function);
+                  __Pyx_DECREF_SET(__pyx_t_3, function);
+                  __pyx_t_8 = 1;
+                }
+              }
+              #if CYTHON_FAST_PYCALL
+              if (PyFunction_Check(__pyx_t_3)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_4, __pyx_t_6};
+                __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L24_error)
+                __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+              } else
+              #endif
+              #if CYTHON_FAST_PYCCALL
+              if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_4, __pyx_t_6};
+                __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L24_error)
+                __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+              } else
+              #endif
+              {
+                __pyx_t_5 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L24_error)
+                __Pyx_GOTREF(__pyx_t_5);
+                if (__pyx_t_9) {
+                  __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_9); __pyx_t_9 = NULL;
+                }
+                __Pyx_GIVEREF(__pyx_t_4);
+                PyTuple_SET_ITEM(__pyx_t_5, 0+__pyx_t_8, __pyx_t_4);
+                __Pyx_GIVEREF(__pyx_t_6);
+                PyTuple_SET_ITEM(__pyx_t_5, 1+__pyx_t_8, __pyx_t_6);
+                __pyx_t_4 = 0;
+                __pyx_t_6 = 0;
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L24_error)
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+              }
+              __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+              if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 59, __pyx_L24_error)
+              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+            }
+            /*finally:*/ {
+              /*normal exit:*/{
+                #ifdef WITH_THREAD
+                __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                #endif
+                goto __pyx_L25;
+              }
+              __pyx_L24_error: {
+                #ifdef WITH_THREAD
+                __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                #endif
+                goto __pyx_L4_error;
+              }
+              __pyx_L25:;
+            }
+        }
+
+        /* "flowstar/root_detection.pyx":58
+ *         Tbak = T
+ *         T.midpoint(M)
+ *         if verbosity >= 3:             # <<<<<<<<<<<<<<
+ *             with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))
+ *         fI = f.call(M)
+ */
+      }
+
+      /* "flowstar/root_detection.pyx":60
+ *         if verbosity >= 3:
+ *             with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))
  *         fI = f.call(M)             # <<<<<<<<<<<<<<
- *         fP = fprime.call(T)
- *         T.inv_assign()
+ *         if verbosity >= 3:
+ *             with gil: print("fI = [{}..{}]".format(fI.inf(), fI.sup()))
  */
       __pyx_v_fI = __pyx_v_f.operator()(__pyx_v_M);
 
-      /* "flowstar/root_detection.pyx":59
- *         T.midpoint(M)
+      /* "flowstar/root_detection.pyx":61
+ *             with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))
  *         fI = f.call(M)
+ *         if verbosity >= 3:             # <<<<<<<<<<<<<<
+ *             with gil: print("fI = [{}..{}]".format(fI.inf(), fI.sup()))
+ *         fP = fprime.call(T)
+ */
+      __pyx_t_10 = ((__pyx_v_verbosity >= 3) != 0);
+      if (__pyx_t_10) {
+
+        /* "flowstar/root_detection.pyx":62
+ *         fI = f.call(M)
+ *         if verbosity >= 3:
+ *             with gil: print("fI = [{}..{}]".format(fI.inf(), fI.sup()))             # <<<<<<<<<<<<<<
+ *         fP = fprime.call(T)
+ *         T.inv_assign()
+ */
+        {
+            #ifdef WITH_THREAD
+            PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+            #endif
+            /*try:*/ {
+              __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_fI, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L30_error)
+              __Pyx_GOTREF(__pyx_t_3);
+              __pyx_t_5 = PyFloat_FromDouble(__pyx_v_fI.inf()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L30_error)
+              __Pyx_GOTREF(__pyx_t_5);
+              __pyx_t_6 = PyFloat_FromDouble(__pyx_v_fI.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 62, __pyx_L30_error)
+              __Pyx_GOTREF(__pyx_t_6);
+              __pyx_t_4 = NULL;
+              __pyx_t_8 = 0;
+              if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+                __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_3);
+                if (likely(__pyx_t_4)) {
+                  PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+                  __Pyx_INCREF(__pyx_t_4);
+                  __Pyx_INCREF(function);
+                  __Pyx_DECREF_SET(__pyx_t_3, function);
+                  __pyx_t_8 = 1;
+                }
+              }
+              #if CYTHON_FAST_PYCALL
+              if (PyFunction_Check(__pyx_t_3)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_5, __pyx_t_6};
+                __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L30_error)
+                __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+                __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+              } else
+              #endif
+              #if CYTHON_FAST_PYCCALL
+              if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_5, __pyx_t_6};
+                __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L30_error)
+                __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+                __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+              } else
+              #endif
+              {
+                __pyx_t_9 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 62, __pyx_L30_error)
+                __Pyx_GOTREF(__pyx_t_9);
+                if (__pyx_t_4) {
+                  __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_4); __pyx_t_4 = NULL;
+                }
+                __Pyx_GIVEREF(__pyx_t_5);
+                PyTuple_SET_ITEM(__pyx_t_9, 0+__pyx_t_8, __pyx_t_5);
+                __Pyx_GIVEREF(__pyx_t_6);
+                PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_8, __pyx_t_6);
+                __pyx_t_5 = 0;
+                __pyx_t_6 = 0;
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L30_error)
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              }
+              __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+              if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 62, __pyx_L30_error)
+              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+            }
+            /*finally:*/ {
+              /*normal exit:*/{
+                #ifdef WITH_THREAD
+                __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                #endif
+                goto __pyx_L31;
+              }
+              __pyx_L30_error: {
+                #ifdef WITH_THREAD
+                __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                #endif
+                goto __pyx_L4_error;
+              }
+              __pyx_L31:;
+            }
+        }
+
+        /* "flowstar/root_detection.pyx":61
+ *             with gil: print("M = [{}..{}]".format(M.inf(), M.sup()))
+ *         fI = f.call(M)
+ *         if verbosity >= 3:             # <<<<<<<<<<<<<<
+ *             with gil: print("fI = [{}..{}]".format(fI.inf(), fI.sup()))
+ *         fP = fprime.call(T)
+ */
+      }
+
+      /* "flowstar/root_detection.pyx":63
+ *         if verbosity >= 3:
+ *             with gil: print("fI = [{}..{}]".format(fI.inf(), fI.sup()))
  *         fP = fprime.call(T)             # <<<<<<<<<<<<<<
  *         T.inv_assign()
  *         T.add_assign(M)
  */
       __pyx_v_fP = __pyx_v_fprime.operator()(__pyx_v_T);
 
-      /* "flowstar/root_detection.pyx":60
- *         fI = f.call(M)
+      /* "flowstar/root_detection.pyx":64
+ *             with gil: print("fI = [{}..{}]".format(fI.inf(), fI.sup()))
  *         fP = fprime.call(T)
  *         T.inv_assign()             # <<<<<<<<<<<<<<
  *         T.add_assign(M)
@@ -2096,7 +2487,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       __pyx_v_T.inv_assign();
 
-      /* "flowstar/root_detection.pyx":61
+      /* "flowstar/root_detection.pyx":65
  *         fP = fprime.call(T)
  *         T.inv_assign()
  *         T.add_assign(M)             # <<<<<<<<<<<<<<
@@ -2105,7 +2496,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       (void)(__pyx_v_T.operator+=(__pyx_v_M));
 
-      /* "flowstar/root_detection.pyx":62
+      /* "flowstar/root_detection.pyx":66
  *         T.inv_assign()
  *         T.add_assign(M)
  *         Told=T             # <<<<<<<<<<<<<<
@@ -2114,7 +2505,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       __pyx_v_Told = __pyx_v_T;
 
-      /* "flowstar/root_detection.pyx":63
+      /* "flowstar/root_detection.pyx":67
  *         T.add_assign(M)
  *         Told=T
  *         failed = not extdiv(Tu, T, split, T, fI, fP)             # <<<<<<<<<<<<<<
@@ -2123,7 +2514,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       __pyx_v_failed = (!(__pyx_f_8flowstar_8interval_extdiv(__pyx_v_Tu, __pyx_v_T, __pyx_v_split, __pyx_v_T, __pyx_v_fI, __pyx_v_fP) != 0));
 
-      /* "flowstar/root_detection.pyx":64
+      /* "flowstar/root_detection.pyx":68
  *         Told=T
  *         failed = not extdiv(Tu, T, split, T, fI, fP)
  *         if failed:             # <<<<<<<<<<<<<<
@@ -2133,7 +2524,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       __pyx_t_10 = (__pyx_v_failed != 0);
       if (__pyx_t_10) {
 
-        /* "flowstar/root_detection.pyx":65
+        /* "flowstar/root_detection.pyx":69
  *         failed = not extdiv(Tu, T, split, T, fI, fP)
  *         if failed:
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -2143,7 +2534,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
         __pyx_t_10 = ((__pyx_v_verbosity >= 2) != 0);
         if (__pyx_t_10) {
 
-          /* "flowstar/root_detection.pyx":66
+          /* "flowstar/root_detection.pyx":70
  *         if failed:
  *             if verbosity >= 2:
  *                 with gil:             # <<<<<<<<<<<<<<
@@ -2156,35 +2547,35 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               #endif
               /*try:*/ {
 
-                /* "flowstar/root_detection.pyx":67
+                /* "flowstar/root_detection.pyx":71
  *             if verbosity >= 2:
  *                 with gil:
  *                     print("failed! on:")             # <<<<<<<<<<<<<<
  *                     print("M=[{}..{}]".format(M.inf(), M.sup()))
  *                     print("extdiv(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(
  */
-                if (__Pyx_PrintOne(0, __pyx_kp_s_failed_on) < 0) __PYX_ERR(0, 67, __pyx_L25_error)
+                if (__Pyx_PrintOne(0, __pyx_kp_s_failed_on) < 0) __PYX_ERR(0, 71, __pyx_L37_error)
 
-                /* "flowstar/root_detection.pyx":68
+                /* "flowstar/root_detection.pyx":72
  *                 with gil:
  *                     print("failed! on:")
  *                     print("M=[{}..{}]".format(M.inf(), M.sup()))             # <<<<<<<<<<<<<<
  *                     print("extdiv(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(
  *                         T.inf(), T.sup(),
  */
-                __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_M, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L25_error)
+                __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_M_2, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_3);
-                __pyx_t_4 = PyFloat_FromDouble(__pyx_v_M.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L25_error)
-                __Pyx_GOTREF(__pyx_t_4);
-                __pyx_t_6 = PyFloat_FromDouble(__pyx_v_M.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 68, __pyx_L25_error)
+                __pyx_t_9 = PyFloat_FromDouble(__pyx_v_M.inf()); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 72, __pyx_L37_error)
+                __Pyx_GOTREF(__pyx_t_9);
+                __pyx_t_6 = PyFloat_FromDouble(__pyx_v_M.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 72, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_6);
-                __pyx_t_9 = NULL;
+                __pyx_t_5 = NULL;
                 __pyx_t_8 = 0;
                 if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
-                  __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_3);
-                  if (likely(__pyx_t_9)) {
+                  __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
+                  if (likely(__pyx_t_5)) {
                     PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-                    __Pyx_INCREF(__pyx_t_9);
+                    __Pyx_INCREF(__pyx_t_5);
                     __Pyx_INCREF(function);
                     __Pyx_DECREF_SET(__pyx_t_3, function);
                     __pyx_t_8 = 1;
@@ -2192,122 +2583,122 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                 }
                 #if CYTHON_FAST_PYCALL
                 if (PyFunction_Check(__pyx_t_3)) {
-                  PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_4, __pyx_t_6};
-                  __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L25_error)
-                  __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+                  PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_9, __pyx_t_6};
+                  __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L37_error)
+                  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
                   __Pyx_GOTREF(__pyx_t_2);
-                  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
                   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                 } else
                 #endif
                 #if CYTHON_FAST_PYCCALL
                 if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
-                  PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_4, __pyx_t_6};
-                  __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L25_error)
-                  __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+                  PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_9, __pyx_t_6};
+                  __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L37_error)
+                  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
                   __Pyx_GOTREF(__pyx_t_2);
-                  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
                   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                 } else
                 #endif
                 {
-                  __pyx_t_5 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 68, __pyx_L25_error)
-                  __Pyx_GOTREF(__pyx_t_5);
-                  if (__pyx_t_9) {
-                    __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_9); __pyx_t_9 = NULL;
+                  __pyx_t_4 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L37_error)
+                  __Pyx_GOTREF(__pyx_t_4);
+                  if (__pyx_t_5) {
+                    __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5); __pyx_t_5 = NULL;
                   }
-                  __Pyx_GIVEREF(__pyx_t_4);
-                  PyTuple_SET_ITEM(__pyx_t_5, 0+__pyx_t_8, __pyx_t_4);
+                  __Pyx_GIVEREF(__pyx_t_9);
+                  PyTuple_SET_ITEM(__pyx_t_4, 0+__pyx_t_8, __pyx_t_9);
                   __Pyx_GIVEREF(__pyx_t_6);
-                  PyTuple_SET_ITEM(__pyx_t_5, 1+__pyx_t_8, __pyx_t_6);
-                  __pyx_t_4 = 0;
+                  PyTuple_SET_ITEM(__pyx_t_4, 1+__pyx_t_8, __pyx_t_6);
+                  __pyx_t_9 = 0;
                   __pyx_t_6 = 0;
-                  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L25_error)
+                  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L37_error)
                   __Pyx_GOTREF(__pyx_t_2);
-                  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+                  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                 }
                 __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-                if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 68, __pyx_L25_error)
+                if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 72, __pyx_L37_error)
                 __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-                /* "flowstar/root_detection.pyx":69
+                /* "flowstar/root_detection.pyx":73
  *                     print("failed! on:")
  *                     print("M=[{}..{}]".format(M.inf(), M.sup()))
  *                     print("extdiv(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(             # <<<<<<<<<<<<<<
  *                         T.inf(), T.sup(),
  *                         Tu.inf(), Tu.sup(),
  */
-                __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_extdiv_T_Tu_split_T_fI_fP, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 69, __pyx_L25_error)
+                __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_extdiv_T_Tu_split_T_fI_fP, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_3);
 
-                /* "flowstar/root_detection.pyx":70
+                /* "flowstar/root_detection.pyx":74
  *                     print("M=[{}..{}]".format(M.inf(), M.sup()))
  *                     print("extdiv(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(
  *                         T.inf(), T.sup(),             # <<<<<<<<<<<<<<
  *                         Tu.inf(), Tu.sup(),
  *                         split,
  */
-                __pyx_t_5 = PyFloat_FromDouble(__pyx_v_T.inf()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 70, __pyx_L25_error)
-                __Pyx_GOTREF(__pyx_t_5);
-                __pyx_t_6 = PyFloat_FromDouble(__pyx_v_T.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 70, __pyx_L25_error)
+                __pyx_t_4 = PyFloat_FromDouble(__pyx_v_T.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L37_error)
+                __Pyx_GOTREF(__pyx_t_4);
+                __pyx_t_6 = PyFloat_FromDouble(__pyx_v_T.sup()); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 74, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_6);
 
-                /* "flowstar/root_detection.pyx":71
+                /* "flowstar/root_detection.pyx":75
  *                     print("extdiv(T=[{}..{}], Tu=[{}..{}], split={}, T=[{}..{}], fI=[{}..{}], fP=[{}..{}])".format(
  *                         T.inf(), T.sup(),
  *                         Tu.inf(), Tu.sup(),             # <<<<<<<<<<<<<<
  *                         split,
  *                         Told.inf(), Told.sup(),
  */
-                __pyx_t_4 = PyFloat_FromDouble(__pyx_v_Tu.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L25_error)
-                __Pyx_GOTREF(__pyx_t_4);
-                __pyx_t_9 = PyFloat_FromDouble(__pyx_v_Tu.sup()); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 71, __pyx_L25_error)
+                __pyx_t_9 = PyFloat_FromDouble(__pyx_v_Tu.inf()); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 75, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_9);
+                __pyx_t_5 = PyFloat_FromDouble(__pyx_v_Tu.sup()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L37_error)
+                __Pyx_GOTREF(__pyx_t_5);
 
-                /* "flowstar/root_detection.pyx":72
+                /* "flowstar/root_detection.pyx":76
  *                         T.inf(), T.sup(),
  *                         Tu.inf(), Tu.sup(),
  *                         split,             # <<<<<<<<<<<<<<
  *                         Told.inf(), Told.sup(),
  *                         fI.inf(), fI.sup(),
  */
-                __pyx_t_7 = __Pyx_PyBool_FromLong(__pyx_v_split); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 72, __pyx_L25_error)
+                __pyx_t_7 = __Pyx_PyBool_FromLong(__pyx_v_split); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 76, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_7);
 
-                /* "flowstar/root_detection.pyx":73
+                /* "flowstar/root_detection.pyx":77
  *                         Tu.inf(), Tu.sup(),
  *                         split,
  *                         Told.inf(), Told.sup(),             # <<<<<<<<<<<<<<
  *                         fI.inf(), fI.sup(),
  *                         fP.inf(), fP.sup()
  */
-                __pyx_t_11 = PyFloat_FromDouble(__pyx_v_Told.inf()); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 73, __pyx_L25_error)
+                __pyx_t_11 = PyFloat_FromDouble(__pyx_v_Told.inf()); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 77, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_11);
-                __pyx_t_12 = PyFloat_FromDouble(__pyx_v_Told.sup()); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 73, __pyx_L25_error)
+                __pyx_t_12 = PyFloat_FromDouble(__pyx_v_Told.sup()); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 77, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_12);
 
-                /* "flowstar/root_detection.pyx":74
+                /* "flowstar/root_detection.pyx":78
  *                         split,
  *                         Told.inf(), Told.sup(),
  *                         fI.inf(), fI.sup(),             # <<<<<<<<<<<<<<
  *                         fP.inf(), fP.sup()
  *                     ))
  */
-                __pyx_t_13 = PyFloat_FromDouble(__pyx_v_fI.inf()); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 74, __pyx_L25_error)
+                __pyx_t_13 = PyFloat_FromDouble(__pyx_v_fI.inf()); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 78, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_13);
-                __pyx_t_14 = PyFloat_FromDouble(__pyx_v_fI.sup()); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 74, __pyx_L25_error)
+                __pyx_t_14 = PyFloat_FromDouble(__pyx_v_fI.sup()); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 78, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_14);
 
-                /* "flowstar/root_detection.pyx":75
+                /* "flowstar/root_detection.pyx":79
  *                         Told.inf(), Told.sup(),
  *                         fI.inf(), fI.sup(),
  *                         fP.inf(), fP.sup()             # <<<<<<<<<<<<<<
  *                     ))
  *             return #  No roots here!
  */
-                __pyx_t_15 = PyFloat_FromDouble(__pyx_v_fP.inf()); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 75, __pyx_L25_error)
+                __pyx_t_15 = PyFloat_FromDouble(__pyx_v_fP.inf()); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 79, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_15);
-                __pyx_t_16 = PyFloat_FromDouble(__pyx_v_fP.sup()); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 75, __pyx_L25_error)
+                __pyx_t_16 = PyFloat_FromDouble(__pyx_v_fP.sup()); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 79, __pyx_L37_error)
                 __Pyx_GOTREF(__pyx_t_16);
                 __pyx_t_17 = NULL;
                 __pyx_t_8 = 0;
@@ -2323,14 +2714,14 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                 }
                 #if CYTHON_FAST_PYCALL
                 if (PyFunction_Check(__pyx_t_3)) {
-                  PyObject *__pyx_temp[12] = {__pyx_t_17, __pyx_t_5, __pyx_t_6, __pyx_t_4, __pyx_t_9, __pyx_t_7, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16};
-                  __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 11+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 69, __pyx_L25_error)
+                  PyObject *__pyx_temp[12] = {__pyx_t_17, __pyx_t_4, __pyx_t_6, __pyx_t_9, __pyx_t_5, __pyx_t_7, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16};
+                  __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 11+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L37_error)
                   __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
                   __Pyx_GOTREF(__pyx_t_2);
-                  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-                  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+                  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
                   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
                   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
@@ -2342,14 +2733,14 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                 #endif
                 #if CYTHON_FAST_PYCCALL
                 if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
-                  PyObject *__pyx_temp[12] = {__pyx_t_17, __pyx_t_5, __pyx_t_6, __pyx_t_4, __pyx_t_9, __pyx_t_7, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16};
-                  __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 11+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 69, __pyx_L25_error)
+                  PyObject *__pyx_temp[12] = {__pyx_t_17, __pyx_t_4, __pyx_t_6, __pyx_t_9, __pyx_t_5, __pyx_t_7, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16};
+                  __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 11+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L37_error)
                   __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
                   __Pyx_GOTREF(__pyx_t_2);
-                  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-                  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+                  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
                   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
                   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
@@ -2360,19 +2751,19 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                 } else
                 #endif
                 {
-                  __pyx_t_18 = PyTuple_New(11+__pyx_t_8); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 69, __pyx_L25_error)
+                  __pyx_t_18 = PyTuple_New(11+__pyx_t_8); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 73, __pyx_L37_error)
                   __Pyx_GOTREF(__pyx_t_18);
                   if (__pyx_t_17) {
                     __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_18, 0, __pyx_t_17); __pyx_t_17 = NULL;
                   }
-                  __Pyx_GIVEREF(__pyx_t_5);
-                  PyTuple_SET_ITEM(__pyx_t_18, 0+__pyx_t_8, __pyx_t_5);
+                  __Pyx_GIVEREF(__pyx_t_4);
+                  PyTuple_SET_ITEM(__pyx_t_18, 0+__pyx_t_8, __pyx_t_4);
                   __Pyx_GIVEREF(__pyx_t_6);
                   PyTuple_SET_ITEM(__pyx_t_18, 1+__pyx_t_8, __pyx_t_6);
-                  __Pyx_GIVEREF(__pyx_t_4);
-                  PyTuple_SET_ITEM(__pyx_t_18, 2+__pyx_t_8, __pyx_t_4);
                   __Pyx_GIVEREF(__pyx_t_9);
-                  PyTuple_SET_ITEM(__pyx_t_18, 3+__pyx_t_8, __pyx_t_9);
+                  PyTuple_SET_ITEM(__pyx_t_18, 2+__pyx_t_8, __pyx_t_9);
+                  __Pyx_GIVEREF(__pyx_t_5);
+                  PyTuple_SET_ITEM(__pyx_t_18, 3+__pyx_t_8, __pyx_t_5);
                   __Pyx_GIVEREF(__pyx_t_7);
                   PyTuple_SET_ITEM(__pyx_t_18, 4+__pyx_t_8, __pyx_t_7);
                   __Pyx_GIVEREF(__pyx_t_11);
@@ -2387,10 +2778,10 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                   PyTuple_SET_ITEM(__pyx_t_18, 9+__pyx_t_8, __pyx_t_15);
                   __Pyx_GIVEREF(__pyx_t_16);
                   PyTuple_SET_ITEM(__pyx_t_18, 10+__pyx_t_8, __pyx_t_16);
-                  __pyx_t_5 = 0;
-                  __pyx_t_6 = 0;
                   __pyx_t_4 = 0;
+                  __pyx_t_6 = 0;
                   __pyx_t_9 = 0;
+                  __pyx_t_5 = 0;
                   __pyx_t_7 = 0;
                   __pyx_t_11 = 0;
                   __pyx_t_12 = 0;
@@ -2398,16 +2789,16 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                   __pyx_t_14 = 0;
                   __pyx_t_15 = 0;
                   __pyx_t_16 = 0;
-                  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_18, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 69, __pyx_L25_error)
+                  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_18, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L37_error)
                   __Pyx_GOTREF(__pyx_t_2);
                   __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
                 }
                 __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-                if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 69, __pyx_L25_error)
+                if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 73, __pyx_L37_error)
                 __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
               }
 
-              /* "flowstar/root_detection.pyx":66
+              /* "flowstar/root_detection.pyx":70
  *         if failed:
  *             if verbosity >= 2:
  *                 with gil:             # <<<<<<<<<<<<<<
@@ -2419,19 +2810,19 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
-                  goto __pyx_L26;
+                  goto __pyx_L38;
                 }
-                __pyx_L25_error: {
+                __pyx_L37_error: {
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
                   goto __pyx_L4_error;
                 }
-                __pyx_L26:;
+                __pyx_L38:;
               }
           }
 
-          /* "flowstar/root_detection.pyx":65
+          /* "flowstar/root_detection.pyx":69
  *         failed = not extdiv(Tu, T, split, T, fI, fP)
  *         if failed:
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -2440,7 +2831,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         }
 
-        /* "flowstar/root_detection.pyx":77
+        /* "flowstar/root_detection.pyx":81
  *                         fP.inf(), fP.sup()
  *                     ))
  *             return #  No roots here!             # <<<<<<<<<<<<<<
@@ -2449,7 +2840,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         goto __pyx_L3_return;
 
-        /* "flowstar/root_detection.pyx":64
+        /* "flowstar/root_detection.pyx":68
  *         Told=T
  *         failed = not extdiv(Tu, T, split, T, fI, fP)
  *         if failed:             # <<<<<<<<<<<<<<
@@ -2458,7 +2849,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       }
 
-      /* "flowstar/root_detection.pyx":78
+      /* "flowstar/root_detection.pyx":82
  *                     ))
  *             return #  No roots here!
  *         T.inv_assign()             # <<<<<<<<<<<<<<
@@ -2467,7 +2858,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       __pyx_v_T.inv_assign();
 
-      /* "flowstar/root_detection.pyx":79
+      /* "flowstar/root_detection.pyx":83
  *             return #  No roots here!
  *         T.inv_assign()
  *         T.add_assign(M)             # <<<<<<<<<<<<<<
@@ -2476,7 +2867,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       (void)(__pyx_v_T.operator+=(__pyx_v_M));
 
-      /* "flowstar/root_detection.pyx":80
+      /* "flowstar/root_detection.pyx":84
  *         T.inv_assign()
  *         T.add_assign(M)
  *         T.intersect_assign(Tbak)             # <<<<<<<<<<<<<<
@@ -2485,7 +2876,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       __pyx_v_T.intersect_assign(__pyx_v_Tbak);
 
-      /* "flowstar/root_detection.pyx":81
+      /* "flowstar/root_detection.pyx":85
  *         T.add_assign(M)
  *         T.intersect_assign(Tbak)
  *         if split:             # <<<<<<<<<<<<<<
@@ -2495,7 +2886,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       __pyx_t_10 = (__pyx_v_split != 0);
       if (__pyx_t_10) {
 
-        /* "flowstar/root_detection.pyx":82
+        /* "flowstar/root_detection.pyx":86
  *         T.intersect_assign(Tbak)
  *         if split:
  *             Tu.inv_assign()             # <<<<<<<<<<<<<<
@@ -2504,7 +2895,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         __pyx_v_Tu.inv_assign();
 
-        /* "flowstar/root_detection.pyx":83
+        /* "flowstar/root_detection.pyx":87
  *         if split:
  *             Tu.inv_assign()
  *             Tu.add_assign(M)             # <<<<<<<<<<<<<<
@@ -2513,7 +2904,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         (void)(__pyx_v_Tu.operator+=(__pyx_v_M));
 
-        /* "flowstar/root_detection.pyx":84
+        /* "flowstar/root_detection.pyx":88
  *             Tu.inv_assign()
  *             Tu.add_assign(M)
  *             Tu.intersect_assign(Tbak)             # <<<<<<<<<<<<<<
@@ -2522,7 +2913,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         __pyx_v_Tu.intersect_assign(__pyx_v_Tbak);
 
-        /* "flowstar/root_detection.pyx":85
+        /* "flowstar/root_detection.pyx":89
  *             Tu.add_assign(M)
  *             Tu.intersect_assign(Tbak)
  *             break             # <<<<<<<<<<<<<<
@@ -2531,7 +2922,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         goto __pyx_L11_break;
 
-        /* "flowstar/root_detection.pyx":81
+        /* "flowstar/root_detection.pyx":85
  *         T.add_assign(M)
  *         T.intersect_assign(Tbak)
  *         if split:             # <<<<<<<<<<<<<<
@@ -2540,7 +2931,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       }
 
-      /* "flowstar/root_detection.pyx":86
+      /* "flowstar/root_detection.pyx":90
  *             Tu.intersect_assign(Tbak)
  *             break
  *         contractive = (contractive             # <<<<<<<<<<<<<<
@@ -2550,10 +2941,10 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       if (!__pyx_v_contractive) {
       } else {
         __pyx_t_19 = __pyx_v_contractive;
-        goto __pyx_L28_bool_binop_done;
+        goto __pyx_L40_bool_binop_done;
       }
 
-      /* "flowstar/root_detection.pyx":87
+      /* "flowstar/root_detection.pyx":91
  *             break
  *         contractive = (contractive
  *                     or Tbak.inf() < T.inf()             # <<<<<<<<<<<<<<
@@ -2564,10 +2955,10 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       if (__pyx_t_10) {
       } else {
         __pyx_t_19 = __pyx_t_10;
-        goto __pyx_L28_bool_binop_done;
+        goto __pyx_L40_bool_binop_done;
       }
 
-      /* "flowstar/root_detection.pyx":88
+      /* "flowstar/root_detection.pyx":92
  *         contractive = (contractive
  *                     or Tbak.inf() < T.inf()
  *                     and T.sup() < Tbak.sup())             # <<<<<<<<<<<<<<
@@ -2576,10 +2967,10 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       __pyx_t_10 = (__pyx_v_T.sup() < __pyx_v_Tbak.sup());
       __pyx_t_19 = __pyx_t_10;
-      __pyx_L28_bool_binop_done:;
+      __pyx_L40_bool_binop_done:;
       __pyx_v_contractive = __pyx_t_19;
 
-      /* "flowstar/root_detection.pyx":89
+      /* "flowstar/root_detection.pyx":93
  *                     or Tbak.inf() < T.inf()
  *                     and T.sup() < Tbak.sup())
  *         bound_found = int_dist(Tbak, T) <= epsilon             # <<<<<<<<<<<<<<
@@ -2590,7 +2981,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
     }
     __pyx_L11_break:;
 
-    /* "flowstar/root_detection.pyx":91
+    /* "flowstar/root_detection.pyx":95
  *         bound_found = int_dist(Tbak, T) <= epsilon
  * 
  *     if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -2600,7 +2991,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
     __pyx_t_10 = ((__pyx_v_verbosity >= 2) != 0);
     if (__pyx_t_10) {
 
-      /* "flowstar/root_detection.pyx":92
+      /* "flowstar/root_detection.pyx":96
  * 
  *     if verbosity >= 2:
  *         with gil: print("Tfinal = [{}..{}]".format(T.inf(), T.sup()))             # <<<<<<<<<<<<<<
@@ -2612,11 +3003,11 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
           PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
           #endif
           /*try:*/ {
-            __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_Tfinal, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 92, __pyx_L33_error)
+            __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_Tfinal, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 96, __pyx_L45_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_18 = PyFloat_FromDouble(__pyx_v_T.inf()); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 92, __pyx_L33_error)
+            __pyx_t_18 = PyFloat_FromDouble(__pyx_v_T.inf()); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 96, __pyx_L45_error)
             __Pyx_GOTREF(__pyx_t_18);
-            __pyx_t_16 = PyFloat_FromDouble(__pyx_v_T.sup()); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 92, __pyx_L33_error)
+            __pyx_t_16 = PyFloat_FromDouble(__pyx_v_T.sup()); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 96, __pyx_L45_error)
             __Pyx_GOTREF(__pyx_t_16);
             __pyx_t_15 = NULL;
             __pyx_t_8 = 0;
@@ -2633,7 +3024,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
             #if CYTHON_FAST_PYCALL
             if (PyFunction_Check(__pyx_t_3)) {
               PyObject *__pyx_temp[3] = {__pyx_t_15, __pyx_t_18, __pyx_t_16};
-              __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 92, __pyx_L33_error)
+              __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 96, __pyx_L45_error)
               __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
               __Pyx_GOTREF(__pyx_t_2);
               __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
@@ -2643,7 +3034,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
             #if CYTHON_FAST_PYCCALL
             if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
               PyObject *__pyx_temp[3] = {__pyx_t_15, __pyx_t_18, __pyx_t_16};
-              __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 92, __pyx_L33_error)
+              __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 96, __pyx_L45_error)
               __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
               __Pyx_GOTREF(__pyx_t_2);
               __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
@@ -2651,7 +3042,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
             } else
             #endif
             {
-              __pyx_t_14 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 92, __pyx_L33_error)
+              __pyx_t_14 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 96, __pyx_L45_error)
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_15) {
                 __Pyx_GIVEREF(__pyx_t_15); PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_15); __pyx_t_15 = NULL;
@@ -2662,12 +3053,12 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               PyTuple_SET_ITEM(__pyx_t_14, 1+__pyx_t_8, __pyx_t_16);
               __pyx_t_18 = 0;
               __pyx_t_16 = 0;
-              __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_14, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 92, __pyx_L33_error)
+              __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_14, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 96, __pyx_L45_error)
               __Pyx_GOTREF(__pyx_t_2);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
             }
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-            if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 92, __pyx_L33_error)
+            if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 96, __pyx_L45_error)
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           }
           /*finally:*/ {
@@ -2675,19 +3066,19 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               #ifdef WITH_THREAD
               __Pyx_PyGILState_Release(__pyx_gilstate_save);
               #endif
-              goto __pyx_L34;
+              goto __pyx_L46;
             }
-            __pyx_L33_error: {
+            __pyx_L45_error: {
               #ifdef WITH_THREAD
               __Pyx_PyGILState_Release(__pyx_gilstate_save);
               #endif
               goto __pyx_L4_error;
             }
-            __pyx_L34:;
+            __pyx_L46:;
           }
       }
 
-      /* "flowstar/root_detection.pyx":91
+      /* "flowstar/root_detection.pyx":95
  *         bound_found = int_dist(Tbak, T) <= epsilon
  * 
  *     if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -2696,7 +3087,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
     }
 
-    /* "flowstar/root_detection.pyx":94
+    /* "flowstar/root_detection.pyx":98
  *         with gil: print("Tfinal = [{}..{}]".format(T.inf(), T.sup()))
  * 
  *     if split:             # <<<<<<<<<<<<<<
@@ -2706,7 +3097,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
     __pyx_t_10 = (__pyx_v_split != 0);
     if (__pyx_t_10) {
 
-      /* "flowstar/root_detection.pyx":95
+      /* "flowstar/root_detection.pyx":99
  * 
  *     if split:
  *         if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -2716,7 +3107,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       __pyx_t_10 = ((__pyx_v_verbosity >= 2) != 0);
       if (__pyx_t_10) {
 
-        /* "flowstar/root_detection.pyx":96
+        /* "flowstar/root_detection.pyx":100
  *     if split:
  *         if verbosity >= 2:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -2729,50 +3120,50 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
             #endif
             /*try:*/ {
 
-              /* "flowstar/root_detection.pyx":97
+              /* "flowstar/root_detection.pyx":101
  *         if verbosity >= 2:
  *             with gil:
  *                 print("splitting! [{}..{}] -> [{}..{}] + [{}..{}]".format(             # <<<<<<<<<<<<<<
  *                     T0.inf(), T0.sup(),
  *                     T.inf(), T.sup(),
  */
-              __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_splitting, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L38_error)
+              __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_splitting, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 101, __pyx_L50_error)
               __Pyx_GOTREF(__pyx_t_3);
 
-              /* "flowstar/root_detection.pyx":98
+              /* "flowstar/root_detection.pyx":102
  *             with gil:
  *                 print("splitting! [{}..{}] -> [{}..{}] + [{}..{}]".format(
  *                     T0.inf(), T0.sup(),             # <<<<<<<<<<<<<<
  *                     T.inf(), T.sup(),
  *                     Tu.inf(), Tu.sup(),
  */
-              __pyx_t_14 = PyFloat_FromDouble(__pyx_v_T0.inf()); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 98, __pyx_L38_error)
+              __pyx_t_14 = PyFloat_FromDouble(__pyx_v_T0.inf()); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 102, __pyx_L50_error)
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_16 = PyFloat_FromDouble(__pyx_v_T0.sup()); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 98, __pyx_L38_error)
+              __pyx_t_16 = PyFloat_FromDouble(__pyx_v_T0.sup()); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 102, __pyx_L50_error)
               __Pyx_GOTREF(__pyx_t_16);
 
-              /* "flowstar/root_detection.pyx":99
+              /* "flowstar/root_detection.pyx":103
  *                 print("splitting! [{}..{}] -> [{}..{}] + [{}..{}]".format(
  *                     T0.inf(), T0.sup(),
  *                     T.inf(), T.sup(),             # <<<<<<<<<<<<<<
  *                     Tu.inf(), Tu.sup(),
  *                 ))
  */
-              __pyx_t_18 = PyFloat_FromDouble(__pyx_v_T.inf()); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 99, __pyx_L38_error)
+              __pyx_t_18 = PyFloat_FromDouble(__pyx_v_T.inf()); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 103, __pyx_L50_error)
               __Pyx_GOTREF(__pyx_t_18);
-              __pyx_t_15 = PyFloat_FromDouble(__pyx_v_T.sup()); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 99, __pyx_L38_error)
+              __pyx_t_15 = PyFloat_FromDouble(__pyx_v_T.sup()); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 103, __pyx_L50_error)
               __Pyx_GOTREF(__pyx_t_15);
 
-              /* "flowstar/root_detection.pyx":100
+              /* "flowstar/root_detection.pyx":104
  *                     T0.inf(), T0.sup(),
  *                     T.inf(), T.sup(),
  *                     Tu.inf(), Tu.sup(),             # <<<<<<<<<<<<<<
  *                 ))
  *         detect_roots(roots, f, fprime, T, epsilon, verbosity)
  */
-              __pyx_t_13 = PyFloat_FromDouble(__pyx_v_Tu.inf()); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 100, __pyx_L38_error)
+              __pyx_t_13 = PyFloat_FromDouble(__pyx_v_Tu.inf()); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 104, __pyx_L50_error)
               __Pyx_GOTREF(__pyx_t_13);
-              __pyx_t_12 = PyFloat_FromDouble(__pyx_v_Tu.sup()); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 100, __pyx_L38_error)
+              __pyx_t_12 = PyFloat_FromDouble(__pyx_v_Tu.sup()); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 104, __pyx_L50_error)
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_11 = NULL;
               __pyx_t_8 = 0;
@@ -2789,7 +3180,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               #if CYTHON_FAST_PYCALL
               if (PyFunction_Check(__pyx_t_3)) {
                 PyObject *__pyx_temp[7] = {__pyx_t_11, __pyx_t_14, __pyx_t_16, __pyx_t_18, __pyx_t_15, __pyx_t_13, __pyx_t_12};
-                __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 6+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L38_error)
+                __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 6+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L50_error)
                 __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
                 __Pyx_GOTREF(__pyx_t_2);
                 __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
@@ -2803,7 +3194,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               #if CYTHON_FAST_PYCCALL
               if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
                 PyObject *__pyx_temp[7] = {__pyx_t_11, __pyx_t_14, __pyx_t_16, __pyx_t_18, __pyx_t_15, __pyx_t_13, __pyx_t_12};
-                __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 6+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L38_error)
+                __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 6+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L50_error)
                 __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
                 __Pyx_GOTREF(__pyx_t_2);
                 __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
@@ -2815,7 +3206,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               } else
               #endif
               {
-                __pyx_t_7 = PyTuple_New(6+__pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 97, __pyx_L38_error)
+                __pyx_t_7 = PyTuple_New(6+__pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 101, __pyx_L50_error)
                 __Pyx_GOTREF(__pyx_t_7);
                 if (__pyx_t_11) {
                   __Pyx_GIVEREF(__pyx_t_11); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_11); __pyx_t_11 = NULL;
@@ -2838,16 +3229,16 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                 __pyx_t_15 = 0;
                 __pyx_t_13 = 0;
                 __pyx_t_12 = 0;
-                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L38_error)
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L50_error)
                 __Pyx_GOTREF(__pyx_t_2);
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
               }
               __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-              if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 97, __pyx_L38_error)
+              if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 101, __pyx_L50_error)
               __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             }
 
-            /* "flowstar/root_detection.pyx":96
+            /* "flowstar/root_detection.pyx":100
  *     if split:
  *         if verbosity >= 2:
  *             with gil:             # <<<<<<<<<<<<<<
@@ -2859,19 +3250,19 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
                 #ifdef WITH_THREAD
                 __Pyx_PyGILState_Release(__pyx_gilstate_save);
                 #endif
-                goto __pyx_L39;
+                goto __pyx_L51;
               }
-              __pyx_L38_error: {
+              __pyx_L50_error: {
                 #ifdef WITH_THREAD
                 __Pyx_PyGILState_Release(__pyx_gilstate_save);
                 #endif
                 goto __pyx_L4_error;
               }
-              __pyx_L39:;
+              __pyx_L51:;
             }
         }
 
-        /* "flowstar/root_detection.pyx":95
+        /* "flowstar/root_detection.pyx":99
  * 
  *     if split:
  *         if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -2880,7 +3271,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       }
 
-      /* "flowstar/root_detection.pyx":102
+      /* "flowstar/root_detection.pyx":106
  *                     Tu.inf(), Tu.sup(),
  *                 ))
  *         detect_roots(roots, f, fprime, T, epsilon, verbosity)             # <<<<<<<<<<<<<<
@@ -2892,7 +3283,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       __pyx_t_20.verbosity = __pyx_v_verbosity;
       __pyx_f_8flowstar_14root_detection_detect_roots(__pyx_v_roots, __pyx_v_f, __pyx_v_fprime, __pyx_v_T, &__pyx_t_20); 
 
-      /* "flowstar/root_detection.pyx":103
+      /* "flowstar/root_detection.pyx":107
  *                 ))
  *         detect_roots(roots, f, fprime, T, epsilon, verbosity)
  *         detect_roots(roots, f, fprime, Tu, epsilon, verbosity)             # <<<<<<<<<<<<<<
@@ -2904,7 +3295,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       __pyx_t_20.verbosity = __pyx_v_verbosity;
       __pyx_f_8flowstar_14root_detection_detect_roots(__pyx_v_roots, __pyx_v_f, __pyx_v_fprime, __pyx_v_Tu, &__pyx_t_20); 
 
-      /* "flowstar/root_detection.pyx":104
+      /* "flowstar/root_detection.pyx":108
  *         detect_roots(roots, f, fprime, T, epsilon, verbosity)
  *         detect_roots(roots, f, fprime, Tu, epsilon, verbosity)
  *         return             # <<<<<<<<<<<<<<
@@ -2913,7 +3304,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
       goto __pyx_L3_return;
 
-      /* "flowstar/root_detection.pyx":94
+      /* "flowstar/root_detection.pyx":98
  *         with gil: print("Tfinal = [{}..{}]".format(T.inf(), T.sup()))
  * 
  *     if split:             # <<<<<<<<<<<<<<
@@ -2922,7 +3313,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
     }
 
-    /* "flowstar/root_detection.pyx":106
+    /* "flowstar/root_detection.pyx":110
  *         return
  * 
  *     if bound_found:             # <<<<<<<<<<<<<<
@@ -2932,7 +3323,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
     __pyx_t_10 = (__pyx_v_bound_found != 0);
     if (__pyx_t_10) {
 
-      /* "flowstar/root_detection.pyx":110
+      /* "flowstar/root_detection.pyx":114
  *         # -- we check for strict contractiveness
  *         # Tbak.inf() <= T.inf() and and T.sup() <= Tbak.sup()
  *         if T0.inf() == T.inf() or T0.sup() == T.sup():             # <<<<<<<<<<<<<<
@@ -2943,14 +3334,14 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       if (!__pyx_t_1) {
       } else {
         __pyx_t_10 = __pyx_t_1;
-        goto __pyx_L42_bool_binop_done;
+        goto __pyx_L54_bool_binop_done;
       }
       __pyx_t_1 = ((__pyx_v_T0.sup() == __pyx_v_T.sup()) != 0);
       __pyx_t_10 = __pyx_t_1;
-      __pyx_L42_bool_binop_done:;
+      __pyx_L54_bool_binop_done:;
       if (__pyx_t_10) {
 
-        /* "flowstar/root_detection.pyx":112
+        /* "flowstar/root_detection.pyx":116
  *         if T0.inf() == T.inf() or T0.sup() == T.sup():
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:             # <<<<<<<<<<<<<<
@@ -2960,7 +3351,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
         __pyx_t_10 = ((__pyx_v_verbosity >= 1) != 0);
         if (__pyx_t_10) {
 
-          /* "flowstar/root_detection.pyx":113
+          /* "flowstar/root_detection.pyx":117
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:
  *                 with gil: print("root on boundary!")             # <<<<<<<<<<<<<<
@@ -2972,26 +3363,26 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
               #endif
               /*try:*/ {
-                if (__Pyx_PrintOne(0, __pyx_kp_s_root_on_boundary) < 0) __PYX_ERR(0, 113, __pyx_L46_error)
+                if (__Pyx_PrintOne(0, __pyx_kp_s_root_on_boundary) < 0) __PYX_ERR(0, 117, __pyx_L58_error)
               }
               /*finally:*/ {
                 /*normal exit:*/{
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
-                  goto __pyx_L47;
+                  goto __pyx_L59;
                 }
-                __pyx_L46_error: {
+                __pyx_L58_error: {
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
                   goto __pyx_L4_error;
                 }
-                __pyx_L47:;
+                __pyx_L59:;
               }
           }
 
-          /* "flowstar/root_detection.pyx":112
+          /* "flowstar/root_detection.pyx":116
  *         if T0.inf() == T.inf() or T0.sup() == T.sup():
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:             # <<<<<<<<<<<<<<
@@ -3000,17 +3391,17 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         }
 
-        /* "flowstar/root_detection.pyx":110
+        /* "flowstar/root_detection.pyx":114
  *         # -- we check for strict contractiveness
  *         # Tbak.inf() <= T.inf() and and T.sup() <= Tbak.sup()
  *         if T0.inf() == T.inf() or T0.sup() == T.sup():             # <<<<<<<<<<<<<<
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:
  */
-        goto __pyx_L41;
+        goto __pyx_L53;
       }
 
-      /* "flowstar/root_detection.pyx":114
+      /* "flowstar/root_detection.pyx":118
  *             if verbosity >= 1:
  *                 with gil: print("root on boundary!")
  *         elif contractive:             # <<<<<<<<<<<<<<
@@ -3020,7 +3411,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
       __pyx_t_10 = (__pyx_v_contractive != 0);
       if (__pyx_t_10) {
 
-        /* "flowstar/root_detection.pyx":116
+        /* "flowstar/root_detection.pyx":120
  *         elif contractive:
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:             # <<<<<<<<<<<<<<
@@ -3030,7 +3421,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
         __pyx_t_10 = ((__pyx_v_verbosity >= 1) != 0);
         if (__pyx_t_10) {
 
-          /* "flowstar/root_detection.pyx":117
+          /* "flowstar/root_detection.pyx":121
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:
  *                 with gil: print("verified contractive!")             # <<<<<<<<<<<<<<
@@ -3042,26 +3433,26 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
               #endif
               /*try:*/ {
-                if (__Pyx_PrintOne(0, __pyx_kp_s_verified_contractive) < 0) __PYX_ERR(0, 117, __pyx_L50_error)
+                if (__Pyx_PrintOne(0, __pyx_kp_s_verified_contractive) < 0) __PYX_ERR(0, 121, __pyx_L62_error)
               }
               /*finally:*/ {
                 /*normal exit:*/{
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
-                  goto __pyx_L51;
+                  goto __pyx_L63;
                 }
-                __pyx_L50_error: {
+                __pyx_L62_error: {
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
                   goto __pyx_L4_error;
                 }
-                __pyx_L51:;
+                __pyx_L63:;
               }
           }
 
-          /* "flowstar/root_detection.pyx":116
+          /* "flowstar/root_detection.pyx":120
  *         elif contractive:
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:             # <<<<<<<<<<<<<<
@@ -3070,17 +3461,17 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         }
 
-        /* "flowstar/root_detection.pyx":114
+        /* "flowstar/root_detection.pyx":118
  *             if verbosity >= 1:
  *                 with gil: print("root on boundary!")
  *         elif contractive:             # <<<<<<<<<<<<<<
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:
  */
-        goto __pyx_L41;
+        goto __pyx_L53;
       }
 
-      /* "flowstar/root_detection.pyx":120
+      /* "flowstar/root_detection.pyx":124
  *         else:
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:             # <<<<<<<<<<<<<<
@@ -3091,7 +3482,7 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
         __pyx_t_10 = ((__pyx_v_verbosity >= 1) != 0);
         if (__pyx_t_10) {
 
-          /* "flowstar/root_detection.pyx":121
+          /* "flowstar/root_detection.pyx":125
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:
  *                 with gil: print("failed to verify contractive!")             # <<<<<<<<<<<<<<
@@ -3102,26 +3493,26 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
               PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
               #endif
               /*try:*/ {
-                if (__Pyx_PrintOne(0, __pyx_kp_s_failed_to_verify_contractive) < 0) __PYX_ERR(0, 121, __pyx_L54_error)
+                if (__Pyx_PrintOne(0, __pyx_kp_s_failed_to_verify_contractive) < 0) __PYX_ERR(0, 125, __pyx_L66_error)
               }
               /*finally:*/ {
                 /*normal exit:*/{
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
-                  goto __pyx_L55;
+                  goto __pyx_L67;
                 }
-                __pyx_L54_error: {
+                __pyx_L66_error: {
                   #ifdef WITH_THREAD
                   __Pyx_PyGILState_Release(__pyx_gilstate_save);
                   #endif
                   goto __pyx_L4_error;
                 }
-                __pyx_L55:;
+                __pyx_L67:;
               }
           }
 
-          /* "flowstar/root_detection.pyx":120
+          /* "flowstar/root_detection.pyx":124
  *         else:
  *             # print("root found! T = [{}..{}]".format(T.inf(), T.sup()))
  *             if verbosity >= 1:             # <<<<<<<<<<<<<<
@@ -3130,9 +3521,9 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
  */
         }
       }
-      __pyx_L41:;
+      __pyx_L53:;
 
-      /* "flowstar/root_detection.pyx":122
+      /* "flowstar/root_detection.pyx":126
  *             if verbosity >= 1:
  *                 with gil: print("failed to verify contractive!")
  *         roots.push_back(T)             # <<<<<<<<<<<<<<
@@ -3147,10 +3538,10 @@ static void __pyx_f_8flowstar_14root_detection_detect_roots(std::vector<flowstar
         #ifdef WITH_THREAD
         __Pyx_PyGILState_Release(__pyx_gilstate_save);
         #endif
-        __PYX_ERR(0, 122, __pyx_L4_error)
+        __PYX_ERR(0, 126, __pyx_L4_error)
       }
 
-      /* "flowstar/root_detection.pyx":106
+      /* "flowstar/root_detection.pyx":110
  *         return
  * 
  *     if bound_found:             # <<<<<<<<<<<<<<
@@ -3260,8 +3651,13 @@ static struct PyModuleDef __pyx_moduledef = {
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_F, __pyx_k_F, sizeof(__pyx_k_F), 0, 0, 1, 1},
+  {&__pyx_kp_s_F_0, __pyx_k_F_0, sizeof(__pyx_k_F_0), 0, 0, 1, 0},
+  {&__pyx_kp_s_F_0_2, __pyx_k_F_0_2, sizeof(__pyx_k_F_0_2), 0, 0, 1, 0},
   {&__pyx_n_s_Fprime, __pyx_k_Fprime, sizeof(__pyx_k_Fprime), 0, 0, 1, 1},
   {&__pyx_kp_s_M, __pyx_k_M, sizeof(__pyx_k_M), 0, 0, 1, 0},
+  {&__pyx_kp_s_M_2, __pyx_k_M_2, sizeof(__pyx_k_M_2), 0, 0, 1, 0},
+  {&__pyx_n_s_R, __pyx_k_R, sizeof(__pyx_k_R), 0, 0, 1, 1},
+  {&__pyx_n_s_Rprime, __pyx_k_Rprime, sizeof(__pyx_k_Rprime), 0, 0, 1, 1},
   {&__pyx_kp_s_T, __pyx_k_T, sizeof(__pyx_k_T), 0, 0, 1, 0},
   {&__pyx_n_s_T_2, __pyx_k_T_2, sizeof(__pyx_k_T_2), 0, 0, 1, 1},
   {&__pyx_kp_s_Tfinal, __pyx_k_Tfinal, sizeof(__pyx_k_Tfinal), 0, 0, 1, 0},
@@ -3271,6 +3667,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_epsilon, __pyx_k_epsilon, sizeof(__pyx_k_epsilon), 0, 0, 1, 1},
   {&__pyx_kp_s_extdiv_T_Tu_split_T_fI_fP, __pyx_k_extdiv_T_Tu_split_T_fI_fP, sizeof(__pyx_k_extdiv_T_Tu_split_T_fI_fP), 0, 0, 1, 0},
   {&__pyx_n_s_f, __pyx_k_f, sizeof(__pyx_k_f), 0, 0, 1, 1},
+  {&__pyx_kp_s_fI, __pyx_k_fI, sizeof(__pyx_k_fI), 0, 0, 1, 0},
   {&__pyx_kp_s_failed_on, __pyx_k_failed_on, sizeof(__pyx_k_failed_on), 0, 0, 1, 0},
   {&__pyx_kp_s_failed_to_verify_contractive, __pyx_k_failed_to_verify_contractive, sizeof(__pyx_k_failed_to_verify_contractive), 0, 0, 1, 0},
   {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
@@ -3307,10 +3704,10 @@ static int __Pyx_InitCachedConstants(void) {
  *     cdef Interval T = make_interval(t)
  *     cdef interval_time_fn F = poly_time_fn(f.c_poly)
  */
-  __pyx_tuple_ = PyTuple_Pack(10, __pyx_n_s_f, __pyx_n_s_fprime, __pyx_n_s_t, __pyx_n_s_epsilon, __pyx_n_s_verbosity, __pyx_n_s_T_2, __pyx_n_s_F, __pyx_n_s_Fprime, __pyx_n_s_roots, __pyx_n_s_r); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(12, __pyx_n_s_f, __pyx_n_s_fprime, __pyx_n_s_t, __pyx_n_s_epsilon, __pyx_n_s_verbosity, __pyx_n_s_T_2, __pyx_n_s_F, __pyx_n_s_Fprime, __pyx_n_s_roots, __pyx_n_s_R, __pyx_n_s_Rprime, __pyx_n_s_r); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(5, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_root_detection_pyx, __pyx_n_s_py_detect_roots, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(5, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_root_detection_pyx, __pyx_n_s_py_detect_roots, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4299,37 +4696,6 @@ bad:
         return (target_type) value;\
     }
 
-/* CIntToPy */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value) {
-    const int neg_one = (int) -1, const_zero = (int) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(int) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(int) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(int) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-#endif
-        }
-    } else {
-        if (sizeof(int) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(int) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-#endif
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(int),
-                                     little, !is_unsigned);
-    }
-}
-
 /* Print */
 #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
 static PyObject *__Pyx_GetStdout(void) {
@@ -4435,6 +4801,37 @@ bad:
     return -1;
 }
 #endif
+
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value) {
+    const int neg_one = (int) -1, const_zero = (int) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(int) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(int) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(int) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(int) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(int) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(int),
+                                     little, !is_unsigned);
+    }
+}
 
 /* CIntFromPy */
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {

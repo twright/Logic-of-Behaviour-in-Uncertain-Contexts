@@ -65,6 +65,7 @@ cdef extern from * nogil:
 cdef class Poly:
     cdef Polynomial c_poly
     cdef dict vars
+    cdef readonly bint explicit_time
 
     @staticmethod
-    cdef Poly from_polynomial(Polynomial & P, vars)
+    cdef Poly from_polynomial(Polynomial & P, vars, explicit_time=?)
