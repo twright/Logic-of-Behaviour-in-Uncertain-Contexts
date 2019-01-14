@@ -666,3 +666,50 @@ class F(Logic):
 
 class U(Logic):
     priority = 5
+
+    def __init__(self, phi, I, psi):
+        self._I = RIF(I)
+        self._phi = phi
+        self._psi = psi
+
+    @property
+    def interval(self):
+        return self._I
+
+    @property
+    def phi(self):
+        return self._phi
+
+    @property
+    def psi(self):
+        return self._psi
+
+    @property
+    def duration(self):
+        return self.phi.duration + self.interval.upper() + self.psi.duration
+
+    def __repr__(self):
+        return 'U({}, {}, {})'.format(
+            repr(self.phi),
+            finterval(self.interval),
+            repr(self.psi)
+        )
+
+    def __str__(self):
+        return 'U({}, {}, {})'.format(
+            str(self.phi),
+            finterval(self.interval),
+            str(self.psi)
+        )
+
+    def signal(self, reach, odes, **kwargs):
+        return self.phi.signal(reach, odes, **kwargs).U(
+            self.interval, self.psi.signal(reach, odes, **kwargs))
+
+    def numerical_signal(self, f, events, duration):
+        return self.phi.numerical_signal(f, events, duration).U(
+            self.interval, self.psi.numerical_signal(f, events, duration))
+
+    @property
+    def atomic_propositions(self):
+        return self.phi.atomic_propositions + self.psi.atomic_propositions
