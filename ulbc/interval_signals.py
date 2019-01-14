@@ -253,10 +253,12 @@ def to_signal_piecewise(f, fprime, time, step):
     return sig
 
 
-def ctx(domain, C, phi, f, epsilon=0.1, verbosity=0):
+def ctx(odes, domain, C, D, phi, f, epsilon=0.1, verbosity=0):
+    # odes The odes defining the system
     # I is the time interval
     # C(x) places state x in context
-    # phi :: initial_set -> {True, False, None}
+    # D(y) places vector field x' = y in context
+    # phi :: odes, initial_set -> {True, False, None}
     # f(t) assumed to be the trace,
     # Note: states are now presumed to be n-dimensional
     d = domain.absolute_diameter()
@@ -265,9 +267,10 @@ def ctx(domain, C, phi, f, epsilon=0.1, verbosity=0):
 
     fI = [RIF(x) for x in f(domain)]
     h = C(fI)
+    Dodes = D(odes)
 
     try:
-        res = phi(h)
+        res = phi(Dodes, h)
     except FlowstarFailedException:
         failed = True
         res = None
@@ -278,7 +281,9 @@ def ctx(domain, C, phi, f, epsilon=0.1, verbosity=0):
         print('I  =', domain.str(style='brackets'))
         print('fI =', [x.str(style='brackets') for x in fI])
         print('C || f(I) =', [x.str(style='brackets') for x in C(fI)])
-        print('phi(C || f(I)) =', res)
+        print('     odes =', odes)
+        print('D || odes =', Dodes)
+        print('phi(D || odes, C || f(I)) =', res)
 
     if (failed or res is None) and d > epsilon:
         J, K = domain.bisection()
@@ -288,7 +293,7 @@ def ctx(domain, C, phi, f, epsilon=0.1, verbosity=0):
                 J.str(style='brackets'),
                 K.str(style='brackets'),
             ))
-        return Signal.union(ctx(J, C, phi, f, epsilon),
-                            ctx(K, C, phi, f, epsilon))
+        return Signal.union(ctx(odes, J, C, D, phi, f, epsilon),
+                            ctx(odes, K, C, D, phi, f, epsilon))
     else:
         return Signal(domain, [] if res is None else [(domain, res)])

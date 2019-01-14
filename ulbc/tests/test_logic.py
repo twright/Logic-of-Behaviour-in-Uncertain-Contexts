@@ -87,3 +87,10 @@ class TestU(object):
             [(RIF(2.9667576512155777, 3.7066212216718828), False),
              (RIF(4.3000000000000104, 5.0497432568189283), True)])
         assert res.approx_eq(expected, 0.1)
+
+
+class TestD(object):
+    def test_repr(self, ringxy):
+        R, (x, y) = ringxy
+        assert (repr({x: RIF(1,2), y: RIF(3, 4)} % G(RIF(1, 2), Atomic(x - 1)))
+                == 'D({x: [1 .. 2], y: [3 .. 4]}, G([1 .. 2], Atomic(x - 1)))')

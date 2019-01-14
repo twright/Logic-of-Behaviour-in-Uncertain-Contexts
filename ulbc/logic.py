@@ -9,6 +9,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import sympy
 import itertools
 import time
+from functools import partial
 
 from ulbc.interval_signals import (true_signal, false_signal,
                                    signal_given_roots, Signal, ctx)
@@ -108,6 +109,9 @@ class Logic(object):
 
     def __rrshift__(self, other):
         return C(other, self)
+
+    def __rmod__(self, other):
+        return D(other, self)
 
     def bstr(self, priority):
         if self.priority <= priority:
@@ -468,30 +472,12 @@ def finterval(I):
         return I.str(style='brackets')
 
 
-class C(Logic):
-    '''
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
-    >>> {x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)
-    C({x: [1 .. 2], y: [3 .. 4]}, Atomic(x^3 - 2))
-    >>> print({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
-    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)
-    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
-    ...       (Atomic(x**3 - 2) & Atomic(y**2 + 3)))
-    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 & y^2 + 3 > 0)
-    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
-    ...        & Atomic(y**2 + 3))
-    ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) & y^2 + 3 > 0
-    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
-    ...       (Atomic(x**3 - 2) | Atomic(y**2 + 3)))
-    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 | y^2 + 3 > 0)
-    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
-    ...       | Atomic(y**2 + 3))
-    ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) | y^2 + 3 > 0
-    >>> ({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)).duration
-    0
-    >>> ({x: RIF(1,2), y: RIF(3,4)} >> G(RIF(3,4), Atomic(x**3 - 2))).duration
-    0
-    '''
+def identity(x):
+    return x
+
+
+class Context(Logic):
+    __metaclass__ = ABCMeta
     priority = 40
 
     def __init__(self, ctx, phi):
@@ -519,18 +505,21 @@ class C(Logic):
     def ctx(self):
         return self._ctx
 
-    def __repr__(self):
-        return 'C({}, {})'.format(self.ctx_str(), repr(self.phi))
-
-    def __str__(self):
-        # Put extra brackets for readability even if not necessary
-        return '{} >> {}'.format(self.ctx_str(), self.phi.bstr(8))
+    def numerical_signal(self, f, events, duration):
+        raise NotImplementedError()
 
     @property
     def atomic_propositions(self):
         # We consider a context to be atomic since we cannot monitor
         # after it
         return [self]
+
+    def phi_fn(self, kwargs, odes, xs):
+        sig = self.phi.signal_for_system(odes, xs, 1e-3, **kwargs)
+        if kwargs.get('verbosity', 0) >= 3:
+            print('sig    =', sig)
+            print('sig(0) =', sig(0))
+        return sig(0)
 
     def context_jump(self, zs):
         '''
@@ -544,30 +533,99 @@ class C(Logic):
         '''
         return [z + self.ctx.get(k, 0.0) for k, z in zip(self.R.gens(), zs)]
 
-    def signal(self, reach, odes, **kwargs):
-        def phi(xs):
-            sig = self.phi.signal_for_system(odes, xs, 1e-3, **kwargs)
-            if kwargs.get('verbosity', 0) >= 3:
-                print('sig    =', sig)
-                print('sig(0) =', sig(0))
-            return sig(0)
-            # order=5, step=(0.001, 0.1),
-            # precondition=1,
-            # estimation=1e-3,
-            # integrationScheme=2,
-            # cutoff_threshold=1e-5,
 
+class C(Context):
+    '''
+    Spacial context operator.
+
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> {x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)
+    C({x: [1 .. 2], y: [3 .. 4]}, Atomic(x^3 - 2))
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
+    ...       (Atomic(x**3 - 2) & Atomic(y**2 + 3)))
+    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 & y^2 + 3 > 0)
+    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    ...        & Atomic(y**2 + 3))
+    ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) & y^2 + 3 > 0
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
+    ...       (Atomic(x**3 - 2) | Atomic(y**2 + 3)))
+    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 | y^2 + 3 > 0)
+    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    ...       | Atomic(y**2 + 3))
+    ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) | y^2 + 3 > 0
+    >>> ({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)).duration
+    0
+    >>> ({x: RIF(1,2), y: RIF(3,4)} >> G(RIF(3,4), Atomic(x**3 - 2))).duration
+    0
+    '''
+
+    def __repr__(self):
+        return 'C({}, {})'.format(self.ctx_str(), repr(self.phi))
+
+    def __str__(self):
+        # Put extra brackets for readability even if not necessary
+        return '{} >> {}'.format(self.ctx_str(), self.phi.bstr(8))
+
+    def signal(self, reach, odes, **kwargs):
         return ctx(
+            odes=odes,
             domain=RIF(0, reach.time),
             C=self.context_jump,
-            phi=phi,
+            D=identity,
+            phi=partial(self.phi_fn, kwargs),
             f=reach,
             epsilon=kwargs.get('epsilon_ctx', 0.5),
             verbosity=kwargs.get('verbosity', 0)
         )
 
-    def numerical_signal(self, f, events, duration):
-        raise NotImplementedError()
+
+class D(Context):
+    '''
+    Differential context spatial operator.
+
+    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> {x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)
+    C({x: [1 .. 2], y: [3 .. 4]}, Atomic(x^3 - 2))
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
+    ...       (Atomic(x**3 - 2) & Atomic(y**2 + 3)))
+    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 & y^2 + 3 > 0)
+    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    ...        & Atomic(y**2 + 3))
+    ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) & y^2 + 3 > 0
+    >>> print({x: RIF(1,2), y: RIF(3,4)} >>
+    ...       (Atomic(x**3 - 2) | Atomic(y**2 + 3)))
+    {x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0 | y^2 + 3 > 0)
+    >>> print(({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
+    ...       | Atomic(y**2 + 3))
+    ({x: [1 .. 2], y: [3 .. 4]} >> (x^3 - 2 > 0)) | y^2 + 3 > 0
+    >>> ({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)).duration
+    0
+    >>> ({x: RIF(1,2), y: RIF(3,4)} >> G(RIF(3,4), Atomic(x**3 - 2))).duration
+    0
+    '''
+
+    def __repr__(self):
+        return 'D({}, {})'.format(self.ctx_str(), repr(self.phi))
+
+    def __str__(self):
+        # Put extra brackets for readability even if not necessary
+        return '{} % {}'.format(self.ctx_str(), self.phi.bstr(8))
+
+    def signal(self, reach, odes, **kwargs):
+        return ctx(
+            odes=odes,
+            domain=RIF(0, reach.time),
+            C=identity,
+            D=self.context_jump,
+            phi=partial(self.phi_fn, kwargs),
+            f=reach,
+            epsilon=kwargs.get('epsilon_ctx', 0.5),
+            verbosity=kwargs.get('verbosity', 0),
+        )
 
 
 class G(Logic):
