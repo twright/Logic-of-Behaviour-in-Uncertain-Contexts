@@ -35,6 +35,7 @@ from cysignals.signals cimport sig_on, sig_off, sig_check
 class FlowstarFailedException(Exception):
     pass
 
+
 # Defined in this module rather than in poly due to Cython bug
 # https://github.com/cython/cython/issues/1427
 cdef (interval_time_fn, interval_time_fn) observable(
@@ -115,13 +116,13 @@ cdef class CReach:
         cdef TaylorModelVec odes_tmv = TaylorModelVec(odes_tms)
 
         # Create initial conditions
-        cdef vector[Interval] initials_vect
+        # cdef vector[Interval] initials_vect
         for initial in initials:
-            initials_vect.push_back(interval.make_interval(initial))
+            self.initials.push_back(interval.make_interval(initial))
 
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
-        initials_fpvect.push_back(Flowpipe(initials_vect, zero_int))
+        initials_fpvect.push_back(Flowpipe(self.initials, zero_int))
 
         # Create system object
         C.system = ContinuousSystem(odes_tmv, initials_fpvect)
@@ -186,20 +187,70 @@ cdef class CReach:
         if run:
             self.run()
 
-    def roots(CReach self, f, fprime, epsilon=0.00001, verbosity=0):
+    cdef optional[vector[Interval]]\
+            _convert_space_domain(CReach self, space_domain=None):
+        cdef:
+            vector[Interval] c_space_domain
+            vector[Interval].iterator iinitials = self.initials.begin()
+            Interval I
+
+        print("TEST!")
+
+        if space_domain is None:
+            return optional[vector[Interval]]()
+        else:
+            for x in space_domain:
+                print(x.endpoints())
+                xl, xu = x.endpoints()
+                initial = deref(iinitials)
+                il, iu = initial.inf(), initial.sup()
+                if il < iu:
+                    I = Interval(-1 + 2*(xl - il)/(iu - il),
+                                 -1 + 2*(xu - il)/(iu - il))
+                else:
+                    I = Interval(-1, 1)
+                c_space_domain.push_back(I)
+
+                inc(iinitials)
+
+            return optional[vector[Interval]](c_space_domain)
+
+    def convert_space_domain(CReach self, space_domain):
+        cdef optional[vector[Interval]] c_space_domain\
+            = self._convert_space_domain(space_domain)
+        assert c_space_domain.has_value()
+        return [sage.RIF(I.inf(), I.sup())
+                for I in c_space_domain.value()]
+
+    def roots(CReach self, f, fprime, space_domain=None,
+              epsilon=0.00001, verbosity=0):
         cdef:
             Polynomial f_poly = Poly(f).c_poly
             Polynomial fprime_poly = Poly(fprime).c_poly
             vector[Interval] c_res
+            optional[vector[Interval]] c_space_domain\
+                = self._convert_space_domain(space_domain)
+            optional[reference_wrapper[vector[Interval]]] c_space_domain_ref
+            Interval I
+
+        if c_space_domain.has_value():
+            c_space_domain_ref = optional[reference_wrapper[vector[Interval]]](
+                reference_wrapper[vector[Interval]](c_space_domain.value()))
+
+
         self.prepare()
+
         with self.global_manager:
             c_res = self.c_roots(f_poly, fprime_poly,
+                                 space_domain=c_space_domain_ref,
                                  epsilon=epsilon, verbosity=verbosity)
         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
 
     cdef vector[Interval] c_roots(CReach self, Polynomial& f,
-                                  Polynomial& fprime,
-                                  double epsilon=0.00001, int verbosity=0):
+            Polynomial& fprime,
+            optional[reference_wrapper[vector[Interval]]] space_domain
+                =optional[reference_wrapper[vector[Interval]]](),
+            double epsilon=0.00001, int verbosity=0):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
             clist[TaylorModelVec].iterator tmv_end = self.c_reach.flowpipesCompo.end()
@@ -208,30 +259,45 @@ cdef class CReach:
             vector[Interval] roots
             vector[Interval] new_roots
             vector[Interval].iterator root_iter = roots.begin()
-            cdef Interval T0
+            Interval T0
             double t = 0.0
             interval.interval_time_fn f_fn, fprime_fn, f_fn_compo
             Interval f_domain
             vector[Interval] tmv_domain
+            vector[Interval]* loop_domain
 
-        cdef vector[Interval] domainCopy
         cdef vector[Interval] final_res
         cdef cbool initialized = False
+
+        cdef vector[Interval] composed_domain
+
+        if space_domain.has_value():
+            composed_domain = space_domain.value().get()
+            composed_domain.insert(composed_domain.begin(), deref(domain)[0])
 
         var_id_t = self.c_reach.tmVarTab['local_t']
 
         while (tmv != tmv_end and domain != domain_end):
+            loop_domain = (&composed_domain
+                           if space_domain.has_value()
+                           else &deref(domain))
+
             # Isolate roots for current timestep
             if verbosity >= 2:
                 print("reached detect roots t={} + {}".format(t,
                     interval.as_str(deref(domain)[0])))
             new_roots.clear()
-            T0 = deref(domain)[0]
+            T0 = loop_domain[0][0] = deref(domain)[0]
+            # print("===")
+            # print('x domain =', interval.as_str(loop_domain[0].at(1)))
+            # print('x special domain =', interval.as_str(deref(domain).at(1)))
+            # print('y domain =', interval.as_str(loop_domain[0].at(2)))
+            # print('y special domain =', interval.as_str(deref(domain).at(2)))
 
             # Compose interval functions to compute f
             f_fn = interval.compose_interval_fn(poly_fn(f),
                                                 deref(tmv),
-                                                deref(domain))
+                                                deref(loop_domain))
             f_domain = f_fn.call(T0)
 
             # Only do anything if there is a chance of a root
@@ -239,18 +305,18 @@ cdef class CReach:
                 if self.symbolic_composition:
                     # Define f and fprime by symbolically composing polynomials
                     (f_fn, fprime_fn) = observable(
-                        f, deref(tmv), deref(domain),
+                        f, deref(tmv), deref(loop_domain),
                         self.c_reach.globalMaxOrder,
                         self.c_reach.cutoff_threshold,
                     )
                 else:
                     # Define fprime as a composition, and use f as defined
                     # similarly above
-                    fprime_fn = interval.compose_interval_fn(poly_fn(fprime),
-                                                             deref(tmv),
-                                                             deref(domain))
-
-
+                    fprime_fn = interval.compose_interval_fn(
+                        poly_fn(fprime),
+                        deref(tmv),
+                        deref(loop_domain)
+                    )
 
                 root_detection.detect_roots(new_roots, f_fn, fprime_fn, T0,
                                             epsilon=epsilon,
@@ -284,6 +350,8 @@ cdef class CReach:
         return roots
 
     cdef vector[Interval] eval_interval(CReach self, Interval & I,
+            optional[reference_wrapper[vector[Interval]]]
+            space_domain=optional[reference_wrapper[vector[Interval]]](),
             optional[reference_wrapper[Polynomial]] poly=optional[reference_wrapper[Polynomial]]()):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.c_reach.flowpipesCompo.begin()
@@ -295,6 +363,7 @@ cdef class CReach:
             vector[int] varIDs # state variable ids
             double t = 0.0
             Interval T
+            vector[Interval]* loop_domain
 
         for i in self.c_reach.stateVarTab:
             varIDs.push_back(i.second)
@@ -304,15 +373,24 @@ cdef class CReach:
         cdef vector[Interval] final_res
         cdef cbool initialized = False
 
+        cdef vector[Interval] composed_domain
+
+        if space_domain.has_value():
+            composed_domain = space_domain.value().get()
+            composed_domain.insert(composed_domain.begin(), deref(domain)[0])
+
         var_id_t = self.c_reach.tmVarTab['local_t']
 
         while (tmv != tmv_end and domain != domain_end):
             T = deref(domain).at(var_id_t)
+            loop_domain = (&composed_domain
+                           if space_domain.has_value()
+                           else &deref(domain))
             T.add_assign(t)
             if interval.overlaps(I, T):
                 # Restrict the time domain of the flowpipe to that portion
                 # which intersects the time interval we are evaluating at
-                domainCopy = deref(domain)
+                domainCopy = deref(loop_domain)
                 domainCopy[var_id_t] = T.intersect(I) # No bounds checking!
                 domainCopy[var_id_t].add_assign(-t)
 
@@ -353,31 +431,50 @@ cdef class CReach:
 
         return final_res
 
-    def __call__(self, t):
+    def __call__(self, t, space_domain=None):
         from sage.all import RIF
 
         self.prepare()
 
         # Convert python interval to flow* interval
-        cdef vector[Interval] res
-        cdef Interval I = interval.make_interval(t)
+        cdef:
+            vector[Interval] res
+            Interval I = interval.make_interval(t)
+            optional[vector[Interval]] c_space_domain\
+                = self._convert_space_domain(space_domain)
+            optional[reference_wrapper[vector[Interval]]] c_space_domain_ref
+
+        # Convert optional to optional reference
+        if c_space_domain.has_value():
+            c_space_domain_ref = optional[reference_wrapper[vector[Interval]]](
+                reference_wrapper[vector[Interval]](c_space_domain.value()))
 
         with self.global_manager: #  Use captured globals
-            res = self.eval_interval(I)
+            res = self.eval_interval(I, space_domain=c_space_domain_ref)
 
         return [RIF(I.inf(), I.sup()) for I in res]
 
-    def eval_poly(self, Poly p, t):
+    def eval_poly(self, Poly p, t, space_domain=None):
         from sage.all import RIF
 
         self.prepare()
 
         # Convert python interval to flow* interval
-        cdef vector[Interval] res
-        cdef Interval I = interval.make_interval(t)
+        cdef:
+            vector[Interval] res
+            Interval I = interval.make_interval(t)
+            optional[vector[Interval]] c_space_domain\
+                = self._convert_space_domain(space_domain)
+            optional[reference_wrapper[vector[Interval]]] c_space_domain_ref
+
+        # Convert optional to optional reference
+        if c_space_domain.has_value():
+            c_space_domain_ref = optional[reference_wrapper[vector[Interval]]](
+                reference_wrapper[vector[Interval]](c_space_domain.value()))
 
         with self.global_manager: #  Use captured globals
             res = self.eval_interval(I,
+                space_domain=c_space_domain_ref,
                 poly=optional[reference_wrapper[Polynomial]](
                     reference_wrapper[Polynomial](p.c_poly)))
 

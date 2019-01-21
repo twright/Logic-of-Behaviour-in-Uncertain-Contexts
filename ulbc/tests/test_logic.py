@@ -92,5 +92,6 @@ class TestU(object):
 class TestD(object):
     def test_repr(self, ringxy):
         R, (x, y) = ringxy
-        assert (repr({x: RIF(1,2), y: RIF(3, 4)} % G(RIF(1, 2), Atomic(x - 1)))
+        assert (repr({x: RIF(1, 2), y: RIF(3, 4)} % G(RIF(1, 2),
+                                                      Atomic(x - 1)))
                 == 'D({x: [1 .. 2], y: [3 .. 4]}, G([1 .. 2], Atomic(x - 1)))')

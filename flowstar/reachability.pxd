@@ -35,7 +35,7 @@ cdef extern from "<optional>" namespace "std" nogil:
         optional(T & value)
         # optional(T && value)
         optional & operator =(const optional[T] & other)
-        # optional & operator =(T && other)
+        optional & operator =(T && other)
         optional & operator =(T & other)
         cbool has_value()
         T & value()
@@ -50,11 +50,16 @@ cdef class CReach:
     cdef bint prepared
     cdef public int result
     cdef public bint symbolic_composition
+    cdef vector[Interval] initials
 
     cdef vector[Interval] c_roots(CReach, Polynomial & f, Polynomial & fprime,
+            optional[reference_wrapper[vector[Interval]]] space_domain=?,
             double epsilon=?, int verbosity=?)
     cdef vector[Interval] eval_interval(CReach, Interval,
+            optional[reference_wrapper[vector[Interval]]] space_domain=*,
             optional[reference_wrapper[Polynomial]] poly=*)
+    cdef optional[vector[Interval]]\
+            _convert_space_domain(CReach self, space_domain=*)
 
 
 cdef class FlowstarGlobalManager:

@@ -225,10 +225,14 @@ class Atomic(Logic):
             return super(Atomic, self).signal_for_system(odes, initials,
                                                          duration, **kwargs)
 
-    def signal(self, R, odes, **kwargs):
-        roots = R.roots(self.p, self.dpdt(odes))
+    def signal(self, R, odes, space_domain=None, **kwargs):
+        roots = R.roots(self.p, self.dpdt(odes), space_domain=space_domain)
         ip = Poly(self.p)
-        return signal_given_roots((lambda t: ip(R(t))),
+
+        def f(t):
+            return ip(R(t, space_domain=space_domain))
+
+        return signal_given_roots(f,
                                   roots,
                                   RIF(0, R.time - 1e-3))
         # ip = index_fn(self.p)

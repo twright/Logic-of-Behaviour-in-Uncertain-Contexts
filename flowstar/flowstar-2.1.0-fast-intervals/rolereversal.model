@@ -22,7 +22,7 @@ continuous reachability
   print on
  }
 
- poly ode 2 {200}  # the symbolic remainder senario which can only be used with "poly ode 1" and "nonpoly ode"
+ poly ode 1 {200}  # the symbolic remainder senario which can only be used with "poly ode 1" and "nonpoly ode"
  {
   x' = b*x*(1 - x) - c*x*(k - x)*y
   y' = -e*y*(1+y) + f*x*(k - x)*y
