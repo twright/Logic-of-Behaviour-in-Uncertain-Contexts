@@ -126,17 +126,24 @@ class CleanFlowstarCommand(Command):
 
 
 class TestCommand(Command):
-    user_options = []
-
+    user_options = [
+        ('verbose-test', 'v', 'Verbose?')
+    ]
+    # boolean_options = ['verbose']
+    #
     def initialize_options(self):
-        pass
+        self.verbose_test = False
 
     def finalize_options(self):
-        pass
+        self.verbose_test = bool(self.verbose_test)
 
     def run(self):
+        self.run_command('build_ext')
         self.announce('Testing...')
-        subprocess.call(['pytest', '--doctest-cython'])
+        cmd = ['pytest', '--doctest-cython']
+        if self.verbose_test:
+            cmd.append('-v')
+        subprocess.call(cmd)
 
 
 class BuildFlowstarCommand(Command):

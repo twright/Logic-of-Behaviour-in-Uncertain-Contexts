@@ -194,8 +194,6 @@ cdef class CReach:
             vector[Interval].iterator iinitials = self.initials.begin()
             Interval I
 
-        print("TEST!")
-
         if space_domain is None:
             return optional[vector[Interval]]()
         else:

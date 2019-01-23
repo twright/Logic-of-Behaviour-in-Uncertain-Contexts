@@ -168,9 +168,6 @@ class Signal(object):
             "[{}]".format(", ".join("({}, {})".format(
                 v.str(style='brackets'), b) for v, b in self.values)))
 
-    def __invert__(self):
-        return Signal(self.domain, [(x, not b) for x, b in self.values])
-
     def plot(self, **kwargs):
         def trues(x, _):
             return any(b and x in II for II, b in self.values)
@@ -187,9 +184,15 @@ class Signal(object):
         return Signal(self.domain.union(other.domain),
                       self.values + other.values)
 
+    def __invert__(self):
+        return Signal(self.domain, [(x, not b) for x, b in self.values])
+
     def __and__(self, other):
         def ounion(x, y):
             return x.union(y)
+
+        if not isinstance(other, Signal):
+            return NotImplemented
 
         xs = self.values
         ys = other.values

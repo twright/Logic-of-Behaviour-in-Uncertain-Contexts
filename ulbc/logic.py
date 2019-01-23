@@ -13,6 +13,9 @@ from functools import partial
 
 from ulbc.interval_signals import (true_signal, false_signal,
                                    signal_given_roots, Signal, ctx)
+from ulbc.context_signals import (ContextSignal, context_to_space_domain,
+                                  space_domain_to_context,
+                                  true_context_signal, false_context_signal)
 from flowstar.reachability import Reach, FlowstarFailedException
 from flowstar.poly import Poly
 
@@ -122,6 +125,43 @@ class Logic(object):
     @abstractmethod
     def signal(self, R, odes, **kwargs):
         pass
+
+    @abstractmethod
+    def context_signal(self, R, odes, initials, **kwargs):
+        pass
+
+    def context_signal_for_system(self, odes, initials, duration, **kwargs):
+        # TODO: Factor out similarities with signal_for_system
+        t0 = time.time()
+        if 'order' not in kwargs:
+            kwargs['order'] = 10
+        if 'step' not in kwargs:
+            kwargs['step'] = (0.001, 0.1)
+        reach = Reach(
+            odes,
+            initials,
+            # Run for a little extra time to account for rounding
+            # errors and temporal quantifiers
+            self.duration + duration + 1e-3,
+            **kwargs
+        )
+        # Check that flowstar ran for the whole timeframe
+        if not reach.ran or reach.result > 3:
+            raise FlowstarFailedException(
+                "Did not run successfully!\n"
+                "status = {}\nnum_flowpipes".format(reach.result,
+                                                    reach.num_flowpipes))
+        t1 = time.time()
+        print("Computed {} flowpipes in {} sec".format(
+            reach.num_flowpipes, t1 - t0))
+        reach.prepare()
+        t2 = time.time()
+        print("Prepared for plotting in {} sec".format(t2 - t1))
+        res = self.context_signal(reach, odes, initials, **kwargs)
+        # TODO: figure out when to project context signals onto the correct
+        # time domain
+        # .to_domain(RIF(0, duration))
+        return res
 
     @abstractmethod
     def numerical_signal(self, f, events, duration):
@@ -235,14 +275,17 @@ class Atomic(Logic):
         return signal_given_roots(f,
                                   roots,
                                   RIF(0, R.time - 1e-3))
-        # ip = index_fn(self.p)
-        # idp = index_fn(self.dpdt(odes))
-        # return to_signal_piecewise(
-        #     (lambda t: ip(R(t))),
-        #     (lambda t: idp(R(t))),
-        #     R.time,
-        #     R.step,
-        # )
+
+    def signal_fn(self, odes, r, ctx):
+        space_domain = context_to_space_domain(self.R, ctx)
+        return self.signal(r, odes, space_domain=space_domain)\
+                   .to_domain(RIF(0, RIF(0, r.time - 1e-3)))
+
+    def context_signal(self, reach, odes, initials, **kwargs):
+        domain = RIF(0, reach.time - 1e-3)
+
+        return ContextSignal(domain, space_domain_to_context(self.R, initials),
+                             reach, partial(self.signal_fn, odes))
 
     def __repr__(self):
         return 'Atomic({})'.format(repr(self.p))
@@ -327,6 +370,16 @@ class And(Logic):
                        for t in self.terms),
                       true_signal(RIF(0, reach.time)))
 
+    def context_signal(self, reach, odes, initials, **kwargs):
+        true_ctx_sig = true_context_signal(
+            RIF(0, reach.time),
+            space_domain_to_context(self.R, initials),
+            reach)
+        return reduce(operator.and_,
+                      (t.context_signal(reach, odes, initials, **kwargs)
+                       for t in self.terms),
+                      true_ctx_sig)
+
     def __repr__(self):
         return "And({})".format(repr(self.terms))
 
@@ -407,6 +460,16 @@ class Or(Logic):
                        for t in self.terms),
                       false_signal(RIF(0, reach.time)))
 
+    def context_signal(self, reach, odes, initials, **kwargs):
+        false_ctx_sig = false_context_signal(
+            RIF(0, reach.time),
+            space_domain_to_context(self.R, initials),
+            reach)
+        return reduce(operator.or_,
+                      (t.context_signal(reach, odes, initials, **kwargs)
+                       for t in self.terms),
+                      false_ctx_sig)
+
     @property
     def atomic_propositions(self):
         return sum((t.atomic_propositions for t in self.terms), [])
@@ -458,6 +521,11 @@ class Neg(Logic):
 
     def signal(self, reach, odes, **kwargs):
         return ~self.p.signal(reach, odes, **kwargs)
+
+    def context_signal(self, reach, odes, initials, **kwargs):
+        # Care is needed here since negation should change the semantics of a
+        # context tree from and to or and vice versa
+        return ~self.p.context_signal(reach, odes, initials, **kwargs)
 
     @property
     def atomic_propositions(self):
@@ -525,6 +593,14 @@ class Context(Logic):
             print('sig(0) =', sig(0))
         return sig(0)
 
+    def context_signal_phi_fn(self, kwargs, odes, xs, refine=0):
+        ctx_sig = self.phi.context_signal_for_system(odes, xs, 1e-3, **kwargs)
+        sig = ctx_sig.refined_signal(refine)
+        if kwargs.get('verbosity', 0) >= 3:
+            print('sig    =', sig)
+            print('sig(0) =', sig(0))
+        return sig(0)
+
     def context_jump(self, zs):
         '''
         >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
@@ -584,6 +660,25 @@ class C(Context):
             verbosity=kwargs.get('verbosity', 0)
         )
 
+    def context_signal(self, reach, odes, initials, refine=0, **kwargs):
+        def signal_fn(reach, context):
+            return ctx(
+                odes=odes,
+                domain=RIF(0, reach.time),
+                C=self.context_jump,
+                D=identity,
+                phi=partial(self.context_signal_phi_fn, kwargs, refine=refine),
+                f=partial(reach,
+                          space_domain=context_to_space_domain(self.R,
+                                                               context)),
+                epsilon=kwargs.get('epsilon_ctx', 0.5),
+                verbosity=kwargs.get('verbosity', 0)
+            )
+
+        return ContextSignal(RIF(0, reach.time),
+                             space_domain_to_context(self.R, initials),
+                             reach, signal_fn)
+
 
 class D(Context):
     '''
@@ -631,6 +726,28 @@ class D(Context):
             verbosity=kwargs.get('verbosity', 0),
         )
 
+    def context_signal(self, reach, odes, initials, refine=0, **kwargs):
+        # This does not actually subdivide the differential context,
+        # but only the initial context, and each component of the inital set
+        # for the system once the differential context is composed.
+        def signal_fn(reach, context):
+            return ctx(
+                odes=odes,
+                domain=RIF(0, reach.time),
+                C=identity,
+                D=self.context_jump,
+                phi=partial(self.context_signal_phi_fn, kwargs, refine=refine),
+                f=partial(reach,
+                          space_domain=context_to_space_domain(self.R,
+                                                               context)),
+                epsilon=kwargs.get('epsilon_ctx', 0.5),
+                verbosity=kwargs.get('verbosity', 0)
+            )
+
+        return ContextSignal(RIF(0, reach.time),
+                             space_domain_to_context(self.R, initials),
+                             reach, signal_fn)
+
 
 class G(Logic):
     '''
@@ -671,6 +788,10 @@ class G(Logic):
 
     def signal(self, reach, odes, **kwargs):
         return self.phi.signal(reach, odes, **kwargs).G(self.interval)
+
+    def context_signal(self, reach, odes, initials, **kwargs):
+        return self.phi.context_signal(reach, odes, initials,
+                                       **kwargs).G(self.interval)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).G(self.interval)
@@ -717,6 +838,10 @@ class F(Logic):
 
     def signal(self, reach, odes, **kwargs):
         return self.phi.signal(reach, odes, **kwargs).F(self.interval)
+
+    def context_signal(self, reach, odes, initials, **kwargs):
+        return self.phi.context_signal(reach, odes, initials,
+                                       **kwargs).F(self.interval)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).F(self.interval)
@@ -767,6 +892,11 @@ class U(Logic):
     def signal(self, reach, odes, **kwargs):
         return self.phi.signal(reach, odes, **kwargs).U(
             self.interval, self.psi.signal(reach, odes, **kwargs))
+
+    def context_signal(self, reach, odes, initials, **kwargs):
+        return self.phi.context_signal(reach, odes, initials, **kwargs).U(
+            self.interval,
+            self.psi.context_signal(reach, odes, initials, **kwargs))
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).U(

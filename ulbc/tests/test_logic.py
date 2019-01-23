@@ -1,8 +1,12 @@
+from __future__ import print_function, division
+
 import pytest
 import sage.all as sage
 from sage.all import RIF
+from builtins import *
 
 from ulbc import Atomic, Signal, G, F, U
+from ulbc.tests.test_context_signals import ctx_approx_eq
 
 
 @pytest.fixture(scope='module')
@@ -95,3 +99,59 @@ class TestD(object):
         assert (repr({x: RIF(1, 2), y: RIF(3, 4)} % G(RIF(1, 2),
                                                       Atomic(x - 1)))
                 == 'D({x: [1 .. 2], y: [3 .. 4]}, G([1 .. 2], Atomic(x - 1)))')
+
+
+class TestLogicContextSignal(object):
+    def test_context_signal_for_signal_child(self, ringxy, odes):
+        R, (x, y) = ringxy
+
+        initials = [RIF(1, 2), RIF(3, 4)]
+        expected = Signal(
+            RIF(0, 5),
+            [(RIF(0.00000000000000000, 0.35650843477242506), True),
+             (RIF(0.52040334304615831, 3.4965304346355520),  False),
+             (RIF(3.6647314216171409,  4.9990000000000006),  True)],
+        )
+        ctx = Atomic(x).context_signal_for_system(odes, initials, 5)
+        child_context_sig = ctx.children[3]
+        assert ctx_approx_eq(ctx.subcontexts[3].items(),
+                             {'x': RIF(1.5, 2), 'y': RIF(3.5, 4)}.items())
+        print(child_context_sig.signal)
+        assert child_context_sig.signal.approx_eq(expected, 0.1)
+
+    def test_context_and_signal(self, ringxy, odes):
+        R, (x, y) = ringxy
+
+        initials = [RIF(1, 2), RIF(3, 4)]
+        ctx = (Atomic(x) & Atomic(y)).context_signal_for_system(odes, initials,
+                                                                5)
+        sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials, 5)
+        assert ctx.signal.approx_eq(sig, 0.01)
+
+    def test_context_refined_and_signal(self, ringxy, odes):
+        R, (x, y) = ringxy
+
+        initials = [RIF(1, 2), RIF(3, 4)]
+        expected = Signal(
+            RIF(0, 5),
+            [(RIF(0.00000000000000000, 0.24391449587943354), True),
+             (RIF(0.32218960990226191, 5),                   False)],
+        )
+        ctx = (Atomic(x) & Atomic(y)).context_signal_for_system(odes, initials,
+                                                                5)
+        plain_sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials,
+                                                              5)
+        refined_sig = ctx.refined_signal(2)
+        print('plain_sig   =', plain_sig)
+        print('refined_sig =', refined_sig)
+        assert refined_sig.approx_eq(plain_sig, 0.3)
+        assert refined_sig.approx_eq(expected, 0.01)
+
+    def test_context_signal_and_signal(self, ringxy, odes):
+        R, (x, y) = ringxy
+
+        initials = [RIF(1, 2), RIF(3, 4)]
+        ctx = (Atomic(x) & Atomic(y)).context_signal_for_system(odes, initials,
+                                                                5)
+        sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials, 5)
+        assert ctx.signal.approx_eq(sig, 0.01)
