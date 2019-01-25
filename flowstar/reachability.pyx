@@ -258,7 +258,9 @@ cdef class CReach:
             vector[Interval] new_roots
             vector[Interval].iterator root_iter = roots.begin()
             Interval T0
-            double t = 0.0
+            # The current time should be an interval, to take into account
+            # numerical error
+            Interval T
             interval.interval_time_fn f_fn, fprime_fn, f_fn_compo
             Interval f_domain
             vector[Interval] tmv_domain
@@ -282,7 +284,8 @@ cdef class CReach:
 
             # Isolate roots for current timestep
             if verbosity >= 2:
-                print("reached detect roots t={} + {}".format(t,
+                print("reached detect roots t={} + {}".format(
+                    interval.as_str(T),
                     interval.as_str(deref(domain)[0])))
             new_roots.clear()
             T0 = loop_domain[0][0] = deref(domain)[0]
@@ -326,7 +329,7 @@ cdef class CReach:
             root_iter = new_roots.begin()
             while root_iter != new_roots.end():
                 # print("shifting root")
-                deref(root_iter).add_assign(t)
+                deref(root_iter).add_assign(T)
                 if (not roots.empty()
                     and interval.int_min_dist(
                         deref(root_iter), roots.back()) < 1e-9):
@@ -341,7 +344,8 @@ cdef class CReach:
                 inc(root_iter)
 
             # Increment time and loop iters
-            t += deref(domain).at(var_id_t).sup()
+            T += deref(domain).at(var_id_t).sup()
+            T += Interval(-1e-53, 0)
             inc(tmv)
             inc(domain)
 
@@ -476,7 +480,7 @@ cdef class CReach:
                 poly=optional[reference_wrapper[Polynomial]](
                     reference_wrapper[Polynomial](p.c_poly)))
 
-        return [RIF(I.inf(), I.sup()) for I in res]
+        return RIF(res[0].inf(), res[0].sup())
 
     def prepare(self):
         '''Prepare for plotting / evaluating.'''

@@ -75,7 +75,7 @@ cdef class SagePlotMixin:
 
         def f(t):
             if t not in ress:
-                ress[t] = (<CReach?>self).eval_poly(poly, (t - step, t + step))[0]
+                ress[t] = (<CReach?>self).eval_poly(poly, (t - step, t + step))
             return ress[t]
         def fl(t):
             return f(t).lower()
@@ -148,7 +148,7 @@ cdef class SagePlotMixin:
             # col = 'default'
             col = kwargs.get('color', None)
             if poly is not None:
-                pres = index_fn(poly)(res)
+                pres = self.eval_poly(Poly(poly), (t, t+step)) #index_fn(poly)(res)
                 if pres.lower() > 0:
                     col = 'green'
                 if pres.upper() < 0:

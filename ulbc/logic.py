@@ -270,7 +270,8 @@ class Atomic(Logic):
         ip = Poly(self.p)
 
         def f(t):
-            return ip(R(t, space_domain=space_domain))
+            return R.eval_poly(ip, t, space_domain=space_domain)
+            # return ip(R(t, space_domain=space_domain))
 
         return signal_given_roots(f,
                                   roots,
