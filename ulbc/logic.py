@@ -11,12 +11,13 @@ import itertools
 import time
 from functools import partial
 
-from ulbc.interval_signals import (true_signal, false_signal,
-                                   signal_given_roots, Signal, ctx)
+from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
+                                   signal_from_observer)
 from ulbc.context_signals import (ContextSignal, context_to_space_domain,
                                   space_domain_to_context,
                                   true_context_signal, false_context_signal)
-from flowstar.reachability import Reach, FlowstarFailedException
+from flowstar.reachability import (Reach, FlowstarFailedException,
+                                   PolyObserver, RestrictedObserver)
 from flowstar.poly import Poly
 
 
@@ -266,27 +267,36 @@ class Atomic(Logic):
                                                          duration, **kwargs)
 
     def signal(self, R, odes, space_domain=None, **kwargs):
-        roots = R.roots(self.p, self.dpdt(odes), space_domain=space_domain)
-        ip = Poly(self.p)
+        if isinstance(R, PolyObserver):
+            observer = R
+        else:
+            observer = PolyObserver(self.p, self.dpdt(odes), R,
+                                    kwargs.get('symbolic_composition', False))
 
-        def f(t):
-            return R.eval_poly(ip, t, space_domain=space_domain)
+        if space_domain is not None:
+            observer = RestrictedObserver(observer, space_domain)
+        # roots = R.roots(self.p, self.dpdt(odes), space_domain=space_domain)
+        # ip = Poly(self.p)
+
+        # def f(t):
+            # return R.eval_poly(ip, t, space_domain=space_domain)
             # return ip(R(t, space_domain=space_domain))
 
-        return signal_given_roots(f,
-                                  roots,
-                                  RIF(0, R.time - 1e-3))
+        return signal_from_observer(observer, RIF(0, R.time - 1e-3))
+        # return signal_given_roots(f,
+        #                           roots,
+        #                           RIF(0, R.time - 1e-3))
 
-    def signal_fn(self, odes, r, ctx):
+    def signal_fn(self, odes, r, ctx, **kwargs):
         space_domain = context_to_space_domain(self.R, ctx)
-        return self.signal(r, odes, space_domain=space_domain)\
+        return self.signal(r, odes, space_domain=space_domain, **kwargs)\
                    .to_domain(RIF(0, RIF(0, r.time - 1e-3)))
 
     def context_signal(self, reach, odes, initials, **kwargs):
         domain = RIF(0, reach.time - 1e-3)
 
         return ContextSignal(domain, space_domain_to_context(self.R, initials),
-                             reach, partial(self.signal_fn, odes))
+                             reach, partial(self.signal_fn, odes, **kwargs))
 
     def __repr__(self):
         return 'Atomic({})'.format(repr(self.p))

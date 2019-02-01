@@ -14,7 +14,8 @@ from flowstar.reachability import FlowstarFailedException
 # from interval_utils import *
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
-           'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots']
+           'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots',
+           'signal_from_observer', 'signal_given_bool_roots']
 
 
 def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
@@ -27,7 +28,24 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
                               domain)
 
 
+def signal_from_observer(observer, domain):  # , theta=0.01, abs_inf=0.0001):
+    return signal_given_bool_roots((lambda x: observer.check(x)),
+                                   observer.roots(),
+                                   domain)
+
+
 def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
+    def f_bool(x):
+        res = RIF(f(x))
+        if 0 in res:
+            return None
+        else:
+            return res.lower() > 0
+    return signal_given_bool_roots(f, roots, domain)
+
+
+def signal_given_bool_roots(f_bool, roots, domain):
+    # , theta=0.01, abs_inf=0.0001):
     values = []
     a = domain.lower()
     # while 0 in RIF(f(a)):
@@ -38,19 +56,20 @@ def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
     for root in roots:
         if a < root.lower():
             J = RIF(a, root.lower())
-            print("  J  = {}\nf(J) = {}".format(
-                RIF(J).str(style='brackets'),
-                RIF(f(J)).str(style='brackets')))
+            # print("  J  = {}\nf(J) = {}".format(
+            #     RIF(J).str(style='brackets'),
+            #     RIF(f(J)).str(style='brackets')))
             # if 0 not in RIF(f(I)):
-            values += [(J, RIF(f(J.center())).lower() > 0)]
+            values += [(J, f_bool(J.center()))]
         a = min(root.upper(), domain.upper())
     b = domain.upper()
     J = RIF(a, b)
-    if 0 not in RIF(f(RIF(b))):
-        print("  J  = {}\nf(J) = {}".format(
-            RIF(J).str(style='brackets'),
-            RIF(f(J)).str(style='brackets')))
-        values += [(J, RIF(f(J.center())).lower() > 0)]
+    res = f_bool(J.center())
+    if res is not None:
+        # print("  J  = {}\nf(J) = {}".format(
+        #     RIF(J).str(style='brackets'),
+        #     RIF(f(J)).str(style='brackets')))
+        values += [(J, res)]
     else:
         print("0 at {}".format(b))
     return Signal(domain, values)

@@ -164,6 +164,8 @@ class ContextSignal(object):
         self._reach = reach
         self._signal_fn = signal_fn
         self._root = ContextNode(self, context if root is None else root)
+        if self._signal_fn is not None:
+            self.signal  # Cause root signal to be evaluated
 
     def __repr__(self):
         return 'ContextSignal({}, {}, {}, {})'.format(finterval(self.domain),

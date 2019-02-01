@@ -156,7 +156,7 @@ cdef class PolyObserver:
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
-        assert self.reach.c_reach.tmVarTab['local_t'] == 0
+        assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
 
         while (    tmv            != tmv_end
                and domain         != domain_end
@@ -297,7 +297,7 @@ cdef class PolyObserver:
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
-        assert self.reach.c_reach.tmVarTab['local_t'] == 0
+        assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
 
         while (    tmv            != tmv_end
                and domain         != domain_end
@@ -422,7 +422,7 @@ cdef class PolyObserver:
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
-        assert self.reach.c_reach.tmVarTab['local_t'] == 0
+        assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
 
         while (    tmv            != tmv_end
                and domain         != domain_end
@@ -488,8 +488,8 @@ cdef class PolyObserver:
                                 deref(tmv),
                                 deref(loop_domain)
                             )
-                        else:
-                            raise Exception("Invalid case!")
+                        # else:
+                        #     raise Exception("Invalid case!")
 
                     ### Interval evaluation over domain
                     f_J = f_fn.call(J)
@@ -649,7 +649,7 @@ cdef class CReach:
         C.max_remainder_queue = max_remainder_queue
 
         # Declare state/taylor model variables
-        C.declareTMVar("local_t")
+        C.declareTMVar(b"local_t")
         for i, var in enumerate(vars, 1):
             C.declareStateVar(<string>var)
             assert i == C.getIDForStateVar(<string>var) + 1
@@ -747,7 +747,7 @@ cdef class CReach:
             composed_domain = space_domain.value().get()
             composed_domain.insert(composed_domain.begin(), deref(domain)[0])
 
-        var_id_t = self.c_reach.tmVarTab['local_t']
+        var_id_t = self.c_reach.tmVarTab[b'local_t']
 
         while (tmv != tmv_end and domain != domain_end):
             loop_domain = (&composed_domain
@@ -853,7 +853,7 @@ cdef class CReach:
             composed_domain = space_domain.value().get()
             composed_domain.insert(composed_domain.begin(), deref(domain)[0])
 
-        var_id_t = self.c_reach.tmVarTab['local_t']
+        var_id_t = self.c_reach.tmVarTab[b'local_t']
 
         while (tmv != tmv_end and domain != domain_end):
             T = deref(domain).at(var_id_t)
@@ -1019,7 +1019,7 @@ cdef class CReach:
         cdef string ode_str
         cdef string interval_str
         cdef vector[string] names = self.c_reach.stateVarNames
-        names.insert(names.begin(), "local_t")
+        names.insert(names.begin(), b"local_t")
         for v in self.c_reach.system.tmvOde.tms:
             v.expansion.toString(ode_str, names)
             v.remainder.toString(interval_str)
