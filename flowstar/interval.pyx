@@ -37,6 +37,8 @@ cdef Interval make_interval(object i):
 
 
 cdef cbool overlaps(const Interval & I, const Interval & J) nogil:
+    # Note: this function is conservative for negative results i.e. it returns
+    # true whenever two intervals *might* overlap
     il, iu = I.inf(), I.sup()
     jl, ju = J.inf(), J.sup()
     return not (iu < jl or ju < il)

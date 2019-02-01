@@ -32,6 +32,7 @@ cdef extern from "Interval.h" namespace "flowstar" nogil:
     void add_assign(const double c)
     const Interval operator + (const Interval & I) const
     Interval add_assign "operator+=" (const Interval & I) const
+    Interval sub_assign "operator-=" (const Interval & I) const
     const Interval operator / (const Interval & I) const
     void mul_assign(const double c);
     Interval intersect(const Interval & I) const

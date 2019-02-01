@@ -31,7 +31,7 @@ def int_dist(I, J):
 
 
 def isorted(kxs):
-    kxs = map(partial(sorted, key=lambda (k, x): (k, x.endpoints())), kxs)
+    kxs = map(partial(sorted, key=lambda x: (x[0], x[1].endpoints())), kxs)
     return sorted(kxs, key=lambda xs: [(k, x.endpoints()) for k, x in xs])
 
 

@@ -42,3 +42,6 @@ class TestOverlaps(object):
 
     def test_one_different_endpoint(self):
         assert py_overlaps(RIF(0, 5), RIF(0, 6))
+
+    def test_point_overlapping(self):
+        assert py_overlaps(RIF(0.9, 1), RIF(1, 2))

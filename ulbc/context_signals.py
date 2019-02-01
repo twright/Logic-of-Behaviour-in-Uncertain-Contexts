@@ -20,7 +20,7 @@ def true_context_signal(J, context, reach):
     return base_context_signal(J, context, reach, true_signal(J))
 
 
-def false_context_signal(J, context, reach, odes):
+def false_context_signal(J, context, reach):
     return base_context_signal(J, context, reach, false_signal(J))
 
 

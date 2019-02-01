@@ -8,6 +8,7 @@ import collections
 import operator
 import itertools
 import sage.all as sage
+from functools import reduce
 
 from flowstar.Polynomial cimport (Polynomial, PolyWrap, PolyWrapPtr,
                                   PolynomialPtr)
@@ -61,7 +62,7 @@ def do_tm_power_test():
     cdef string s
     cdef string i
     cdef vector[string] var_names
-    var_names.push_back('x')
+    var_names.push_back(b'x')
 
     tm.expansion.toString(s, var_names)
     tm.remainder.toString(i)
@@ -82,7 +83,7 @@ def do_tm_power_test2():
     cdef string s
     cdef string i
     cdef vector[string] var_names
-    var_names.push_back('x')
+    var_names.push_back(b'x')
 
     tm.expansion.toString(s, var_names)
     tm.remainder.toString(i)
@@ -110,9 +111,9 @@ cdef TaylorModel compose(const Polynomial & P,
     cdef string s
     cdef vector[string] var_names
     with gil:
-        var_names.push_back('t')
-        var_names.push_back('x')
-        var_names.push_back('y')
+        var_names.push_back(b't')
+        var_names.push_back(b'x')
+        var_names.push_back(b'y')
 
     for mono in monomials:
         if verbosity >= 1:
@@ -200,9 +201,9 @@ def do_compose_test():
     cdef string s
     cdef string i
     cdef vector[string] var_names
-    var_names.push_back('t')
-    var_names.push_back('x')
-    var_names.push_back('y')
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
 
     tm.expansion.toString(s, var_names)
     tm.remainder.toString(i)

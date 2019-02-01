@@ -3,11 +3,13 @@ from libcpp.string cimport string
 from libcpp cimport bool as cbool
 
 from flowstar.Interval cimport Interval
-from flowstar.interval cimport interval_fn
+from flowstar.interval cimport interval_fn, interval_time_fn
 from flowstar.Continuous cimport ContinuousReachability
 from flowstar.Polynomial cimport Polynomial
 from flowstar.TaylorModel cimport TaylorModelVec
 from flowstar.poly cimport Poly
+from flowstar.tribool cimport tribool, unknown
+from flowstar.tribool cimport and_ as tri_and
 # cimport flowstar.plotting
 
 
@@ -40,6 +42,33 @@ cdef extern from "<optional>" namespace "std" nogil:
         cbool has_value()
         T & value()
         # T&& value()
+
+
+cdef class PolyObserver:
+    cdef CReach reach
+    cdef Poly f
+    cdef Poly fprime
+    cdef vector[optional[interval_time_fn]] poly_f_fns
+    cdef vector[optional[interval_time_fn]] poly_fprime_fns
+    cdef vector[optional[bint]] bools
+    cdef bint symbolic_composition
+
+    cdef optional[vector[Interval]] _global_domain(self)
+    cdef vector[Interval] c_roots(PolyObserver self,
+                                  double epsilon=?, int verbosity=?)
+    cdef Interval eval_interval(PolyObserver self, Interval & I)
+    cdef tribool eval_bool_interval(PolyObserver self, Interval & I)
+
+
+cdef class RestrictedObserver(PolyObserver):
+    cdef vector[Interval] space_domain
+    # cdef CReach reach
+    # cdef Poly f
+    # cdef Poly fprime
+    # cdef vector[optional[interval_time_fn]] poly_f_fns
+    # cdef vector[optional[interval_time_fn]] poly_fprime_fns
+    # cdef vector[optional[bint]] bools
+    # cdef bint symbolic_composition
 
 
 cdef class CReach:

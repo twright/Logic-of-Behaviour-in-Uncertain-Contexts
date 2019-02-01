@@ -13,7 +13,8 @@ import Cython.Compiler.Options
 Cython.Compiler.Options.annotate = True
 Cython.Compiler.Options.fast_fail = True
 
-LIB_DIRS = ['.', './flowstar/', './flowstar/flowstar-2.1.0']
+LIB_DIRS = ['.', './flowstar/', './flowstar/flowstar-2.1.0',
+            '/usr/include/boost']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
 COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-march=native']
 LINK_ARGS = ['-std=c++17']
@@ -129,8 +130,7 @@ class TestCommand(Command):
     user_options = [
         ('verbose-test', 'v', 'Verbose?')
     ]
-    # boolean_options = ['verbose']
-    #
+
     def initialize_options(self):
         self.verbose_test = False
 
@@ -140,7 +140,7 @@ class TestCommand(Command):
     def run(self):
         self.run_command('build_ext')
         self.announce('Testing...')
-        cmd = ['pytest', '--doctest-cython']
+        cmd = ['pytest'] #, '--doctest-cython']
         if self.verbose_test:
             cmd.append('-v')
         subprocess.call(cmd)
@@ -177,4 +177,5 @@ setup(package_dir={'flowstar': 'flowstar'},
                 'test': TestCommand,
                 'build_ext': BuildAllCommand},
       ext_modules=cythonize(extensions, gdb_debug=True,
-                            annotate=True, nthreads=4))
+                            annotate=True, nthreads=4,
+                            language_level=3))

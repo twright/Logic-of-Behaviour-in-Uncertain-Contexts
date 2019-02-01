@@ -23,7 +23,8 @@
         "include_dirs": [
             ".", 
             "./flowstar/", 
-            "./flowstar/flowstar-2.1.0"
+            "./flowstar/flowstar-2.1.0", 
+            "/usr/include/boost"
         ], 
         "language": "c++", 
         "libraries": [
@@ -38,7 +39,8 @@
         "library_dirs": [
             ".", 
             "./flowstar/", 
-            "./flowstar/flowstar-2.1.0"
+            "./flowstar/flowstar-2.1.0", 
+            "/usr/include/boost"
         ], 
         "name": "flowstar.plotting", 
         "sources": [
@@ -724,6 +726,7 @@ static CYTHON_INLINE float __PYX_NAN() {
         };
     }
     
+#include <boost/logic/tribool.hpp>
 #include <optional>
 #ifdef _OPENMP
 #include <omp.h>
@@ -936,6 +939,8 @@ static const char *__pyx_f[] = {
 
 /*--- Type declarations ---*/
 struct __pyx_obj_8flowstar_4poly_Poly;
+struct __pyx_obj_8flowstar_12reachability_PolyObserver;
+struct __pyx_obj_8flowstar_12reachability_RestrictedObserver;
 struct __pyx_obj_8flowstar_12reachability_CReach;
 struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager;
 struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin;
@@ -997,11 +1002,25 @@ struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial {
   int __pyx_n;
   PyObject *explicit_time;
 };
+struct __pyx_opt_args_8flowstar_12reachability_12PolyObserver_c_roots;
 struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots;
 struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval;
 struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain;
 
-/* "flowstar/reachability.pxd":55
+/* "flowstar/reachability.pxd":57
+ * 
+ *     cdef optional[vector[Interval]] _global_domain(self)
+ *     cdef vector[Interval] c_roots(PolyObserver self,             # <<<<<<<<<<<<<<
+ *                                   double epsilon=?, int verbosity=?)
+ *     cdef Interval eval_interval(PolyObserver self, Interval & I)
+ */
+struct __pyx_opt_args_8flowstar_12reachability_12PolyObserver_c_roots {
+  int __pyx_n;
+  double epsilon;
+  int verbosity;
+};
+
+/* "flowstar/reachability.pxd":84
  *     cdef vector[Interval] initials
  * 
  *     cdef vector[Interval] c_roots(CReach, Polynomial & f, Polynomial & fprime,             # <<<<<<<<<<<<<<
@@ -1015,7 +1034,7 @@ struct __pyx_opt_args_8flowstar_12reachability_6CReach_c_roots {
   int verbosity;
 };
 
-/* "flowstar/reachability.pxd":58
+/* "flowstar/reachability.pxd":87
  *             optional[reference_wrapper[vector[Interval]]] space_domain=?,
  *             double epsilon=?, int verbosity=?)
  *     cdef vector[Interval] eval_interval(CReach, Interval,             # <<<<<<<<<<<<<<
@@ -1028,7 +1047,7 @@ struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval {
   std::optional<std::reference_wrapper<flowstar::Polynomial> >  poly;
 };
 
-/* "flowstar/reachability.pxd":62
+/* "flowstar/reachability.pxd":91
  *             optional[reference_wrapper[Polynomial]] poly=*)
  *     cdef optional[vector[Interval]]\
  *             _convert_space_domain(CReach self, space_domain=*)             # <<<<<<<<<<<<<<
@@ -1056,7 +1075,40 @@ struct __pyx_obj_8flowstar_4poly_Poly {
 };
 
 
-/* "flowstar/reachability.pxd":45
+/* "flowstar/reachability.pxd":47
+ * 
+ * 
+ * cdef class PolyObserver:             # <<<<<<<<<<<<<<
+ *     cdef CReach reach
+ *     cdef Poly f
+ */
+struct __pyx_obj_8flowstar_12reachability_PolyObserver {
+  PyObject_HEAD
+  struct __pyx_vtabstruct_8flowstar_12reachability_PolyObserver *__pyx_vtab;
+  struct __pyx_obj_8flowstar_12reachability_CReach *reach;
+  struct __pyx_obj_8flowstar_4poly_Poly *f;
+  struct __pyx_obj_8flowstar_4poly_Poly *fprime;
+  std::vector<std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> >  poly_f_fns;
+  std::vector<std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> >  poly_fprime_fns;
+  std::vector<std::optional<int> >  bools;
+  int symbolic_composition;
+};
+
+
+/* "flowstar/reachability.pxd":63
+ * 
+ * 
+ * cdef class RestrictedObserver(PolyObserver):             # <<<<<<<<<<<<<<
+ *     cdef vector[Interval] space_domain
+ *     # cdef CReach reach
+ */
+struct __pyx_obj_8flowstar_12reachability_RestrictedObserver {
+  struct __pyx_obj_8flowstar_12reachability_PolyObserver __pyx_base;
+  std::vector<flowstar::Interval>  space_domain;
+};
+
+
+/* "flowstar/reachability.pxd":74
  * 
  * 
  * cdef class CReach:             # <<<<<<<<<<<<<<
@@ -1076,7 +1128,7 @@ struct __pyx_obj_8flowstar_12reachability_CReach {
 };
 
 
-/* "flowstar/reachability.pxd":65
+/* "flowstar/reachability.pxd":94
  * 
  * 
  * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
@@ -1174,7 +1226,38 @@ struct __pyx_vtabstruct_8flowstar_4poly_Poly {
 static struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtabptr_8flowstar_4poly_Poly;
 
 
-/* "flowstar/reachability.pxd":45
+/* "flowstar/reachability.pxd":47
+ * 
+ * 
+ * cdef class PolyObserver:             # <<<<<<<<<<<<<<
+ *     cdef CReach reach
+ *     cdef Poly f
+ */
+
+struct __pyx_vtabstruct_8flowstar_12reachability_PolyObserver {
+  std::optional<std::vector<flowstar::Interval> >  (*_global_domain)(struct __pyx_obj_8flowstar_12reachability_PolyObserver *);
+  std::vector<flowstar::Interval>  (*c_roots)(struct __pyx_obj_8flowstar_12reachability_PolyObserver *, struct __pyx_opt_args_8flowstar_12reachability_12PolyObserver_c_roots *__pyx_optional_args);
+  flowstar::Interval (*eval_interval)(struct __pyx_obj_8flowstar_12reachability_PolyObserver *, flowstar::Interval &);
+  boost::logic::tribool (*eval_bool_interval)(struct __pyx_obj_8flowstar_12reachability_PolyObserver *, flowstar::Interval &);
+};
+static struct __pyx_vtabstruct_8flowstar_12reachability_PolyObserver *__pyx_vtabptr_8flowstar_12reachability_PolyObserver;
+
+
+/* "flowstar/reachability.pxd":63
+ * 
+ * 
+ * cdef class RestrictedObserver(PolyObserver):             # <<<<<<<<<<<<<<
+ *     cdef vector[Interval] space_domain
+ *     # cdef CReach reach
+ */
+
+struct __pyx_vtabstruct_8flowstar_12reachability_RestrictedObserver {
+  struct __pyx_vtabstruct_8flowstar_12reachability_PolyObserver __pyx_base;
+};
+static struct __pyx_vtabstruct_8flowstar_12reachability_RestrictedObserver *__pyx_vtabptr_8flowstar_12reachability_RestrictedObserver;
+
+
+/* "flowstar/reachability.pxd":74
  * 
  * 
  * cdef class CReach:             # <<<<<<<<<<<<<<
@@ -1804,7 +1887,11 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 /* Module declarations from 'flowstar.poly' */
 static PyTypeObject *__pyx_ptype_8flowstar_4poly_Poly = 0;
 
+/* Module declarations from 'flowstar.tribool' */
+
 /* Module declarations from 'flowstar.reachability' */
+static PyTypeObject *__pyx_ptype_8flowstar_12reachability_PolyObserver = 0;
+static PyTypeObject *__pyx_ptype_8flowstar_12reachability_RestrictedObserver = 0;
 static PyTypeObject *__pyx_ptype_8flowstar_12reachability_CReach = 0;
 static PyTypeObject *__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = 0;
 
@@ -13114,9 +13201,13 @@ static int __Pyx_modinit_type_import_code(void) {
   /*--- Type import code ---*/
   __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
   __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
-  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(3, 45, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(3, 45, __pyx_L1_error)
-  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(3, 65, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_PolyObserver = __Pyx_ImportType("flowstar.reachability", "PolyObserver", sizeof(struct __pyx_obj_8flowstar_12reachability_PolyObserver), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_PolyObserver)) __PYX_ERR(3, 47, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_PolyObserver = (struct __pyx_vtabstruct_8flowstar_12reachability_PolyObserver*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_PolyObserver->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_PolyObserver)) __PYX_ERR(3, 47, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_RestrictedObserver = __Pyx_ImportType("flowstar.reachability", "RestrictedObserver", sizeof(struct __pyx_obj_8flowstar_12reachability_RestrictedObserver), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_RestrictedObserver)) __PYX_ERR(3, 63, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_RestrictedObserver = (struct __pyx_vtabstruct_8flowstar_12reachability_RestrictedObserver*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_RestrictedObserver->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_RestrictedObserver)) __PYX_ERR(3, 63, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(3, 74, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(3, 74, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(3, 94, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

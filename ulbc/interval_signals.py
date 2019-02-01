@@ -71,7 +71,8 @@ def to_signal_bisection(f, domain, epsilon=0.1):
             to_signal_bisection(f, M, epsilon))
 
 
-def shift_F(J, (K, b)):
+def shift_F(J, Kb):
+    (K, b) = Kb
     il, iu = K.endpoints()
     if J not in RIF:
         J = RIF(J)
@@ -85,7 +86,8 @@ def shift_F(J, (K, b)):
         return None
 
 
-def shift_G(J, (K, b)):
+def shift_G(J, Kb):
+    (K, b) = Kb
     il, iu = K.endpoints()
     if J not in RIF:
         J = RIF(J)
@@ -133,7 +135,7 @@ class Signal(object):
                                           'and {} ({}) in signal!'.format(
                                               v.str(style='brackets'), bv,
                                               u.str(style='brackets'), bu))
-        self._values.sort(key=lambda (I, b): I.lower())
+        self._values.sort(key=lambda x: x[0].lower())
 
     def to_domain(self, J):
         return Signal(J,
