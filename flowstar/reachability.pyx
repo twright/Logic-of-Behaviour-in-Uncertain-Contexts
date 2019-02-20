@@ -111,6 +111,10 @@ cdef class PolyObserver:
             self.reach.c_reach.flowpipesCompo.size(),
             optional[interval_time_fn]())
 
+    @property
+    def time(self):
+        return self.reach.time
+
     cdef optional[vector[Interval]] _global_domain(PolyObserver self):
         return optional[vector[Interval]]()
 

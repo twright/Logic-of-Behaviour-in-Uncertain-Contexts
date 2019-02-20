@@ -6,22 +6,23 @@ from functools import partial, reduce
 import warnings
 
 from sage.all import RIF
-from ulbc.interval_signals import (Signal, FlowstarFailedException,
-                                   true_signal, false_signal)
+import sage.all as sage
+from ulbc.interval_signals import (true_signal, false_signal)
+from flowstar.reachability import RestrictedObserver
 
 __all__ = ['true_context_signal', 'false_context_signal', 'ContextSignal']
 
 
-def base_context_signal(J, context, reach, signal):
-    return ContextSignal(J, context, reach, lambda *_: signal)
+def base_context_signal(J, space_domain, reach, signal):
+    return ContextSignal(J, space_domain, reach, lambda *_: signal)
 
 
-def true_context_signal(J, context, reach):
-    return base_context_signal(J, context, reach, true_signal(J))
+def true_context_signal(J, space_domain, reach):
+    return base_context_signal(J, space_domain, reach, true_signal(J))
 
 
-def false_context_signal(J, context, reach):
-    return base_context_signal(J, context, reach, false_signal(J))
+def false_context_signal(J, space_domain, reach):
+    return base_context_signal(J, space_domain, reach, false_signal(J))
 
 
 def gen_subcontexts(xs):
@@ -38,6 +39,20 @@ def gen_subcontexts(xs):
         return [[(k, y)] + ys for ys in yss]
 
 
+def gen_sub_space_domains(xs):
+    if len(xs) == 0:
+        return [[]]
+
+    y = xs[0]
+    yss = gen_sub_space_domains(xs[1:])
+
+    if y.absolute_diameter() > 0:
+        yl, yu = y.bisection()
+        return [[yl] + ys for ys in yss] + [[yu] + ys for ys in yss]
+    else:
+        return [[y] + ys for ys in yss]
+
+
 def finterval(I):
     a, b = I.endpoints()
     ra, rb = a.floor(), b.ceil()
@@ -51,6 +66,10 @@ def ctx_str(context):
     return '{{{}}}'.format(', '.join(
         "'{}': {}".format(k, finterval(x))
         for k, x in sorted(context.iteritems())))
+
+
+def space_domain_str(space_domain):
+    return '[{}]'.format(', '.join(map(finterval, space_domain)))
 
 
 def context_to_space_domain(R, ctx):
@@ -147,6 +166,78 @@ class ContextNode(object):
         return res
 
 
+class Thunk(object):
+    def __init__(self, f, res=None):
+        if callable(f):
+            self.f = f
+        else:
+            self.f = lambda: f
+        self._res = res
+
+    @property
+    def evaluated(self):
+        return self._res is not None
+
+    @property
+    def strict(self):
+        if self._res is None:
+            self._res = self.f()
+        return self._res
+
+    def apply(self, g):
+        # if self._res is not None:
+        #     self._res = g(self._res)
+        # f = self.f
+        # self.f = lambda: g(f())
+        return Thunk(lambda: g(self.strict))
+
+    def combine(self, other, g):
+        return Thunk(lambda: g(self.strict, other.strict))
+        # if self._res is not None and other._res is not None:
+        #     res = g(self._res)
+        # else:
+        #     res = None
+        # f = self.f
+        # self.f = lambda: g(f())
+
+    def __getattr__(self, name):
+        def thunk_method_handler(*args, **kwargs):
+            # if len(args) > 0 and isinstance(args[0], Thunk):
+                # return self.combine(args[0], lambda s, o: s)
+            return Thunk(lambda: getattr(self.strict, name)(*args, **kwargs))
+
+        return thunk_method_handler
+
+
+class ChildIterator(object):
+    def __init__(self, gen):
+        self._gen = iter(gen)
+        self._res = []
+
+    def __iter__(self):
+        # Cache the results after the first iteration
+        i = 0
+        while True:
+            if i >= len(self._res):
+                self._res.append(next(self._gen))
+            assert i <= len(self._res) - 1
+            yield self._res[i]
+            i += 1
+
+    def __getitem__(self, i):
+        return list(self)[i]
+
+    def map(self, f):
+        # if self._res is not None:
+        #     self._res = g(self._res)
+        # f = self.f
+        # self.f = lambda: g(f())
+        return ChildIterator(f(c) for c in self)
+
+    def zip_with(self, f, other):
+        return ChildIterator(f(c1, c2) for (c1, c2) in zip(self, other))
+
+
 class ContextSignal(object):
     # Signal map
     # signal_fn :: reach, domain -> Signal
@@ -155,47 +246,55 @@ class ContextSignal(object):
     # _context
     # _reach
 
-    def __init__(self, domain, context, reach, signal_fn, root=None):
+    def __init__(self, domain, space_domain, observer, signal_fn,
+                 children=None):
         assert domain in RIF
-        assert isinstance(context, dict)
+        assert isinstance(space_domain, list)
         assert signal_fn is None or callable(signal_fn)
-        assert root is None or isinstance(root, ContextNode)
+        # assert root is None or isinstance(root, ContextNode)
+        # self._signal_fn = signal_fn
         self._domain = domain
-        self._reach = reach
-        self._signal_fn = signal_fn
-        self._root = ContextNode(self, context if root is None else root)
-        if self._signal_fn is not None:
-            self.signal  # Cause root signal to be evaluated
+        self._observer = observer
+        if signal_fn is not None:
+            self._signal = signal_fn(observer, space_domain)
+        self._space_domain = space_domain
+        if children is not None:
+            self._children = children
+        elif signal_fn is not None:
+            self._children = ChildIterator(
+                ContextSignal(domain,
+                              sub_space_domain,
+                              RestrictedObserver(observer, sub_space_domain),
+                              signal_fn)
+                for sub_space_domain in self.sub_space_domains
+            )
+        else:
+            self._children = None
 
     def __repr__(self):
-        return 'ContextSignal({}, {}, {}, {})'.format(finterval(self.domain),
-                                                      ctx_str(self.context),
-                                                      self._reach,
-                                                      self._signal_fn)
-
-    @property
-    def root(self):
-        return self._root
+        return 'ContextSignal({}, {}, <...>, children={})'.format(
+            finterval(self.domain), space_domain_str(self.space_domain),
+            self._observer, self.children)
 
     @property
     def domain(self):
         return self._domain
 
     @property
-    def subcontexts(self):
-        return list(map(dict, gen_subcontexts(list(self.context.iteritems()))))
-
-    @property
-    def context(self):
-        return self.root._context
-
-    @property
     def children(self):
-        return self.root.children
+        return self._children
+
+    @property
+    def sub_space_domains(self):
+        return list(gen_sub_space_domains(self.space_domain))
+
+    @property
+    def space_domain(self):
+        return self._space_domain
 
     @property
     def signal(self):
-        return self.root.signal
+        return self._signal
 
     def refined_signal(self, n):
         if n == 0:
@@ -206,24 +305,63 @@ class ContextSignal(object):
         else:
             raise ValueError('n should be a possible integer')
 
-    def signal_map(self, f):
-        def f_signal_fn(reach, ctx):
-            return f(self._signal_fn(reach, ctx))
+    def histogram2d(self, n):
+        if n == 0:
+            x = self.signal(0)
+            if x is False:
+                return sage.matrix([[-1]])
+            elif x is True:
+                return sage.matrix([[1]])
+            else:
+                return sage.matrix([[0]])
+        else:
+            assert len(list(self.children)) == 4
+            return sage.block_matrix(2, 2,
+                                     [c.histogram2d(n - 1)
+                                      for c in self.children])\
+                       .transpose()
 
-        return ContextSignal(self.domain, self.context, self._reach,
-                             f_signal_fn, self.root.signal_map(f))
+    def plot_histogram2d(self, n):
+        from matplotlib.colors import LinearSegmentedColormap
+        from matplotlib import ticker
+        colors = ['pink', 'white', 'lightgreen']
+        cm = LinearSegmentedColormap.from_list('ternary colors', colors, N=3)
+        m = self.histogram2d(n)
+        s = min(2**n, 8)
+        ticks = [-0.5 + k*2**n/s for k in range(s + 1)]
+        gridlines = [k + 0.5 for k in range(2**n)]
+        xformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
+            self.space_domain[0].lower()
+            + (k + 0.5)*self.space_domain[0].absolute_diameter()/2**n))
+        yformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
+            self.space_domain[1].lower()
+            + (k + 0.5)*self.space_domain[1].absolute_diameter()/2**n))
+        p = sage.matrix_plot(m[::-1, :], cmap=cm, ticks=(ticks, ticks),
+                             origin='lower', vmin=-1, vmax=1,
+                             gridlines=(gridlines, gridlines),
+                             tick_formatter=(xformatter, yformatter))
+        return p
+        # return p.show(gridlines=(gridlines, gridlines),
+        #               tick_formatter=(xformatter, yformatter))
+
+    def signal_map(self, f):
+        return ContextSignal(
+            self.domain,
+            self.space_domain,
+            self._observer,
+            lambda *_: f(self.signal),
+            self.children.map(lambda c: c.signal_map(f)),
+        )
 
     def signal_zip_with(self, f, other):
-        assert callable(f)
-        if not isinstance(other, ContextSignal):
-            return NotImplemented
-
-        def f_signal_fn(reach, ctx):
-            return f(self._signal_fn(reach, ctx), other._signal_fn(reach, ctx))
-
-        return ContextSignal(self.domain, self.context, self._reach,
-                             f_signal_fn,
-                             self.root.signal_zip_with(f, other.root))
+        return ContextSignal(
+            self.domain,
+            self.space_domain,
+            self._observer,
+            lambda *_: f(self.signal, other.signal),
+            self.children.zip_with(lambda c1, c2: c1.signal_zip_with(f, c2),
+                                   other.children),
+        )
 
     def __invert__(self):
         return self.signal_map(lambda x: ~x)
@@ -241,7 +379,7 @@ class ContextSignal(object):
         return self.signal_map(lambda x: x.G(J))
 
     def U(self, J):
-        return self.signal_zip_with(lambda x, y: x.G(J))
+        return self.signal_zip_with(lambda x, y: x.U(y, J))
 
     def to_domain(self, domain):
         return self.signal_map(lambda x: x.to_domain(domain))

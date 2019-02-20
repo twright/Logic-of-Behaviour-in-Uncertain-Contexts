@@ -287,16 +287,20 @@ class Atomic(Logic):
         #                           roots,
         #                           RIF(0, R.time - 1e-3))
 
-    def signal_fn(self, odes, r, ctx, **kwargs):
-        space_domain = context_to_space_domain(self.R, ctx)
+    def signal_fn(self, odes, r, space_domain, **kwargs):
         return self.signal(r, odes, space_domain=space_domain, **kwargs)\
                    .to_domain(RIF(0, RIF(0, r.time - 1e-3)))
 
     def context_signal(self, reach, odes, initials, **kwargs):
         domain = RIF(0, reach.time - 1e-3)
+        if isinstance(reach, PolyObserver):
+            observer = reach
+        else:
+            observer = PolyObserver(self.p, self.dpdt(odes), reach,
+                                    kwargs.get('symbolic_composition', False))
 
-        return ContextSignal(domain, space_domain_to_context(self.R, initials),
-                             reach, partial(self.signal_fn, odes, **kwargs))
+        return ContextSignal(domain, initials, observer,
+                             partial(self.signal_fn, odes, **kwargs))
 
     def __repr__(self):
         return 'Atomic({})'.format(repr(self.p))
@@ -384,7 +388,7 @@ class And(Logic):
     def context_signal(self, reach, odes, initials, **kwargs):
         true_ctx_sig = true_context_signal(
             RIF(0, reach.time),
-            space_domain_to_context(self.R, initials),
+            initials,
             reach)
         return reduce(operator.and_,
                       (t.context_signal(reach, odes, initials, **kwargs)
@@ -474,7 +478,7 @@ class Or(Logic):
     def context_signal(self, reach, odes, initials, **kwargs):
         false_ctx_sig = false_context_signal(
             RIF(0, reach.time),
-            space_domain_to_context(self.R, initials),
+            initials,
             reach)
         return reduce(operator.or_,
                       (t.context_signal(reach, odes, initials, **kwargs)
@@ -687,7 +691,7 @@ class C(Context):
             )
 
         return ContextSignal(RIF(0, reach.time),
-                             space_domain_to_context(self.R, initials),
+                             initials,
                              reach, signal_fn)
 
 
