@@ -82,9 +82,11 @@ cdef class RestrictedObserver(PolyObserver):
         self.bools = p.bools
         self.symbolic_composition = p.symbolic_composition
         self.reach = p.reach
-        cdef optional[vector[Interval]] c_space_domain = self.reach._convert_space_domain(space_domain)
-        assert c_space_domain.has_value()
-        self.space_domain = c_space_domain.value()
+        cdef optional[vector[Interval]] c_space_domain
+        if self.reach is not None:
+            c_space_domain = self.reach._convert_space_domain(space_domain)
+            assert c_space_domain.has_value()
+            self.space_domain = c_space_domain.value()
 
     cdef optional[vector[Interval]] _global_domain(self):
         cdef vector[Interval] domain = (<RestrictedObserver>self).space_domain
@@ -99,21 +101,25 @@ cdef class PolyObserver:
         self.fprime = Poly(fprime)
         self.reach = reach
         self.symbolic_composition = symbolic_composition
-        self.reach.prepare()
+        if self.reach is not None:
+            self.reach.prepare()
 
-        # Initialise optional arrays
-        self.bools = vector[optional[bint]](
-            self.reach.c_reach.flowpipesCompo.size(), optional[bint]())
-        self.poly_f_fns = vector[optional[interval_time_fn]](
-            self.reach.c_reach.flowpipesCompo.size(),
-            optional[interval_time_fn]())
-        self.poly_fprime_fns = vector[optional[interval_time_fn]](
-            self.reach.c_reach.flowpipesCompo.size(),
-            optional[interval_time_fn]())
+            # Initialise optional arrays
+            self.bools = vector[optional[bint]](
+                self.reach.c_reach.flowpipesCompo.size(), optional[bint]())
+            self.poly_f_fns = vector[optional[interval_time_fn]](
+                self.reach.c_reach.flowpipesCompo.size(),
+                optional[interval_time_fn]())
+            self.poly_fprime_fns = vector[optional[interval_time_fn]](
+                self.reach.c_reach.flowpipesCompo.size(),
+                optional[interval_time_fn]())
 
     @property
     def time(self):
-        return self.reach.time
+        if self.reach is not None:
+            return self.reach.time
+        else:
+            return None
 
     cdef optional[vector[Interval]] _global_domain(PolyObserver self):
         return optional[vector[Interval]]()
@@ -121,6 +127,9 @@ cdef class PolyObserver:
     def roots(PolyObserver self, space_domain=None,
               epsilon=0.00001, verbosity=0):
         cdef vector[Interval] c_res
+
+        if self.reach is None:
+            return None
 
         self.reach.prepare()
 
@@ -385,6 +394,9 @@ cdef class PolyObserver:
     def __call__(self, t):
         from sage.all import RIF
 
+        if self.reach is None:
+            return None
+
         self.reach.prepare()
 
         # Convert python interval to flow* interval
@@ -528,6 +540,9 @@ cdef class PolyObserver:
         return final_res
 
     def check(self, t, space_domain=None):
+        if self.reach is None:
+            return None
+
         self.reach.prepare()
 
         # Convert python interval to flow* interval
