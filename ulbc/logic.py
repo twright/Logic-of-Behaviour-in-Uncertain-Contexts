@@ -299,8 +299,9 @@ class Atomic(Logic):
             observer = PolyObserver(self.p, self.dpdt(odes), reach,
                                     kwargs.get('symbolic_composition', False))
 
-        return ContextSignal(domain, initials, observer,
-                             partial(self.signal_fn, odes, **kwargs))
+        return ContextSignal(domain, initials, 
+                             partial(self.signal_fn, odes, **kwargs),
+                             observer=observer)
 
     def __repr__(self):
         return 'Atomic({})'.format(repr(self.p))
@@ -388,8 +389,7 @@ class And(Logic):
     def context_signal(self, reach, odes, initials, **kwargs):
         true_ctx_sig = true_context_signal(
             RIF(0, reach.time),
-            initials,
-            reach)
+            initials)
         return reduce(operator.and_,
                       (t.context_signal(reach, odes, initials, **kwargs)
                        for t in self.terms),
@@ -478,8 +478,7 @@ class Or(Logic):
     def context_signal(self, reach, odes, initials, **kwargs):
         false_ctx_sig = false_context_signal(
             RIF(0, reach.time),
-            initials,
-            reach)
+            initials)
         return reduce(operator.or_,
                       (t.context_signal(reach, odes, initials, **kwargs)
                        for t in self.terms),
@@ -690,9 +689,7 @@ class C(Context):
                 verbosity=kwargs.get('verbosity', 0)
             )
 
-        return ContextSignal(RIF(0, reach.time),
-                             initials,
-                             reach, signal_fn)
+        return ContextSignal(RIF(0, reach.time), initials, signal_fn)
 
 
 class D(Context):
@@ -761,7 +758,7 @@ class D(Context):
 
         return ContextSignal(RIF(0, reach.time),
                              space_domain_to_context(self.R, initials),
-                             reach, signal_fn)
+                             signal_fn)
 
 
 class G(Logic):

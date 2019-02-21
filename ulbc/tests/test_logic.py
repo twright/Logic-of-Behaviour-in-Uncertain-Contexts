@@ -3,10 +3,10 @@ from __future__ import print_function, division
 import pytest
 import sage.all as sage
 from sage.all import RIF
-from builtins import *
+from builtins import *  # NOQA
 
 from ulbc import Atomic, Signal, G, F, U
-from ulbc.tests.test_context_signals import ctx_approx_eq
+from ulbc.tests.test_context_signals import space_domain_approx_eq
 
 
 @pytest.fixture(scope='module')
@@ -114,8 +114,8 @@ class TestLogicContextSignal(object):
         )
         ctx = Atomic(x).context_signal_for_system(odes, initials, 5)
         child_context_sig = ctx.children[3]
-        assert ctx_approx_eq(ctx.subcontexts[3].items(),
-                             {'x': RIF(1.5, 2), 'y': RIF(3.5, 4)}.items())
+        assert space_domain_approx_eq(child_context_sig.space_domain,
+                                      [RIF(1.5, 2), RIF(3.5, 4)])
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.1)
 

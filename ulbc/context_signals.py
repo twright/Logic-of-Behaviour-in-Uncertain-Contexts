@@ -12,16 +12,16 @@ from flowstar.reachability import RestrictedObserver, PolyObserver
 __all__ = ['true_context_signal', 'false_context_signal', 'ContextSignal']
 
 
-def base_context_signal(J, space_domain, observer, signal):
-    return ContextSignal(J, space_domain, observer, lambda *_: signal)
+def base_context_signal(J, space_domain, signal):
+    return ContextSignal(J, space_domain, lambda *_: signal)
 
 
-def true_context_signal(J, space_domain, observer):
-    return base_context_signal(J, space_domain, observer, true_signal(J))
+def true_context_signal(J, space_domain):
+    return base_context_signal(J, space_domain, true_signal(J))
 
 
-def false_context_signal(J, space_domain, observer):
-    return base_context_signal(J, space_domain, observer, false_signal(J))
+def false_context_signal(J, space_domain):
+    return base_context_signal(J, space_domain, false_signal(J))
 
 
 def gen_subcontexts(xs):
@@ -117,15 +117,16 @@ class ContextSignal(object):
     # _context
     # _reach
 
-    def __init__(self, domain, space_domain, observer, signal_fn,
-                 children=None):
+    def __init__(self, domain, space_domain, signal_fn,
+                 children=None, observer=None):
         assert domain in RIF
         self._domain = domain
         assert isinstance(space_domain, list)
         self._space_domain = space_domain
-        assert isinstance(observer, PolyObserver)
-        self._observer = observer
+        assert observer is None or isinstance(observer, PolyObserver)
+        # self._observer = observer
         assert signal_fn is None or callable(signal_fn)
+        assert children is None or isinstance(children, ChildIterator)
         # assert root is None or isinstance(root, ContextNode)
         # self._signal_fn = signal_fn
         if signal_fn is not None:
@@ -136,17 +137,20 @@ class ContextSignal(object):
             self._children = ChildIterator(
                 ContextSignal(domain,
                               sub_space_domain,
-                              RestrictedObserver(observer, sub_space_domain),
-                              signal_fn)
+                              signal_fn,
+                              observer=RestrictedObserver(observer,
+                                                          sub_space_domain)
+                                       if observer is not None
+                                       else None)
                 for sub_space_domain in self.sub_space_domains
             )
         else:
             self._children = None
 
     def __repr__(self):
-        return 'ContextSignal({}, {}, <...>, children={})'.format(
+        return 'ContextSignal({}, <...>, children={})'.format(
             finterval(self.domain), space_domain_str(self.space_domain),
-            self._observer, self.children)
+            self.children)
 
     @property
     def domain(self):
@@ -220,7 +224,6 @@ class ContextSignal(object):
         return ContextSignal(
             self.domain,
             self.space_domain,
-            self._observer,
             lambda *_: f(self.signal),
             self.children.map(lambda c: c.signal_map(f)),
         )
@@ -229,7 +232,6 @@ class ContextSignal(object):
         return ContextSignal(
             self.domain,
             self.space_domain,
-            self._observer,
             lambda *_: f(self.signal, other.signal),
             self.children.zip_with(lambda c1, c2: c1.signal_zip_with(f, c2),
                                    other.children),
