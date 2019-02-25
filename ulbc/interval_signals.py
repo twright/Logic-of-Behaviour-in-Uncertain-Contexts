@@ -92,32 +92,46 @@ def to_signal_bisection(f, domain, epsilon=0.1):
             to_signal_bisection(f, M, epsilon))
 
 
+def inner_inverse_minkowski(I, J):
+    # I - J, smallest possible answer
+    il, iu = RIF(I).edges()
+    jl, ju = RIF(J).edges()
+    kl = il - ju
+    ku = iu - jl
+    if kl.overlaps(ku):
+        return None
+    else:
+        return RIF(kl.upper('RNDU'), ku.lower('RNDD'))
+
+
 def shift_F(J, Kb):
     (K, b) = Kb
-    il, iu = K.endpoints()
     if J not in RIF:
         J = RIF(J)
-    tl, tu = J.endpoints()
+    tl, tu = J.edges()
+    Ktl = inner_inverse_minkowski(K, tl)
+    Ktu = inner_inverse_minkowski(K, tu)
 
     if b:
-        return K - J, True
-    elif (K - tl).overlaps(K - tu):
-        return (K - tl).intersection(K - tu), False
+        return inner_inverse_minkowski(K, J), True
+    elif Ktl.overlaps(Ktu):
+        return Ktl.intersection(Ktu), False
     else:
         return None
 
 
 def shift_G(J, Kb):
     (K, b) = Kb
-    il, iu = K.endpoints()
     if J not in RIF:
         J = RIF(J)
-    tl, tu = J.endpoints()
+    tl, tu = J.edges()
+    Ktl = inner_inverse_minkowski(K, tl)
+    Ktu = inner_inverse_minkowski(K, tu)
 
     if not b:
-        return K - J, False
-    elif (K - tl).overlaps(K - tu):
-        return (K - tl).intersection(K - tu), True
+        return inner_inverse_minkowski(K, J), False
+    elif Ktl.overlaps(Ktu):
+        return Ktl.intersection(Ktu), True
     else:
         return None
 
@@ -134,7 +148,8 @@ class Signal(object):
     def __init__(self, domain, values):
         self._domain = domain  # :: RIF
         # self._values = list(values) # :: [(RIF, Bool)]
-        self._values = [p for p in values if p is not None]
+        self._values = values
+        self._values = [p for p in self._values if p is not None]
         self._values = [(v, b) for v, b in self._values if b is not None]
         dup = True
         while dup:
@@ -236,11 +251,13 @@ class Signal(object):
 
     def F(self, J):
         J = RIF(J)
-        return Signal(self.domain - J, map(partial(shift_F, J), self.values))
+        return Signal(inner_inverse_minkowski(self.domain, J),
+                      map(partial(shift_F, J), self.values))
 
     def G(self, J):
         J = RIF(J)
-        return Signal(self.domain - J, map(partial(shift_G, J), self.values))
+        return Signal(inner_inverse_minkowski(self.domain, J),
+                      map(partial(shift_G, J), self.values))
 
     def U(self, J, other):
         J = RIF(J)
