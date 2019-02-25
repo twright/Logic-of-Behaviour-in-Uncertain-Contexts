@@ -127,13 +127,22 @@ class ContextSignal(object):
         # self._observer = observer
         assert signal_fn is None or callable(signal_fn)
         assert children is None or isinstance(children, ChildIterator)
+        # print('ContextSignal(domain={}, space_domain={}, observer={})'.format(
+        #     finterval(domain),
+        #     space_domain_str(space_domain),
+        #     observer
+        # ))
         # assert root is None or isinstance(root, ContextNode)
         # self._signal_fn = signal_fn
+
         if signal_fn is not None:
+            # assert observer is not None
             self._signal = signal_fn(observer, space_domain)
+
         if children is not None:
             self._children = children
         elif signal_fn is not None:
+            # Recursively populate children using signal_fn
             self._children = ChildIterator(
                 ContextSignal(domain,
                               sub_space_domain,
@@ -205,14 +214,14 @@ class ContextSignal(object):
         m = self.histogram2d(n)
         s = min(2**n, 8)
         ticks = [-0.5 + k*2**n/s for k in range(s + 1)]
-        gridlines = [k + 0.5 for k in range(2**n)]
+        gridlines = [k + 0.5 for k in range(2**n - 1)]
         xformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
             self.space_domain[0].lower()
             + (k + 0.5)*self.space_domain[0].absolute_diameter()/2**n))
         yformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
             self.space_domain[1].lower()
             + (k + 0.5)*self.space_domain[1].absolute_diameter()/2**n))
-        p = sage.matrix_plot(m[::-1, :], cmap=cm, ticks=(ticks, ticks),
+        p = sage.matrix_plot(m, cmap=cm, ticks=(ticks, ticks),
                              origin='lower', vmin=-1, vmax=1,
                              gridlines=(gridlines, gridlines),
                              tick_formatter=(xformatter, yformatter))

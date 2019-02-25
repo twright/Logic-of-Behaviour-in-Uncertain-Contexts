@@ -29,6 +29,8 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
 
 
 def signal_from_observer(observer, domain):  # , theta=0.01, abs_inf=0.0001):
+    if not observer.flowstar_successful:
+        return Signal(domain, [])
     return signal_given_bool_roots((lambda x: observer.check(x)),
                                    observer.roots(),
                                    domain)

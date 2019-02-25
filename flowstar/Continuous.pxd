@@ -91,3 +91,11 @@ cdef extern from "Continuous.h" namespace "flowstar" nogil:
     vector[string] stateVarNames
     cmap[string, int] stateVarTab
     cmap[string, int] tmVarTab
+    vector[string] tmVarNames
+    cmap[string, int] parTab
+    vector[string] parNames
+    vector[Interval] parRanges
+    cmap[string, int] TI_Par_Tab
+    vector[string] TI_Par_Names
+    cmap[string, int] TV_Par_Tab
+    vector[string] TV_Par_Names

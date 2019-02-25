@@ -272,6 +272,23 @@ class TestRoots(object):
                                 RIF(3.3840480018296905,  3.6056159786942144)])
 
 
+class TestReachability(object):
+    def test_constructor(self, ringxy, odes, initials):
+        reach = Reach(odes, initials, 2*sage.pi, (0.001, 0.1), order=10)
+        assert reach.ran
+        assert reach.result == 2
+
+    def test_copy(self, ringxy, odes, reach):
+        assert reach.ran
+        reach1 = Reach(reach)
+        assert reach1.ran
+
+    def test_copy_change_initial(self, ringxy, odes, reach):
+        assert reach.ran
+        reach1 = Reach(reach)
+        assert reach1.ran
+
+
 class TestEval(object):
     '''Tests for interval evaluation.'''
 

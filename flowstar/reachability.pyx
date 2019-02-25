@@ -84,6 +84,10 @@ cdef class RestrictedObserver(PolyObserver):
         self.reach = p.reach
         cdef optional[vector[Interval]] c_space_domain
         if self.reach is not None:
+            if not self.flowstar_successful:
+                self.reach = Reach(self.reach, space_domain)
+                self._init_stored_data()
+
             c_space_domain = self.reach._convert_space_domain(space_domain)
             assert c_space_domain.has_value()
             self.space_domain = c_space_domain.value()
@@ -101,7 +105,10 @@ cdef class PolyObserver:
         self.fprime = Poly(fprime)
         self.reach = reach
         self.symbolic_composition = symbolic_composition
-        if self.reach is not None:
+        self._init_stored_data()
+
+    def _init_stored_data(self):
+        if self.reach is not None and self.flowstar_successful:
             self.reach.prepare()
 
             # Initialise optional arrays
@@ -115,6 +122,10 @@ cdef class PolyObserver:
                 optional[interval_time_fn]())
 
     @property
+    def flowstar_successful(self):
+        return self.reach.ran and self.reach.result <= 3
+
+    @property
     def time(self):
         if self.reach is not None:
             return self.reach.time
@@ -126,12 +137,13 @@ cdef class PolyObserver:
 
     def roots(PolyObserver self, space_domain=None,
               epsilon=0.00001, verbosity=0):
+        # if not self.flowstar_successful:
+        #     return [sage.RIF(0, self.time)]
+        
         cdef vector[Interval] c_res
 
         if self.reach is None:
             return None
-
-        self.reach.prepare()
 
         with self.reach.global_manager:
             c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)
@@ -562,7 +574,67 @@ cdef class PolyObserver:
 
 
 cdef class CReach:
-    def __cinit__(
+    def __cinit__(CReach self, *args, **kwargs):
+        if len(args) == 1 or len(args) == 2:
+            ## Copy constructor
+            self._init_clone(*args)
+        else:
+            ## Construct from arguments
+            self._init_args(*args, **kwargs)
+
+    def _init_clone(CReach self, CReach other, initials=None):
+        cdef Interval zero_int
+        cdef vector[Flowpipe] initials_fpvect
+
+        self.ran = False
+        self.prepared = False
+        self.result = 0
+        self.symbolic_composition = other.symbolic_composition
+        self.global_manager = FlowstarGlobalManager()
+        if initials is None:
+            self.initials = other.initials
+            self.c_reach.system = other.c_reach.system
+        else:
+            for initial in initials:
+                self.initials.push_back(interval.make_interval(initial))
+            initials_fpvect.push_back(Flowpipe(self.initials, zero_int))
+            self.c_reach.system = ContinuousSystem(other.c_reach.system.tmvOde,
+                                                   initials_fpvect)
+        
+        self.c_reach.bAdaptiveOrders = other.c_reach.bAdaptiveOrders
+        self.c_reach.miniStep = other.c_reach.miniStep
+        self.c_reach.step = other.c_reach.step
+        self.c_reach.orderType = other.c_reach.orderType
+        self.c_reach.bAdaptiveSteps = other.c_reach.bAdaptiveSteps
+        self.c_reach.orders = other.c_reach.orders
+        self.c_reach.maxOrders = other.c_reach.maxOrders
+        self.c_reach.globalMaxOrder = other.c_reach.globalMaxOrder
+        self.c_reach.time = other.c_reach.time
+        self.c_reach.precondition = other.c_reach.precondition
+        self.c_reach.plotSetting = other.c_reach.plotSetting
+        self.c_reach.bPrint = other.c_reach.bPrint
+        self.c_reach.bSafetyChecking = other.c_reach.bSafetyChecking
+        self.c_reach.bPlot = other.c_reach.bPlot
+        self.c_reach.bDump = other.c_reach.bDump
+        self.c_reach.integrationScheme = other.c_reach.integrationScheme
+        self.c_reach.cutoff_threshold = other.c_reach.cutoff_threshold
+        self.c_reach.estimation = other.c_reach.estimation
+        self.c_reach.maxNumSteps = other.c_reach.maxNumSteps
+        self.c_reach.max_remainder_queue = other.c_reach.max_remainder_queue
+        self.c_reach.stateVarTab = other.c_reach.stateVarTab
+        self.c_reach.stateVarNames = other.c_reach.stateVarNames
+        self.c_reach.tmVarTab = other.c_reach.tmVarTab
+        self.c_reach.parTab = other.c_reach.parTab
+        self.c_reach.parNames = other.c_reach.parNames
+        self.c_reach.parRanges = other.c_reach.parRanges
+        self.c_reach.TI_Par_Tab = other.c_reach.TI_Par_Tab
+        self.c_reach.TI_Par_Names = other.c_reach.TI_Par_Names
+        self.c_reach.TV_Par_Tab = other.c_reach.TV_Par_Tab
+        self.c_reach.TV_Par_Names = other.c_reach.TV_Par_Names
+        # Run immediately? Do we need a flag for this?
+        self.run()
+
+    def _init_args(
         self,
         odes,
         initials,

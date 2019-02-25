@@ -20,6 +20,17 @@ def odes(ringxy):
     return [-y, x]
 
 
+@pytest.fixture(scope='module')
+def odes_whelks(ringxy):
+    R, (x, y) = ringxy
+    k = RIF(0.8)
+    b = RIF(0.6)
+    c = RIF(0.3)
+    e = RIF(0.05)
+    f = RIF(2)
+    return [b*x*(RIF(1)-x) - c*x*(k-x)*y, -e*y*(RIF(1)+y)+f*x*(k-x)*y]
+
+
 def test_atomic(ringxy, odes):
     R, (x, y) = ringxy
     initials = [RIF(1, 2), RIF(3, 4)]
@@ -155,3 +166,49 @@ class TestLogicContextSignal(object):
                                                                 5)
         sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials, 5)
         assert ctx.signal.approx_eq(sig, 0.01)
+
+    @pytest.mark.slow
+    def test_context_context_signals(self, ringxy, odes_whelks):
+        R, (x, y) = ringxy
+
+        initials = [RIF(1, 1.2), RIF(4, 6)]
+        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        kwargs = dict(
+            order=5, step=(0.01, 0.5),
+            precondition=1,
+            estimation=1e-3,
+            integrationScheme=2,
+            cutoff_threshold=1e-5,
+            verbosity=0,
+            epsilon_ctx=0.5,
+            symbolic_composition=False,
+        )
+        sig = ({x: RIF(0.05, 0.1)} >> G(RIF(0, 0.2), P)
+               ).signal_for_system(odes_whelks, initials, 10, **kwargs)
+        ctx_sig = ({x: RIF(0.05, 0.1)} >> G(RIF(0, 0.2), P)
+                   ).context_signal_for_system(odes_whelks, initials, 10,
+                                               **kwargs)
+        assert ctx_sig.signal.approx_eq(sig, 0.001)
+
+    @pytest.mark.slow
+    def test_differential_context_context_signals(self, ringxy, odes_whelks):
+        R, (x, y) = ringxy
+
+        initials = [RIF(1, 1.2), RIF(4, 6)]
+        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        kwargs = dict(
+            order=5, step=(0.01, 0.5),
+            precondition=1,
+            estimation=1e-3,
+            integrationScheme=2,
+            cutoff_threshold=1e-5,
+            verbosity=0,
+            epsilon_ctx=0.5,
+            symbolic_composition=False,
+        )
+        sig = ({x: RIF(6, 6.1)} % G(RIF(0, 0.2), P)
+               ).signal_for_system(odes_whelks, initials, 10, **kwargs)
+        ctx_sig = ({x: RIF(6, 6.1)} % G(RIF(0, 0.2), P)
+                   ).context_signal_for_system(odes_whelks, initials, 10,
+                                               **kwargs)
+        assert ctx_sig.signal.approx_eq(sig, 0.001)

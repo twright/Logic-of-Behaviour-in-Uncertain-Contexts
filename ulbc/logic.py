@@ -147,22 +147,21 @@ class Logic(object):
             **kwargs
         )
         # Check that flowstar ran for the whole timeframe
-        if not reach.ran or reach.result > 3:
-            raise FlowstarFailedException(
-                "Did not run successfully!\n"
-                "status = {}\nnum_flowpipes".format(reach.result,
-                                                    reach.num_flowpipes))
-        t1 = time.time()
-        print("Computed {} flowpipes in {} sec".format(
-            reach.num_flowpipes, t1 - t0))
-        reach.prepare()
-        t2 = time.time()
-        print("Prepared for plotting in {} sec".format(t2 - t1))
+        # if not reach.ran or reach.result > 3:
+        #     raise FlowstarFailedException(
+        #         "Did not run successfully!\n"
+        #         "status = {}\nnum_flowpipes".format(reach.result,
+        #                                             reach.num_flowpipes))
+        if reach.ran and reach.result <= 3:
+            t1 = time.time()
+            print("Computed {} flowpipes in {} sec".format(
+                reach.num_flowpipes, t1 - t0))
+            reach.prepare()
+            t2 = time.time()
+            print("Prepared for plotting in {} sec".format(t2 - t1))
+
         res = self.context_signal(reach, odes, initials, **kwargs)
-        # TODO: figure out when to project context signals onto the correct
-        # time domain
-        # .to_domain(RIF(0, duration))
-        return res
+        return res.to_domain(RIF(0, duration))
 
     @abstractmethod
     def numerical_signal(self, f, events, duration):
@@ -675,16 +674,16 @@ class C(Context):
         )
 
     def context_signal(self, reach, odes, initials, refine=0, **kwargs):
-        def signal_fn(reach, context):
+        def signal_fn(_, space_domain):
+            # should we refer to the parent reach object or the child
+            # observer?
             return ctx(
                 odes=odes,
                 domain=RIF(0, reach.time),
                 C=self.context_jump,
                 D=identity,
                 phi=partial(self.context_signal_phi_fn, kwargs, refine=refine),
-                f=partial(reach,
-                          space_domain=context_to_space_domain(self.R,
-                                                               context)),
+                f=partial(reach, space_domain=space_domain),
                 epsilon=kwargs.get('epsilon_ctx', 0.5),
                 verbosity=kwargs.get('verbosity', 0)
             )
@@ -742,22 +741,20 @@ class D(Context):
         # This does not actually subdivide the differential context,
         # but only the initial context, and each component of the inital set
         # for the system once the differential context is composed.
-        def signal_fn(reach, context):
+        def signal_fn(_, space_domain):
             return ctx(
                 odes=odes,
                 domain=RIF(0, reach.time),
                 C=identity,
                 D=self.context_jump,
                 phi=partial(self.context_signal_phi_fn, kwargs, refine=refine),
-                f=partial(reach,
-                          space_domain=context_to_space_domain(self.R,
-                                                               context)),
+                f=partial(reach, space_domain=space_domain),
                 epsilon=kwargs.get('epsilon_ctx', 0.5),
                 verbosity=kwargs.get('verbosity', 0)
             )
 
         return ContextSignal(RIF(0, reach.time),
-                             space_domain_to_context(self.R, initials),
+                             initials,
                              signal_fn)
 
 
