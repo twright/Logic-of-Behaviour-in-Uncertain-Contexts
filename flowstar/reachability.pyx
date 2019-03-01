@@ -187,23 +187,68 @@ cdef class PolyObserver:
             else:
                 roots.push_back(root)
 
+    cdef bint _tm_segment_loop(PolyObserver self,
+                               int & i,
+                               vector[Interval]* & loop_domain,
+                               optional[vector[Interval]] & global_domain,
+                               clist[TaylorModelVec].iterator & tmv,
+                               clist[vector[Interval]].iterator & domain,
+                               vector[optional[bint]].iterator & cached_bool,
+                               vector[optional[interval_time_fn]].iterator & poly_f_fn,
+                               vector[optional[interval_time_fn]].iterator & poly_fprime_fn,
+                               Interval & T,
+                               Interval & T0):
+        cdef:
+            clist[TaylorModelVec].iterator tmv_end = self.reach.c_reach.flowpipesCompo.end()
+            clist[vector[Interval]].iterator domain_end = self.reach.c_reach.domains.end()
+            vector[optional[bint]].iterator cached_bool_end = self.bools.end()
+            vector[optional[interval_time_fn]].iterator\
+                poly_f_fn_end = self.poly_f_fns.end()
+            vector[optional[interval_time_fn]].iterator\
+                poly_fprime_fn_end = self.poly_fprime_fns.end()
+
+        ### Increment time and loop iters
+        if i > 0:
+            (&T)[0] += T0.sup()
+            # Pad lower endpoint to take into account numerical error in
+            # endpoints
+            (&T)[0] += Interval(-1e-53, 0)
+            inc(tmv)
+            inc(domain)
+            inc(poly_f_fn)
+            inc(poly_fprime_fn)
+            inc(cached_bool)
+        inc(i)
+
+        # Check stopping condition
+        if (   tmv            == tmv_end
+            or domain         == domain_end
+            or cached_bool    == cached_bool_end
+            or poly_f_fn      == poly_f_fn_end
+            or poly_fprime_fn == poly_fprime_fn_end):
+            return False
+        else:
+            # TM domain
+            (&loop_domain)[0] = (&global_domain.value()
+                                 if global_domain.has_value()
+                                 else &deref(domain))
+
+            # Absolute time domain for current interval
+            (&T0)[0] = loop_domain[0][0] = deref(domain).at(0)
+
+            return True
+        
+
     cdef vector[Interval] c_roots(PolyObserver self,
                                   double epsilon=0.00001, int verbosity=0):
         cdef:
             clist[TaylorModelVec].iterator tmv = self.reach.c_reach.flowpipesCompo.begin()
-            clist[TaylorModelVec].iterator tmv_end = self.reach.c_reach.flowpipesCompo.end()
             clist[vector[Interval]].iterator domain = self.reach.c_reach.domains.begin()
-            clist[vector[Interval]].iterator domain_end = self.reach.c_reach.domains.end()
             vector[optional[bint]].iterator cached_bool = self.bools.begin()
-            vector[optional[bint]].iterator cached_bool_end = self.bools.end()
             vector[optional[interval_time_fn]].iterator\
                 poly_f_fn = self.poly_f_fns.begin()
             vector[optional[interval_time_fn]].iterator\
-                poly_f_fn_end = self.poly_f_fns.end()
-            vector[optional[interval_time_fn]].iterator\
                 poly_fprime_fn = self.poly_fprime_fns.begin()
-            vector[optional[interval_time_fn]].iterator\
-                poly_fprime_fn_end = self.poly_fprime_fns.end()
             vector[Interval] roots
             vector[Interval] new_roots
             vector[Interval].iterator root_iter = roots.begin()
@@ -221,52 +266,18 @@ cdef class PolyObserver:
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
-        
-        print("TEST!")
 
-        while (True):
-            ### Increment time and loop iters
-            if i > 0:
-                T += T0.sup()
-                # Pad lower endpoint to take into account numerical error in
-                # endpoints
-                T += Interval(-1e-53, 0)
-                new_roots.clear()
-                inc(tmv)
-                inc(domain)
-                inc(poly_f_fn)
-                inc(poly_fprime_fn)
-                inc(cached_bool)
-            inc(i)
-
-            # Check stopping condition
-            if (   tmv            == tmv_end
-                or domain         == domain_end
-                or cached_bool    == cached_bool_end
-                or poly_f_fn      == poly_f_fn_end
-                or poly_fprime_fn == poly_fprime_fn_end):
-                break
-
-            # TM domain
-            loop_domain = (&global_domain.value()
-                           if global_domain.has_value()
-                           else &deref(domain))
-
-            # Absolute time domain for current interval
-            T0 = loop_domain[0][0] = deref(domain).at(0)
-
+        while self._tm_segment_loop(i, loop_domain, global_domain,
+                                    tmv, domain, cached_bool,
+                                    poly_f_fn, poly_fprime_fn, T, T0):
             if verbosity >= 2:
+                print("===")
                 print("reached detect roots t={} + {}".format(
                     interval.as_str(T),
                     interval.as_str(deref(domain)[0])))
 
             ### Isolate roots for current timestep
 
-            # print("===")
-            # print('x domain =', interval.as_str(loop_domain[0].at(1)))
-            # print('x special domain =', interval.as_str(deref(domain).at(1)))
-            # print('y domain =', interval.as_str(loop_domain[0].at(2)))
-            # print('y special domain =', interval.as_str(deref(domain).at(2)))
 
             ### If there is a definitive boolean value, there can be no roots
             ### here
@@ -337,6 +348,7 @@ cdef class PolyObserver:
             ### Amalgamate new and existing roots, shifting new roots by
             ### current time, and merging adjacent roots
             self._amalgamate_roots(roots, new_roots, T, verbosity=verbosity)
+            new_roots.clear()
 
 
         return roots

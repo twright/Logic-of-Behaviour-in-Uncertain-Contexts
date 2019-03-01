@@ -1,4 +1,5 @@
 from libcpp.vector cimport vector
+from libcpp.list cimport list as clist
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 
@@ -64,6 +65,17 @@ cdef class PolyObserver:
     cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,
                                 vector[Interval] & new_roots,
                                 Interval & T, int verbosity=?)
+    cdef bint _tm_segment_loop(PolyObserver self,
+                               int & i,
+                               vector[Interval]* & loop_domain,
+                               optional[vector[Interval]] & global_domain,
+                               clist[TaylorModelVec].iterator & tmv,
+                               clist[vector[Interval]].iterator & domain,
+                               vector[optional[bint]].iterator & cached_bool,
+                               vector[optional[interval_time_fn]].iterator & poly_f_fn,
+                               vector[optional[interval_time_fn]].iterator & poly_fprime_fn,
+                               Interval & T,
+                               Interval & T0)
 
 
 cdef class RestrictedObserver(PolyObserver):
