@@ -1,17 +1,29 @@
 from __future__ import (absolute_import, division,
                         print_function)
 from builtins import *  # NOQA
+from abc import ABCMeta  # , abstractmethod
 
 from functools import partial, reduce
+import itertools
 import warnings
 
 from sage.all import RIF, region_plot
 from flowstar.interval import py_int_dist as int_dist
 from ulbc.interval_root_isolation import isolate_roots
 from flowstar.reachability import FlowstarFailedException
+
+
+# def int_dist(I, J):
+#     il, iu = I.edges()
+#     jl, ju = J.edges()
+#     # Round up/down endpoints so as to overapproximate the real distance
+#     return max((il - jl).upper('RNDU'), (jl - il).upper('RNDU'),
+#                (iu - ju).upper('RNDU'), (ju - iu).upper('RNDU'))
+
 # from sage.all import *
 
 # from interval_utils import *
+
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
            'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots',
@@ -136,19 +148,21 @@ def shift_G(J, Kb):
         return None
 
 
-def true_signal(J):
-    return Signal(J, [(J, True)])
+def true_signal(J, mask=None):
+    return Signal(J, [(J, True)], mask=mask)
 
 
-def false_signal(J):
-    return Signal(J, [(J, False)])
+def false_signal(J, mask=None):
+    return Signal(J, [(J, False)], mask=mask)
 
 
-class Signal(object):
-    def __init__(self, domain, values):
+class BaseSignal(object):
+    __metaclass__ = ABCMeta
+
+    def __init__(self, domain, values, expect_consistent=True):
         self._domain = domain  # :: RIF
         # self._values = list(values) # :: [(RIF, Bool)]
-        self._values = values
+        self._values = list(values)
         self._values = [p for p in self._values if p is not None]
         self._values = [(v, b) for v, b in self._values if b is not None]
         dup = True
@@ -166,22 +180,24 @@ class Signal(object):
                             self._values.pop(j)
                             found = True
                             dup = True
-                        elif v.upper() != u.lower() and u.upper() != v.lower():
+                        elif (expect_consistent
+                              and v.upper() != u.lower()
+                              and u.upper() != v.lower()):
                             warnings.warn('Inconsitient intervals {} ({}) '
                                           'and {} ({}) in signal!'.format(
                                               v.str(style='brackets'), bv,
                                               u.str(style='brackets'), bu))
-        self._values.sort(key=lambda x: x[0].lower())
+        self._values.sort(key=lambda x: (x[0].lower(), x[1]))
 
-    def to_domain(self, J):
-        return Signal(J,
-                      [(I.intersection(J), b)
-                       for I, b in self.values if I.overlaps(J)])
-
-    def decompose(self):
-        return (Signal(self.domain, [v]) for v in self.values)
+    def to_domain(self, J, **kwargs):
+        return self.__class__(
+            J,
+            [(I.intersection(J), b) for I, b in self.values if I.overlaps(J)],
+            **kwargs
+        )
 
     def approx_eq(self, other, epsilon=1e-6):
+        # For signals, this will not take into account their masks
         if int_dist(self.domain, other.domain) > epsilon:
             return False
 
@@ -200,11 +216,43 @@ class Signal(object):
     def values(self):
         return self._values
 
-    def __repr__(self):
-        return 'Signal({}, {})'.format(
-            self.domain.str(style='brackets'),
-            "[{}]".format(", ".join("({}, {})".format(
-                v.str(style='brackets'), b) for v, b in self.values)))
+    def union(self, other, **kwargs):
+        return self.__class__(
+            self.domain.union(other.domain),
+            self.values + other.values,
+            **kwargs
+        )
+
+    def intersection(self, other, **kwargs):
+        assert self.domain.overlaps(other.domain)
+
+        def ointersect(x, y):
+            return x.intersection(y)
+
+        # print(self.values)
+        # print(other.values)
+        domain = self.domain.intersection(other.domain)
+        # for I, b in self.values:
+        #     for J, c in other.values:
+        #         if b is c:
+        #             print(b, c)
+        #             print(I, J)
+        #             print(b is c)
+        #             print(I.overlaps(J))
+        # print('---')
+        values = itertools.chain.from_iterable(
+            ((I.intersection(J), b)
+             for J, c in other.values
+             if (b is c) and I.overlaps(J))
+            for I, b in self.values
+        )
+        # from ulbc.context_signals import finterval
+        # print('values =', [(finterval(I), b) for I, b in values])
+        return self.__class__(domain, values, **kwargs)
+
+    def __invert__(self):
+        return self.__class__(self.domain,
+                              [(x, not b) for x, b in self.values])
 
     def plot(self, **kwargs):
         def trues(x, _):
@@ -218,12 +266,91 @@ class Signal(object):
                 + region_plot(falses, self.domain.endpoints(), (-1, 1),
                               incol='pink', **kwargs))
 
+
+def interval_complements(I, J):
+    I, J = RIF(I), RIF(J)
+    il, iu = I.endpoints()
+    jl, ju = J.endpoints()
+    if il < jl:
+        yield RIF(il, jl)
+    if ju < iu:
+        yield RIF(ju, iu)
+
+
+class Signal(BaseSignal):
+    def __init__(self, domain, values, mask=None):
+        super(Signal, self).__init__(domain, values)
+        from ulbc.signal_masks import Mask
+        assert mask is None or isinstance(mask, Mask)
+        if mask is None:
+            self._mask = None
+        else:
+            self._mask = mask.to_domain(self.domain)
+
+    def to_mask(self):
+        from ulbc.signal_masks import Mask
+
+        def ointersect(x, y):
+            return x.intersection(y)
+
+        pos_masks = [
+            Mask(self.domain,
+                 [(K, b) for K in interval_complements(self.domain, J)])
+            for J, b in self.values if b is True
+        ]
+        pos_mask = (reduce(ointersect, pos_masks)
+                    if pos_masks else Mask(self.domain, []))
+        neg_masks = [
+            Mask(self.domain,
+                 [(K, b) for K in interval_complements(self.domain, J)])
+            for J, b in self.values if b is False
+        ]
+        neg_mask = (reduce(ointersect, neg_masks)
+                    if neg_masks else Mask(self.domain, []))
+
+        # print('masks =', masks)
+
+        return pos_mask.union(neg_mask)
+
+    def to_neg_mask(self):
+        return ~self.to_mask()
+
+    def with_mask(self, mask):
+        return Signal(self.domain, self.values, mask=mask)
+
+    @property
+    def mask(self):
+        return self._mask
+
+    def approx_eq(self, other, epsilon=1e-6):
+        sig_eq = super(Signal, self).approx_eq(other, epsilon)
+        mask_eq = self.mask is None or self.mask.approx_eq(other, epsilon)
+        return sig_eq and mask_eq
+
+    def to_domain(self, J):
+        return super(Signal, self).to_domain(
+            J, mask=(None if self.mask is None
+                     else self.mask.to_domain(J)))
+
+    def decompose(self):
+        return (Signal(self.domain, [v]) for v in self.values)
+
+    def __repr__(self):
+        return 'Signal({}, {}, mask={})'.format(
+            self.domain.str(style='brackets'),
+            "[{}]".format(", ".join("({}, {})".format(
+                v.str(style='brackets'), b) for v, b in self.values)),
+            repr(self.mask))
+
     def union(self, other):
-        return Signal(self.domain.union(other.domain),
-                      self.values + other.values)
+        if self.mask is None or other.mask is None:
+            mask = None
+        else:
+            mask = self.mask.union(other.mask)
+        return super(Signal, self).union(other, mask=mask)
 
     def __invert__(self):
-        return Signal(self.domain, [(x, not b) for x, b in self.values])
+        return super(Signal, self).__invert__().with_mask(self.mask)
 
     def __and__(self, other):
         def ounion(x, y):

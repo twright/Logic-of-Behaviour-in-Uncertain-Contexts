@@ -100,11 +100,13 @@ cdef class RestrictedObserver(PolyObserver):
 
 cdef class PolyObserver:
     def __init__(PolyObserver self, f, fprime, CReach reach,
-                  bint symbolic_composition):
+                 bint symbolic_composition,
+                 object mask=None):
         self.f = Poly(f)
         self.fprime = Poly(fprime)
         self.reach = reach
         self.symbolic_composition = symbolic_composition
+        self.mask = mask
         self._init_stored_data()
 
     def _init_stored_data(self):
@@ -120,6 +122,24 @@ cdef class PolyObserver:
             self.poly_fprime_fns = vector[optional[interval_time_fn]](
                 self.reach.c_reach.flowpipesCompo.size(),
                 optional[interval_time_fn]())
+
+        # Translate mask into a vector
+        if self.mask is not None:
+            for I in self.mask.pos:
+                self.masked_regions.push_back(make_interval(I))
+
+    cdef optional[Interval] mask_overlap(self, Interval & x) nogil:
+        cdef optional[Interval] overlap
+        cdef Interval intersection
+
+        for y in self.masked_regions:
+            if interval.overlaps(x, y):
+                if overlap.has_value():
+                    interval.interval_union(overlap.value(), x.intersect(y)) 
+                else:
+                    overlap = optional[Interval](x.intersect(y))
+
+        return overlap
 
     @property
     def flowstar_successful(self):
@@ -145,10 +165,27 @@ cdef class PolyObserver:
         if self.reach is None:
             return None
 
+        print("Test 1!")
+
         with self.reach.global_manager:
             c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)
 
         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
+
+    cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,
+                                vector[Interval] & new_roots,
+                                Interval & T, int verbosity=0):
+        for root in new_roots:
+            root.add_assign(T)
+            if (not roots.empty()
+                and interval.int_min_dist(root, roots.back()) < 1e-9):
+                if verbosity >= 3:
+                    print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
+                        root.inf(), root.sup(),
+                        roots.back().inf(), roots.back().sup()))
+                interval.interval_union(roots.back(), root)
+            else:
+                roots.push_back(root)
 
     cdef vector[Interval] c_roots(PolyObserver self,
                                   double epsilon=0.00001, int verbosity=0):
@@ -177,17 +214,39 @@ cdef class PolyObserver:
             interval.interval_time_fn f_fn, fprime_fn, f_fn_compo
             Interval f_domain
             vector[Interval] tmv_domain
+            optional[Interval] mask_overlap
+            int i = 0
             vector[Interval]* loop_domain
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
+        
+        print("TEST!")
 
-        while (    tmv            != tmv_end
-               and domain         != domain_end
-               and cached_bool    != cached_bool_end
-               and poly_f_fn      != poly_f_fn_end
-               and poly_fprime_fn != poly_fprime_fn_end):
+        while (True):
+            ### Increment time and loop iters
+            if i > 0:
+                T += T0.sup()
+                # Pad lower endpoint to take into account numerical error in
+                # endpoints
+                T += Interval(-1e-53, 0)
+                new_roots.clear()
+                inc(tmv)
+                inc(domain)
+                inc(poly_f_fn)
+                inc(poly_fprime_fn)
+                inc(cached_bool)
+            inc(i)
+
+            # Check stopping condition
+            if (   tmv            == tmv_end
+                or domain         == domain_end
+                or cached_bool    == cached_bool_end
+                or poly_f_fn      == poly_f_fn_end
+                or poly_fprime_fn == poly_fprime_fn_end):
+                break
+
             # TM domain
             loop_domain = (&global_domain.value()
                            if global_domain.has_value()
@@ -211,87 +270,74 @@ cdef class PolyObserver:
 
             ### If there is a definitive boolean value, there can be no roots
             ### here
-            if not deref(cached_bool).has_value():
-                ### Retrieve cached symbolically composed functions, or perform
-                ### functional composition.
-                if self.symbolic_composition and deref(poly_f_fn).has_value():
-                    assert deref(poly_fprime_fn).has_value()
-                    # Retrieve cached composed functions
-                    f_fn = deref(poly_f_fn).value()
-                    fprime_fn = deref(poly_fprime_fn).value()
-                else:
-                    # Functional composition for polynomial
-                    f_fn = interval.compose_interval_fn(poly_fn(self.f.c_poly),
-                                                        deref(tmv),
-                                                        deref(loop_domain))
+            if deref(cached_bool).has_value():
+                continue
 
-                # Evaluate f over the whole domain
-                f_domain = f_fn.call(T0)
+            ### Use mask to determine what region is compatible with the mask
+            # if self.mask is not None:
+            #     mask_overlap = self.mask_overlap(T)
 
-                # Only do anything if there is a chance of a root
-                if not (f_domain.inf() <= 0 <= f_domain.sup()):
-                    # Annoying code to make Cython allow assignment to a r-value
-                    (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
-                else:
-                    if self.symbolic_composition and not deref(poly_f_fn).has_value():
-                        # Define f and fprime by symbolically composing polynomials
-                        (f_fn, fprime_fn) = observable(
-                            self.f.c_poly, deref(tmv), deref(loop_domain),
-                            self.reach.c_reach.globalMaxOrder,
-                            self.reach.c_reach.cutoff_threshold,
-                        )
-                        (&deref(poly_f_fn))[0] = optional[interval_time_fn](f_fn)
-                        (&deref(poly_fprime_fn))[0] = optional[interval_time_fn](
-                            fprime_fn)
-                    elif not self.symbolic_composition:
-                        # Define fprime as a functional composition, and use f as
-                        # defined similarly above
-                        fprime_fn = interval.compose_interval_fn(
-                            poly_fn(self.fprime.c_poly),
-                            deref(tmv),
-                            deref(loop_domain)
-                        )
-                    else:
-                        raise Exception("Invalid case!")
+            #     if mask_overlap.has_value():
+            #         mask_overlap.value().sub_assign(T)
+            #         mask_overlap.value().intersect_assign(T0)
+            #     else:
+            #         continue
 
-                    ### Perform root detection
-                    root_detection.detect_roots(new_roots, f_fn, fprime_fn, T0,
-                                                epsilon=epsilon,
-                                                verbosity=verbosity)
+            ### Retrieve cached symbolically composed functions, or perform
+            ### functional composition.
+            if self.symbolic_composition and deref(poly_f_fn).has_value():
+                assert deref(poly_fprime_fn).has_value()
+                # Retrieve cached composed functions
+                f_fn = deref(poly_f_fn).value()
+                fprime_fn = deref(poly_fprime_fn).value()
+            else:
+                # Functional composition for polynomial
+                f_fn = interval.compose_interval_fn(poly_fn(self.f.c_poly),
+                                                    deref(tmv),
+                                                    deref(loop_domain))
 
-                    # Restore domain after root detection
-                    deref(loop_domain)[0] = T0
+            # Evaluate f over the whole domain
+            f_domain = f_fn.call(T0)
 
-                    ### Amalgamate new and existing roots, shifting new roots by
-                    ### current time, and merging adjacent roots
-                    root_iter = new_roots.begin()
-                    while root_iter != new_roots.end():
-                        # print("shifting root")
-                        deref(root_iter).add_assign(T)
-                        if (not roots.empty()
-                            and interval.int_min_dist(
-                                deref(root_iter), roots.back()) < 1e-9):
-                            if verbosity >= 3:
-                                print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
-                                    deref(root_iter).inf(), deref(root_iter).sup(),
-                                    roots.back().inf(), roots.back().sup()))
-                            interval.interval_union(roots.back(),
-                                                    deref(root_iter))
-                        else:
-                            roots.push_back(deref(root_iter))
-                        inc(root_iter)
+            # Only do anything if there is a chance of a root
+            if not (f_domain.inf() <= 0 <= f_domain.sup()):
+                # Annoying code to make Cython allow assignment to a r-value
+                (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
+                continue
 
-            ### Increment time and loop iters
-            T += T0.sup()
-            # Pad lower endpoint to take into account numerical error in
-            # endpoints
-            T += Interval(-1e-53, 0)
-            new_roots.clear()
-            inc(tmv)
-            inc(domain)
-            inc(poly_f_fn)
-            inc(poly_fprime_fn)
-            inc(cached_bool)
+            if self.symbolic_composition and not deref(poly_f_fn).has_value():
+                # Define f and fprime by symbolically composing polynomials
+                (f_fn, fprime_fn) = observable(
+                    self.f.c_poly, deref(tmv), deref(loop_domain),
+                    self.reach.c_reach.globalMaxOrder,
+                    self.reach.c_reach.cutoff_threshold,
+                )
+                (&deref(poly_f_fn))[0] = optional[interval_time_fn](f_fn)
+                (&deref(poly_fprime_fn))[0] = optional[interval_time_fn](
+                    fprime_fn)
+            elif not self.symbolic_composition:
+                # Define fprime as a functional composition, and use f as
+                # defined similarly above
+                fprime_fn = interval.compose_interval_fn(
+                    poly_fn(self.fprime.c_poly),
+                    deref(tmv),
+                    deref(loop_domain)
+                )
+            else:
+                raise Exception("Invalid case!")
+
+            ### Perform root detection
+            root_detection.detect_roots(new_roots, f_fn, fprime_fn, T0,
+                                        epsilon=epsilon,
+                                        verbosity=verbosity)
+
+            # Restore domain after root detection
+            deref(loop_domain)[0] = T0
+
+            ### Amalgamate new and existing roots, shifting new roots by
+            ### current time, and merging adjacent roots
+            self._amalgamate_roots(roots, new_roots, T, verbosity=verbosity)
+
 
         return roots
 

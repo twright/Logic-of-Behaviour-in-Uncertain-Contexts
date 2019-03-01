@@ -52,12 +52,18 @@ cdef class PolyObserver:
     cdef vector[optional[interval_time_fn]] poly_fprime_fns
     cdef vector[optional[bint]] bools
     cdef bint symbolic_composition
+    cdef readonly object mask  # Mask
+    cdef vector[Interval] masked_regions
 
+    cdef optional[Interval] mask_overlap(self, Interval & x) nogil
     cdef optional[vector[Interval]] _global_domain(self)
     cdef vector[Interval] c_roots(PolyObserver self,
                                   double epsilon=?, int verbosity=?)
     cdef Interval eval_interval(PolyObserver self, Interval & I)
     cdef tribool eval_bool_interval(PolyObserver self, Interval & I)
+    cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,
+                                vector[Interval] & new_roots,
+                                Interval & T, int verbosity=?)
 
 
 cdef class RestrictedObserver(PolyObserver):

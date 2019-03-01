@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 from distutils.extension import Extension
@@ -13,7 +13,7 @@ import Cython.Compiler.Options
 Cython.Compiler.Options.annotate = True
 Cython.Compiler.Options.fast_fail = True
 
-LIB_DIRS = ['.', './flowstar/', './flowstar/flowstar-2.1.0',
+LIB_DIRS = ['.', './flowstar/', './ulbc/', './flowstar/flowstar-2.1.0',
             '/usr/include/boost']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
 COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-march=native']
@@ -70,6 +70,16 @@ extensions = [
         library_dirs=LIB_DIRS,
         include_dirs=LIB_DIRS,
     ),
+    # Extension(
+    #     name='ulbc.signal_masks',
+    #     sources=['ulbc/signal_masks.pyx'],
+    #     language='c++',
+    #     libraries=LIBS,
+    #     extra_compile_args=COMPILE_ARGS,
+    #     extra_link_args=LINK_ARGS,
+    #     library_dirs=LIB_DIRS,
+    #     include_dirs=LIB_DIRS,
+    # ),
 ]
 
 
@@ -117,7 +127,7 @@ class CleanFlowstarCommand(Command):
         self.announce('Cleaning flowstar...')
         try:
             subprocess.call('make clean', cwd='flowstar/flowstar-2.1.0',
-                shell=True)
+                            shell=True)
         except:
             pass
         try:
@@ -142,8 +152,9 @@ class TestCommand(Command):
 
     def run(self):
         self.run_command('build_ext')
+        # self.run_command('pytest')
         self.announce('Testing...')
-        cmd = ['pytest'] #, '--doctest-cython']
+        cmd = ['pytest']  # , '--doctest-cython']
         if self.verbose_test:
             cmd.append('-v')
         if self.all:
@@ -174,13 +185,17 @@ class BuildAllCommand(build_ext, object):
         super(BuildAllCommand, self).build_extensions()
 
 
-setup(package_dir={'flowstar': 'flowstar'},
-      packages=['flowstar'],
-      cmdclass={'choose_flowstar': ChooseFlowstarCommand,
-                'clean_flowstar': CleanFlowstarCommand,
-                'build_flowstar': BuildFlowstarCommand,
-                'test': TestCommand,
-                'build_ext': BuildAllCommand},
-      ext_modules=cythonize(extensions, gdb_debug=True,
-                            annotate=True, nthreads=4,
-                            language_level=3))
+setup(
+    packages=find_packages(),
+    package_dir={'ulbc': 'ulbc', 'flowstar': 'flowstar'},
+    py_modules=['flowstar', 'ulbc'],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
+    cmdclass={'choose_flowstar': ChooseFlowstarCommand,
+              'clean_flowstar': CleanFlowstarCommand,
+              'build_flowstar': BuildFlowstarCommand,
+              'test': TestCommand,
+              'build_ext': BuildAllCommand},
+    ext_modules=cythonize(extensions, gdb_debug=True,
+                          annotate=True, nthreads=4,
+                          language_level=2))

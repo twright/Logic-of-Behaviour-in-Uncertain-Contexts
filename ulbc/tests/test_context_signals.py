@@ -4,13 +4,14 @@ from sage.all import RIF
 from functools import partial
 
 from ulbc.interval_signals import Signal
-from ulbc.context_signals import (ContextSignal, gen_subcontexts, finterval,
+from ulbc.context_signals import (ContextSignal, gen_subcontexts,
                                   context_to_space_domain,
                                   gen_sub_space_domains,
                                   true_context_signal,
                                   ChildIterator)
 from flowstar.reachability import Reach, PolyObserver
 from ulbc.logic import Atomic
+from ulbc.interval_utils import finterval, int_dist, int_sorted
 # from flowstar.interval import int_dist
 
 
@@ -25,18 +26,6 @@ def odes(ringxy):
     return [-y, x]
 
 
-def int_dist(I, J):
-    il, iu = I.endpoints()
-    jl, ju = J.endpoints()
-    # Round up/down endpoints so as to overapproximate the real distance
-    return max(max(abs(I.lower('RNDU') - J.lower('RNDD')),
-                   abs(I.upper('RNDU') - J.upper('RNDD'))), 0)
-
-
-def isorted(kxs):
-    kxs = map(partial(sorted, key=lambda x: (x[0], x[1].endpoints())), kxs)
-    return sorted(kxs, key=lambda xs: [(k, x.endpoints()) for k, x in xs])
-
 
 def ctx_approx_eq(kxs1, kxs2, epsilon=1e-3):
     res = all(k1 == k2 and int_dist(x1, x2) <= epsilon
@@ -50,8 +39,8 @@ def ctx_approx_eq(kxs1, kxs2, epsilon=1e-3):
 
 
 def ctxs_approx_eq(kxss1, kxss2, epsilon=1e-3):
-    kxss1 = isorted(kxss1)
-    kxss2 = isorted(kxss2)
+    kxss1 = int_sorted(kxss1)
+    kxss2 = int_sorted(kxss2)
     print('kxss1 = {}\nkxss2 = {}'.format(kxss1, kxss2))
     return (len(kxss1) == len(kxss2)
             and all(ctx_approx_eq(kxs1, kxs2, epsilon)

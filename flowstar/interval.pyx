@@ -48,12 +48,13 @@ def py_overlaps(I, J):
     return overlaps(make_interval(I), make_interval(J))
 
 
-cdef void interval_union(Interval & I, Interval & J) nogil:
+cdef void interval_union(Interval & I, const Interval & J) nogil:
     I.setInf(cmin(I.inf(), J.inf()))
     I.setSup(cmax(I.sup(), J.sup()))
 
 
-cdef void interval_vect_union(vector[Interval] & Is, vector[Interval] & Js) nogil:
+cdef void interval_vect_union(vector[Interval] & Is,
+                              vector[Interval] & Js) nogil:
     cdef:
         vector[Interval].iterator itI = Is.begin()
         vector[Interval].iterator itJ = Js.begin()

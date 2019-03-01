@@ -13,12 +13,14 @@ from functools import partial
 
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer)
-from ulbc.context_signals import (ContextSignal, context_to_space_domain,
+from ulbc.context_signals import (ContextSignal,
                                   space_domain_to_context,
                                   true_context_signal, false_context_signal)
+from ulbc.signal_masks import (Mask, mask_zero)
 from flowstar.reachability import (Reach, FlowstarFailedException,
                                    PolyObserver, RestrictedObserver)
 from flowstar.poly import Poly
+from ulbc.interval_utils import finterval
 
 
 def convert_mat(m):
@@ -70,7 +72,8 @@ class Logic(object):
     def vars(self):
         return self._vars
 
-    def signal_for_system(self, odes, initials, duration, **kwargs):
+    def signal_for_system(self, odes, initials, duration, use_masks=False,
+                          mask=None, **kwargs):
         t0 = time.time()
         if 'order' not in kwargs:
             kwargs['order'] = 10
@@ -96,8 +99,10 @@ class Logic(object):
         reach.prepare()
         t2 = time.time()
         print("Prepared for plotting in {} sec".format(t2 - t1))
-        res = self.signal(reach, odes, **kwargs
-                          ).to_domain(RIF(0, duration))
+        res = self.signal(reach, odes,
+                          # Specify mask, if one is to be used
+                          mask=mask_zero if use_masks else None,
+                          **kwargs).to_domain(RIF(0, duration))
         t3 = time.time()
         print("Monitored signal {} sec".format(t3 - t2))
         return res
@@ -131,7 +136,8 @@ class Logic(object):
     def context_signal(self, R, odes, initials, **kwargs):
         pass
 
-    def context_signal_for_system(self, odes, initials, duration, **kwargs):
+    def context_signal_for_system(self, odes, initials, duration, mask=None,
+                                  **kwargs):
         # TODO: Factor out similarities with signal_for_system
         t0 = time.time()
         if 'order' not in kwargs:
@@ -194,7 +200,7 @@ class Logic(object):
         return self.numerical_signal(sln.sol,
                                      sln_events,
                                      self.duration + duration)\
-                   .to_domain(RIF(0, duration))
+            .to_domain(RIF(0, duration))
 
     @abstractproperty
     def atomic_propositions(self):
@@ -241,7 +247,8 @@ class Atomic(Logic):
 
         return sage.plot((lo, up), (0, R.time))
 
-    def signal_for_system(self, odes, initials, duration, **kwargs):
+    def signal_for_system(self, odes, initials, duration, use_masks=True,
+                          mask=None, **kwargs):
         '''
         >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
         >>> odes = [-y, x]
@@ -254,18 +261,21 @@ class Atomic(Logic):
         '''
         # Do the smart thing in the case of duration 0
         if duration == 0:
+            mask = mask_zero if use_masks else None
             res = Poly(self.p)(initials)
             if res.lower() > 0:
-                return true_signal(RIF(0, 0))
+                return true_signal(RIF(0, 0), mask=mask)
             elif res.upper() < 0:
-                return false_signal(RIF(0, 0))
+                return false_signal(RIF(0, 0), mask=mask)
             else:
-                return Signal(RIF(0, 0), [])
+                return Signal(RIF(0, 0), [], mask=mask)
         else:
             return super(Atomic, self).signal_for_system(odes, initials,
-                                                         duration, **kwargs)
+                                                         duration,
+                                                         use_masks=use_masks,
+                                                         **kwargs)
 
-    def signal(self, R, odes, space_domain=None, **kwargs):
+    def signal(self, R, odes, space_domain=None, mask=None, **kwargs):
         if isinstance(R, PolyObserver):
             observer = R
         else:
@@ -298,7 +308,7 @@ class Atomic(Logic):
             observer = PolyObserver(self.p, self.dpdt(odes), reach,
                                     kwargs.get('symbolic_composition', False))
 
-        return ContextSignal(domain, initials, 
+        return ContextSignal(domain, initials,
                              partial(self.signal_fn, odes, **kwargs),
                              observer=observer)
 
@@ -546,15 +556,6 @@ class Neg(Logic):
 
     def numerical_signal(self, f, events, duration):
         return ~self.p.numerical_signal(f, events, duration)
-
-
-def finterval(I):
-    a, b = I.endpoints()
-    ra, rb = a.floor(), b.ceil()
-    if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
-        return str(ra) if ra == rb else '[{} .. {}]'.format(ra, rb)
-    else:
-        return I.str(style='brackets')
 
 
 def identity(x):

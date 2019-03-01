@@ -4,6 +4,9 @@ from sage.all import RIF
 
 from ulbc.logic import Atomic
 from flowstar.reachability import Reach, PolyObserver, RestrictedObserver
+from ulbc.signal_masks import Mask
+from ulbc.interval_utils import (finterval, int_dist,
+                                 intervals_approx_eq as roots_approx_eq)
 
 
 @pytest.fixture(scope='module')
@@ -22,28 +25,10 @@ def initials():
     return [RIF(1, 2), RIF(3, 4)]
 
 
-def finterval(I):
-    a, b = I.endpoints()
-    ra, rb = a.floor(), b.ceil()
-    if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
-        return str(ra) if ra == rb else '[{} .. {}]'.format(ra, rb)
-    else:
-        return I.str(style='brackets')
-
-
-def int_dist(I, J):
-    il, iu = I.endpoints()
-    jl, ju = J.endpoints()
-    # Round up/down endpoints so as to overapproximate the real distance
-    return max(max(abs(I.lower('RNDU') - J.lower('RNDD')),
-                   abs(I.upper('RNDU') - J.upper('RNDD'))), 0)
-
-
-def roots_approx_eq(xs, ys, epsilon=1e-3):
-    print('xs = {}\nys = {}'.format(list(map(finterval, xs)),
-                                    list(map(finterval, ys))))
-    return (len(xs) == len(ys)
-            and all(int_dist(x, y) <= epsilon for x, y in zip(xs, ys)))
+@pytest.fixture
+def mask1():
+    return Mask(RIF(0, 2*sage.pi),
+                [(RIF(0.15, 0.4), True)])
 
 
 @pytest.fixture(scope='module')
@@ -59,6 +44,25 @@ class TestConvertSpaceDomain(object):
         )
 
 
+class TestPolyObserverMask(object):
+    def test_construct_masked(self, ringxy, odes, reach, mask1):
+        R, (x, y) = ringxy
+        P = Atomic(x)
+        observer = PolyObserver(P.p, P.dpdt(odes), reach, False,
+                                mask=mask1)
+
+        assert observer.mask.approx_eq(mask1)
+
+    def test_masked_roots(self, ringxy, odes, reach, mask1):
+        R, (x, y) = ringxy
+        P = Atomic(x)
+        observer = PolyObserver(P.p, P.dpdt(odes), reach, False,
+                                mask=mask1)
+
+        assert roots_approx_eq(observer.roots(),
+                               [RIF(0.23975290341611912, 0.5)])
+
+
 class TestPolyObserverRoots(object):
     def test_unrestricted(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -66,7 +70,7 @@ class TestPolyObserverRoots(object):
         observer = PolyObserver(P.p, P.dpdt(odes), reach, False)
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
     def test_unrestricted_symbolic_composition(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -74,7 +78,7 @@ class TestPolyObserverRoots(object):
         observer = PolyObserver(P.p, P.dpdt(odes), reach, True)
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
 
 class TestRestrictedObserverRoots(object):
@@ -85,13 +89,13 @@ class TestRestrictedObserverRoots(object):
         observer = PolyObserver(P.p, P.dpdt(odes), reach, False)
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
         restricted = RestrictedObserver(observer,
                                         [RIF(1, 1.5), RIF(3.5, 3.75)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
-                                RIF(3.3994777805033886,  3.5489584384093589)])
+                                RIF(3.39947778050338860, 3.5489584384093589)])
 
     def test_restricted_no_oversharing(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -104,11 +108,11 @@ class TestRestrictedObserverRoots(object):
                                         [RIF(1, 1.5), RIF(3.5, 3.75)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
-                                RIF(3.3994777805033886,  3.5489584384093589)])
+                                RIF(3.39947778050338860, 3.5489584384093589)])
 
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
     def test_unrestricted_symbolic_composition(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -117,13 +121,13 @@ class TestRestrictedObserverRoots(object):
         observer = PolyObserver(P.p, P.dpdt(odes), reach, False)
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
         restricted = RestrictedObserver(observer,
                                         [RIF(1, 1.5), RIF(3.5, 3.75)])
         assert roots_approx_eq(restricted.roots(),
                                [RIF(0.25876412796561448, 0.40515754491116441),
-                                RIF(3.3994777805033886,  3.5489584384093589)])
+                                RIF(3.39947778050338860, 3.5489584384093589)])
 
     def test_one_dimensional_context(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -132,12 +136,12 @@ class TestRestrictedObserverRoots(object):
         observer = PolyObserver(P.p, P.dpdt(odes), reach, False)
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
         restricted = RestrictedObserver(observer, [RIF(1, 1.5), RIF(3.5, 3.5)])
         assert roots_approx_eq(restricted.roots([RIF(1, 1.5), RIF(3.5, 3.5)]),
                                [RIF(0.27559817196853414, 0.40515751487396307),
-                                RIF(3.4178662628694436,  3.5489199118809270)])
+                                RIF(3.41786626286944360, 3.5489199118809270)])
 
     def test_context_one_restricted_dimension(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -145,12 +149,12 @@ class TestRestrictedObserverRoots(object):
         observer = PolyObserver(P.p, P.dpdt(odes), reach, False)
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
         restricted = RestrictedObserver(observer, [RIF(1, 1.5), RIF(3, 4)])
         assert roots_approx_eq(restricted.roots(),
                                [RIF(0.24153380171243452, 0.46837741667207051),
-                                RIF(3.3840480018296905,  3.6056159786942144)])
+                                RIF(3.38404800182969050, 3.6056159786942144)])
 
 
 class TestPolyObserverEval(object):
@@ -242,7 +246,7 @@ class TestRoots(object):
         P = Atomic(x)
         assert roots_approx_eq(reach.roots(P.p, P.dpdt(odes)),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.3820262152396072,  3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)])
 
     def test_restricted_context(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -251,7 +255,7 @@ class TestRoots(object):
                                            space_domain=[RIF(1, 1.5),
                                                          RIF(3.5, 3.75)]),
                                [RIF(0.25876412796561448, 0.40515754491116441),
-                                RIF(3.3994777805033886,  3.5489584384093589)])
+                                RIF(3.39947778050338860, 3.5489584384093589)])
 
     def test_one_dimensional_context(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -260,7 +264,7 @@ class TestRoots(object):
                                            space_domain=[RIF(1, 1.5),
                                                          RIF(3.5, 3.5)]),
                                [RIF(0.27559817196853414, 0.40515751487396307),
-                                RIF(3.4178662628694436,  3.5489199118809270)])
+                                RIF(3.41786626286944360, 3.5489199118809270)])
 
     def test_context_one_restricted_dimension(self, ringxy, odes, reach):
         R, (x, y) = ringxy
@@ -269,7 +273,7 @@ class TestRoots(object):
                                            space_domain=[RIF(1, 1.5),
                                                          RIF(3, 4)]),
                                [RIF(0.24153380171243452, 0.46837741667207051),
-                                RIF(3.3840480018296905,  3.6056159786942144)])
+                                RIF(3.38404800182969050, 3.6056159786942144)])
 
 
 class TestReachability(object):
