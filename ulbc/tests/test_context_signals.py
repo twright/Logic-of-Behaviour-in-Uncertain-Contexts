@@ -1,7 +1,6 @@
-import pytest
-import sage.all as sage
+# import pytest
+# import sage.all as sage
 from sage.all import RIF
-from functools import partial
 
 from ulbc.interval_signals import Signal
 from ulbc.context_signals import (ContextSignal, gen_subcontexts,
@@ -9,22 +8,12 @@ from ulbc.context_signals import (ContextSignal, gen_subcontexts,
                                   gen_sub_space_domains,
                                   true_context_signal,
                                   ChildIterator)
-from flowstar.reachability import Reach, PolyObserver
+from flowstar.reachability import Reach
+from flowstar.observers import PolyObserver
+from flowstar.tests.test_reachability import ringxy, odes  # NOQA
 from ulbc.logic import Atomic
 from ulbc.interval_utils import finterval, int_dist, int_sorted
 # from flowstar.interval import int_dist
-
-
-@pytest.fixture(scope='module')
-def ringxy():
-    return sage.PolynomialRing(sage.RIF, 'x, y').objgens()
-
-
-@pytest.fixture(scope='module')
-def odes(ringxy):
-    R, (x, y) = ringxy
-    return [-y, x]
-
 
 
 def ctx_approx_eq(kxs1, kxs2, epsilon=1e-3):
@@ -68,7 +57,7 @@ def space_domains_approx_eq(xs, ys, epsilon=1e-3):
 
 
 class TestCtxToSpaceDomain(object):
-    def test_two_dimensional(self, ringxy):
+    def test_two_dimensional(self, ringxy):  # NOQA
         R, (x, y) = ringxy
         ctx = {'x': RIF(1, 3), 'y': RIF(5, 7)}
         assert space_domain_approx_eq(context_to_space_domain(R, ctx),
@@ -170,7 +159,7 @@ class TestContextSignal(object):
     #                " ContextSignal([1 .. 2], {'x': 2, 'y': [6 .. 7]},"
     #                " None, None)]")
 
-    def test_signal_gen(self, ringxy):
+    def test_signal_gen(self, ringxy):  # NOQA
         R, (x, y) = ringxy
         odes = [-y, x]
         atomic = Atomic(x)
@@ -192,9 +181,8 @@ class TestContextSignal(object):
                             observer=observer)
         assert ctx.signal.approx_eq(expected, 0.1)
 
-    def test_signal_gen_restricted_context(self, ringxy):
+    def test_signal_gen_restricted_context(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
-        odes = [-y, x]
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain):
@@ -218,9 +206,8 @@ class TestContextSignal(object):
         print(ctx.signal)
         assert ctx.signal.approx_eq(expected, 0.1)
 
-    def test_signal_restricted_via_children(self, ringxy):
+    def test_signal_restricted_via_children(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
-        odes = [-y, x]
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain):
@@ -244,9 +231,8 @@ class TestContextSignal(object):
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.1)
 
-    def test_signal_further_restricted_via_children(self, ringxy):
+    def test_signal_further_restricted_via_children(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
-        odes = [-y, x]
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain):
@@ -275,9 +261,8 @@ class TestContextSignal(object):
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.01)
 
-    def test_trivial_refined_signal(self, ringxy):
+    def test_trivial_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
-        odes = [-y, x]
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain):
@@ -292,9 +277,8 @@ class TestContextSignal(object):
                             observer=observer)
         assert ctx.refined_signal(0).approx_eq(ctx.signal, 0.01)
 
-    def test_refined_signal(self, ringxy):
+    def test_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
-        odes = [-y, x]
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain):
@@ -315,9 +299,8 @@ class TestContextSignal(object):
         print(ctx.refined_signal(1))
         assert ctx.refined_signal(1).approx_eq(expected, 0.01)
 
-    def test_further_refined_signal(self, ringxy):
+    def test_further_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
-        odes = [-y, x]
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain):

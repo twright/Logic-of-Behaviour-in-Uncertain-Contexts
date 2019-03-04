@@ -1,13 +1,14 @@
 from __future__ import (absolute_import, division,
                         print_function)
-from builtins import *  # NOQA
 
 from functools import reduce
 
-from sage.all import RIF
 import sage.all as sage
+from builtins import *  # NOQA
+from sage.all import RIF
+
+from flowstar.observers import RestrictedObserver, PolyObserver
 from ulbc.interval_signals import (true_signal, false_signal)
-from flowstar.reachability import RestrictedObserver, PolyObserver
 
 __all__ = ['true_context_signal', 'false_context_signal', 'ContextSignal']
 
@@ -149,8 +150,8 @@ class ContextSignal(object):
                               signal_fn,
                               observer=RestrictedObserver(observer,
                                                           sub_space_domain)
-                                       if observer is not None
-                                       else None)
+                              if observer is not None
+                              else None)
                 for sub_space_domain in self.sub_space_domains
             )
         else:
@@ -203,8 +204,8 @@ class ContextSignal(object):
             assert len(list(self.children)) == 4
             return sage.block_matrix(2, 2,
                                      [c.histogram2d(n - 1)
-                                      for c in self.children])\
-                       .transpose()
+                                      for c in self.children]) \
+                .transpose()
 
     def plot_histogram2d(self, n):
         from matplotlib.colors import LinearSegmentedColormap

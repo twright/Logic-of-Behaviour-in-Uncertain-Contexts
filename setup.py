@@ -1,15 +1,16 @@
 #!/usr/bin/env python2
 
-from setuptools import setup, find_packages
-from Cython.Build import cythonize
-from Cython.Distutils import build_ext
-from distutils.extension import Extension
-from distutils.cmd import Command
+import os
 # from Cython.Distutils import build_ext
 import subprocess
-import os
+from distutils.cmd import Command
+from distutils.extension import Extension
 
 import Cython.Compiler.Options
+from Cython.Build import cythonize
+from Cython.Distutils import build_ext
+from setuptools import setup, find_packages
+
 Cython.Compiler.Options.annotate = True
 Cython.Compiler.Options.fast_fail = True
 
@@ -70,16 +71,16 @@ extensions = [
         library_dirs=LIB_DIRS,
         include_dirs=LIB_DIRS,
     ),
-    # Extension(
-    #     name='ulbc.signal_masks',
-    #     sources=['ulbc/signal_masks.pyx'],
-    #     language='c++',
-    #     libraries=LIBS,
-    #     extra_compile_args=COMPILE_ARGS,
-    #     extra_link_args=LINK_ARGS,
-    #     library_dirs=LIB_DIRS,
-    #     include_dirs=LIB_DIRS,
-    # ),
+    Extension(
+        name='flowstar.observers',
+        sources=['flowstar/observers.pyx'],
+        language='c++',
+        libraries=LIBS,
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+    ),
 ]
 
 

@@ -1,26 +1,27 @@
 from __future__ import (absolute_import, division,
                         print_function)
-from builtins import *  # NOQA
-from sage.all import RIF
-import sage.all as sage
-from collections import OrderedDict
-import operator
-from abc import ABCMeta, abstractmethod, abstractproperty
-import sympy
+
 import itertools
+import operator
 import time
+from abc import ABCMeta, abstractmethod, abstractproperty
+from collections import OrderedDict
 from functools import partial
 
+import sage.all as sage
+import sympy
+from builtins import *  # NOQA
+from flowstar.poly import Poly
+from flowstar.reachability import Reach, FlowstarFailedException
+from sage.all import RIF
+
+from flowstar.observers import PolyObserver, RestrictedObserver
+from ulbc.context_signals import (ContextSignal,
+                                  true_context_signal, false_context_signal)
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer)
-from ulbc.context_signals import (ContextSignal,
-                                  space_domain_to_context,
-                                  true_context_signal, false_context_signal)
-from ulbc.signal_masks import (Mask, mask_zero)
-from flowstar.reachability import (Reach, FlowstarFailedException,
-                                   PolyObserver, RestrictedObserver)
-from flowstar.poly import Poly
 from ulbc.interval_utils import finterval
+from ulbc.signal_masks import Mask, mask_zero
 
 
 def convert_mat(m):
@@ -87,6 +88,14 @@ class Logic(object):
             self.duration + duration + 1e-3,
             **kwargs
         )
+
+        # Decide on an initial mask.
+        if mask is None and use_masks:
+            domain = RIF(0, duration)
+            mask = Mask(domain, [(domain, True), (domain, False)])
+        elif not use_masks:
+            mask = None
+
         # Check that flowstar ran for the whole timeframe
         if not reach.ran or reach.result > 3:
             raise FlowstarFailedException(
@@ -99,10 +108,8 @@ class Logic(object):
         reach.prepare()
         t2 = time.time()
         print("Prepared for plotting in {} sec".format(t2 - t1))
-        res = self.signal(reach, odes,
-                          # Specify mask, if one is to be used
-                          mask=mask_zero if use_masks else None,
-                          **kwargs).to_domain(RIF(0, duration))
+        res = self.signal(reach, odes, mask=mask, **kwargs
+                          ).to_domain(RIF(0, duration))
         t3 = time.time()
         print("Monitored signal {} sec".format(t3 - t2))
         return res
@@ -247,7 +254,7 @@ class Atomic(Logic):
 
         return sage.plot((lo, up), (0, R.time))
 
-    def signal_for_system(self, odes, initials, duration, use_masks=True,
+    def signal_for_system(self, odes, initials, duration, use_masks=False,
                           mask=None, **kwargs):
         '''
         >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
@@ -273,6 +280,7 @@ class Atomic(Logic):
             return super(Atomic, self).signal_for_system(odes, initials,
                                                          duration,
                                                          use_masks=use_masks,
+                                                         mask=mask,
                                                          **kwargs)
 
     def signal(self, R, odes, space_domain=None, mask=None, **kwargs):
