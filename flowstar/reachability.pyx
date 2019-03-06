@@ -5,12 +5,13 @@ from __future__ import division, print_function, absolute_import
 from flowstar.Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
 from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
 from flowstar.Interval cimport Interval, intervalNumPrecision
-# from reachability cimport interval_fn, Reach, poly_fn
-from flowstar.Polynomial cimport Polynomial, power_4, double_factorial
+from flowstar.Polynomial cimport (Polynomial, power_4, double_factorial,
+                                  factorial_rec)
 from flowstar.poly cimport Poly, poly_fn, poly_time_fn, compose
 cimport flowstar.interval as interval
-from flowstar.interval cimport make_interval
 cimport flowstar.plotting as plotting
+from flowstar.interval cimport interval_fn, interval_time_fn
+from flowstar.observers cimport observable
 
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
@@ -18,45 +19,9 @@ from libcpp.vector cimport vector
 from libcpp.list cimport list as clist
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
-from libcpp.map cimport map as cmap
 from libcpp.algorithm cimport sort as csort
-import operator
-from functools import reduce
-import collections
 import sage.all as sage
-
-# Redefined in this module rather than imported from observers
-# due to Cython bug https://github.com/cython/cython/issues/1427
-cdef (interval_time_fn, interval_time_fn) observable(
-    Polynomial & f, TaylorModelVec & tmv, vector[Interval] & domain,
-    int order, Interval & cutoff_threshold) nogil:
-    cdef:
-        interval_fn f_fn
-        TaylorModel f1, f2
-        vector[Interval] space_domain
-        vector[int] varIDs
-        Interval R
-        Polynomial p, p_deriv
-
-    # Compose
-    f1 = compose(f, tmv, domain, order + 1, cutoff_threshold)
-
-    # Separate off space variables from time
-    for i in range(1, domain.size()):
-        varIDs.push_back(i)
-        space_domain.push_back(domain[i])
-
-    # Substitute domain variables
-    f1.substitute(f2, varIDs, space_domain)
-
-    # return poly_domain_time_fn(f1.expansion
-    #                                + Polynomial(f1.remainder, domain.size()),
-    #                            domain)
-    p = f2.expansion + Polynomial(f2.remainder, 1)
-    p.derivative(p_deriv, 0)
-    p.ctrunc(R, domain, order)
-
-    return (poly_time_fn(p + Polynomial(R, 1)), poly_time_fn(p_deriv))
+from sage.all import RIF
 
 
 class FlowstarFailedException(Exception):
@@ -283,7 +248,7 @@ cdef class CReach:
             clist[vector[Interval]].iterator domain = self.c_reach.domains.begin()
             clist[vector[Interval]].iterator domain_end = self.c_reach.domains.end()
             vector[Interval] res
-            interval_time_fn f_fn
+            interval_time_fn f_fn, fprime_fn
             vector[int] varIDs # state variable ids
             double t = 0.0
             Interval T
@@ -305,7 +270,7 @@ cdef class CReach:
 
         var_id_t = self.c_reach.tmVarTab[b'local_t']
 
-        while (tmv != tmv_end and domain != domain_end):
+        while tmv != tmv_end and domain != domain_end:
             T = deref(domain).at(var_id_t)
             loop_domain = (&composed_domain
                            if space_domain.has_value()
@@ -319,7 +284,7 @@ cdef class CReach:
                 domainCopy[var_id_t].add_assign(-t)
 
                 if not poly.has_value():
-                    # In the normal case we directly evaulate the intervals for
+                    # In the normal case we directly evaluate the intervals for
                     # each component of the system
                     deref(tmv).intEval(res, domainCopy, varIDs)
                 else:
@@ -327,9 +292,11 @@ cdef class CReach:
                     # the system instead
                     res.clear()
                     if self.symbolic_composition:
-                        # Evaluate by symbolically compositing the polynomial
+                        # Evaluate by symbolically composing the polynomial
                         # with the system
-                        (f_fn, _) = observable(
+                        observable(
+                            f_fn,
+                            fprime_fn,
                             poly.value().get(), deref(tmv), domainCopy,
                             self.c_reach.globalMaxOrder,
                             self.c_reach.cutoff_threshold,
@@ -356,8 +323,6 @@ cdef class CReach:
         return final_res
 
     def __call__(self, t, space_domain=None):
-        from sage.all import RIF
-
         self.prepare()
 
         # Convert python interval to flow* interval
@@ -379,7 +344,7 @@ cdef class CReach:
         return [RIF(I.inf(), I.sup()) for I in res]
 
     def prepare(self):
-        '''Prepare for plotting / evaluating.'''
+        """Prepare for plotting / evaluating."""
         if not self.ran:
             raise Exception('Not ran!')
 
@@ -407,7 +372,7 @@ cdef class CReach:
     @property
     def cutoff_threshold(self):
         i = self.c_reach.cutoff_threshold
-        return (i.inf(), i.sup())
+        return i.inf(), i.sup()
 
     @property
     def estimation(self):

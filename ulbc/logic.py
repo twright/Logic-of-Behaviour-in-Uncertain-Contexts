@@ -215,7 +215,7 @@ class Logic(object):
 
 
 class Atomic(Logic):
-    '''
+    """
     >>> R, (x, y) = sage.PolynomialRing(sage.RIF, 'x, y').objgens()
     >>> Atomic(x**2 + y + 1).p
     x^2 + y + 1
@@ -227,7 +227,7 @@ class Atomic(Logic):
     0
     >>> Atomic(2*x + 3*y).dpdt([-y, x])
     3*x - 2*y
-    '''
+    """
     priority = 10
     duration = 0
 
@@ -256,7 +256,7 @@ class Atomic(Logic):
 
     def signal_for_system(self, odes, initials, duration, use_masks=False,
                           mask=None, **kwargs):
-        '''
+        """
         >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
         >>> odes = [-y, x]
         >>> initials = [RIF(1, 2), RIF(3, 4)]
@@ -265,7 +265,7 @@ class Atomic(Logic):
         True
         >>> Atomic(x-2.5).signal_for_system(odes, initials, 0)(0)
         False
-        '''
+        """
         # Do the smart thing in the case of duration 0
         if duration == 0:
             mask = mask_zero if use_masks else None
@@ -463,7 +463,7 @@ class Or(Logic):
                 self._terms.append(term)
 
         if len(self._terms) > 0:
-            super().__init__(self._terms[0].R)
+            super(Or, self).__init__(self._terms[0].R)
 
     @property
     def terms(self):
@@ -534,7 +534,7 @@ class Neg(Logic):
 
     def __init__(self, p):
         self._p = p
-        super().__init__(p.R)
+        super(Neg, self).__init__(p.R)
 
     @property
     def p(self):
@@ -577,7 +577,7 @@ class Context(Logic):
     def __init__(self, ctx, phi):
         self._ctx = ctx
         self._phi = phi
-        super().__init__(phi.R)
+        super(Context, self).__init__(phi.R)
 
     @property
     def phi(self):
@@ -784,7 +784,7 @@ class G(Logic):
     def __init__(self, I, phi):
         self._I = RIF(I)
         self._phi = phi
-        super().__init__(phi.R)
+        super(G, self).__init__(phi.R)
 
     @property
     def interval(self):
@@ -834,7 +834,7 @@ class F(Logic):
     def __init__(self, I, phi):
         self._I = RIF(I)
         self._phi = phi
-        super().__init__(phi.R)
+        super(F, self).__init__(phi.R)
 
     @property
     def interval(self):
@@ -876,6 +876,7 @@ class U(Logic):
         self._I = RIF(I)
         self._phi = phi
         self._psi = psi
+        super(U, self).__init__(phi.R)
 
     @property
     def interval(self):

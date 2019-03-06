@@ -1,83 +1,64 @@
 from __future__ import print_function, division, absolute_import
 
-cimport
+from cython.operator cimport dereference as deref
+from cython.operator cimport preincrement as inc
+from libcpp.vector cimport vector
+from libcpp.list cimport list as clist
+from libcpp cimport bool as cbool
 
-flowstar.root_detection as root_detection
-cimport
-
-flowstar.interval as interval
 import sage.all as sage
-from cython.operator cimport
 
-dereference as deref
-from cython.operator cimport
-
-preincrement as inc
-from flowstar.Polynomial cimport
-
-Polynomial
-from flowstar.TaylorModel cimport
-
-TaylorModel
-from flowstar.interval cimport
-
-make_interval, interval_time_fn, interval_fn
-from flowstar.poly cimport
-
-Poly, poly_fn, compose, poly_time_fn
+cimport flowstar.root_detection as root_detection
+from flowstar.Polynomial cimport Polynomial
+from flowstar.poly cimport Poly, poly_fn, compose, poly_time_fn
+from flowstar.TaylorModel cimport TaylorModel
+cimport flowstar.interval as interval
+from flowstar.interval cimport make_interval, interval_time_fn, interval_fn
+from flowstar.tribool cimport tribool, unknown
+from flowstar.tribool cimport and_ as tri_and
 from flowstar.reachability import Reach
-from libcpp cimport
-
-bool as cbool
-from libcpp.list cimport
-
-list as clist
-from libcpp.vector cimport
-
-vector
-
-from flowstar.tribool cimport
-
-and_ as tri_and
-from flowstar.tribool cimport
-
-tribool, unknown
 
 __all__ = ('RestrictedObserver', 'PolyObserver')
 
-# Also redefined in reachability module due to Cython bug
+
+# Cannot return values using ctuples due to Cython bug
 # https://github.com/cython/cython/issues/1427
-cdef (interval_time_fn, interval_time_fn) observable(
-    Polynomial & f, TaylorModelVec & tmv, vector[Interval] & domain,
-    int
-order, Interval & cutoff_threshold) nogil:
-cdef:
-    interval_fn f_fn
-    TaylorModel f1, f2
-    vector[Interval] space_domain
-    vector[int] varIDs
-    Interval R
-    Polynomial p, p_deriv
+cdef void observable(interval_time_fn & f_fn, interval_time_fn & f_prime_fn,
+                     Polynomial & f, TaylorModelVec & tmv,
+                     vector[Interval] & domain,
+                     int order, Interval & cutoff_threshold) nogil:
+    """Given a polynomial f and a vector field defined by a vector of Taylor
+    Models tmv (over a given domain), return a pair of polynomials
+    f, fprime in the variables of the Taylor model which give the values
+    of f and fprime.
+    
+    Returns its results via the references f_fn and fprime_fn.
+    """
+    cdef:
+        TaylorModel f1, f2
+        vector[Interval] space_domain
+        vector[int] varIDs
+        Interval R
+        Polynomial p, p_deriv
 
-# Compose
-f1 = compose(f, tmv, domain, order + 1, cutoff_threshold)
+    # Compose
+    f1 = compose(f, tmv, domain, order + 1, cutoff_threshold)
 
-# Separate off space variables from time
-for i in range(1, domain.size()):
-    varIDs.push_back(i)
-    space_domain.push_back(domain[i])
+    # Separate off space variables from time
+    for i in range(1, domain.size()):
+        varIDs.push_back(i)
+        space_domain.push_back(domain[i])
 
-# Substitute domain variables
-f1.substitute(f2, varIDs, space_domain)
+    # Substitute domain variables
+    f1.substitute(f2, varIDs, space_domain)
 
-# return poly_domain_time_fn(f1.expansion
-#                                + Polynomial(f1.remainder, domain.size()),
-#                            domain)
-p = f2.expansion + Polynomial(f2.remainder, 1)
-p.derivative(p_deriv, 0)
-p.ctrunc(R, domain, order)
+    p = f2.expansion + Polynomial(f2.remainder, 1)
+    p.derivative(p_deriv, 0)
+    p.ctrunc(R, domain, order)
 
-return (poly_time_fn(p + Polynomial(R, 1)), poly_time_fn(p_deriv))
+    (&f_fn)[0] = poly_time_fn(p + Polynomial(R, 1))
+    (&f_prime_fn)[0] = poly_time_fn(p_deriv)
+
 
 # noinspection PyUnreachableCode
 cdef class RestrictedObserver(PolyObserver):
@@ -102,10 +83,46 @@ cdef class RestrictedObserver(PolyObserver):
             assert c_space_domain.has_value()
             self.space_domain = c_space_domain.value()
 
+        # Invalidate any composed polynomials for indeterminate intervals
+        if p.flowstar_successful:
+            self._invalidate_indeterminate_polys()
+
+
+    cdef void _invalidate_indeterminate_polys(RestrictedObserver self):
+        """If we restrict a PolyObserver, any cached composed polynomials
+        for subdomains become invalid.
+
+        This is because we currently include explicit space variables in the
+        symbolicly composed polynomial -- this step will no longer be
+        necessary if we leave them abstract.
+        """
+        cdef:
+            vector[optional[bint]].iterator b = self.bools.begin()
+            vector[optional[interval_time_fn]].iterator f = \
+                self.poly_f_fns.begin()
+            vector[optional[interval_time_fn]].iterator fprime = \
+                self.poly_fprime_fns.begin()
+            vector[optional[bint]].iterator b_end = self.bools.end()
+            vector[optional[interval_time_fn]].iterator f_end = \
+                self.poly_f_fns.end()
+            vector[optional[interval_time_fn]].iterator fprime_end = \
+                self.poly_fprime_fns.end()
+
+        while b != b_end and f != f_end and fprime != fprime_end:
+            if not deref(b).has_value():
+                (&deref(f))[0] = optional[interval_time_fn]()
+                (&deref(fprime))[0] = optional[interval_time_fn]()
+
+            inc(b)
+            inc(f)
+            inc(fprime)
+
+
     cdef optional[vector[Interval]] _global_domain(self):
-        cdef vector[Interval] domain = (<RestrictedObserver> self).space_domain
+        cdef vector[Interval] domain = (<RestrictedObserver>self).space_domain
         domain.insert(domain.begin(), Interval(-1, 1))
         return optional[vector[Interval]](domain)
+
 
 cdef class PolyObserver:
     def __init__(PolyObserver self, f, fprime, CReach reach,
@@ -137,19 +154,6 @@ cdef class PolyObserver:
             for I in self.mask.pos:
                 self.masked_regions.push_back(make_interval(I))
 
-    cdef optional[Interval] mask_overlap(self, const Interval & x) nogil:
-        cdef optional[Interval] overlap
-        cdef Interval intersection
-
-        for y in self.masked_regions:
-            if interval.overlaps(x, y):
-                if overlap.has_value():
-                    interval.interval_union(overlap.value(), x.intersect(y))
-                else:
-                    overlap = optional[Interval](x.intersect(y))
-
-        return overlap
-
     @property
     def flowstar_successful(self):
         return self.reach.ran and self.reach.result <= 3
@@ -174,130 +178,22 @@ cdef class PolyObserver:
         if self.reach is None:
             return None
 
-        print("Test 1!")
-
         with self.reach.global_manager:
             c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)
 
         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
 
-    cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,
-                                vector[Interval] & new_roots,
-                                Interval & T, int verbosity=0):
-        for root in new_roots:
-            root.add_assign(T)
-            if (not roots.empty()
-                    and interval.int_min_dist(root, roots.back()) < 1e-9):
-                if verbosity >= 3:
-                    print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
-                        roots.back().inf(), roots.back().sup(),
-                        root.inf(), root.sup()))
-                interval.interval_union(roots.back(), root)
-            else:
-                roots.push_back(root)
-
-    cdef bint _tm_segment_loop(PolyObserver self,
-                               int & i,
-                               vector[Interval]*& loop_domain,
-                               optional[vector[Interval]] & global_domain,
-                               clist[TaylorModelVec].iterator & tmv,
-                               clist[vector[Interval]].iterator & domain,
-                               vector[optional[bint]].iterator & cached_bool,
-                               vector[optional[
-                                          interval_time_fn]].iterator & poly_f_fn,
-                               vector[optional[
-                                          interval_time_fn]].iterator & poly_fprime_fn,
-                               Interval & t, Interval & t0,
-                               const Interval & t00):
-        cdef:
-            clist[
-                TaylorModelVec].iterator tmv_end = self.reach.c_reach.flowpipesCompo.end()
-            clist[vector[
-                      Interval]].iterator domain_end = self.reach.c_reach.domains.end()
-            vector[optional[bint]].iterator cached_bool_end = self.bools.end()
-            vector[optional[interval_time_fn]].iterator \
-                poly_f_fn_end = self.poly_f_fns.end()
-            vector[optional[interval_time_fn]].iterator \
-                poly_fprime_fn_end = self.poly_fprime_fns.end()
-
-        ### Increment time and loop iters
-        if i > 0:
-            (&t)[0] += t0.sup()
-            # Pad lower endpoint to take into account numerical error in
-            # endpoints
-            (&t)[0] += Interval(-1e-53, 0)
-            inc(tmv)
-            inc(domain)
-            inc(poly_f_fn)
-            inc(poly_fprime_fn)
-            inc(cached_bool)
-            # Restore loop domains
-            deref(loop_domain)[0] = (&t0)[0] = t00
-        inc(i)
-
-        # Check stopping condition
-        if (tmv == tmv_end
-                or domain == domain_end
-                or cached_bool == cached_bool_end
-                or poly_f_fn == poly_f_fn_end
-                or poly_fprime_fn == poly_fprime_fn_end):
-            return False
-        else:
-            # TM domain
-            (&loop_domain)[0] = (&global_domain.value()
-                                 if global_domain.has_value()
-                                 else &deref(domain))
-
-            # Absolute time domain for current interval
-            (&t0)[0] = loop_domain[0][0] = deref(domain).at(0)
-
-            return True
-
-    cdef _mask_intersect_check(PolyObserver self, Interval & t,
-                               Interval & t0, int verbosity):
-        if self.mask is not None:
-            if verbosity >= 4:
-                print("using mask!")
-            mask_overlap = self.mask_overlap(t + t0)
-
-            if mask_overlap.has_value():
-                if verbosity >= 3:
-                    print("mask_overlap =",
-                          interval.as_str(mask_overlap.value()))
-                mask_overlap.value().sub_assign(t)
-                if verbosity >= 3:
-                    print("mask_overlap =",
-                          interval.as_str(mask_overlap.value()))
-                mask_overlap.value().intersect_assign(t0)
-                (&t0)[0] = mask_overlap.value()
-                if verbosity >= 2:
-                    print("t0 =", interval.as_str(t0))
-
-                return True
-            else:
-                if verbosity >= 2:
-                    print("outside mask!")
-                    # print('t + t0 =', interval.as_str(t + t0))
-                    # print('mask =', self.mask)
-
-                return False
-        else:
-            if verbosity >= 4:
-                print("not using mask!")
-
-            return True
-
     cdef vector[Interval] c_roots(PolyObserver self,
                                   double epsilon=0.00001, int verbosity=0):
         cdef:
-            clist[
-                TaylorModelVec].iterator tmv = self.reach.c_reach.flowpipesCompo.begin()
-            clist[vector[
-                      Interval]].iterator domain = self.reach.c_reach.domains.begin()
+            clist[TaylorModelVec].iterator tmv =\
+                self.reach.c_reach.flowpipesCompo.begin()
+            clist[vector[Interval]].iterator domain =\
+                self.reach.c_reach.domains.begin()
             vector[optional[bint]].iterator cached_bool = self.bools.begin()
-            vector[optional[interval_time_fn]].iterator \
+            vector[optional[interval_time_fn]].iterator\
                 poly_f_fn = self.poly_f_fns.begin()
-            vector[optional[interval_time_fn]].iterator \
+            vector[optional[interval_time_fn]].iterator\
                 poly_fprime_fn = self.poly_fprime_fns.begin()
             vector[Interval] roots
             vector[Interval] new_roots
@@ -310,7 +206,7 @@ cdef class PolyObserver:
             Interval f_domain
             vector[Interval] tmv_domain
             int i = 0
-            vector[Interval]*loop_domain
+            vector[Interval]* loop_domain
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
@@ -341,46 +237,25 @@ cdef class PolyObserver:
 
             ### Retrieve cached symbolically composed functions, or perform
             ### functional composition.
-            if self.symbolic_composition and deref(poly_f_fn).has_value():
-                assert deref(poly_fprime_fn).has_value()
-                # Retrieve cached composed functions
-                f_fn = deref(poly_f_fn).value()
-                fprime_fn = deref(poly_fprime_fn).value()
-            else:
-                # Functional composition for polynomial
-                f_fn = interval.compose_interval_fn(poly_fn(self.f.c_poly),
-                                                    deref(tmv),
-                                                    deref(loop_domain))
+            self._pre_retrieve_f(f_fn, fprime_fn,
+                                 deref(poly_f_fn), deref(poly_fprime_fn),
+                                 deref(tmv), loop_domain)
 
             # Evaluate f over the whole domain
             f_domain = f_fn.call(t0)
 
             # Only do anything if there is a chance of a root
             if not (f_domain.inf() <= 0 <= f_domain.sup()):
+                if verbosity >= 3:
+                    print("skipping given consistent value over domain")
                 # Annoying code to make Cython allow assignment to a r-value
                 (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
                 continue
 
-            if self.symbolic_composition and not deref(poly_f_fn).has_value():
-                # Define f and fprime by symbolically composing polynomials
-                (f_fn, fprime_fn) = observable(
-                    self.f.c_poly, deref(tmv), deref(loop_domain),
-                    self.reach.c_reach.globalMaxOrder,
-                    self.reach.c_reach.cutoff_threshold,
-                )
-                (&deref(poly_f_fn))[0] = optional[interval_time_fn](f_fn)
-                (&deref(poly_fprime_fn))[0] = optional[interval_time_fn](
-                    fprime_fn)
-            elif not self.symbolic_composition:
-                # Define fprime as a functional composition, and use f as
-                # defined similarly above
-                fprime_fn = interval.compose_interval_fn(
-                    poly_fn(self.fprime.c_poly),
-                    deref(tmv),
-                    deref(loop_domain)
-                )
-            else:
-                raise Exception("Invalid case!")
+            ### Perform symbolic or functional composition.
+            self._post_retrieve_f(f_fn, fprime_fn,
+                                  deref(poly_f_fn), deref(poly_fprime_fn),
+                                  deref(tmv), loop_domain)
 
             ### Perform root detection
             root_detection.detect_roots(new_roots, f_fn, fprime_fn, t0,
@@ -397,10 +272,10 @@ cdef class PolyObserver:
     cdef Interval eval_interval(PolyObserver self, Interval & x,
                                 int verbosity=0):
         cdef:
-            clist[
-                TaylorModelVec].iterator tmv = self.reach.c_reach.flowpipesCompo.begin()
-            clist[vector[
-                      Interval]].iterator domain = self.reach.c_reach.domains.begin()
+            clist[TaylorModelVec].iterator tmv =\
+                self.reach.c_reach.flowpipesCompo.begin()
+            clist[vector[Interval]].iterator domain =\
+                self.reach.c_reach.domains.begin()
             vector[optional[bint]].iterator cached_bool = self.bools.begin()
             vector[optional[interval_time_fn]].iterator \
                 poly_f_fn = self.poly_f_fns.begin()
@@ -417,7 +292,7 @@ cdef class PolyObserver:
             Interval f_domain
             vector[Interval] tmv_domain
             int i = 0
-            vector[Interval]*loop_domain
+            vector[Interval]* loop_domain
             optional[Interval] final_res
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
@@ -425,8 +300,8 @@ cdef class PolyObserver:
         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
 
         while (self._tm_segment_loop(i, loop_domain, global_domain,
-                                     tmv, domain, cached_bool,
-                                     poly_f_fn, poly_fprime_fn, t, t0, t00) \
+                                    tmv, domain, cached_bool,
+                                    poly_f_fn, poly_fprime_fn, t, t0, t00)\
                and t.inf() <= x.sup()):
             t00 = t0
             if verbosity >= 2:
@@ -436,8 +311,10 @@ cdef class PolyObserver:
                     interval.as_str(deref(domain)[0])))
 
             ### Perform mask intersection
-            if not self._mask_intersect_check(t, t0, verbosity):
-                continue
+            # Actually, we should not take the mask into account for interval
+            # evaluation since we need this in between roots!
+            # if not self._mask_intersect_check(t, t0, verbosity):
+            #     continue
 
             ### Absolute time domain for current interval
             y = t0
@@ -454,32 +331,17 @@ cdef class PolyObserver:
 
             ### Retrieve cached symbolically composed functions, or perform
             ### functional composition.
-            if self.symbolic_composition and deref(poly_f_fn).has_value():
-                assert deref(poly_fprime_fn).has_value()
-                # Retrieve cached composed functions
-                f_fn = deref(poly_f_fn).value()
-            elif self.symbolic_composition and not deref(
-                    poly_f_fn).has_value():
-                # Define f and fprime by symbolically composing polynomials
-                (f_fn, fprime_fn) = observable(
-                    self.f.c_poly, deref(tmv), deref(loop_domain),
-                    self.reach.c_reach.globalMaxOrder,
-                    self.reach.c_reach.cutoff_threshold,
-                )
-                (&deref(poly_f_fn))[0] = optional[interval_time_fn](f_fn)
-                (&deref(poly_fprime_fn))[0] = optional[interval_time_fn](
-                    fprime_fn)
-            else:
-                # print("Performing functional composition")
-                # print("f = {}".format(self.f))
-                # Functional composition for polynomial
-                f_fn = interval.compose_interval_fn(poly_fn(self.f.c_poly),
-                                                    deref(tmv),
-                                                    deref(loop_domain))
+            self._pre_retrieve_f(f_fn, fprime_fn,
+                                 deref(poly_f_fn), deref(poly_fprime_fn),
+                                 deref(tmv), loop_domain)
+            self._post_retrieve_f(f_fn, fprime_fn,
+                                  deref(poly_f_fn), deref(poly_fprime_fn),
+                                  deref(tmv), loop_domain)
 
             ### Interval evaluation over domain
             res = f_fn.call(y)
-            # print("res = {}".format(interval.as_str(res)))
+            if verbosity >= 3:
+                print("res = {}".format(interval.as_str(res)))
 
             ### Amalgamate result
             if final_res.has_value():
@@ -490,7 +352,7 @@ cdef class PolyObserver:
         assert final_res.has_value()
         return final_res.value()
 
-    def __call__(self, t):
+    def __call__(self, t, verbosity=0):
         from sage.all import RIF
 
         if self.reach is None:
@@ -503,18 +365,18 @@ cdef class PolyObserver:
             Interval res
             Interval I = interval.make_interval(t)
 
-        with self.reach.global_manager:  #  Use captured globals
-            res = self.eval_interval(I)
+        with self.reach.global_manager: #  Use captured globals
+            res = self.eval_interval(I, verbosity=verbosity)
 
         return RIF(res.inf(), res.sup())
 
     cdef tribool eval_bool_interval(PolyObserver self, Interval & x,
                                     int verbosity=0):
         cdef:
-            clist[
-                TaylorModelVec].iterator tmv = self.reach.c_reach.flowpipesCompo.begin()
-            clist[vector[
-                      Interval]].iterator domain = self.reach.c_reach.domains.begin()
+            clist[TaylorModelVec].iterator tmv =\
+                self.reach.c_reach.flowpipesCompo.begin()
+            clist[vector[Interval]].iterator domain =\
+                self.reach.c_reach.domains.begin()
             vector[optional[bint]].iterator cached_bool = self.bools.begin()
             vector[optional[interval_time_fn]].iterator \
                 poly_f_fn = self.poly_f_fns.begin()
@@ -531,8 +393,8 @@ cdef class PolyObserver:
             Interval f_domain, f_y
             vector[Interval] tmv_domain
             int i = 0
-            vector[Interval]*loop_domain
-            tribool final_res = <tribool> True
+            vector[Interval]* loop_domain
+            tribool final_res = <tribool>True
             tribool res
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
@@ -543,7 +405,7 @@ cdef class PolyObserver:
                                      tmv, domain, cached_bool,
                                      poly_f_fn, poly_fprime_fn, t, t0, t00) \
                and t.inf() <= x.sup()
-               and <cbool> (final_res != <cbool> False)):
+               and <cbool>(final_res != <cbool>False)):
             t00 = t0
             if verbosity >= 2:
                 print("===")
@@ -552,8 +414,10 @@ cdef class PolyObserver:
                     interval.as_str(deref(domain)[0])))
 
             ### Perform mask intersection
-            if not self._mask_intersect_check(t, t0, verbosity):
-                continue
+            # Actually, we should not take the mask into account for interval
+            # evaluation since we need this in between roots!
+            # if not self._mask_intersect_check(t, t0, verbosity):
+            #     continue
 
             ### Absolute time domain for current interval
             y = t0
@@ -591,47 +455,27 @@ cdef class PolyObserver:
                 # Only do anything if there is a chance of a root
                 if not (f_domain.inf() <= 0 <= f_domain.sup()):
                     # Annoying code to make Cython allow assignment to a r-value
-                    (&deref(cached_bool))[0] = optional[bint](
-                        f_domain.inf() > 0)
+                    (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
                 else:
-                    if self.symbolic_composition and not deref(
-                            poly_f_fn).has_value():
-                        # Define f and fprime by symbolically composing polynomials
-                        (f_fn, fprime_fn) = observable(
-                            self.f.c_poly, deref(tmv), deref(loop_domain),
-                            self.reach.c_reach.globalMaxOrder,
-                            self.reach.c_reach.cutoff_threshold,
-                        )
-                        (&deref(poly_f_fn))[0] = optional[interval_time_fn](
-                            f_fn)
-                        (&deref(poly_fprime_fn))[0] = optional[
-                            interval_time_fn](
-                            fprime_fn)
-                    elif not self.symbolic_composition:
-                        # Define fprime as a functional composition, and use f as
-                        # defined similarly above
-                        fprime_fn = interval.compose_interval_fn(
-                            poly_fn(self.fprime.c_poly),
-                            deref(tmv),
-                            deref(loop_domain)
-                        )
-                    else:
-                        raise Exception("Invalid case!")
+                    self._post_retrieve_f(f_fn, fprime_fn,
+                                          deref(poly_f_fn),
+                                          deref(poly_fprime_fn),
+                                          deref(tmv), loop_domain)
 
                 ### Interval evaluation over domain
                 f_y = f_fn.call(y)
                 # print("f_y =", interval.as_str(f_y))
                 if f_y.inf() > 0:
                     # print("res =", True)
-                    res = tribool(<cbool> True)
+                    res = tribool(<cbool>True)
                 elif f_y.sup() < 0:
                     # print("res =", False)
-                    res = tribool(<cbool> False)
+                    res = tribool(<cbool>False)
                 else:
                     # print("res =", None)
                     res = tribool(unknown)
 
-            final_res = tri_and(final_res, res)
+            final_res =  tri_and(final_res, res)
 
         return final_res
 
@@ -646,12 +490,202 @@ cdef class PolyObserver:
             tribool res
             Interval I = interval.make_interval(t)
 
-        with self.reach.global_manager:  #  Use captured globals
+        with self.reach.global_manager: #  Use captured globals
             res = self.eval_bool_interval(I)
 
-        if <cbool> res:
+        if <cbool>res:
             return True
-        elif <cbool> (not res):
+        elif <cbool>(not res):
             return False
         else:
             return None
+
+    ### Helper methods
+
+    cdef bint _tm_segment_loop(PolyObserver self,
+                               int & i,
+                               vector[Interval]* & loop_domain,
+                               optional[vector[Interval]] & global_domain,
+                               clist[TaylorModelVec].iterator & tmv,
+                               clist[vector[Interval]].iterator & domain,
+                               vector[optional[bint]].iterator & cached_bool,
+                               vector[optional[interval_time_fn]].iterator
+                               & poly_f_fn,
+                               vector[optional[interval_time_fn]].iterator
+                               & poly_fprime_fn,
+                               Interval & t, Interval & t0,
+                               const Interval & t00):
+        """Control the iteration over all Taylor model segments."""
+        cdef:
+            clist[TaylorModelVec].iterator tmv_end\
+                = self.reach.c_reach.flowpipesCompo.end()
+            clist[vector[Interval]].iterator domain_end\
+                = self.reach.c_reach.domains.end()
+            vector[optional[bint]].iterator cached_bool_end = self.bools.end()
+            vector[optional[interval_time_fn]].iterator \
+                poly_f_fn_end = self.poly_f_fns.end()
+            vector[optional[interval_time_fn]].iterator \
+                poly_fprime_fn_end = self.poly_fprime_fns.end()
+
+        ### Increment time and loop iters
+        if i > 0:
+            (&t)[0] += t0.sup()
+            # Pad lower endpoint to take into account numerical error in
+            # endpoints
+            (&t)[0] += Interval(-1e-53, 0)
+            inc(tmv)
+            inc(domain)
+            inc(poly_f_fn)
+            inc(poly_fprime_fn)
+            inc(cached_bool)
+            # Restore loop domains
+            deref(loop_domain)[0] = (&t0)[0] = t00
+        inc(i)
+
+        # Check stopping condition
+        if (       tmv            == tmv_end
+                or domain         == domain_end
+                or cached_bool    == cached_bool_end
+                or poly_f_fn      == poly_f_fn_end
+                or poly_fprime_fn == poly_fprime_fn_end):
+            return False
+        else:
+            # TM domain
+            (&loop_domain)[0] = (&global_domain.value()
+                                 if global_domain.has_value()
+                                 else &deref(domain))
+
+            # Absolute time domain for current interval
+            (&t0)[0] = loop_domain[0][0] = deref(domain).at(0)
+
+            return True
+
+    cdef bint _mask_intersect_check(PolyObserver self, Interval & t,
+                                    Interval & t0, int verbosity):
+        """Check there is a mask intersection and, if so, set t0 to the
+        overlap interval."""
+        if self.mask is not None:
+            if verbosity >= 4:
+                print("using mask!")
+            mask_overlap = self._mask_overlap(t + t0)
+
+            if mask_overlap.has_value():
+                if verbosity >= 3:
+                    print("mask_overlap =",
+                          interval.as_str(mask_overlap.value()))
+                mask_overlap.value().sub_assign(t)
+                if verbosity >= 3:
+                    print("mask_overlap =",
+                          interval.as_str(mask_overlap.value()))
+                mask_overlap.value().intersect_assign(t0)
+                (&t0)[0] = mask_overlap.value()
+                if verbosity >= 2:
+                    print("t0 =", interval.as_str(t0))
+
+                return True
+            else:
+                if verbosity >= 2:
+                    print("outside mask!")
+                    # print('t + t0 =', interval.as_str(t + t0))
+                    # print('mask =', self.mask)
+
+                return False
+        else:
+            if verbosity >= 4:
+                print("not using mask!")
+
+            return True
+
+    cdef void _pre_retrieve_f(PolyObserver self,
+                              interval_time_fn & f_fn,
+                              interval_time_fn & fprime_fn,
+                              optional[interval_time_fn] & poly_f_fn,
+                              optional[interval_time_fn] & poly_fprime_fn,
+                              TaylorModelVec & tmv,
+                              vector[Interval] * loop_domain):
+        """Do the bare minimum work to get f.
+
+        In practice, this means retrieve a cached symbolically composed
+        f (and, as a bonus, fprime) if one exists, otherwise, perform
+        functional composition.
+        """
+        if self.symbolic_composition and poly_f_fn.has_value():
+            assert poly_fprime_fn.has_value()
+            # Retrieve cached composed functions
+            print("retrieving f and fprime polys")
+            (&f_fn)[0] = poly_f_fn.value()
+            (&fprime_fn)[0] = poly_fprime_fn.value()
+        else:
+            # Functional composition for polynomial
+            (&f_fn)[0] = interval.compose_interval_fn(poly_fn(self.f.c_poly),
+                                                      tmv,
+                                                      deref(loop_domain))
+
+    cdef void _post_retrieve_f(PolyObserver self,
+                               interval_time_fn & f_fn,
+                               interval_time_fn & fprime_fn,
+                               optional[interval_time_fn] & poly_f_fn,
+                               optional[interval_time_fn] & poly_fprime_fn,
+                               TaylorModelVec & tmv,
+                               vector[Interval] * loop_domain):
+        """Retrieve f and fprime.
+
+        Retrieve f and fprime, performing symbolic composition if desired.
+        """
+        if self.symbolic_composition and not poly_f_fn.has_value():
+            # Define f and fprime by symbolically composing polynomials
+            observable(
+                f_fn, fprime_fn,
+                self.f.c_poly, tmv, deref(loop_domain),
+                self.reach.c_reach.globalMaxOrder,
+                self.reach.c_reach.cutoff_threshold,
+            )
+            print("setting f and fprime polys")
+            # NOTE: Under symbolic composition, the polys depend on the space
+            # variables and so are invalidated when the space domain is
+            # restricted
+            (&poly_f_fn)[0] = optional[interval_time_fn](f_fn)
+            (&poly_fprime_fn)[0] = optional[interval_time_fn](fprime_fn)
+            assert poly_f_fn.has_value()
+        elif not self.symbolic_composition:
+            # Define fprime as a functional composition, and use f as
+            # defined similarly above
+            (&fprime_fn)[0] = interval.compose_interval_fn(
+                poly_fn(self.fprime.c_poly),
+                tmv,
+                deref(loop_domain)
+            )
+        # Nothing should happen in the else case since a cached value
+        # has already been retrieved.
+
+    cdef optional[Interval] _mask_overlap(self, const Interval & x) nogil:
+        cdef optional[Interval] overlap
+        cdef Interval intersection
+
+        for y in self.masked_regions:
+            if interval.overlaps(x, y):
+                if overlap.has_value():
+                    interval.interval_union(overlap.value(), x.intersect(y))
+                else:
+                    overlap = optional[Interval](x.intersect(y))
+
+        return overlap
+
+    cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,
+                                vector[Interval] & new_roots,
+                                Interval & t, int verbosity=0):
+        """Add new_roots to roots, whilst amalgamating adjacent overlapping 
+        roots."""
+        for root in new_roots:
+            root.add_assign(t)
+            if (not roots.empty()
+                    and interval.int_min_dist(root, roots.back()) < 1e-9):
+                if verbosity >= 3:
+                    print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
+                        roots.back().inf(), roots.back().sup(),
+                        root.inf(), root.sup()))
+                interval.interval_union(roots.back(), root)
+            else:
+                if verbosity >= 3:
+                    print("new root:\n[{}..{}]".format(root.inf(), root.sup()))
+                roots.push_back(root)

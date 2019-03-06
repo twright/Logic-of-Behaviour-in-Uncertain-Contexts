@@ -673,6 +673,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include <map>
 #include "Continuous.h"
 #include <functional>
+#include <optional>
 
     std::function<flowstar::Interval(const flowstar::Interval &)>
     compose_interval_fn(
@@ -728,8 +729,6 @@ static CYTHON_INLINE float __PYX_NAN() {
         };
     }
     
-#include <boost/logic/tribool.hpp>
-#include <optional>
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -935,14 +934,14 @@ static const char *__pyx_filename;
 static const char *__pyx_f[] = {
   "flowstar/plotting.pyx",
   "stringsource",
-  "flowstar/poly.pxd",
   "flowstar/reachability.pxd",
+  "flowstar/poly.pxd",
 };
 
 /*--- Type declarations ---*/
-struct __pyx_obj_8flowstar_4poly_Poly;
 struct __pyx_obj_8flowstar_12reachability_CReach;
 struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager;
+struct __pyx_obj_8flowstar_4poly_Poly;
 struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin;
 struct __pyx_obj_8flowstar_8plotting_SagePlotMixin;
 struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin;
@@ -978,6 +977,33 @@ typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
  * ctypedef Polynomial* PolynomialPtr             # <<<<<<<<<<<<<<
  */
 typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval;
+struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain;
+
+/* "flowstar/reachability.pxd":20
+ *     cdef vector[Interval] initials
+ * 
+ *     cdef vector[Interval] eval_interval(CReach, Interval,             # <<<<<<<<<<<<<<
+ *             optional[reference_wrapper[vector[Interval]]] space_domain=*,
+ *             optional[reference_wrapper[Polynomial]] poly=*)
+ */
+struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval {
+  int __pyx_n;
+  std::optional<std::reference_wrapper<std::vector<flowstar::Interval> > >  space_domain;
+  std::optional<std::reference_wrapper<flowstar::Polynomial> >  poly;
+};
+
+/* "flowstar/reachability.pxd":24
+ *             optional[reference_wrapper[Polynomial]] poly=*)
+ *     cdef optional[vector[Interval]]\
+ *             _convert_space_domain(CReach self, space_domain=*)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain {
+  int __pyx_n;
+  PyObject *space_domain;
+};
 struct __pyx_opt_args_8flowstar_4poly_compose;
 struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial;
 
@@ -1002,51 +1028,8 @@ struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial {
   int __pyx_n;
   PyObject *explicit_time;
 };
-struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval;
-struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain;
 
-/* "flowstar/reachability.pxd":27
- *     cdef vector[Interval] initials
- * 
- *     cdef vector[Interval] eval_interval(CReach, Interval,             # <<<<<<<<<<<<<<
- *             optional[reference_wrapper[vector[Interval]]] space_domain=*,
- *             optional[reference_wrapper[Polynomial]] poly=*)
- */
-struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval {
-  int __pyx_n;
-  std::optional<std::reference_wrapper<std::vector<flowstar::Interval> > >  space_domain;
-  std::optional<std::reference_wrapper<flowstar::Polynomial> >  poly;
-};
-
-/* "flowstar/reachability.pxd":31
- *             optional[reference_wrapper[Polynomial]] poly=*)
- *     cdef optional[vector[Interval]]\
- *             _convert_space_domain(CReach self, space_domain=*)             # <<<<<<<<<<<<<<
- * 
- * 
- */
-struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain {
-  int __pyx_n;
-  PyObject *space_domain;
-};
-
-/* "flowstar/poly.pxd":65
- *                                                const vector[Interval] & domain)
- * 
- * cdef class Poly:             # <<<<<<<<<<<<<<
- *     cdef Polynomial c_poly
- *     cdef dict vars
- */
-struct __pyx_obj_8flowstar_4poly_Poly {
-  PyObject_HEAD
-  struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtab;
-  flowstar::Polynomial c_poly;
-  PyObject *vars;
-  int explicit_time;
-};
-
-
-/* "flowstar/reachability.pxd":17
+/* "flowstar/reachability.pxd":10
  * 
  * 
  * cdef class CReach:             # <<<<<<<<<<<<<<
@@ -1066,7 +1049,7 @@ struct __pyx_obj_8flowstar_12reachability_CReach {
 };
 
 
-/* "flowstar/reachability.pxd":34
+/* "flowstar/reachability.pxd":27
  * 
  * 
  * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
@@ -1079,6 +1062,22 @@ struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager {
   std::vector<flowstar::Interval>  power_4;
   std::vector<flowstar::Interval>  double_factorial;
   std::vector<std::string>  domainVarNames;
+};
+
+
+/* "flowstar/poly.pxd":65
+ *                                                const vector[Interval] & domain)
+ * 
+ * cdef class Poly:             # <<<<<<<<<<<<<<
+ *     cdef Polynomial c_poly
+ *     cdef dict vars
+ */
+struct __pyx_obj_8flowstar_4poly_Poly {
+  PyObject_HEAD
+  struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtab;
+  flowstar::Polynomial c_poly;
+  PyObject *vars;
+  int explicit_time;
 };
 
 
@@ -1150,21 +1149,7 @@ struct __pyx_obj_8flowstar_8plotting___pyx_scope_struct_1_sage_parametric_plot {
 
 
 
-/* "flowstar/poly.pxd":65
- *                                                const vector[Interval] & domain)
- * 
- * cdef class Poly:             # <<<<<<<<<<<<<<
- *     cdef Polynomial c_poly
- *     cdef dict vars
- */
-
-struct __pyx_vtabstruct_8flowstar_4poly_Poly {
-  struct __pyx_obj_8flowstar_4poly_Poly *(*from_polynomial)(flowstar::Polynomial &, PyObject *, struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial *__pyx_optional_args);
-};
-static struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtabptr_8flowstar_4poly_Poly;
-
-
-/* "flowstar/reachability.pxd":17
+/* "flowstar/reachability.pxd":10
  * 
  * 
  * cdef class CReach:             # <<<<<<<<<<<<<<
@@ -1177,6 +1162,20 @@ struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
   std::optional<std::vector<flowstar::Interval> >  (*_convert_space_domain)(struct __pyx_obj_8flowstar_12reachability_CReach *, struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
+
+
+/* "flowstar/poly.pxd":65
+ *                                                const vector[Interval] & domain)
+ * 
+ * cdef class Poly:             # <<<<<<<<<<<<<<
+ *     cdef Polynomial c_poly
+ *     cdef dict vars
+ */
+
+struct __pyx_vtabstruct_8flowstar_4poly_Poly {
+  struct __pyx_obj_8flowstar_4poly_Poly *(*from_polynomial)(flowstar::Polynomial &, PyObject *, struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial *__pyx_optional_args);
+};
+static struct __pyx_vtabstruct_8flowstar_4poly_Poly *__pyx_vtabptr_8flowstar_4poly_Poly;
 
 /* --- Runtime support code (head) --- */
 /* Refnanny.proto */
@@ -1788,18 +1787,16 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'flowstar.Continuous' */
 
-/* Module declarations from 'flowstar.interval' */
-
-/* Module declarations from 'flowstar.poly' */
-static PyTypeObject *__pyx_ptype_8flowstar_4poly_Poly = 0;
-
-/* Module declarations from 'flowstar.tribool' */
-
 /* Module declarations from 'flowstar.cppstd' */
 
 /* Module declarations from 'flowstar.reachability' */
 static PyTypeObject *__pyx_ptype_8flowstar_12reachability_CReach = 0;
 static PyTypeObject *__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = 0;
+
+/* Module declarations from 'flowstar.interval' */
+
+/* Module declarations from 'flowstar.poly' */
+static PyTypeObject *__pyx_ptype_8flowstar_4poly_Poly = 0;
 
 /* Module declarations from 'flowstar.plotting' */
 static PyTypeObject *__pyx_ptype_8flowstar_8plotting_FlowstarPlotMixin = 0;
@@ -13105,11 +13102,11 @@ static int __Pyx_modinit_type_import_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
-  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(3, 17, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(3, 17, __pyx_L1_error)
-  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(3, 34, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(2, 27, __pyx_L1_error)
+  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(3, 65, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(3, 65, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

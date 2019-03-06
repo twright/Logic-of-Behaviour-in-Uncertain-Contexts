@@ -3,13 +3,16 @@
 import os
 # from Cython.Distutils import build_ext
 import subprocess
-from distutils.cmd import Command
-from distutils.extension import Extension
+# from distutils.extension import Extension
 
+from setuptools import setup, find_packages
 import Cython.Compiler.Options
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
-from setuptools import setup, find_packages
+from distutils.extension import Extension
+from distutils.cmd import Command
+# from distutils.core import setup
+# from setuptools import find_packages
 
 Cython.Compiler.Options.annotate = True
 Cython.Compiler.Options.fast_fail = True

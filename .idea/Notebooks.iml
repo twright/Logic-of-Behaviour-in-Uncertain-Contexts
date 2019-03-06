@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/flowstar" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ulbc" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ulbc/tests" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/build/temp.linux-x86_64-2.7" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flowstar/flowstar-2.1.0" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flowstar/tests" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/.ipynb_checkpoints" />
+      <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
+      <excludeFolder url="file://$MODULE_DIR$/.pytest_cache/v" />
+      <excludeFolder url="file://$MODULE_DIR$/.vscode" />
+      <excludeFolder url="file://$MODULE_DIR$/.vscode/.ropeproject" />
+      <excludeFolder url="file://$MODULE_DIR$/UNKNOWN.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/build/temp.linux-x86_64-2.7" />
+      <excludeFolder url="file://$MODULE_DIR$/cysignals_crash_logs" />
+      <excludeFolder url="file://$MODULE_DIR$/cython_debug" />
+      <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/.ipynb_checkpoints" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/.pytest_cache" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/cython_debug" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/flowstar-2.1.0-clean" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/flowstar-2.1.0-debug" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/flowstar-2.1.0-fast-intervals" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/flowstar-2.1.1-fast-intervals" />
+      <excludeFolder url="file://$MODULE_DIR$/flowstar/outputs" />
+      <excludeFolder url="file://$MODULE_DIR$/images" />
+      <excludeFolder url="file://$MODULE_DIR$/old" />
+      <excludeFolder url="file://$MODULE_DIR$/outputs" />
+      <excludeFolder url="file://$MODULE_DIR$/reveal.js" />
+      <excludeFolder url="file://$MODULE_DIR$/reveal.js/lib" />
+      <excludeFolder url="file://$MODULE_DIR$/reveal.js/plugin" />
+      <excludeFolder url="file://$MODULE_DIR$/signals_crash_logs" />
+      <excludeFolder url="file://$MODULE_DIR$/ulbc.egg-info" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="TestRunnerService">
+    <option name="projectConfiguration" value="Twisted Trial" />
+    <option name="PROJECT_TEST_RUNNER" value="Twisted Trial" />
+  </component>
+</module>
