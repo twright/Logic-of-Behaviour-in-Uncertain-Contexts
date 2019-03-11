@@ -25,6 +25,8 @@ cdef extern from "Polynomial.h" namespace "flowstar" nogil:
         Polynomial operator - (const Polynomial & polynomial) const
         Polynomial operator * (const Polynomial & polynomial) const
         Polynomial operator * (const Interval & I) const
+        void LieDerivative(Polynomial & result,
+                           const vector[Polynomial] & f) const
 
         Polynomial & operator = (const Polynomial & polynomial)
         void mul_assign(const Interval & I)    # Polynomial & operator += (const Polynomial & polynomial)

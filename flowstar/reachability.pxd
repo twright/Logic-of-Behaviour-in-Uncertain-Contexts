@@ -16,6 +16,7 @@ cdef class CReach:
     cdef public int result
     cdef public bint symbolic_composition
     cdef vector[Interval] initials
+    cdef vector[Polynomial] odes
 
     cdef vector[Interval] eval_interval(CReach, Interval,
             optional[reference_wrapper[vector[Interval]]] space_domain=*,

@@ -7,11 +7,11 @@ from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
 from flowstar.Interval cimport Interval, intervalNumPrecision
 from flowstar.Polynomial cimport (Polynomial, power_4, double_factorial,
                                   factorial_rec)
-from flowstar.poly cimport Poly, poly_fn, poly_time_fn, compose
+from flowstar.poly cimport Poly, poly_fn
 cimport flowstar.interval as interval
 cimport flowstar.plotting as plotting
-from flowstar.interval cimport interval_fn, interval_time_fn
-from flowstar.observers cimport observable
+from flowstar.interval cimport interval_time_fn
+from flowstar.observable cimport observable
 
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
@@ -123,6 +123,9 @@ cdef class CReach:
 
         if vars is None:
             vars = [str(x) for x in odes[0].parent().gens()]
+
+        for ode in odes:
+            self.odes.push_back(Poly(ode).c_poly)
 
         assert len(vars) == len(odes)
 
@@ -258,7 +261,7 @@ cdef class CReach:
             varIDs.push_back(i.second)
         csort(varIDs.begin(), varIDs.end())
 
-        cdef vector[Interval] domainCopy
+        cdef vector[Interval] domain_copy
         cdef vector[Interval] final_res
         cdef cbool initialized = False
 
@@ -279,14 +282,14 @@ cdef class CReach:
             if interval.overlaps(I, T):
                 # Restrict the time domain of the flowpipe to that portion
                 # which intersects the time interval we are evaluating at
-                domainCopy = deref(loop_domain)
-                domainCopy[var_id_t] = T.intersect(I) # No bounds checking!
-                domainCopy[var_id_t].add_assign(-t)
+                domain_copy = deref(loop_domain)
+                domain_copy[var_id_t] = T.intersect(I) # No bounds checking!
+                domain_copy[var_id_t].add_assign(-t)
 
                 if not poly.has_value():
                     # In the normal case we directly evaluate the intervals for
                     # each component of the system
-                    deref(tmv).intEval(res, domainCopy, varIDs)
+                    deref(tmv).intEval(res, domain_copy, varIDs)
                 else:
                     # If a polynomial poly is specified, we evaluate that over
                     # the system instead
@@ -297,7 +300,7 @@ cdef class CReach:
                         observable(
                             f_fn,
                             fprime_fn,
-                            poly.value().get(), deref(tmv), domainCopy,
+                            poly.value().get(), deref(tmv), domain_copy,
                             self.c_reach.globalMaxOrder,
                             self.c_reach.cutoff_threshold,
                         )
@@ -306,9 +309,9 @@ cdef class CReach:
                         f_fn = interval.compose_interval_fn(
                             poly_fn(poly.value().get()),
                             deref(tmv),
-                            domainCopy,
+                            domain_copy,
                         )
-                    res.push_back(f_fn.call(domainCopy.at(0)))
+                    res.push_back(f_fn.call(domain_copy.at(0)))
 
                 if initialized:
                     interval.interval_vect_union(final_res, res)

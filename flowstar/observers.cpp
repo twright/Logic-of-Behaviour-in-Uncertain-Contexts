@@ -933,23 +933,11 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "flowstar/observers.pyx",
   "stringsource",
+  "flowstar/observers.pyx",
   "flowstar/poly.pxd",
   "flowstar/reachability.pxd",
 };
-/* ForceInitThreads.proto */
-#ifndef __PYX_FORCE_INIT_THREADS
-  #define __PYX_FORCE_INIT_THREADS 0
-#endif
-
-/* NoFastGil.proto */
-#define __Pyx_PyGILState_Ensure PyGILState_Ensure
-#define __Pyx_PyGILState_Release PyGILState_Release
-#define __Pyx_FastGIL_Remember()
-#define __Pyx_FastGIL_Forget()
-#define __Pyx_FastGilFuncInit()
-
 
 /*--- Type declarations ---*/
 struct __pyx_obj_8flowstar_4poly_Poly;
@@ -973,7 +961,7 @@ typedef MonoWrap *__pyx_t_8flowstar_8Monomial_MonoWrapPtr;
  */
 typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
 
-/* "flowstar/Polynomial.pxd":62
+/* "flowstar/Polynomial.pxd":64
  *         clist[Monomial] & getMonomials()
  * 
  * ctypedef PolyWrap* PolyWrapPtr             # <<<<<<<<<<<<<<
@@ -981,7 +969,7 @@ typedef flowstar::Monomial *__pyx_t_8flowstar_8Monomial_MonomialPtr;
  */
 typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
 
-/* "flowstar/Polynomial.pxd":63
+/* "flowstar/Polynomial.pxd":65
  * 
  * ctypedef PolyWrap* PolyWrapPtr
  * ctypedef Polynomial* PolynomialPtr             # <<<<<<<<<<<<<<
@@ -990,8 +978,8 @@ typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
 struct __pyx_opt_args_8flowstar_4poly_compose;
 struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial;
 
-/* "flowstar/poly.pxd":12
- *     int order, Interval & cutoff_threshold) nogil
+/* "flowstar/poly.pxd":8
+ * from libcpp.vector cimport vector
  * 
  * cdef TaylorModel compose(const Polynomial & P,             # <<<<<<<<<<<<<<
  *                          const TaylorModelVec tmv,
@@ -1002,7 +990,7 @@ struct __pyx_opt_args_8flowstar_4poly_compose {
   int verbosity;
 };
 
-/* "flowstar/poly.pxd":71
+/* "flowstar/poly.pxd":67
  * 
  *     @staticmethod
  *     cdef Poly from_polynomial(Polynomial & P, vars, explicit_time=?)             # <<<<<<<<<<<<<<
@@ -1014,8 +1002,8 @@ struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial {
 struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval;
 struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain;
 
-/* "flowstar/reachability.pxd":20
- *     cdef vector[Interval] initials
+/* "flowstar/reachability.pxd":21
+ *     cdef vector[Polynomial] odes
  * 
  *     cdef vector[Interval] eval_interval(CReach, Interval,             # <<<<<<<<<<<<<<
  *             optional[reference_wrapper[vector[Interval]]] space_domain=*,
@@ -1027,7 +1015,7 @@ struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval {
   std::optional<std::reference_wrapper<flowstar::Polynomial> >  poly;
 };
 
-/* "flowstar/reachability.pxd":24
+/* "flowstar/reachability.pxd":25
  *             optional[reference_wrapper[Polynomial]] poly=*)
  *     cdef optional[vector[Interval]]\
  *             _convert_space_domain(CReach self, space_domain=*)             # <<<<<<<<<<<<<<
@@ -1057,7 +1045,7 @@ struct __pyx_opt_args_8flowstar_9observers_12PolyObserver_eval_interval;
 struct __pyx_opt_args_8flowstar_9observers_12PolyObserver_eval_bool_interval;
 struct __pyx_opt_args_8flowstar_9observers_12PolyObserver__amalgamate_roots;
 
-/* "flowstar/observers.pxd":31
+/* "flowstar/observers.pxd":24
  *     cdef vector[Interval] masked_regions
  * 
  *     cdef vector[Interval] c_roots(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -1070,7 +1058,7 @@ struct __pyx_opt_args_8flowstar_9observers_12PolyObserver_c_roots {
   int verbosity;
 };
 
-/* "flowstar/observers.pxd":33
+/* "flowstar/observers.pxd":26
  *     cdef vector[Interval] c_roots(PolyObserver self,
  *                                   double epsilon=?, int verbosity=?)
  *     cdef Interval eval_interval(PolyObserver self, Interval & x,             # <<<<<<<<<<<<<<
@@ -1082,7 +1070,7 @@ struct __pyx_opt_args_8flowstar_9observers_12PolyObserver_eval_interval {
   int verbosity;
 };
 
-/* "flowstar/observers.pxd":35
+/* "flowstar/observers.pxd":28
  *     cdef Interval eval_interval(PolyObserver self, Interval & x,
  *                                 int verbosity=?)
  *     cdef tribool eval_bool_interval(PolyObserver self, Interval & x,             # <<<<<<<<<<<<<<
@@ -1094,7 +1082,7 @@ struct __pyx_opt_args_8flowstar_9observers_12PolyObserver_eval_bool_interval {
   int verbosity;
 };
 
-/* "flowstar/observers.pxd":49
+/* "flowstar/observers.pxd":42
  *                                const Interval & t00)
  *     cdef optional[Interval] _mask_overlap(self, const Interval & x) nogil
  *     cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,             # <<<<<<<<<<<<<<
@@ -1106,12 +1094,12 @@ struct __pyx_opt_args_8flowstar_9observers_12PolyObserver__amalgamate_roots {
   int verbosity;
 };
 
-/* "flowstar/poly.pxd":65
+/* "flowstar/poly.pxd":61
  *                                                const vector[Interval] & domain)
  * 
  * cdef class Poly:             # <<<<<<<<<<<<<<
  *     cdef Polynomial c_poly
- *     cdef dict vars
+ *     cdef readonly dict vars
  */
 struct __pyx_obj_8flowstar_4poly_Poly {
   PyObject_HEAD
@@ -1139,10 +1127,11 @@ struct __pyx_obj_8flowstar_12reachability_CReach {
   int result;
   int symbolic_composition;
   std::vector<flowstar::Interval>  initials;
+  std::vector<flowstar::Polynomial>  odes;
 };
 
 
-/* "flowstar/reachability.pxd":27
+/* "flowstar/reachability.pxd":28
  * 
  * 
  * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
@@ -1158,12 +1147,12 @@ struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager {
 };
 
 
-/* "flowstar/observers.pxd":20
+/* "flowstar/observers.pxd":13
  * 
  * 
  * cdef class PolyObserver:             # <<<<<<<<<<<<<<
  *     cdef CReach reach
- *     cdef Poly f
+ *     cdef readonly Poly f
  */
 struct __pyx_obj_8flowstar_9observers_PolyObserver {
   PyObject_HEAD
@@ -1180,7 +1169,7 @@ struct __pyx_obj_8flowstar_9observers_PolyObserver {
 };
 
 
-/* "flowstar/observers.pxd":71
+/* "flowstar/observers.pxd":65
  * 
  * 
  * cdef class RestrictedObserver(PolyObserver):             # <<<<<<<<<<<<<<
@@ -1194,12 +1183,12 @@ struct __pyx_obj_8flowstar_9observers_RestrictedObserver {
 
 
 
-/* "flowstar/poly.pxd":65
+/* "flowstar/poly.pxd":61
  *                                                const vector[Interval] & domain)
  * 
  * cdef class Poly:             # <<<<<<<<<<<<<<
  *     cdef Polynomial c_poly
- *     cdef dict vars
+ *     cdef readonly dict vars
  */
 
 struct __pyx_vtabstruct_8flowstar_4poly_Poly {
@@ -1223,11 +1212,11 @@ struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
 static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
 
 
-/* "flowstar/observers.pyx":127
+/* "flowstar/observers.pyx":90
  * 
  * 
  * cdef class PolyObserver:             # <<<<<<<<<<<<<<
- *     def __init__(PolyObserver self, f, fprime, CReach reach,
+ *     def __init__(PolyObserver self, f, CReach reach,
  *                  bint symbolic_composition,
  */
 
@@ -1242,11 +1231,12 @@ struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver {
   void (*_pre_retrieve_f)(struct __pyx_obj_8flowstar_9observers_PolyObserver *, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  *);
   void (*_post_retrieve_f)(struct __pyx_obj_8flowstar_9observers_PolyObserver *, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  *);
   std::optional<std::vector<flowstar::Interval> >  (*_global_domain)(struct __pyx_obj_8flowstar_9observers_PolyObserver *);
+  struct __pyx_obj_8flowstar_4poly_Poly *(*_fprime_given_f)(struct __pyx_obj_8flowstar_9observers_PolyObserver *);
 };
 static struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *__pyx_vtabptr_8flowstar_9observers_PolyObserver;
 
 
-/* "flowstar/observers.pyx":64
+/* "flowstar/observers.pyx":27
  * 
  * # noinspection PyUnreachableCode
  * cdef class RestrictedObserver(PolyObserver):             # <<<<<<<<<<<<<<
@@ -1334,47 +1324,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject
 /* GetBuiltinName.proto */
 static PyObject *__Pyx_GetBuiltinName(PyObject *name);
 
-/* PyThreadStateGet.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
-#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
-#define __Pyx_PyErr_Occurred()  __pyx_tstate->curexc_type
-#else
-#define __Pyx_PyThreadState_declare
-#define __Pyx_PyThreadState_assign
-#define __Pyx_PyErr_Occurred()  PyErr_Occurred()
-#endif
-
-/* PyErrFetchRestore.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#if CYTHON_COMPILING_IN_CPYTHON
-#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
-#else
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#endif
-#else
-#define __Pyx_PyErr_Clear() PyErr_Clear()
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
-#endif
-
-/* WriteUnraisableException.proto */
-static void __Pyx_WriteUnraisable(const char *name, int clineno,
-                                  int lineno, const char *filename,
-                                  int full_traceback, int nogil);
-
 /* RaiseArgTupleInvalid.proto */
 static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
     Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
@@ -1438,6 +1387,47 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
 #else
 #define __Pyx_PyObject_CallNoArg(func) __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL)
 #endif
+
+/* PyThreadStateGet.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
+#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
+#define __Pyx_PyErr_Occurred()  __pyx_tstate->curexc_type
+#else
+#define __Pyx_PyThreadState_declare
+#define __Pyx_PyThreadState_assign
+#define __Pyx_PyErr_Occurred()  PyErr_Occurred()
+#endif
+
+/* PyErrFetchRestore.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#if CYTHON_COMPILING_IN_CPYTHON
+#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
+#else
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#endif
+#else
+#define __Pyx_PyErr_Clear() PyErr_Clear()
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
+#endif
+
+/* WriteUnraisableException.proto */
+static void __Pyx_WriteUnraisable(const char *name, int clineno,
+                                  int lineno, const char *filename,
+                                  int full_traceback, int nogil);
 
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
@@ -1605,9 +1595,6 @@ static void __Pyx_CppExn2PyErr() {
 #endif
 
 /* CIntFromPy.proto */
-static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *);
-
-/* CIntFromPy.proto */
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
 /* CIntToPy.proto */
@@ -1631,9 +1618,6 @@ static CYTHON_INLINE int __Pyx_PyErr_GivenExceptionMatches2(PyObject *err, PyObj
 
 /* CheckBinaryVersion.proto */
 static int __Pyx_check_binary_version(void);
-
-/* FunctionExport.proto */
-static int __Pyx_ExportFunction(const char *name, void (*f)(void), const char *sig);
 
 /* PyIdentifierFromString.proto */
 #if !defined(__Pyx_PyIdentifier_FromString)
@@ -1668,6 +1652,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
 static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, std::function<flowstar::Interval(const flowstar::Interval &)> &__pyx_v_f_fn, std::function<flowstar::Interval(const flowstar::Interval &)> &__pyx_v_fprime_fn, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &__pyx_v_poly_f_fn, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &__pyx_v_poly_fprime_fn, flowstar::TaylorModelVec &__pyx_v_tmv, std::vector<flowstar::Interval>  *__pyx_v_loop_domain); /* proto*/
 static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObserver__mask_overlap(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, flowstar::Interval const &__pyx_v_x); /* proto*/
 static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON_UNUSED struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, std::vector<flowstar::Interval>  &__pyx_v_roots, std::vector<flowstar::Interval>  &__pyx_v_new_roots, flowstar::Interval &__pyx_v_t, struct __pyx_opt_args_8flowstar_9observers_12PolyObserver__amalgamate_roots *__pyx_optional_args); /* proto*/
+static struct __pyx_obj_8flowstar_4poly_Poly *__pyx_f_8flowstar_9observers_12PolyObserver__fprime_given_f(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto*/
 
 /* Module declarations from 'libc.string' */
 
@@ -1717,17 +1702,18 @@ static PyTypeObject *__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager 
 /* Module declarations from 'flowstar.root_detection' */
 static void (*__pyx_f_8flowstar_14root_detection_detect_roots)(std::vector<flowstar::Interval>  &, std::function<flowstar::Interval(const flowstar::Interval &)>, std::function<flowstar::Interval(const flowstar::Interval &)>, flowstar::Interval &, struct __pyx_opt_args_8flowstar_14root_detection_detect_roots *__pyx_optional_args); /*proto*/
 
+/* Module declarations from 'flowstar.observable' */
+static void (*__pyx_f_8flowstar_10observable_observable)(std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, flowstar::Polynomial &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  &, int, flowstar::Interval &); /*proto*/
+
 /* Module declarations from 'flowstar.observers' */
 static PyTypeObject *__pyx_ptype_8flowstar_9observers_PolyObserver = 0;
 static PyTypeObject *__pyx_ptype_8flowstar_9observers_RestrictedObserver = 0;
-static void __pyx_f_8flowstar_9observers_observable(std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, flowstar::Polynomial &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  &, int, flowstar::Interval &); /*proto*/
 static std::string __pyx_convert_string_from_py_std__in_string(PyObject *); /*proto*/
 #define __Pyx_MODULE_NAME "flowstar.observers"
 extern int __pyx_module_is_main_flowstar__observers;
 int __pyx_module_is_main_flowstar__observers = 0;
 
 /* Implementation of 'flowstar.observers' */
-static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_print;
 static const char __pyx_k_f[] = "f";
@@ -1750,10 +1736,8 @@ static const char __pyx_k_time[] = "time";
 static const char __pyx_k_Reach[] = "Reach";
 static const char __pyx_k_enter[] = "__enter__";
 static const char __pyx_k_print[] = "print";
-static const char __pyx_k_range[] = "range";
 static const char __pyx_k_reach[] = "reach";
 static const char __pyx_k_format[] = "format";
-static const char __pyx_k_fprime[] = "fprime";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_epsilon[] = "epsilon";
@@ -1806,7 +1790,6 @@ static PyObject *__pyx_n_s_f;
 static PyObject *__pyx_n_s_flowstar_reachability;
 static PyObject *__pyx_n_s_flowstar_successful;
 static PyObject *__pyx_n_s_format;
-static PyObject *__pyx_n_s_fprime;
 static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_init_stored_data;
@@ -1824,7 +1807,6 @@ static PyObject *__pyx_n_s_pos;
 static PyObject *__pyx_n_s_prepare;
 static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_pyx_vtable;
-static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_reach;
 static PyObject *__pyx_kp_s_reached_detect_roots_t;
 static PyObject *__pyx_kp_s_reached_interval_eval_t;
@@ -1853,13 +1835,15 @@ static PyObject *__pyx_n_s_verbosity;
 static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __pyx_obj_8flowstar_9observers_RestrictedObserver *__pyx_v_self, struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_p, PyObject *__pyx_v_space_domain); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_18RestrictedObserver_2__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_8flowstar_9observers_RestrictedObserver *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_18RestrictedObserver_4__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_8flowstar_9observers_RestrictedObserver *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
-static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, PyObject *__pyx_v_f, PyObject *__pyx_v_fprime, struct __pyx_obj_8flowstar_12reachability_CReach *__pyx_v_reach, int __pyx_v_symbolic_composition, PyObject *__pyx_v_mask); /* proto */
+static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, PyObject *__pyx_v_f, struct __pyx_obj_8flowstar_12reachability_CReach *__pyx_v_reach, int __pyx_v_symbolic_composition, PyObject *__pyx_v_mask); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_19flowstar_successful___get__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4time___get__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_space_domain, PyObject *__pyx_v_epsilon, PyObject *__pyx_v_verbosity); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, PyObject *__pyx_v_t, PyObject *__pyx_v_verbosity); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, PyObject *__pyx_v_t, CYTHON_UNUSED PyObject *__pyx_v_space_domain); /* proto */
+static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_1f___get__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6fprime___get__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4mask___get__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_10__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_12__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
@@ -1887,159 +1871,7 @@ static PyObject *__pyx_tuple__18;
 static PyObject *__pyx_tuple__20;
 /* Late includes */
 
-/* "flowstar/observers.pyx":26
- * # Cannot return values using ctuples due to Cython bug
- * # https://github.com/cython/cython/issues/1427
- * cdef void observable(interval_time_fn & f_fn, interval_time_fn & f_prime_fn,             # <<<<<<<<<<<<<<
- *                      Polynomial & f, TaylorModelVec & tmv,
- *                      vector[Interval] & domain,
- */
-
-static void __pyx_f_8flowstar_9observers_observable(std::function<flowstar::Interval(const flowstar::Interval &)> &__pyx_v_f_fn, std::function<flowstar::Interval(const flowstar::Interval &)> &__pyx_v_f_prime_fn, flowstar::Polynomial &__pyx_v_f, flowstar::TaylorModelVec &__pyx_v_tmv, std::vector<flowstar::Interval>  &__pyx_v_domain, int __pyx_v_order, flowstar::Interval &__pyx_v_cutoff_threshold) {
-  flowstar::TaylorModel __pyx_v_f1;
-  flowstar::TaylorModel __pyx_v_f2;
-  std::vector<flowstar::Interval>  __pyx_v_space_domain;
-  std::vector<int>  __pyx_v_varIDs;
-  flowstar::Interval __pyx_v_R;
-  flowstar::Polynomial __pyx_v_p;
-  flowstar::Polynomial __pyx_v_p_deriv;
-  std::vector<flowstar::Interval> ::size_type __pyx_v_i;
-  std::vector<flowstar::Interval> ::size_type __pyx_t_1;
-  std::vector<flowstar::Interval> ::size_type __pyx_t_2;
-  std::vector<flowstar::Interval> ::size_type __pyx_t_3;
-
-  /* "flowstar/observers.pyx":45
- * 
- *     # Compose
- *     f1 = compose(f, tmv, domain, order + 1, cutoff_threshold)             # <<<<<<<<<<<<<<
- * 
- *     # Separate off space variables from time
- */
-  __pyx_v_f1 = __pyx_f_8flowstar_4poly_compose(__pyx_v_f, __pyx_v_tmv, __pyx_v_domain, (__pyx_v_order + 1), __pyx_v_cutoff_threshold, NULL);
-
-  /* "flowstar/observers.pyx":48
- * 
- *     # Separate off space variables from time
- *     for i in range(1, domain.size()):             # <<<<<<<<<<<<<<
- *         varIDs.push_back(i)
- *         space_domain.push_back(domain[i])
- */
-  __pyx_t_1 = __pyx_v_domain.size();
-  __pyx_t_2 = __pyx_t_1;
-  for (__pyx_t_3 = 1; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_i = __pyx_t_3;
-
-    /* "flowstar/observers.pyx":49
- *     # Separate off space variables from time
- *     for i in range(1, domain.size()):
- *         varIDs.push_back(i)             # <<<<<<<<<<<<<<
- *         space_domain.push_back(domain[i])
- * 
- */
-    try {
-      __pyx_v_varIDs.push_back(__pyx_v_i);
-    } catch(...) {
-      #ifdef WITH_THREAD
-      PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-      #endif
-      __Pyx_CppExn2PyErr();
-      #ifdef WITH_THREAD
-      __Pyx_PyGILState_Release(__pyx_gilstate_save);
-      #endif
-      __PYX_ERR(0, 49, __pyx_L1_error)
-    }
-
-    /* "flowstar/observers.pyx":50
- *     for i in range(1, domain.size()):
- *         varIDs.push_back(i)
- *         space_domain.push_back(domain[i])             # <<<<<<<<<<<<<<
- * 
- *     # Substitute domain variables
- */
-    try {
-      __pyx_v_space_domain.push_back((__pyx_v_domain[__pyx_v_i]));
-    } catch(...) {
-      #ifdef WITH_THREAD
-      PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-      #endif
-      __Pyx_CppExn2PyErr();
-      #ifdef WITH_THREAD
-      __Pyx_PyGILState_Release(__pyx_gilstate_save);
-      #endif
-      __PYX_ERR(0, 50, __pyx_L1_error)
-    }
-  }
-
-  /* "flowstar/observers.pyx":53
- * 
- *     # Substitute domain variables
- *     f1.substitute(f2, varIDs, space_domain)             # <<<<<<<<<<<<<<
- * 
- *     p = f2.expansion + Polynomial(f2.remainder, 1)
- */
-  __pyx_v_f1.substitute(__pyx_v_f2, __pyx_v_varIDs, __pyx_v_space_domain);
-
-  /* "flowstar/observers.pyx":55
- *     f1.substitute(f2, varIDs, space_domain)
- * 
- *     p = f2.expansion + Polynomial(f2.remainder, 1)             # <<<<<<<<<<<<<<
- *     p.derivative(p_deriv, 0)
- *     p.ctrunc(R, domain, order)
- */
-  __pyx_v_p = (__pyx_v_f2.expansion + flowstar::Polynomial(__pyx_v_f2.remainder, 1));
-
-  /* "flowstar/observers.pyx":56
- * 
- *     p = f2.expansion + Polynomial(f2.remainder, 1)
- *     p.derivative(p_deriv, 0)             # <<<<<<<<<<<<<<
- *     p.ctrunc(R, domain, order)
- * 
- */
-  __pyx_v_p.derivative(__pyx_v_p_deriv, 0);
-
-  /* "flowstar/observers.pyx":57
- *     p = f2.expansion + Polynomial(f2.remainder, 1)
- *     p.derivative(p_deriv, 0)
- *     p.ctrunc(R, domain, order)             # <<<<<<<<<<<<<<
- * 
- *     (&f_fn)[0] = poly_time_fn(p + Polynomial(R, 1))
- */
-  __pyx_v_p.ctrunc(__pyx_v_R, __pyx_v_domain, __pyx_v_order);
-
-  /* "flowstar/observers.pyx":59
- *     p.ctrunc(R, domain, order)
- * 
- *     (&f_fn)[0] = poly_time_fn(p + Polynomial(R, 1))             # <<<<<<<<<<<<<<
- *     (&f_prime_fn)[0] = poly_time_fn(p_deriv)
- * 
- */
-  ((&__pyx_v_f_fn)[0]) = poly_time_fn((__pyx_v_p + flowstar::Polynomial(__pyx_v_R, 1)));
-
-  /* "flowstar/observers.pyx":60
- * 
- *     (&f_fn)[0] = poly_time_fn(p + Polynomial(R, 1))
- *     (&f_prime_fn)[0] = poly_time_fn(p_deriv)             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  ((&__pyx_v_f_prime_fn)[0]) = poly_time_fn(__pyx_v_p_deriv);
-
-  /* "flowstar/observers.pyx":26
- * # Cannot return values using ctuples due to Cython bug
- * # https://github.com/cython/cython/issues/1427
- * cdef void observable(interval_time_fn & f_fn, interval_time_fn & f_prime_fn,             # <<<<<<<<<<<<<<
- *                      Polynomial & f, TaylorModelVec & tmv,
- *                      vector[Interval] & domain,
- */
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_WriteUnraisable("flowstar.observers.observable", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 1);
-  __pyx_L0:;
-}
-
-/* "flowstar/observers.pyx":65
+/* "flowstar/observers.pyx":28
  * # noinspection PyUnreachableCode
  * cdef class RestrictedObserver(PolyObserver):
  *     def __init__(RestrictedObserver self, PolyObserver p,             # <<<<<<<<<<<<<<
@@ -2078,11 +1910,11 @@ static int __pyx_pw_8flowstar_9observers_18RestrictedObserver_1__init__(PyObject
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_space_domain)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(0, 65, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(1, 28, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 65, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 28, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2095,14 +1927,14 @@ static int __pyx_pw_8flowstar_9observers_18RestrictedObserver_1__init__(PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 65, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 28, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.observers.RestrictedObserver.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p), __pyx_ptype_8flowstar_9observers_PolyObserver, 1, "p", 0))) __PYX_ERR(0, 65, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_space_domain), (&PyList_Type), 0, "space_domain", 1))) __PYX_ERR(0, 66, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p), __pyx_ptype_8flowstar_9observers_PolyObserver, 1, "p", 0))) __PYX_ERR(1, 28, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_space_domain), (&PyList_Type), 0, "space_domain", 1))) __PYX_ERR(1, 29, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(((struct __pyx_obj_8flowstar_9observers_RestrictedObserver *)__pyx_v_self), __pyx_v_p, __pyx_v_space_domain);
 
   /* function exit code */
@@ -2132,7 +1964,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain __pyx_t_12;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "flowstar/observers.pyx":67
+  /* "flowstar/observers.pyx":30
  *     def __init__(RestrictedObserver self, PolyObserver p,
  *                  list space_domain not None):
  *         self.f = p.f             # <<<<<<<<<<<<<<
@@ -2147,7 +1979,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_v_self->__pyx_base.f = ((struct __pyx_obj_8flowstar_4poly_Poly *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/observers.pyx":68
+  /* "flowstar/observers.pyx":31
  *                  list space_domain not None):
  *         self.f = p.f
  *         self.fprime = p.fprime             # <<<<<<<<<<<<<<
@@ -2162,7 +1994,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_v_self->__pyx_base.fprime = ((struct __pyx_obj_8flowstar_4poly_Poly *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/observers.pyx":69
+  /* "flowstar/observers.pyx":32
  *         self.f = p.f
  *         self.fprime = p.fprime
  *         self.poly_f_fns = p.poly_f_fns             # <<<<<<<<<<<<<<
@@ -2172,7 +2004,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_t_2 = __pyx_v_p->poly_f_fns;
   __pyx_v_self->__pyx_base.poly_f_fns = __pyx_t_2;
 
-  /* "flowstar/observers.pyx":70
+  /* "flowstar/observers.pyx":33
  *         self.fprime = p.fprime
  *         self.poly_f_fns = p.poly_f_fns
  *         self.poly_fprime_fns = p.poly_fprime_fns             # <<<<<<<<<<<<<<
@@ -2182,7 +2014,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_t_2 = __pyx_v_p->poly_fprime_fns;
   __pyx_v_self->__pyx_base.poly_fprime_fns = __pyx_t_2;
 
-  /* "flowstar/observers.pyx":71
+  /* "flowstar/observers.pyx":34
  *         self.poly_f_fns = p.poly_f_fns
  *         self.poly_fprime_fns = p.poly_fprime_fns
  *         self.bools = p.bools             # <<<<<<<<<<<<<<
@@ -2192,7 +2024,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_t_3 = __pyx_v_p->bools;
   __pyx_v_self->__pyx_base.bools = __pyx_t_3;
 
-  /* "flowstar/observers.pyx":72
+  /* "flowstar/observers.pyx":35
  *         self.poly_fprime_fns = p.poly_fprime_fns
  *         self.bools = p.bools
  *         self.symbolic_composition = p.symbolic_composition             # <<<<<<<<<<<<<<
@@ -2202,7 +2034,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_t_4 = __pyx_v_p->symbolic_composition;
   __pyx_v_self->__pyx_base.symbolic_composition = __pyx_t_4;
 
-  /* "flowstar/observers.pyx":73
+  /* "flowstar/observers.pyx":36
  *         self.bools = p.bools
  *         self.symbolic_composition = p.symbolic_composition
  *         self.reach = p.reach             # <<<<<<<<<<<<<<
@@ -2217,7 +2049,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_v_self->__pyx_base.reach = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/observers.pyx":74
+  /* "flowstar/observers.pyx":37
  *         self.symbolic_composition = p.symbolic_composition
  *         self.reach = p.reach
  *         self.mask = p.mask             # <<<<<<<<<<<<<<
@@ -2232,7 +2064,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_v_self->__pyx_base.mask = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/observers.pyx":75
+  /* "flowstar/observers.pyx":38
  *         self.reach = p.reach
  *         self.mask = p.mask
  *         self.masked_regions = p.masked_regions             # <<<<<<<<<<<<<<
@@ -2242,7 +2074,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_t_5 = __pyx_v_p->masked_regions;
   __pyx_v_self->__pyx_base.masked_regions = __pyx_t_5;
 
-  /* "flowstar/observers.pyx":77
+  /* "flowstar/observers.pyx":40
  *         self.masked_regions = p.masked_regions
  *         cdef optional[vector[Interval]] c_space_domain
  *         if self.reach is not None:             # <<<<<<<<<<<<<<
@@ -2253,28 +2085,28 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   __pyx_t_6 = (__pyx_t_4 != 0);
   if (__pyx_t_6) {
 
-    /* "flowstar/observers.pyx":78
+    /* "flowstar/observers.pyx":41
  *         cdef optional[vector[Interval]] c_space_domain
  *         if self.reach is not None:
  *             if not self.flowstar_successful:             # <<<<<<<<<<<<<<
  *                 self.reach = Reach(self.reach, space_domain)
  *                 self._init_stored_data()
  */
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_flowstar_successful); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_flowstar_successful); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 41, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(1, 41, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_4 = ((!__pyx_t_6) != 0);
     if (__pyx_t_4) {
 
-      /* "flowstar/observers.pyx":79
+      /* "flowstar/observers.pyx":42
  *         if self.reach is not None:
  *             if not self.flowstar_successful:
  *                 self.reach = Reach(self.reach, space_domain)             # <<<<<<<<<<<<<<
  *                 self._init_stored_data()
  * 
  */
-      __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_Reach); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 79, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_Reach); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 42, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __pyx_t_8 = NULL;
       __pyx_t_9 = 0;
@@ -2291,7 +2123,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_7)) {
         PyObject *__pyx_temp[3] = {__pyx_t_8, ((PyObject *)__pyx_v_self->__pyx_base.reach), __pyx_v_space_domain};
-        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 42, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_1);
       } else
@@ -2299,13 +2131,13 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
         PyObject *__pyx_temp[3] = {__pyx_t_8, ((PyObject *)__pyx_v_self->__pyx_base.reach), __pyx_v_space_domain};
-        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 42, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_1);
       } else
       #endif
       {
-        __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 79, __pyx_L1_error)
+        __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 42, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         if (__pyx_t_8) {
           __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
@@ -2316,26 +2148,26 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
         __Pyx_INCREF(__pyx_v_space_domain);
         __Pyx_GIVEREF(__pyx_v_space_domain);
         PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_9, __pyx_v_space_domain);
-        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_10, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_10, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 42, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       }
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_8flowstar_12reachability_CReach))))) __PYX_ERR(0, 79, __pyx_L1_error)
+      if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_8flowstar_12reachability_CReach))))) __PYX_ERR(1, 42, __pyx_L1_error)
       __Pyx_GIVEREF(__pyx_t_1);
       __Pyx_GOTREF(__pyx_v_self->__pyx_base.reach);
       __Pyx_DECREF(((PyObject *)__pyx_v_self->__pyx_base.reach));
       __pyx_v_self->__pyx_base.reach = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "flowstar/observers.pyx":80
+      /* "flowstar/observers.pyx":43
  *             if not self.flowstar_successful:
  *                 self.reach = Reach(self.reach, space_domain)
  *                 self._init_stored_data()             # <<<<<<<<<<<<<<
  * 
  *             c_space_domain = self.reach._convert_space_domain(space_domain)
  */
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_init_stored_data); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 80, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_init_stored_data); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __pyx_t_10 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
@@ -2348,16 +2180,16 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
         }
       }
       if (__pyx_t_10) {
-        __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 43, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       } else {
-        __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 43, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "flowstar/observers.pyx":78
+      /* "flowstar/observers.pyx":41
  *         cdef optional[vector[Interval]] c_space_domain
  *         if self.reach is not None:
  *             if not self.flowstar_successful:             # <<<<<<<<<<<<<<
@@ -2366,7 +2198,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
  */
     }
 
-    /* "flowstar/observers.pyx":82
+    /* "flowstar/observers.pyx":45
  *                 self._init_stored_data()
  * 
  *             c_space_domain = self.reach._convert_space_domain(space_domain)             # <<<<<<<<<<<<<<
@@ -2378,7 +2210,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
     __pyx_t_11 = ((struct __pyx_vtabstruct_8flowstar_12reachability_CReach *)__pyx_v_self->__pyx_base.reach->__pyx_vtab)->_convert_space_domain(__pyx_v_self->__pyx_base.reach, &__pyx_t_12); 
     __pyx_v_c_space_domain = __pyx_t_11;
 
-    /* "flowstar/observers.pyx":83
+    /* "flowstar/observers.pyx":46
  * 
  *             c_space_domain = self.reach._convert_space_domain(space_domain)
  *             assert c_space_domain.has_value()             # <<<<<<<<<<<<<<
@@ -2389,12 +2221,12 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
     if (unlikely(!Py_OptimizeFlag)) {
       if (unlikely(!(__pyx_v_c_space_domain.has_value() != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 83, __pyx_L1_error)
+        __PYX_ERR(1, 46, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/observers.pyx":84
+    /* "flowstar/observers.pyx":47
  *             c_space_domain = self.reach._convert_space_domain(space_domain)
  *             assert c_space_domain.has_value()
  *             self.space_domain = c_space_domain.value()             # <<<<<<<<<<<<<<
@@ -2403,7 +2235,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
  */
     __pyx_v_self->space_domain = __pyx_v_c_space_domain.value();
 
-    /* "flowstar/observers.pyx":77
+    /* "flowstar/observers.pyx":40
  *         self.masked_regions = p.masked_regions
  *         cdef optional[vector[Interval]] c_space_domain
  *         if self.reach is not None:             # <<<<<<<<<<<<<<
@@ -2412,20 +2244,20 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
  */
   }
 
-  /* "flowstar/observers.pyx":87
+  /* "flowstar/observers.pyx":50
  * 
  *         # Invalidate any composed polynomials for indeterminate intervals
  *         if p.flowstar_successful:             # <<<<<<<<<<<<<<
  *             self._invalidate_indeterminate_polys()
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_p), __pyx_n_s_flowstar_successful); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_p), __pyx_n_s_flowstar_successful); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(1, 50, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_4) {
 
-    /* "flowstar/observers.pyx":88
+    /* "flowstar/observers.pyx":51
  *         # Invalidate any composed polynomials for indeterminate intervals
  *         if p.flowstar_successful:
  *             self._invalidate_indeterminate_polys()             # <<<<<<<<<<<<<<
@@ -2434,7 +2266,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
  */
     ((struct __pyx_vtabstruct_8flowstar_9observers_RestrictedObserver *)__pyx_v_self->__pyx_base.__pyx_vtab)->_invalidate_indeterminate_polys(__pyx_v_self);
 
-    /* "flowstar/observers.pyx":87
+    /* "flowstar/observers.pyx":50
  * 
  *         # Invalidate any composed polynomials for indeterminate intervals
  *         if p.flowstar_successful:             # <<<<<<<<<<<<<<
@@ -2443,7 +2275,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
  */
   }
 
-  /* "flowstar/observers.pyx":65
+  /* "flowstar/observers.pyx":28
  * # noinspection PyUnreachableCode
  * cdef class RestrictedObserver(PolyObserver):
  *     def __init__(RestrictedObserver self, PolyObserver p,             # <<<<<<<<<<<<<<
@@ -2466,7 +2298,7 @@ static int __pyx_pf_8flowstar_9observers_18RestrictedObserver___init__(struct __
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":91
+/* "flowstar/observers.pyx":54
  * 
  * 
  *     cdef void _invalidate_indeterminate_polys(RestrictedObserver self):             # <<<<<<<<<<<<<<
@@ -2486,7 +2318,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
   int __pyx_t_2;
   __Pyx_RefNannySetupContext("_invalidate_indeterminate_polys", 0);
 
-  /* "flowstar/observers.pyx":100
+  /* "flowstar/observers.pyx":63
  *         """
  *         cdef:
  *             vector[optional[bint]].iterator b = self.bools.begin()             # <<<<<<<<<<<<<<
@@ -2495,7 +2327,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
   __pyx_v_b = __pyx_v_self->__pyx_base.bools.begin();
 
-  /* "flowstar/observers.pyx":102
+  /* "flowstar/observers.pyx":65
  *             vector[optional[bint]].iterator b = self.bools.begin()
  *             vector[optional[interval_time_fn]].iterator f = \
  *                 self.poly_f_fns.begin()             # <<<<<<<<<<<<<<
@@ -2504,7 +2336,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
   __pyx_v_f = __pyx_v_self->__pyx_base.poly_f_fns.begin();
 
-  /* "flowstar/observers.pyx":104
+  /* "flowstar/observers.pyx":67
  *                 self.poly_f_fns.begin()
  *             vector[optional[interval_time_fn]].iterator fprime = \
  *                 self.poly_fprime_fns.begin()             # <<<<<<<<<<<<<<
@@ -2513,7 +2345,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
   __pyx_v_fprime = __pyx_v_self->__pyx_base.poly_fprime_fns.begin();
 
-  /* "flowstar/observers.pyx":105
+  /* "flowstar/observers.pyx":68
  *             vector[optional[interval_time_fn]].iterator fprime = \
  *                 self.poly_fprime_fns.begin()
  *             vector[optional[bint]].iterator b_end = self.bools.end()             # <<<<<<<<<<<<<<
@@ -2522,7 +2354,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
   __pyx_v_b_end = __pyx_v_self->__pyx_base.bools.end();
 
-  /* "flowstar/observers.pyx":107
+  /* "flowstar/observers.pyx":70
  *             vector[optional[bint]].iterator b_end = self.bools.end()
  *             vector[optional[interval_time_fn]].iterator f_end = \
  *                 self.poly_f_fns.end()             # <<<<<<<<<<<<<<
@@ -2531,7 +2363,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
   __pyx_v_f_end = __pyx_v_self->__pyx_base.poly_f_fns.end();
 
-  /* "flowstar/observers.pyx":109
+  /* "flowstar/observers.pyx":72
  *                 self.poly_f_fns.end()
  *             vector[optional[interval_time_fn]].iterator fprime_end = \
  *                 self.poly_fprime_fns.end()             # <<<<<<<<<<<<<<
@@ -2540,7 +2372,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
   __pyx_v_fprime_end = __pyx_v_self->__pyx_base.poly_fprime_fns.end();
 
-  /* "flowstar/observers.pyx":111
+  /* "flowstar/observers.pyx":74
  *                 self.poly_fprime_fns.end()
  * 
  *         while b != b_end and f != f_end and fprime != fprime_end:             # <<<<<<<<<<<<<<
@@ -2565,7 +2397,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
     __pyx_L5_bool_binop_done:;
     if (!__pyx_t_1) break;
 
-    /* "flowstar/observers.pyx":112
+    /* "flowstar/observers.pyx":75
  * 
  *         while b != b_end and f != f_end and fprime != fprime_end:
  *             if not deref(b).has_value():             # <<<<<<<<<<<<<<
@@ -2575,7 +2407,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
     __pyx_t_1 = ((!((*__pyx_v_b).has_value() != 0)) != 0);
     if (__pyx_t_1) {
 
-      /* "flowstar/observers.pyx":113
+      /* "flowstar/observers.pyx":76
  *         while b != b_end and f != f_end and fprime != fprime_end:
  *             if not deref(b).has_value():
  *                 (&deref(f))[0] = optional[interval_time_fn]()             # <<<<<<<<<<<<<<
@@ -2584,7 +2416,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
       ((&(*__pyx_v_f))[0]) = std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> ();
 
-      /* "flowstar/observers.pyx":114
+      /* "flowstar/observers.pyx":77
  *             if not deref(b).has_value():
  *                 (&deref(f))[0] = optional[interval_time_fn]()
  *                 (&deref(fprime))[0] = optional[interval_time_fn]()             # <<<<<<<<<<<<<<
@@ -2593,7 +2425,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
       ((&(*__pyx_v_fprime))[0]) = std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> ();
 
-      /* "flowstar/observers.pyx":112
+      /* "flowstar/observers.pyx":75
  * 
  *         while b != b_end and f != f_end and fprime != fprime_end:
  *             if not deref(b).has_value():             # <<<<<<<<<<<<<<
@@ -2602,7 +2434,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
     }
 
-    /* "flowstar/observers.pyx":116
+    /* "flowstar/observers.pyx":79
  *                 (&deref(fprime))[0] = optional[interval_time_fn]()
  * 
  *             inc(b)             # <<<<<<<<<<<<<<
@@ -2611,7 +2443,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
     (void)((++__pyx_v_b));
 
-    /* "flowstar/observers.pyx":117
+    /* "flowstar/observers.pyx":80
  * 
  *             inc(b)
  *             inc(f)             # <<<<<<<<<<<<<<
@@ -2620,7 +2452,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
  */
     (void)((++__pyx_v_f));
 
-    /* "flowstar/observers.pyx":118
+    /* "flowstar/observers.pyx":81
  *             inc(b)
  *             inc(f)
  *             inc(fprime)             # <<<<<<<<<<<<<<
@@ -2630,7 +2462,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
     (void)((++__pyx_v_fprime));
   }
 
-  /* "flowstar/observers.pyx":91
+  /* "flowstar/observers.pyx":54
  * 
  * 
  *     cdef void _invalidate_indeterminate_polys(RestrictedObserver self):             # <<<<<<<<<<<<<<
@@ -2642,7 +2474,7 @@ static void __pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indete
   __Pyx_RefNannyFinishContext();
 }
 
-/* "flowstar/observers.pyx":121
+/* "flowstar/observers.pyx":84
  * 
  * 
  *     cdef optional[vector[Interval]] _global_domain(self):             # <<<<<<<<<<<<<<
@@ -2657,7 +2489,7 @@ static std::optional<std::vector<flowstar::Interval> >  __pyx_f_8flowstar_9obser
   std::vector<flowstar::Interval>  __pyx_t_1;
   __Pyx_RefNannySetupContext("_global_domain", 0);
 
-  /* "flowstar/observers.pyx":122
+  /* "flowstar/observers.pyx":85
  * 
  *     cdef optional[vector[Interval]] _global_domain(self):
  *         cdef vector[Interval] domain = (<RestrictedObserver>self).space_domain             # <<<<<<<<<<<<<<
@@ -2667,7 +2499,7 @@ static std::optional<std::vector<flowstar::Interval> >  __pyx_f_8flowstar_9obser
   __pyx_t_1 = __pyx_v_self->space_domain;
   __pyx_v_domain = __pyx_t_1;
 
-  /* "flowstar/observers.pyx":123
+  /* "flowstar/observers.pyx":86
  *     cdef optional[vector[Interval]] _global_domain(self):
  *         cdef vector[Interval] domain = (<RestrictedObserver>self).space_domain
  *         domain.insert(domain.begin(), Interval(-1, 1))             # <<<<<<<<<<<<<<
@@ -2678,10 +2510,10 @@ static std::optional<std::vector<flowstar::Interval> >  __pyx_f_8flowstar_9obser
     __pyx_v_domain.insert(__pyx_v_domain.begin(), flowstar::Interval(-1.0, 1.0));
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 123, __pyx_L1_error)
+    __PYX_ERR(1, 86, __pyx_L1_error)
   }
 
-  /* "flowstar/observers.pyx":124
+  /* "flowstar/observers.pyx":87
  *         cdef vector[Interval] domain = (<RestrictedObserver>self).space_domain
  *         domain.insert(domain.begin(), Interval(-1, 1))
  *         return optional[vector[Interval]](domain)             # <<<<<<<<<<<<<<
@@ -2691,7 +2523,7 @@ static std::optional<std::vector<flowstar::Interval> >  __pyx_f_8flowstar_9obser
   __pyx_r = std::optional<std::vector<flowstar::Interval> > (__pyx_v_domain);
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":121
+  /* "flowstar/observers.pyx":84
  * 
  * 
  *     cdef optional[vector[Interval]] _global_domain(self):             # <<<<<<<<<<<<<<
@@ -2739,11 +2571,11 @@ static PyObject *__pyx_pf_8flowstar_9observers_18RestrictedObserver_2__reduce_cy
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns,self.space_domain cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(1, 2, __pyx_L1_error)
+  __PYX_ERR(0, 2, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -2792,11 +2624,11 @@ static PyObject *__pyx_pf_8flowstar_9observers_18RestrictedObserver_4__setstate_
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns,self.space_domain cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(1, 4, __pyx_L1_error)
+  __PYX_ERR(0, 4, __pyx_L1_error)
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
@@ -2815,10 +2647,10 @@ static PyObject *__pyx_pf_8flowstar_9observers_18RestrictedObserver_4__setstate_
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":128
+/* "flowstar/observers.pyx":91
  * 
  * cdef class PolyObserver:
- *     def __init__(PolyObserver self, f, fprime, CReach reach,             # <<<<<<<<<<<<<<
+ *     def __init__(PolyObserver self, f, CReach reach,             # <<<<<<<<<<<<<<
  *                  bint symbolic_composition,
  *                  object mask=None):
  */
@@ -2827,7 +2659,6 @@ static PyObject *__pyx_pf_8flowstar_9observers_18RestrictedObserver_4__setstate_
 static int __pyx_pw_8flowstar_9observers_12PolyObserver_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_8flowstar_9observers_12PolyObserver_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_f = 0;
-  PyObject *__pyx_v_fprime = 0;
   struct __pyx_obj_8flowstar_12reachability_CReach *__pyx_v_reach = 0;
   int __pyx_v_symbolic_composition;
   PyObject *__pyx_v_mask = 0;
@@ -2835,23 +2666,21 @@ static int __pyx_pw_8flowstar_9observers_12PolyObserver_1__init__(PyObject *__py
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_f,&__pyx_n_s_fprime,&__pyx_n_s_reach,&__pyx_n_s_symbolic_composition,&__pyx_n_s_mask,0};
-    PyObject* values[5] = {0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_f,&__pyx_n_s_reach,&__pyx_n_s_symbolic_composition,&__pyx_n_s_mask,0};
+    PyObject* values[4] = {0,0,0,0};
 
-    /* "flowstar/observers.pyx":130
- *     def __init__(PolyObserver self, f, fprime, CReach reach,
+    /* "flowstar/observers.pyx":93
+ *     def __init__(PolyObserver self, f, CReach reach,
  *                  bint symbolic_composition,
  *                  object mask=None):             # <<<<<<<<<<<<<<
  *         self.f = Poly(f)
- *         self.fprime = Poly(fprime)
+ *         self.reach = reach
  */
-    values[4] = ((PyObject *)Py_None);
+    values[3] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
-        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
-        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -2870,38 +2699,31 @@ static int __pyx_pw_8flowstar_9observers_12PolyObserver_1__init__(PyObject *__py
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
-        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_fprime)) != 0)) kw_args--;
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reach)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, 1); __PYX_ERR(0, 128, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 3, 4, 1); __PYX_ERR(1, 91, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
-        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reach)) != 0)) kw_args--;
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_symbolic_composition)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, 2); __PYX_ERR(0, 128, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 3, 4, 2); __PYX_ERR(1, 91, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
-        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_symbolic_composition)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, 3); __PYX_ERR(0, 128, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  4:
         if (kw_args > 0) {
           PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_mask);
-          if (value) { values[4] = value; kw_args--; }
+          if (value) { values[3] = value; kw_args--; }
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 128, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 91, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
-        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
-        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
-        values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
         values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
         break;
@@ -2909,26 +2731,25 @@ static int __pyx_pw_8flowstar_9observers_12PolyObserver_1__init__(PyObject *__py
       }
     }
     __pyx_v_f = values[0];
-    __pyx_v_fprime = values[1];
-    __pyx_v_reach = ((struct __pyx_obj_8flowstar_12reachability_CReach *)values[2]);
-    __pyx_v_symbolic_composition = __Pyx_PyObject_IsTrue(values[3]); if (unlikely((__pyx_v_symbolic_composition == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 129, __pyx_L3_error)
-    __pyx_v_mask = values[4];
+    __pyx_v_reach = ((struct __pyx_obj_8flowstar_12reachability_CReach *)values[1]);
+    __pyx_v_symbolic_composition = __Pyx_PyObject_IsTrue(values[2]); if (unlikely((__pyx_v_symbolic_composition == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 92, __pyx_L3_error)
+    __pyx_v_mask = values[3];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 128, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 3, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 91, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.observers.PolyObserver.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_reach), __pyx_ptype_8flowstar_12reachability_CReach, 1, "reach", 0))) __PYX_ERR(0, 128, __pyx_L1_error)
-  __pyx_r = __pyx_pf_8flowstar_9observers_12PolyObserver___init__(((struct __pyx_obj_8flowstar_9observers_PolyObserver *)__pyx_v_self), __pyx_v_f, __pyx_v_fprime, __pyx_v_reach, __pyx_v_symbolic_composition, __pyx_v_mask);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_reach), __pyx_ptype_8flowstar_12reachability_CReach, 1, "reach", 0))) __PYX_ERR(1, 91, __pyx_L1_error)
+  __pyx_r = __pyx_pf_8flowstar_9observers_12PolyObserver___init__(((struct __pyx_obj_8flowstar_9observers_PolyObserver *)__pyx_v_self), __pyx_v_f, __pyx_v_reach, __pyx_v_symbolic_composition, __pyx_v_mask);
 
-  /* "flowstar/observers.pyx":128
+  /* "flowstar/observers.pyx":91
  * 
  * cdef class PolyObserver:
- *     def __init__(PolyObserver self, f, fprime, CReach reach,             # <<<<<<<<<<<<<<
+ *     def __init__(PolyObserver self, f, CReach reach,             # <<<<<<<<<<<<<<
  *                  bint symbolic_composition,
  *                  object mask=None):
  */
@@ -2942,7 +2763,7 @@ static int __pyx_pw_8flowstar_9observers_12PolyObserver_1__init__(PyObject *__py
   return __pyx_r;
 }
 
-static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, PyObject *__pyx_v_f, PyObject *__pyx_v_fprime, struct __pyx_obj_8flowstar_12reachability_CReach *__pyx_v_reach, int __pyx_v_symbolic_composition, PyObject *__pyx_v_mask) {
+static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self, PyObject *__pyx_v_f, struct __pyx_obj_8flowstar_12reachability_CReach *__pyx_v_reach, int __pyx_v_symbolic_composition, PyObject *__pyx_v_mask) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -2950,14 +2771,14 @@ static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_ob
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "flowstar/observers.pyx":131
+  /* "flowstar/observers.pyx":94
  *                  bint symbolic_composition,
  *                  object mask=None):
  *         self.f = Poly(f)             # <<<<<<<<<<<<<<
- *         self.fprime = Poly(fprime)
  *         self.reach = reach
+ *         self.fprime = self._fprime_given_f()
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_8flowstar_4poly_Poly), __pyx_v_f); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_8flowstar_4poly_Poly), __pyx_v_f); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 94, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_self->f);
@@ -2965,27 +2786,12 @@ static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_ob
   __pyx_v_self->f = ((struct __pyx_obj_8flowstar_4poly_Poly *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/observers.pyx":132
+  /* "flowstar/observers.pyx":95
  *                  object mask=None):
  *         self.f = Poly(f)
- *         self.fprime = Poly(fprime)             # <<<<<<<<<<<<<<
- *         self.reach = reach
- *         self.symbolic_composition = symbolic_composition
- */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_8flowstar_4poly_Poly), __pyx_v_fprime); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 132, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __Pyx_GOTREF(__pyx_v_self->fprime);
-  __Pyx_DECREF(((PyObject *)__pyx_v_self->fprime));
-  __pyx_v_self->fprime = ((struct __pyx_obj_8flowstar_4poly_Poly *)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "flowstar/observers.pyx":133
- *         self.f = Poly(f)
- *         self.fprime = Poly(fprime)
  *         self.reach = reach             # <<<<<<<<<<<<<<
+ *         self.fprime = self._fprime_given_f()
  *         self.symbolic_composition = symbolic_composition
- *         self.mask = mask
  */
   __Pyx_INCREF(((PyObject *)__pyx_v_reach));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_reach));
@@ -2993,17 +2799,32 @@ static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_ob
   __Pyx_DECREF(((PyObject *)__pyx_v_self->reach));
   __pyx_v_self->reach = __pyx_v_reach;
 
-  /* "flowstar/observers.pyx":134
- *         self.fprime = Poly(fprime)
+  /* "flowstar/observers.pyx":96
+ *         self.f = Poly(f)
  *         self.reach = reach
+ *         self.fprime = self._fprime_given_f()             # <<<<<<<<<<<<<<
+ *         self.symbolic_composition = symbolic_composition
+ *         self.mask = mask
+ */
+  __pyx_t_1 = ((PyObject *)((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_fprime_given_f(__pyx_v_self)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 96, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_1);
+  __Pyx_GOTREF(__pyx_v_self->fprime);
+  __Pyx_DECREF(((PyObject *)__pyx_v_self->fprime));
+  __pyx_v_self->fprime = ((struct __pyx_obj_8flowstar_4poly_Poly *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "flowstar/observers.pyx":97
+ *         self.reach = reach
+ *         self.fprime = self._fprime_given_f()
  *         self.symbolic_composition = symbolic_composition             # <<<<<<<<<<<<<<
  *         self.mask = mask
  *         self._init_stored_data()
  */
   __pyx_v_self->symbolic_composition = __pyx_v_symbolic_composition;
 
-  /* "flowstar/observers.pyx":135
- *         self.reach = reach
+  /* "flowstar/observers.pyx":98
+ *         self.fprime = self._fprime_given_f()
  *         self.symbolic_composition = symbolic_composition
  *         self.mask = mask             # <<<<<<<<<<<<<<
  *         self._init_stored_data()
@@ -3015,14 +2836,14 @@ static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_ob
   __Pyx_DECREF(__pyx_v_self->mask);
   __pyx_v_self->mask = __pyx_v_mask;
 
-  /* "flowstar/observers.pyx":136
+  /* "flowstar/observers.pyx":99
  *         self.symbolic_composition = symbolic_composition
  *         self.mask = mask
  *         self._init_stored_data()             # <<<<<<<<<<<<<<
  * 
  *     def _init_stored_data(self):
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_init_stored_data); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_init_stored_data); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 99, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -3035,19 +2856,19 @@ static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_ob
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 99, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 99, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/observers.pyx":128
+  /* "flowstar/observers.pyx":91
  * 
  * cdef class PolyObserver:
- *     def __init__(PolyObserver self, f, fprime, CReach reach,             # <<<<<<<<<<<<<<
+ *     def __init__(PolyObserver self, f, CReach reach,             # <<<<<<<<<<<<<<
  *                  bint symbolic_composition,
  *                  object mask=None):
  */
@@ -3066,7 +2887,7 @@ static int __pyx_pf_8flowstar_9observers_12PolyObserver___init__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":138
+/* "flowstar/observers.pyx":101
  *         self._init_stored_data()
  * 
  *     def _init_stored_data(self):             # <<<<<<<<<<<<<<
@@ -3103,7 +2924,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
   PyObject *(*__pyx_t_10)(PyObject *);
   __Pyx_RefNannySetupContext("_init_stored_data", 0);
 
-  /* "flowstar/observers.pyx":139
+  /* "flowstar/observers.pyx":102
  * 
  *     def _init_stored_data(self):
  *         if self.reach is not None and self.flowstar_successful:             # <<<<<<<<<<<<<<
@@ -3117,22 +2938,22 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
     __pyx_t_1 = __pyx_t_3;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_flowstar_successful); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 139, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_flowstar_successful); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 139, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(1, 102, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_1 = __pyx_t_3;
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "flowstar/observers.pyx":140
+    /* "flowstar/observers.pyx":103
  *     def _init_stored_data(self):
  *         if self.reach is not None and self.flowstar_successful:
  *             self.reach.prepare()             # <<<<<<<<<<<<<<
  * 
  *             # Initialise optional arrays
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_prepare); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 140, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_prepare); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 103, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -3145,16 +2966,16 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
       }
     }
     if (__pyx_t_6) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 140, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 103, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     } else {
-      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 140, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 103, __pyx_L1_error)
     }
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "flowstar/observers.pyx":143
+    /* "flowstar/observers.pyx":106
  * 
  *             # Initialise optional arrays
  *             self.bools = vector[optional[bint]](             # <<<<<<<<<<<<<<
@@ -3165,11 +2986,11 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
       __pyx_t_7 = std::vector<std::optional<int> > (__pyx_v_self->reach->c_reach.flowpipesCompo.size(), std::optional<int> ());
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 143, __pyx_L1_error)
+      __PYX_ERR(1, 106, __pyx_L1_error)
     }
     __pyx_v_self->bools = __pyx_t_7;
 
-    /* "flowstar/observers.pyx":145
+    /* "flowstar/observers.pyx":108
  *             self.bools = vector[optional[bint]](
  *                 self.reach.c_reach.flowpipesCompo.size(), optional[bint]())
  *             self.poly_f_fns = vector[optional[interval_time_fn]](             # <<<<<<<<<<<<<<
@@ -3180,11 +3001,11 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
       __pyx_t_8 = std::vector<std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> > (__pyx_v_self->reach->c_reach.flowpipesCompo.size(), std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> ());
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 145, __pyx_L1_error)
+      __PYX_ERR(1, 108, __pyx_L1_error)
     }
     __pyx_v_self->poly_f_fns = __pyx_t_8;
 
-    /* "flowstar/observers.pyx":148
+    /* "flowstar/observers.pyx":111
  *                 self.reach.c_reach.flowpipesCompo.size(),
  *                 optional[interval_time_fn]())
  *             self.poly_fprime_fns = vector[optional[interval_time_fn]](             # <<<<<<<<<<<<<<
@@ -3195,11 +3016,11 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
       __pyx_t_8 = std::vector<std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> > (__pyx_v_self->reach->c_reach.flowpipesCompo.size(), std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> ());
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 148, __pyx_L1_error)
+      __PYX_ERR(1, 111, __pyx_L1_error)
     }
     __pyx_v_self->poly_fprime_fns = __pyx_t_8;
 
-    /* "flowstar/observers.pyx":139
+    /* "flowstar/observers.pyx":102
  * 
  *     def _init_stored_data(self):
  *         if self.reach is not None and self.flowstar_successful:             # <<<<<<<<<<<<<<
@@ -3208,7 +3029,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
  */
   }
 
-  /* "flowstar/observers.pyx":153
+  /* "flowstar/observers.pyx":116
  * 
  *         # Translate mask into a vector
  *         if self.mask is not None:             # <<<<<<<<<<<<<<
@@ -3219,22 +3040,22 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
   __pyx_t_3 = (__pyx_t_1 != 0);
   if (__pyx_t_3) {
 
-    /* "flowstar/observers.pyx":154
+    /* "flowstar/observers.pyx":117
  *         # Translate mask into a vector
  *         if self.mask is not None:
  *             for I in self.mask.pos:             # <<<<<<<<<<<<<<
  *                 self.masked_regions.push_back(make_interval(I))
  * 
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self->mask, __pyx_n_s_pos); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 154, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self->mask, __pyx_n_s_pos); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 117, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     if (likely(PyList_CheckExact(__pyx_t_4)) || PyTuple_CheckExact(__pyx_t_4)) {
       __pyx_t_5 = __pyx_t_4; __Pyx_INCREF(__pyx_t_5); __pyx_t_9 = 0;
       __pyx_t_10 = NULL;
     } else {
-      __pyx_t_9 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 154, __pyx_L1_error)
+      __pyx_t_9 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 117, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_10 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 154, __pyx_L1_error)
+      __pyx_t_10 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 117, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     for (;;) {
@@ -3242,17 +3063,17 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
         if (likely(PyList_CheckExact(__pyx_t_5))) {
           if (__pyx_t_9 >= PyList_GET_SIZE(__pyx_t_5)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_4 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_9); __Pyx_INCREF(__pyx_t_4); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(0, 154, __pyx_L1_error)
+          __pyx_t_4 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_9); __Pyx_INCREF(__pyx_t_4); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(1, 117, __pyx_L1_error)
           #else
-          __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 154, __pyx_L1_error)
+          __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 117, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
           #endif
         } else {
           if (__pyx_t_9 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_9); __Pyx_INCREF(__pyx_t_4); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(0, 154, __pyx_L1_error)
+          __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_9); __Pyx_INCREF(__pyx_t_4); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(1, 117, __pyx_L1_error)
           #else
-          __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 154, __pyx_L1_error)
+          __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 117, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
           #endif
         }
@@ -3262,7 +3083,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 154, __pyx_L1_error)
+            else __PYX_ERR(1, 117, __pyx_L1_error)
           }
           break;
         }
@@ -3271,7 +3092,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
       __Pyx_XDECREF_SET(__pyx_v_I, __pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "flowstar/observers.pyx":155
+      /* "flowstar/observers.pyx":118
  *         if self.mask is not None:
  *             for I in self.mask.pos:
  *                 self.masked_regions.push_back(make_interval(I))             # <<<<<<<<<<<<<<
@@ -3282,10 +3103,10 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
         __pyx_v_self->masked_regions.push_back(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_I));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 155, __pyx_L1_error)
+        __PYX_ERR(1, 118, __pyx_L1_error)
       }
 
-      /* "flowstar/observers.pyx":154
+      /* "flowstar/observers.pyx":117
  *         # Translate mask into a vector
  *         if self.mask is not None:
  *             for I in self.mask.pos:             # <<<<<<<<<<<<<<
@@ -3295,7 +3116,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-    /* "flowstar/observers.pyx":153
+    /* "flowstar/observers.pyx":116
  * 
  *         # Translate mask into a vector
  *         if self.mask is not None:             # <<<<<<<<<<<<<<
@@ -3304,7 +3125,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
  */
   }
 
-  /* "flowstar/observers.pyx":138
+  /* "flowstar/observers.pyx":101
  *         self._init_stored_data()
  * 
  *     def _init_stored_data(self):             # <<<<<<<<<<<<<<
@@ -3328,7 +3149,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_2_init_stored_data
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":158
+/* "flowstar/observers.pyx":121
  * 
  *     @property
  *     def flowstar_successful(self):             # <<<<<<<<<<<<<<
@@ -3357,7 +3178,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_19flowstar_success
   int __pyx_t_3;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "flowstar/observers.pyx":159
+  /* "flowstar/observers.pyx":122
  *     @property
  *     def flowstar_successful(self):
  *         return self.reach.ran and self.reach.result <= 3             # <<<<<<<<<<<<<<
@@ -3367,14 +3188,14 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_19flowstar_success
   __Pyx_XDECREF(__pyx_r);
   if (__pyx_v_self->reach->ran) {
   } else {
-    __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_v_self->reach->ran); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 159, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_v_self->reach->ran); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 122, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_1 = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L3_bool_binop_done;
   }
   __pyx_t_3 = (__pyx_v_self->reach->result <= 3);
-  __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = __pyx_t_2;
   __pyx_t_2 = 0;
@@ -3383,7 +3204,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_19flowstar_success
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":158
+  /* "flowstar/observers.pyx":121
  * 
  *     @property
  *     def flowstar_successful(self):             # <<<<<<<<<<<<<<
@@ -3403,7 +3224,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_19flowstar_success
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":162
+/* "flowstar/observers.pyx":125
  * 
  *     @property
  *     def time(self):             # <<<<<<<<<<<<<<
@@ -3432,7 +3253,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4time___get__(stru
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "flowstar/observers.pyx":163
+  /* "flowstar/observers.pyx":126
  *     @property
  *     def time(self):
  *         if self.reach is not None:             # <<<<<<<<<<<<<<
@@ -3443,7 +3264,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4time___get__(stru
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/observers.pyx":164
+    /* "flowstar/observers.pyx":127
  *     def time(self):
  *         if self.reach is not None:
  *             return self.reach.time             # <<<<<<<<<<<<<<
@@ -3451,13 +3272,13 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4time___get__(stru
  *             return None
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_time); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 164, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_time); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "flowstar/observers.pyx":163
+    /* "flowstar/observers.pyx":126
  *     @property
  *     def time(self):
  *         if self.reach is not None:             # <<<<<<<<<<<<<<
@@ -3466,7 +3287,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4time___get__(stru
  */
   }
 
-  /* "flowstar/observers.pyx":166
+  /* "flowstar/observers.pyx":129
  *             return self.reach.time
  *         else:
  *             return None             # <<<<<<<<<<<<<<
@@ -3479,7 +3300,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4time___get__(stru
     goto __pyx_L0;
   }
 
-  /* "flowstar/observers.pyx":162
+  /* "flowstar/observers.pyx":125
  * 
  *     @property
  *     def time(self):             # <<<<<<<<<<<<<<
@@ -3498,7 +3319,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4time___get__(stru
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":168
+/* "flowstar/observers.pyx":131
  *             return None
  * 
  *     cdef optional[vector[Interval]] _global_domain(PolyObserver self):             # <<<<<<<<<<<<<<
@@ -3511,7 +3332,7 @@ static std::optional<std::vector<flowstar::Interval> >  __pyx_f_8flowstar_9obser
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_global_domain", 0);
 
-  /* "flowstar/observers.pyx":169
+  /* "flowstar/observers.pyx":132
  * 
  *     cdef optional[vector[Interval]] _global_domain(PolyObserver self):
  *         return optional[vector[Interval]]()             # <<<<<<<<<<<<<<
@@ -3521,7 +3342,7 @@ static std::optional<std::vector<flowstar::Interval> >  __pyx_f_8flowstar_9obser
   __pyx_r = std::optional<std::vector<flowstar::Interval> > ();
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":168
+  /* "flowstar/observers.pyx":131
  *             return None
  * 
  *     cdef optional[vector[Interval]] _global_domain(PolyObserver self):             # <<<<<<<<<<<<<<
@@ -3535,7 +3356,7 @@ static std::optional<std::vector<flowstar::Interval> >  __pyx_f_8flowstar_9obser
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":171
+/* "flowstar/observers.pyx":134
  *         return optional[vector[Interval]]()
  * 
  *     def roots(PolyObserver self, space_domain=None,             # <<<<<<<<<<<<<<
@@ -3592,7 +3413,7 @@ static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_5roots(PyObject *_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "roots") < 0)) __PYX_ERR(0, 171, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "roots") < 0)) __PYX_ERR(1, 134, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3612,7 +3433,7 @@ static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_5roots(PyObject *_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("roots", 0, 0, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 171, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("roots", 0, 0, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 134, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.observers.PolyObserver.roots", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3652,7 +3473,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
   PyObject *__pyx_t_20 = NULL;
   __Pyx_RefNannySetupContext("roots", 0);
 
-  /* "flowstar/observers.pyx":178
+  /* "flowstar/observers.pyx":141
  *         cdef vector[Interval] c_res
  * 
  *         if self.reach is None:             # <<<<<<<<<<<<<<
@@ -3663,7 +3484,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/observers.pyx":179
+    /* "flowstar/observers.pyx":142
  * 
  *         if self.reach is None:
  *             return None             # <<<<<<<<<<<<<<
@@ -3674,7 +3495,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "flowstar/observers.pyx":178
+    /* "flowstar/observers.pyx":141
  *         cdef vector[Interval] c_res
  * 
  *         if self.reach is None:             # <<<<<<<<<<<<<<
@@ -3683,7 +3504,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
  */
   }
 
-  /* "flowstar/observers.pyx":181
+  /* "flowstar/observers.pyx":144
  *             return None
  * 
  *         with self.reach.global_manager:             # <<<<<<<<<<<<<<
@@ -3691,9 +3512,9 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
  * 
  */
   /*with:*/ {
-    __pyx_t_3 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 181, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 144, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 181, __pyx_L4_error)
+    __pyx_t_5 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 144, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -3706,10 +3527,10 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
       }
     }
     if (__pyx_t_6) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 181, __pyx_L4_error)
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 144, __pyx_L4_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     } else {
-      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 181, __pyx_L4_error)
+      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 144, __pyx_L4_error)
     }
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -3724,22 +3545,22 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
         __Pyx_XGOTREF(__pyx_t_9);
         /*try:*/ {
 
-          /* "flowstar/observers.pyx":182
+          /* "flowstar/observers.pyx":145
  * 
  *         with self.reach.global_manager:
  *             c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)             # <<<<<<<<<<<<<<
  * 
  *         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
  */
-          __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_epsilon); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 182, __pyx_L8_error)
-          __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_v_verbosity); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 182, __pyx_L8_error)
+          __pyx_t_10 = __pyx_PyFloat_AsDouble(__pyx_v_epsilon); if (unlikely((__pyx_t_10 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 145, __pyx_L8_error)
+          __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_v_verbosity); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 145, __pyx_L8_error)
           __pyx_t_13.__pyx_n = 2;
           __pyx_t_13.epsilon = __pyx_t_10;
           __pyx_t_13.verbosity = __pyx_t_11;
           __pyx_t_12 = ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->c_roots(__pyx_v_self, &__pyx_t_13); 
           __pyx_v_c_res = __pyx_t_12;
 
-          /* "flowstar/observers.pyx":181
+          /* "flowstar/observers.pyx":144
  *             return None
  * 
  *         with self.reach.global_manager:             # <<<<<<<<<<<<<<
@@ -3757,20 +3578,20 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("flowstar.observers.PolyObserver.roots", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_6) < 0) __PYX_ERR(0, 181, __pyx_L10_except_error)
+          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_6) < 0) __PYX_ERR(1, 144, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_4);
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_GOTREF(__pyx_t_6);
-          __pyx_t_14 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 181, __pyx_L10_except_error)
+          __pyx_t_14 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_14)) __PYX_ERR(1, 144, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_14);
           __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_14, NULL);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-          if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 181, __pyx_L10_except_error)
+          if (unlikely(!__pyx_t_15)) __PYX_ERR(1, 144, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_15);
           __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_15);
           __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-          if (__pyx_t_2 < 0) __PYX_ERR(0, 181, __pyx_L10_except_error)
+          if (__pyx_t_2 < 0) __PYX_ERR(1, 144, __pyx_L10_except_error)
           __pyx_t_1 = ((!(__pyx_t_2 != 0)) != 0);
           if (__pyx_t_1) {
             __Pyx_GIVEREF(__pyx_t_4);
@@ -3778,7 +3599,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
             __Pyx_XGIVEREF(__pyx_t_6);
             __Pyx_ErrRestoreWithState(__pyx_t_4, __pyx_t_5, __pyx_t_6);
             __pyx_t_4 = 0; __pyx_t_5 = 0; __pyx_t_6 = 0; 
-            __PYX_ERR(0, 181, __pyx_L10_except_error)
+            __PYX_ERR(1, 144, __pyx_L10_except_error)
           }
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -3804,7 +3625,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
         if (__pyx_t_3) {
           __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__3, NULL);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-          if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 181, __pyx_L1_error)
+          if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 144, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
@@ -3819,7 +3640,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
     __pyx_L17:;
   }
 
-  /* "flowstar/observers.pyx":184
+  /* "flowstar/observers.pyx":147
  *             c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)
  * 
  *         return [sage.RIF(r.inf(), r.sup()) for r in c_res]             # <<<<<<<<<<<<<<
@@ -3827,7 +3648,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
  *     cdef vector[Interval] c_roots(PolyObserver self,
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_6 = PyList_New(0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 184, __pyx_L1_error)
+  __pyx_t_6 = PyList_New(0); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_16 = __pyx_v_c_res.begin();
   for (;;) {
@@ -3835,14 +3656,14 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
     __pyx_t_17 = *__pyx_t_16;
     ++__pyx_t_16;
     __pyx_v_r = __pyx_t_17;
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_sage); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 184, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_sage); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 147, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_RIF); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 184, __pyx_L1_error)
+    __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_RIF); if (unlikely(!__pyx_t_14)) __PYX_ERR(1, 147, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_r.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 184, __pyx_L1_error)
+    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_r.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 147, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_18 = PyFloat_FromDouble(__pyx_v_r.sup()); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 184, __pyx_L1_error)
+    __pyx_t_18 = PyFloat_FromDouble(__pyx_v_r.sup()); if (unlikely(!__pyx_t_18)) __PYX_ERR(1, 147, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_18);
     __pyx_t_19 = NULL;
     __pyx_t_11 = 0;
@@ -3859,7 +3680,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_14)) {
       PyObject *__pyx_temp[3] = {__pyx_t_19, __pyx_t_4, __pyx_t_18};
-      __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 184, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 147, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -3869,7 +3690,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_14)) {
       PyObject *__pyx_temp[3] = {__pyx_t_19, __pyx_t_4, __pyx_t_18};
-      __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 184, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_14, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 147, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -3877,7 +3698,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
     } else
     #endif
     {
-      __pyx_t_20 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_20)) __PYX_ERR(0, 184, __pyx_L1_error)
+      __pyx_t_20 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_20)) __PYX_ERR(1, 147, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_20);
       if (__pyx_t_19) {
         __Pyx_GIVEREF(__pyx_t_19); PyTuple_SET_ITEM(__pyx_t_20, 0, __pyx_t_19); __pyx_t_19 = NULL;
@@ -3888,19 +3709,19 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
       PyTuple_SET_ITEM(__pyx_t_20, 1+__pyx_t_11, __pyx_t_18);
       __pyx_t_4 = 0;
       __pyx_t_18 = 0;
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_20, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 184, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_14, __pyx_t_20, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 147, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
     }
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_6, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 184, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_6, (PyObject*)__pyx_t_5))) __PYX_ERR(1, 147, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":171
+  /* "flowstar/observers.pyx":134
  *         return optional[vector[Interval]]()
  * 
  *     def roots(PolyObserver self, space_domain=None,             # <<<<<<<<<<<<<<
@@ -3925,7 +3746,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_4roots(struct __py
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":186
+/* "flowstar/observers.pyx":149
  *         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
  * 
  *     cdef vector[Interval] c_roots(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -3977,7 +3798,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     }
   }
 
-  /* "flowstar/observers.pyx":190
+  /* "flowstar/observers.pyx":153
  *         cdef:
  *             clist[TaylorModelVec].iterator tmv =\
  *                 self.reach.c_reach.flowpipesCompo.begin()             # <<<<<<<<<<<<<<
@@ -3986,7 +3807,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_tmv = __pyx_v_self->reach->c_reach.flowpipesCompo.begin();
 
-  /* "flowstar/observers.pyx":192
+  /* "flowstar/observers.pyx":155
  *                 self.reach.c_reach.flowpipesCompo.begin()
  *             clist[vector[Interval]].iterator domain =\
  *                 self.reach.c_reach.domains.begin()             # <<<<<<<<<<<<<<
@@ -3995,7 +3816,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_domain = __pyx_v_self->reach->c_reach.domains.begin();
 
-  /* "flowstar/observers.pyx":193
+  /* "flowstar/observers.pyx":156
  *             clist[vector[Interval]].iterator domain =\
  *                 self.reach.c_reach.domains.begin()
  *             vector[optional[bint]].iterator cached_bool = self.bools.begin()             # <<<<<<<<<<<<<<
@@ -4004,7 +3825,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_cached_bool = __pyx_v_self->bools.begin();
 
-  /* "flowstar/observers.pyx":195
+  /* "flowstar/observers.pyx":158
  *             vector[optional[bint]].iterator cached_bool = self.bools.begin()
  *             vector[optional[interval_time_fn]].iterator\
  *                 poly_f_fn = self.poly_f_fns.begin()             # <<<<<<<<<<<<<<
@@ -4013,7 +3834,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_poly_f_fn = __pyx_v_self->poly_f_fns.begin();
 
-  /* "flowstar/observers.pyx":197
+  /* "flowstar/observers.pyx":160
  *                 poly_f_fn = self.poly_f_fns.begin()
  *             vector[optional[interval_time_fn]].iterator\
  *                 poly_fprime_fn = self.poly_fprime_fns.begin()             # <<<<<<<<<<<<<<
@@ -4022,7 +3843,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_poly_fprime_fn = __pyx_v_self->poly_fprime_fns.begin();
 
-  /* "flowstar/observers.pyx":200
+  /* "flowstar/observers.pyx":163
  *             vector[Interval] roots
  *             vector[Interval] new_roots
  *             vector[Interval].iterator root_iter = roots.begin()             # <<<<<<<<<<<<<<
@@ -4031,7 +3852,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_root_iter = __pyx_v_roots.begin();
 
-  /* "flowstar/observers.pyx":208
+  /* "flowstar/observers.pyx":171
  *             Interval f_domain
  *             vector[Interval] tmv_domain
  *             int i = 0             # <<<<<<<<<<<<<<
@@ -4040,7 +3861,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_i = 0;
 
-  /* "flowstar/observers.pyx":211
+  /* "flowstar/observers.pyx":174
  *             vector[Interval]* loop_domain
  * 
  *         cdef optional[vector[Interval]] global_domain = self._global_domain()             # <<<<<<<<<<<<<<
@@ -4049,7 +3870,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   __pyx_v_global_domain = ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_global_domain(__pyx_v_self);
 
-  /* "flowstar/observers.pyx":213
+  /* "flowstar/observers.pyx":176
  *         cdef optional[vector[Interval]] global_domain = self._global_domain()
  * 
  *         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0             # <<<<<<<<<<<<<<
@@ -4058,15 +3879,15 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(!Py_OptimizeFlag)) {
-    __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_n_b_local_t); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
+    __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_n_b_local_t); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 176, __pyx_L1_error)
     if (unlikely(!(((__pyx_v_self->reach->c_reach.tmVarTab[__pyx_t_1]) == 0) != 0))) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 213, __pyx_L1_error)
+      __PYX_ERR(1, 176, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "flowstar/observers.pyx":215
+  /* "flowstar/observers.pyx":178
  *         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
  * 
  *         while self._tm_segment_loop(i, loop_domain, global_domain,             # <<<<<<<<<<<<<<
@@ -4075,7 +3896,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
   while (1) {
 
-    /* "flowstar/observers.pyx":217
+    /* "flowstar/observers.pyx":180
  *         while self._tm_segment_loop(i, loop_domain, global_domain,
  *                                     tmv, domain, cached_bool,
  *                                     poly_f_fn, poly_fprime_fn, t, t0, t00):             # <<<<<<<<<<<<<<
@@ -4085,7 +3906,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_t_2 = (((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_tm_segment_loop(__pyx_v_self, __pyx_v_i, __pyx_v_loop_domain, __pyx_v_global_domain, __pyx_v_tmv, __pyx_v_domain, __pyx_v_cached_bool, __pyx_v_poly_f_fn, __pyx_v_poly_fprime_fn, __pyx_v_t, __pyx_v_t0, __pyx_v_t00) != 0);
     if (!__pyx_t_2) break;
 
-    /* "flowstar/observers.pyx":218
+    /* "flowstar/observers.pyx":181
  *                                     tmv, domain, cached_bool,
  *                                     poly_f_fn, poly_fprime_fn, t, t0, t00):
  *             t00 = t0             # <<<<<<<<<<<<<<
@@ -4094,7 +3915,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     __pyx_v_t00 = __pyx_v_t0;
 
-    /* "flowstar/observers.pyx":219
+    /* "flowstar/observers.pyx":182
  *                                     poly_f_fn, poly_fprime_fn, t, t0, t00):
  *             t00 = t0
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -4104,45 +3925,45 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_t_2 = ((__pyx_v_verbosity >= 2) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":220
+      /* "flowstar/observers.pyx":183
  *             t00 = t0
  *             if verbosity >= 2:
  *                 print("===")             # <<<<<<<<<<<<<<
  *                 print("reached detect roots t={} + {}".format(
  *                     interval.as_str(t),
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 220, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 183, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-      /* "flowstar/observers.pyx":221
+      /* "flowstar/observers.pyx":184
  *             if verbosity >= 2:
  *                 print("===")
  *                 print("reached detect roots t={} + {}".format(             # <<<<<<<<<<<<<<
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))
  */
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_reached_detect_roots_t, __pyx_n_s_format); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 221, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_reached_detect_roots_t, __pyx_n_s_format); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 184, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
 
-      /* "flowstar/observers.pyx":222
+      /* "flowstar/observers.pyx":185
  *                 print("===")
  *                 print("reached detect roots t={} + {}".format(
  *                     interval.as_str(t),             # <<<<<<<<<<<<<<
  *                     interval.as_str(deref(domain)[0])))
  * 
  */
-      __pyx_t_5 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 222, __pyx_L1_error)
+      __pyx_t_5 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 185, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
 
-      /* "flowstar/observers.pyx":223
+      /* "flowstar/observers.pyx":186
  *                 print("reached detect roots t={} + {}".format(
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))             # <<<<<<<<<<<<<<
  * 
  *             ### Isolate roots for current timestep
  */
-      __pyx_t_6 = __pyx_f_8flowstar_8interval_as_str(((*__pyx_v_domain)[0])); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 223, __pyx_L1_error)
+      __pyx_t_6 = __pyx_f_8flowstar_8interval_as_str(((*__pyx_v_domain)[0])); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 186, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __pyx_t_7 = NULL;
       __pyx_t_8 = 0;
@@ -4159,7 +3980,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_4)) {
         PyObject *__pyx_temp[3] = {__pyx_t_7, __pyx_t_5, __pyx_t_6};
-        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 184, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -4169,7 +3990,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
         PyObject *__pyx_temp[3] = {__pyx_t_7, __pyx_t_5, __pyx_t_6};
-        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 184, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -4177,7 +3998,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
       } else
       #endif
       {
-        __pyx_t_9 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 221, __pyx_L1_error)
+        __pyx_t_9 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 184, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         if (__pyx_t_7) {
           __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -4188,25 +4009,25 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
         PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_8, __pyx_t_6);
         __pyx_t_5 = 0;
         __pyx_t_6 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_9, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_9, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 184, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       }
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "flowstar/observers.pyx":221
+      /* "flowstar/observers.pyx":184
  *             if verbosity >= 2:
  *                 print("===")
  *                 print("reached detect roots t={} + {}".format(             # <<<<<<<<<<<<<<
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))
  */
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 221, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 184, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "flowstar/observers.pyx":219
+      /* "flowstar/observers.pyx":182
  *                                     poly_f_fn, poly_fprime_fn, t, t0, t00):
  *             t00 = t0
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -4215,7 +4036,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     }
 
-    /* "flowstar/observers.pyx":229
+    /* "flowstar/observers.pyx":192
  *             ### If there is a definitive boolean value, there can be no roots
  *             ### here
  *             if deref(cached_bool).has_value():             # <<<<<<<<<<<<<<
@@ -4225,7 +4046,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_t_2 = ((*__pyx_v_cached_bool).has_value() != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":230
+      /* "flowstar/observers.pyx":193
  *             ### here
  *             if deref(cached_bool).has_value():
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -4235,18 +4056,18 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
       __pyx_t_2 = ((__pyx_v_verbosity >= 3) != 0);
       if (__pyx_t_2) {
 
-        /* "flowstar/observers.pyx":231
+        /* "flowstar/observers.pyx":194
  *             if deref(cached_bool).has_value():
  *                 if verbosity >= 3:
  *                     print("skipping given cached bool!")             # <<<<<<<<<<<<<<
  *                 continue
  * 
  */
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 231, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 194, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-        /* "flowstar/observers.pyx":230
+        /* "flowstar/observers.pyx":193
  *             ### here
  *             if deref(cached_bool).has_value():
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -4255,7 +4076,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
       }
 
-      /* "flowstar/observers.pyx":232
+      /* "flowstar/observers.pyx":195
  *                 if verbosity >= 3:
  *                     print("skipping given cached bool!")
  *                 continue             # <<<<<<<<<<<<<<
@@ -4264,7 +4085,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
       goto __pyx_L3_continue;
 
-      /* "flowstar/observers.pyx":229
+      /* "flowstar/observers.pyx":192
  *             ### If there is a definitive boolean value, there can be no roots
  *             ### here
  *             if deref(cached_bool).has_value():             # <<<<<<<<<<<<<<
@@ -4273,7 +4094,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     }
 
-    /* "flowstar/observers.pyx":235
+    /* "flowstar/observers.pyx":198
  * 
  *             ### Use mask to determine what region is compatible with the mask
  *             if not self._mask_intersect_check(t, t0, verbosity):             # <<<<<<<<<<<<<<
@@ -4283,7 +4104,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_t_2 = ((!(((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_mask_intersect_check(__pyx_v_self, __pyx_v_t, __pyx_v_t0, __pyx_v_verbosity) != 0)) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":236
+      /* "flowstar/observers.pyx":199
  *             ### Use mask to determine what region is compatible with the mask
  *             if not self._mask_intersect_check(t, t0, verbosity):
  *                 continue             # <<<<<<<<<<<<<<
@@ -4292,7 +4113,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
       goto __pyx_L3_continue;
 
-      /* "flowstar/observers.pyx":235
+      /* "flowstar/observers.pyx":198
  * 
  *             ### Use mask to determine what region is compatible with the mask
  *             if not self._mask_intersect_check(t, t0, verbosity):             # <<<<<<<<<<<<<<
@@ -4301,7 +4122,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     }
 
-    /* "flowstar/observers.pyx":240
+    /* "flowstar/observers.pyx":203
  *             ### Retrieve cached symbolically composed functions, or perform
  *             ### functional composition.
  *             self._pre_retrieve_f(f_fn, fprime_fn,             # <<<<<<<<<<<<<<
@@ -4310,7 +4131,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_pre_retrieve_f(__pyx_v_self, __pyx_v_f_fn, __pyx_v_fprime_fn, (*__pyx_v_poly_f_fn), (*__pyx_v_poly_fprime_fn), (*__pyx_v_tmv), __pyx_v_loop_domain);
 
-    /* "flowstar/observers.pyx":245
+    /* "flowstar/observers.pyx":208
  * 
  *             # Evaluate f over the whole domain
  *             f_domain = f_fn.call(t0)             # <<<<<<<<<<<<<<
@@ -4319,7 +4140,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     __pyx_v_f_domain = __pyx_v_f_fn.operator()(__pyx_v_t0);
 
-    /* "flowstar/observers.pyx":248
+    /* "flowstar/observers.pyx":211
  * 
  *             # Only do anything if there is a chance of a root
  *             if not (f_domain.inf() <= 0 <= f_domain.sup()):             # <<<<<<<<<<<<<<
@@ -4333,7 +4154,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_t_10 = ((!(__pyx_t_2 != 0)) != 0);
     if (__pyx_t_10) {
 
-      /* "flowstar/observers.pyx":249
+      /* "flowstar/observers.pyx":212
  *             # Only do anything if there is a chance of a root
  *             if not (f_domain.inf() <= 0 <= f_domain.sup()):
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -4343,18 +4164,18 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
       __pyx_t_10 = ((__pyx_v_verbosity >= 3) != 0);
       if (__pyx_t_10) {
 
-        /* "flowstar/observers.pyx":250
+        /* "flowstar/observers.pyx":213
  *             if not (f_domain.inf() <= 0 <= f_domain.sup()):
  *                 if verbosity >= 3:
  *                     print("skipping given consistent value over domain")             # <<<<<<<<<<<<<<
  *                 # Annoying code to make Cython allow assignment to a r-value
  *                 (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
  */
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 250, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 213, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-        /* "flowstar/observers.pyx":249
+        /* "flowstar/observers.pyx":212
  *             # Only do anything if there is a chance of a root
  *             if not (f_domain.inf() <= 0 <= f_domain.sup()):
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -4363,7 +4184,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
       }
 
-      /* "flowstar/observers.pyx":252
+      /* "flowstar/observers.pyx":215
  *                     print("skipping given consistent value over domain")
  *                 # Annoying code to make Cython allow assignment to a r-value
  *                 (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)             # <<<<<<<<<<<<<<
@@ -4372,7 +4193,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
       ((&(*__pyx_v_cached_bool))[0]) = std::optional<int> ((__pyx_v_f_domain.inf() > 0.0));
 
-      /* "flowstar/observers.pyx":253
+      /* "flowstar/observers.pyx":216
  *                 # Annoying code to make Cython allow assignment to a r-value
  *                 (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
  *                 continue             # <<<<<<<<<<<<<<
@@ -4381,7 +4202,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
       goto __pyx_L3_continue;
 
-      /* "flowstar/observers.pyx":248
+      /* "flowstar/observers.pyx":211
  * 
  *             # Only do anything if there is a chance of a root
  *             if not (f_domain.inf() <= 0 <= f_domain.sup()):             # <<<<<<<<<<<<<<
@@ -4390,7 +4211,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     }
 
-    /* "flowstar/observers.pyx":256
+    /* "flowstar/observers.pyx":219
  * 
  *             ### Perform symbolic or functional composition.
  *             self._post_retrieve_f(f_fn, fprime_fn,             # <<<<<<<<<<<<<<
@@ -4399,7 +4220,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
  */
     ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_post_retrieve_f(__pyx_v_self, __pyx_v_f_fn, __pyx_v_fprime_fn, (*__pyx_v_poly_f_fn), (*__pyx_v_poly_fprime_fn), (*__pyx_v_tmv), __pyx_v_loop_domain);
 
-    /* "flowstar/observers.pyx":261
+    /* "flowstar/observers.pyx":224
  * 
  *             ### Perform root detection
  *             root_detection.detect_roots(new_roots, f_fn, fprime_fn, t0,             # <<<<<<<<<<<<<<
@@ -4411,7 +4232,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_t_11.verbosity = __pyx_v_verbosity;
     __pyx_f_8flowstar_14root_detection_detect_roots(__pyx_v_new_roots, __pyx_v_f_fn, __pyx_v_fprime_fn, __pyx_v_t0, &__pyx_t_11); 
 
-    /* "flowstar/observers.pyx":267
+    /* "flowstar/observers.pyx":230
  *             ### Amalgamate new and existing roots, shifting new roots by
  *             ### current time, and merging adjacent roots
  *             self._amalgamate_roots(roots, new_roots, t, verbosity=verbosity)             # <<<<<<<<<<<<<<
@@ -4422,7 +4243,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_t_12.verbosity = __pyx_v_verbosity;
     ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_amalgamate_roots(__pyx_v_self, __pyx_v_roots, __pyx_v_new_roots, __pyx_v_t, &__pyx_t_12); 
 
-    /* "flowstar/observers.pyx":268
+    /* "flowstar/observers.pyx":231
  *             ### current time, and merging adjacent roots
  *             self._amalgamate_roots(roots, new_roots, t, verbosity=verbosity)
  *             new_roots.clear()             # <<<<<<<<<<<<<<
@@ -4433,7 +4254,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
     __pyx_L3_continue:;
   }
 
-  /* "flowstar/observers.pyx":270
+  /* "flowstar/observers.pyx":233
  *             new_roots.clear()
  * 
  *         return roots             # <<<<<<<<<<<<<<
@@ -4443,7 +4264,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
   __pyx_r = __pyx_v_roots;
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":186
+  /* "flowstar/observers.pyx":149
  *         return [sage.RIF(r.inf(), r.sup()) for r in c_res]
  * 
  *     cdef vector[Interval] c_roots(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -4466,7 +4287,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObser
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":272
+/* "flowstar/observers.pyx":235
  *         return roots
  * 
  *     cdef Interval eval_interval(PolyObserver self, Interval & x,             # <<<<<<<<<<<<<<
@@ -4513,7 +4334,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
     }
   }
 
-  /* "flowstar/observers.pyx":276
+  /* "flowstar/observers.pyx":239
  *         cdef:
  *             clist[TaylorModelVec].iterator tmv =\
  *                 self.reach.c_reach.flowpipesCompo.begin()             # <<<<<<<<<<<<<<
@@ -4522,7 +4343,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_tmv = __pyx_v_self->reach->c_reach.flowpipesCompo.begin();
 
-  /* "flowstar/observers.pyx":278
+  /* "flowstar/observers.pyx":241
  *                 self.reach.c_reach.flowpipesCompo.begin()
  *             clist[vector[Interval]].iterator domain =\
  *                 self.reach.c_reach.domains.begin()             # <<<<<<<<<<<<<<
@@ -4531,7 +4352,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_domain = __pyx_v_self->reach->c_reach.domains.begin();
 
-  /* "flowstar/observers.pyx":279
+  /* "flowstar/observers.pyx":242
  *             clist[vector[Interval]].iterator domain =\
  *                 self.reach.c_reach.domains.begin()
  *             vector[optional[bint]].iterator cached_bool = self.bools.begin()             # <<<<<<<<<<<<<<
@@ -4540,7 +4361,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_cached_bool = __pyx_v_self->bools.begin();
 
-  /* "flowstar/observers.pyx":281
+  /* "flowstar/observers.pyx":244
  *             vector[optional[bint]].iterator cached_bool = self.bools.begin()
  *             vector[optional[interval_time_fn]].iterator \
  *                 poly_f_fn = self.poly_f_fns.begin()             # <<<<<<<<<<<<<<
@@ -4549,7 +4370,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_poly_f_fn = __pyx_v_self->poly_f_fns.begin();
 
-  /* "flowstar/observers.pyx":283
+  /* "flowstar/observers.pyx":246
  *                 poly_f_fn = self.poly_f_fns.begin()
  *             vector[optional[interval_time_fn]].iterator \
  *                 poly_fprime_fn = self.poly_fprime_fns.begin()             # <<<<<<<<<<<<<<
@@ -4558,7 +4379,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_poly_fprime_fn = __pyx_v_self->poly_fprime_fns.begin();
 
-  /* "flowstar/observers.pyx":286
+  /* "flowstar/observers.pyx":249
  *             vector[Interval] roots
  *             vector[Interval] new_roots
  *             vector[Interval].iterator root_iter = roots.begin()             # <<<<<<<<<<<<<<
@@ -4567,7 +4388,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_root_iter = __pyx_v_roots.begin();
 
-  /* "flowstar/observers.pyx":294
+  /* "flowstar/observers.pyx":257
  *             Interval f_domain
  *             vector[Interval] tmv_domain
  *             int i = 0             # <<<<<<<<<<<<<<
@@ -4576,7 +4397,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_i = 0;
 
-  /* "flowstar/observers.pyx":298
+  /* "flowstar/observers.pyx":261
  *             optional[Interval] final_res
  * 
  *         cdef optional[vector[Interval]] global_domain = self._global_domain()             # <<<<<<<<<<<<<<
@@ -4585,7 +4406,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   __pyx_v_global_domain = ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_global_domain(__pyx_v_self);
 
-  /* "flowstar/observers.pyx":300
+  /* "flowstar/observers.pyx":263
  *         cdef optional[vector[Interval]] global_domain = self._global_domain()
  * 
  *         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0             # <<<<<<<<<<<<<<
@@ -4594,15 +4415,15 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(!Py_OptimizeFlag)) {
-    __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_n_b_local_t); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 300, __pyx_L1_error)
+    __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_n_b_local_t); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 263, __pyx_L1_error)
     if (unlikely(!(((__pyx_v_self->reach->c_reach.tmVarTab[__pyx_t_1]) == 0) != 0))) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 300, __pyx_L1_error)
+      __PYX_ERR(1, 263, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "flowstar/observers.pyx":302
+  /* "flowstar/observers.pyx":265
  *         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
  * 
  *         while (self._tm_segment_loop(i, loop_domain, global_domain,             # <<<<<<<<<<<<<<
@@ -4611,7 +4432,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
   while (1) {
 
-    /* "flowstar/observers.pyx":304
+    /* "flowstar/observers.pyx":267
  *         while (self._tm_segment_loop(i, loop_domain, global_domain,
  *                                     tmv, domain, cached_bool,
  *                                     poly_f_fn, poly_fprime_fn, t, t0, t00)\             # <<<<<<<<<<<<<<
@@ -4625,7 +4446,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
       goto __pyx_L5_bool_binop_done;
     }
 
-    /* "flowstar/observers.pyx":305
+    /* "flowstar/observers.pyx":268
  *                                     tmv, domain, cached_bool,
  *                                     poly_f_fn, poly_fprime_fn, t, t0, t00)\
  *                and t.inf() <= x.sup()):             # <<<<<<<<<<<<<<
@@ -4637,7 +4458,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
     __pyx_L5_bool_binop_done:;
     if (!__pyx_t_2) break;
 
-    /* "flowstar/observers.pyx":306
+    /* "flowstar/observers.pyx":269
  *                                     poly_f_fn, poly_fprime_fn, t, t0, t00)\
  *                and t.inf() <= x.sup()):
  *             t00 = t0             # <<<<<<<<<<<<<<
@@ -4646,7 +4467,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     __pyx_v_t00 = __pyx_v_t0;
 
-    /* "flowstar/observers.pyx":307
+    /* "flowstar/observers.pyx":270
  *                and t.inf() <= x.sup()):
  *             t00 = t0
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -4656,45 +4477,45 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
     __pyx_t_2 = ((__pyx_v_verbosity >= 2) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":308
+      /* "flowstar/observers.pyx":271
  *             t00 = t0
  *             if verbosity >= 2:
  *                 print("===")             # <<<<<<<<<<<<<<
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),
  */
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 308, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 271, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "flowstar/observers.pyx":309
+      /* "flowstar/observers.pyx":272
  *             if verbosity >= 2:
  *                 print("===")
  *                 print("reached interval eval t={} + {}".format(             # <<<<<<<<<<<<<<
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))
  */
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_reached_interval_eval_t, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 309, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_reached_interval_eval_t, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 272, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
 
-      /* "flowstar/observers.pyx":310
+      /* "flowstar/observers.pyx":273
  *                 print("===")
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),             # <<<<<<<<<<<<<<
  *                     interval.as_str(deref(domain)[0])))
  * 
  */
-      __pyx_t_6 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 310, __pyx_L1_error)
+      __pyx_t_6 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 273, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
 
-      /* "flowstar/observers.pyx":311
+      /* "flowstar/observers.pyx":274
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))             # <<<<<<<<<<<<<<
  * 
  *             ### Perform mask intersection
  */
-      __pyx_t_7 = __pyx_f_8flowstar_8interval_as_str(((*__pyx_v_domain)[0])); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 311, __pyx_L1_error)
+      __pyx_t_7 = __pyx_f_8flowstar_8interval_as_str(((*__pyx_v_domain)[0])); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 274, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __pyx_t_8 = NULL;
       __pyx_t_9 = 0;
@@ -4711,7 +4532,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_6, __pyx_t_7};
-        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 272, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4721,7 +4542,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_6, __pyx_t_7};
-        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 272, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4729,7 +4550,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
       } else
       #endif
       {
-        __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 309, __pyx_L1_error)
+        __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 272, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         if (__pyx_t_8) {
           __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
@@ -4740,25 +4561,25 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
         PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_9, __pyx_t_7);
         __pyx_t_6 = 0;
         __pyx_t_7 = 0;
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 272, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       }
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "flowstar/observers.pyx":309
+      /* "flowstar/observers.pyx":272
  *             if verbosity >= 2:
  *                 print("===")
  *                 print("reached interval eval t={} + {}".format(             # <<<<<<<<<<<<<<
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))
  */
-      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 309, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 272, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "flowstar/observers.pyx":307
+      /* "flowstar/observers.pyx":270
  *                and t.inf() <= x.sup()):
  *             t00 = t0
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -4767,7 +4588,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     }
 
-    /* "flowstar/observers.pyx":320
+    /* "flowstar/observers.pyx":283
  * 
  *             ### Absolute time domain for current interval
  *             y = t0             # <<<<<<<<<<<<<<
@@ -4776,7 +4597,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     __pyx_v_y = __pyx_v_t0;
 
-    /* "flowstar/observers.pyx":321
+    /* "flowstar/observers.pyx":284
  *             ### Absolute time domain for current interval
  *             y = t0
  *             y.add_assign(t)             # <<<<<<<<<<<<<<
@@ -4785,7 +4606,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     (void)(__pyx_v_y.operator+=(__pyx_v_t));
 
-    /* "flowstar/observers.pyx":324
+    /* "flowstar/observers.pyx":287
  * 
  *             ### Skip if there is no overlap
  *             if not interval.overlaps(x, y):             # <<<<<<<<<<<<<<
@@ -4795,7 +4616,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
     __pyx_t_2 = ((!(__pyx_f_8flowstar_8interval_overlaps(__pyx_v_x, __pyx_v_y) != 0)) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":325
+      /* "flowstar/observers.pyx":288
  *             ### Skip if there is no overlap
  *             if not interval.overlaps(x, y):
  *                 continue             # <<<<<<<<<<<<<<
@@ -4804,7 +4625,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
       goto __pyx_L3_continue;
 
-      /* "flowstar/observers.pyx":324
+      /* "flowstar/observers.pyx":287
  * 
  *             ### Skip if there is no overlap
  *             if not interval.overlaps(x, y):             # <<<<<<<<<<<<<<
@@ -4813,7 +4634,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     }
 
-    /* "flowstar/observers.pyx":328
+    /* "flowstar/observers.pyx":291
  * 
  *             ### Intersect and shift back to relative reference
  *             y.intersect_assign(x)             # <<<<<<<<<<<<<<
@@ -4822,7 +4643,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     __pyx_v_y.intersect_assign(__pyx_v_x);
 
-    /* "flowstar/observers.pyx":329
+    /* "flowstar/observers.pyx":292
  *             ### Intersect and shift back to relative reference
  *             y.intersect_assign(x)
  *             y.sub_assign(t)             # <<<<<<<<<<<<<<
@@ -4831,7 +4652,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     (void)(__pyx_v_y.operator-=(__pyx_v_t));
 
-    /* "flowstar/observers.pyx":330
+    /* "flowstar/observers.pyx":293
  *             y.intersect_assign(x)
  *             y.sub_assign(t)
  *             y.intersect_assign(t0)             # <<<<<<<<<<<<<<
@@ -4840,7 +4661,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     __pyx_v_y.intersect_assign(__pyx_v_t0);
 
-    /* "flowstar/observers.pyx":334
+    /* "flowstar/observers.pyx":297
  *             ### Retrieve cached symbolically composed functions, or perform
  *             ### functional composition.
  *             self._pre_retrieve_f(f_fn, fprime_fn,             # <<<<<<<<<<<<<<
@@ -4849,7 +4670,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_pre_retrieve_f(__pyx_v_self, __pyx_v_f_fn, __pyx_v_fprime_fn, (*__pyx_v_poly_f_fn), (*__pyx_v_poly_fprime_fn), (*__pyx_v_tmv), __pyx_v_loop_domain);
 
-    /* "flowstar/observers.pyx":337
+    /* "flowstar/observers.pyx":300
  *                                  deref(poly_f_fn), deref(poly_fprime_fn),
  *                                  deref(tmv), loop_domain)
  *             self._post_retrieve_f(f_fn, fprime_fn,             # <<<<<<<<<<<<<<
@@ -4858,7 +4679,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_post_retrieve_f(__pyx_v_self, __pyx_v_f_fn, __pyx_v_fprime_fn, (*__pyx_v_poly_f_fn), (*__pyx_v_poly_fprime_fn), (*__pyx_v_tmv), __pyx_v_loop_domain);
 
-    /* "flowstar/observers.pyx":342
+    /* "flowstar/observers.pyx":305
  * 
  *             ### Interval evaluation over domain
  *             res = f_fn.call(y)             # <<<<<<<<<<<<<<
@@ -4867,7 +4688,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     __pyx_v_res = __pyx_v_f_fn.operator()(__pyx_v_y);
 
-    /* "flowstar/observers.pyx":343
+    /* "flowstar/observers.pyx":306
  *             ### Interval evaluation over domain
  *             res = f_fn.call(y)
  *             if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -4877,16 +4698,16 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
     __pyx_t_2 = ((__pyx_v_verbosity >= 3) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":344
+      /* "flowstar/observers.pyx":307
  *             res = f_fn.call(y)
  *             if verbosity >= 3:
  *                 print("res = {}".format(interval.as_str(res)))             # <<<<<<<<<<<<<<
  * 
  *             ### Amalgamate result
  */
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_res, __pyx_n_s_format); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 344, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_res, __pyx_n_s_format); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 307, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_10 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_res); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 344, __pyx_L1_error)
+      __pyx_t_10 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_res); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 307, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __pyx_t_7 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -4899,14 +4720,14 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
         }
       }
       if (!__pyx_t_7) {
-        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 344, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 307, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
         __Pyx_GOTREF(__pyx_t_5);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_4)) {
           PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_10};
-          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 344, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 307, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -4915,31 +4736,31 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
           PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_10};
-          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 344, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 307, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
         } else
         #endif
         {
-          __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 344, __pyx_L1_error)
+          __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 307, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_7); __pyx_t_7 = NULL;
           __Pyx_GIVEREF(__pyx_t_10);
           PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_10);
           __pyx_t_10 = 0;
-          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 344, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 307, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         }
       }
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 344, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 307, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "flowstar/observers.pyx":343
+      /* "flowstar/observers.pyx":306
  *             ### Interval evaluation over domain
  *             res = f_fn.call(y)
  *             if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -4948,7 +4769,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
     }
 
-    /* "flowstar/observers.pyx":347
+    /* "flowstar/observers.pyx":310
  * 
  *             ### Amalgamate result
  *             if final_res.has_value():             # <<<<<<<<<<<<<<
@@ -4958,7 +4779,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
     __pyx_t_2 = (__pyx_v_final_res.has_value() != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":348
+      /* "flowstar/observers.pyx":311
  *             ### Amalgamate result
  *             if final_res.has_value():
  *                 interval.interval_union(final_res.value(), res)             # <<<<<<<<<<<<<<
@@ -4967,7 +4788,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
  */
       __pyx_f_8flowstar_8interval_interval_union(__pyx_v_final_res.value(), __pyx_v_res);
 
-      /* "flowstar/observers.pyx":347
+      /* "flowstar/observers.pyx":310
  * 
  *             ### Amalgamate result
  *             if final_res.has_value():             # <<<<<<<<<<<<<<
@@ -4977,7 +4798,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
       goto __pyx_L10;
     }
 
-    /* "flowstar/observers.pyx":350
+    /* "flowstar/observers.pyx":313
  *                 interval.interval_union(final_res.value(), res)
  *             else:
  *                 final_res = optional[Interval](res)             # <<<<<<<<<<<<<<
@@ -4991,7 +4812,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
     __pyx_L3_continue:;
   }
 
-  /* "flowstar/observers.pyx":352
+  /* "flowstar/observers.pyx":315
  *                 final_res = optional[Interval](res)
  * 
  *         assert final_res.has_value()             # <<<<<<<<<<<<<<
@@ -5002,12 +4823,12 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
   if (unlikely(!Py_OptimizeFlag)) {
     if (unlikely(!(__pyx_v_final_res.has_value() != 0))) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 352, __pyx_L1_error)
+      __PYX_ERR(1, 315, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "flowstar/observers.pyx":353
+  /* "flowstar/observers.pyx":316
  * 
  *         assert final_res.has_value()
  *         return final_res.value()             # <<<<<<<<<<<<<<
@@ -5017,7 +4838,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
   __pyx_r = __pyx_v_final_res.value();
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":272
+  /* "flowstar/observers.pyx":235
  *         return roots
  * 
  *     cdef Interval eval_interval(PolyObserver self, Interval & x,             # <<<<<<<<<<<<<<
@@ -5040,7 +4861,7 @@ static flowstar::Interval __pyx_f_8flowstar_9observers_12PolyObserver_eval_inter
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":355
+/* "flowstar/observers.pyx":318
  *         return final_res.value()
  * 
  *     def __call__(self, t, verbosity=0):             # <<<<<<<<<<<<<<
@@ -5084,7 +4905,7 @@ static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_7__call__(PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__call__") < 0)) __PYX_ERR(0, 355, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__call__") < 0)) __PYX_ERR(1, 318, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5100,7 +4921,7 @@ static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_7__call__(PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__call__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 355, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__call__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 318, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.observers.PolyObserver.__call__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5137,29 +4958,29 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
   PyObject *__pyx_t_16 = NULL;
   __Pyx_RefNannySetupContext("__call__", 0);
 
-  /* "flowstar/observers.pyx":356
+  /* "flowstar/observers.pyx":319
  * 
  *     def __call__(self, t, verbosity=0):
  *         from sage.all import RIF             # <<<<<<<<<<<<<<
  * 
  *         if self.reach is None:
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 356, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_RIF);
   __Pyx_GIVEREF(__pyx_n_s_RIF);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_RIF);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 356, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RIF); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 356, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RIF); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_RIF = __pyx_t_1;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/observers.pyx":358
+  /* "flowstar/observers.pyx":321
  *         from sage.all import RIF
  * 
  *         if self.reach is None:             # <<<<<<<<<<<<<<
@@ -5170,7 +4991,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
   __pyx_t_4 = (__pyx_t_3 != 0);
   if (__pyx_t_4) {
 
-    /* "flowstar/observers.pyx":359
+    /* "flowstar/observers.pyx":322
  * 
  *         if self.reach is None:
  *             return None             # <<<<<<<<<<<<<<
@@ -5181,7 +5002,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "flowstar/observers.pyx":358
+    /* "flowstar/observers.pyx":321
  *         from sage.all import RIF
  * 
  *         if self.reach is None:             # <<<<<<<<<<<<<<
@@ -5190,14 +5011,14 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
  */
   }
 
-  /* "flowstar/observers.pyx":361
+  /* "flowstar/observers.pyx":324
  *             return None
  * 
  *         self.reach.prepare()             # <<<<<<<<<<<<<<
  * 
  *         # Convert python interval to flow* interval
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_prepare); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 361, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_prepare); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 324, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_5 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -5210,16 +5031,16 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
     }
   }
   if (__pyx_t_5) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 361, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 324, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 361, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 324, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/observers.pyx":366
+  /* "flowstar/observers.pyx":329
  *         cdef:
  *             Interval res
  *             Interval I = interval.make_interval(t)             # <<<<<<<<<<<<<<
@@ -5228,7 +5049,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
  */
   __pyx_v_I = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_t);
 
-  /* "flowstar/observers.pyx":368
+  /* "flowstar/observers.pyx":331
  *             Interval I = interval.make_interval(t)
  * 
  *         with self.reach.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
@@ -5236,9 +5057,9 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
  * 
  */
   /*with:*/ {
-    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 368, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 331, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_1 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 368, __pyx_L4_error)
+    __pyx_t_1 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 331, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -5251,10 +5072,10 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 368, __pyx_L4_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 331, __pyx_L4_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 368, __pyx_L4_error)
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 331, __pyx_L4_error)
     }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5269,20 +5090,20 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
         __Pyx_XGOTREF(__pyx_t_9);
         /*try:*/ {
 
-          /* "flowstar/observers.pyx":369
+          /* "flowstar/observers.pyx":332
  * 
  *         with self.reach.global_manager: #  Use captured globals
  *             res = self.eval_interval(I, verbosity=verbosity)             # <<<<<<<<<<<<<<
  * 
  *         return RIF(res.inf(), res.sup())
  */
-          __pyx_t_10 = __Pyx_PyInt_As_int(__pyx_v_verbosity); if (unlikely((__pyx_t_10 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 369, __pyx_L8_error)
+          __pyx_t_10 = __Pyx_PyInt_As_int(__pyx_v_verbosity); if (unlikely((__pyx_t_10 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 332, __pyx_L8_error)
           __pyx_t_12.__pyx_n = 1;
           __pyx_t_12.verbosity = __pyx_t_10;
           __pyx_t_11 = ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->eval_interval(__pyx_v_self, __pyx_v_I, &__pyx_t_12); 
           __pyx_v_res = __pyx_t_11;
 
-          /* "flowstar/observers.pyx":368
+          /* "flowstar/observers.pyx":331
  *             Interval I = interval.make_interval(t)
  * 
  *         with self.reach.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
@@ -5300,20 +5121,20 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("flowstar.observers.PolyObserver.__call__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_1, &__pyx_t_5) < 0) __PYX_ERR(0, 368, __pyx_L10_except_error)
+          if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_1, &__pyx_t_5) < 0) __PYX_ERR(1, 331, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GOTREF(__pyx_t_1);
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_13 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 368, __pyx_L10_except_error)
+          __pyx_t_13 = PyTuple_Pack(3, __pyx_t_2, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_13)) __PYX_ERR(1, 331, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_13);
           __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_13, NULL);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-          if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 368, __pyx_L10_except_error)
+          if (unlikely(!__pyx_t_14)) __PYX_ERR(1, 331, __pyx_L10_except_error)
           __Pyx_GOTREF(__pyx_t_14);
           __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_14);
           __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-          if (__pyx_t_4 < 0) __PYX_ERR(0, 368, __pyx_L10_except_error)
+          if (__pyx_t_4 < 0) __PYX_ERR(1, 331, __pyx_L10_except_error)
           __pyx_t_3 = ((!(__pyx_t_4 != 0)) != 0);
           if (__pyx_t_3) {
             __Pyx_GIVEREF(__pyx_t_2);
@@ -5321,7 +5142,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
             __Pyx_XGIVEREF(__pyx_t_5);
             __Pyx_ErrRestoreWithState(__pyx_t_2, __pyx_t_1, __pyx_t_5);
             __pyx_t_2 = 0; __pyx_t_1 = 0; __pyx_t_5 = 0; 
-            __PYX_ERR(0, 368, __pyx_L10_except_error)
+            __PYX_ERR(1, 331, __pyx_L10_except_error)
           }
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5347,7 +5168,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
         if (__pyx_t_6) {
           __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_tuple__9, NULL);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-          if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 368, __pyx_L1_error)
+          if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 331, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
@@ -5362,7 +5183,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
     __pyx_L17:;
   }
 
-  /* "flowstar/observers.pyx":371
+  /* "flowstar/observers.pyx":334
  *             res = self.eval_interval(I, verbosity=verbosity)
  * 
  *         return RIF(res.inf(), res.sup())             # <<<<<<<<<<<<<<
@@ -5370,9 +5191,9 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
  *     cdef tribool eval_bool_interval(PolyObserver self, Interval & x,
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_res.inf()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 371, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_res.inf()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 334, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_res.sup()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 371, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_res.sup()); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 334, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_RIF);
   __pyx_t_13 = __pyx_v_RIF; __pyx_t_15 = NULL;
@@ -5390,7 +5211,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_13)) {
     PyObject *__pyx_temp[3] = {__pyx_t_15, __pyx_t_1, __pyx_t_2};
-    __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_13, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 371, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_13, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 334, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5400,7 +5221,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_13)) {
     PyObject *__pyx_temp[3] = {__pyx_t_15, __pyx_t_1, __pyx_t_2};
-    __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_13, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 371, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_13, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 334, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5408,7 +5229,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
   } else
   #endif
   {
-    __pyx_t_16 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 371, __pyx_L1_error)
+    __pyx_t_16 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_16)) __PYX_ERR(1, 334, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_16);
     if (__pyx_t_15) {
       __Pyx_GIVEREF(__pyx_t_15); PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_15); __pyx_t_15 = NULL;
@@ -5419,7 +5240,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
     PyTuple_SET_ITEM(__pyx_t_16, 1+__pyx_t_10, __pyx_t_2);
     __pyx_t_1 = 0;
     __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_16, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 371, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_16, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 334, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
   }
@@ -5428,7 +5249,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":355
+  /* "flowstar/observers.pyx":318
  *         return final_res.value()
  * 
  *     def __call__(self, t, verbosity=0):             # <<<<<<<<<<<<<<
@@ -5453,7 +5274,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6__call__(struct _
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":373
+/* "flowstar/observers.pyx":336
  *         return RIF(res.inf(), res.sup())
  * 
  *     cdef tribool eval_bool_interval(PolyObserver self, Interval & x,             # <<<<<<<<<<<<<<
@@ -5502,7 +5323,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     }
   }
 
-  /* "flowstar/observers.pyx":377
+  /* "flowstar/observers.pyx":340
  *         cdef:
  *             clist[TaylorModelVec].iterator tmv =\
  *                 self.reach.c_reach.flowpipesCompo.begin()             # <<<<<<<<<<<<<<
@@ -5511,7 +5332,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_tmv = __pyx_v_self->reach->c_reach.flowpipesCompo.begin();
 
-  /* "flowstar/observers.pyx":379
+  /* "flowstar/observers.pyx":342
  *                 self.reach.c_reach.flowpipesCompo.begin()
  *             clist[vector[Interval]].iterator domain =\
  *                 self.reach.c_reach.domains.begin()             # <<<<<<<<<<<<<<
@@ -5520,7 +5341,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_domain = __pyx_v_self->reach->c_reach.domains.begin();
 
-  /* "flowstar/observers.pyx":380
+  /* "flowstar/observers.pyx":343
  *             clist[vector[Interval]].iterator domain =\
  *                 self.reach.c_reach.domains.begin()
  *             vector[optional[bint]].iterator cached_bool = self.bools.begin()             # <<<<<<<<<<<<<<
@@ -5529,7 +5350,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_cached_bool = __pyx_v_self->bools.begin();
 
-  /* "flowstar/observers.pyx":382
+  /* "flowstar/observers.pyx":345
  *             vector[optional[bint]].iterator cached_bool = self.bools.begin()
  *             vector[optional[interval_time_fn]].iterator \
  *                 poly_f_fn = self.poly_f_fns.begin()             # <<<<<<<<<<<<<<
@@ -5538,7 +5359,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_poly_f_fn = __pyx_v_self->poly_f_fns.begin();
 
-  /* "flowstar/observers.pyx":384
+  /* "flowstar/observers.pyx":347
  *                 poly_f_fn = self.poly_f_fns.begin()
  *             vector[optional[interval_time_fn]].iterator \
  *                 poly_fprime_fn = self.poly_fprime_fns.begin()             # <<<<<<<<<<<<<<
@@ -5547,7 +5368,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_poly_fprime_fn = __pyx_v_self->poly_fprime_fns.begin();
 
-  /* "flowstar/observers.pyx":387
+  /* "flowstar/observers.pyx":350
  *             vector[Interval] roots
  *             vector[Interval] new_roots
  *             vector[Interval].iterator root_iter = roots.begin()             # <<<<<<<<<<<<<<
@@ -5556,7 +5377,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_root_iter = __pyx_v_roots.begin();
 
-  /* "flowstar/observers.pyx":395
+  /* "flowstar/observers.pyx":358
  *             Interval f_domain, f_y
  *             vector[Interval] tmv_domain
  *             int i = 0             # <<<<<<<<<<<<<<
@@ -5565,7 +5386,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_i = 0;
 
-  /* "flowstar/observers.pyx":397
+  /* "flowstar/observers.pyx":360
  *             int i = 0
  *             vector[Interval]* loop_domain
  *             tribool final_res = <tribool>True             # <<<<<<<<<<<<<<
@@ -5574,7 +5395,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_final_res = ((boost::logic::tribool)1);
 
-  /* "flowstar/observers.pyx":400
+  /* "flowstar/observers.pyx":363
  *             tribool res
  * 
  *         cdef optional[vector[Interval]] global_domain = self._global_domain()             # <<<<<<<<<<<<<<
@@ -5583,7 +5404,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   __pyx_v_global_domain = ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_global_domain(__pyx_v_self);
 
-  /* "flowstar/observers.pyx":402
+  /* "flowstar/observers.pyx":365
  *         cdef optional[vector[Interval]] global_domain = self._global_domain()
  * 
  *         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0             # <<<<<<<<<<<<<<
@@ -5592,15 +5413,15 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(!Py_OptimizeFlag)) {
-    __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_n_b_local_t); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 402, __pyx_L1_error)
+    __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_n_b_local_t); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 365, __pyx_L1_error)
     if (unlikely(!(((__pyx_v_self->reach->c_reach.tmVarTab[__pyx_t_1]) == 0) != 0))) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 402, __pyx_L1_error)
+      __PYX_ERR(1, 365, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "flowstar/observers.pyx":404
+  /* "flowstar/observers.pyx":367
  *         assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
  * 
  *         while (self._tm_segment_loop(i, loop_domain, global_domain,             # <<<<<<<<<<<<<<
@@ -5609,7 +5430,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
   while (1) {
 
-    /* "flowstar/observers.pyx":406
+    /* "flowstar/observers.pyx":369
  *         while (self._tm_segment_loop(i, loop_domain, global_domain,
  *                                      tmv, domain, cached_bool,
  *                                      poly_f_fn, poly_fprime_fn, t, t0, t00) \             # <<<<<<<<<<<<<<
@@ -5623,7 +5444,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       goto __pyx_L5_bool_binop_done;
     }
 
-    /* "flowstar/observers.pyx":407
+    /* "flowstar/observers.pyx":370
  *                                      tmv, domain, cached_bool,
  *                                      poly_f_fn, poly_fprime_fn, t, t0, t00) \
  *                and t.inf() <= x.sup()             # <<<<<<<<<<<<<<
@@ -5637,7 +5458,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       goto __pyx_L5_bool_binop_done;
     }
 
-    /* "flowstar/observers.pyx":408
+    /* "flowstar/observers.pyx":371
  *                                      poly_f_fn, poly_fprime_fn, t, t0, t00) \
  *                and t.inf() <= x.sup()
  *                and <cbool>(final_res != <cbool>False)):             # <<<<<<<<<<<<<<
@@ -5649,7 +5470,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     __pyx_L5_bool_binop_done:;
     if (!__pyx_t_2) break;
 
-    /* "flowstar/observers.pyx":409
+    /* "flowstar/observers.pyx":372
  *                and t.inf() <= x.sup()
  *                and <cbool>(final_res != <cbool>False)):
  *             t00 = t0             # <<<<<<<<<<<<<<
@@ -5658,7 +5479,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
     __pyx_v_t00 = __pyx_v_t0;
 
-    /* "flowstar/observers.pyx":410
+    /* "flowstar/observers.pyx":373
  *                and <cbool>(final_res != <cbool>False)):
  *             t00 = t0
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -5668,45 +5489,45 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     __pyx_t_2 = ((__pyx_v_verbosity >= 2) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":411
+      /* "flowstar/observers.pyx":374
  *             t00 = t0
  *             if verbosity >= 2:
  *                 print("===")             # <<<<<<<<<<<<<<
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),
  */
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 411, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 374, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "flowstar/observers.pyx":412
+      /* "flowstar/observers.pyx":375
  *             if verbosity >= 2:
  *                 print("===")
  *                 print("reached interval eval t={} + {}".format(             # <<<<<<<<<<<<<<
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))
  */
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_reached_interval_eval_t, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 412, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_reached_interval_eval_t, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 375, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
 
-      /* "flowstar/observers.pyx":413
+      /* "flowstar/observers.pyx":376
  *                 print("===")
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),             # <<<<<<<<<<<<<<
  *                     interval.as_str(deref(domain)[0])))
  * 
  */
-      __pyx_t_6 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 413, __pyx_L1_error)
+      __pyx_t_6 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 376, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
 
-      /* "flowstar/observers.pyx":414
+      /* "flowstar/observers.pyx":377
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))             # <<<<<<<<<<<<<<
  * 
  *             ### Perform mask intersection
  */
-      __pyx_t_7 = __pyx_f_8flowstar_8interval_as_str(((*__pyx_v_domain)[0])); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 414, __pyx_L1_error)
+      __pyx_t_7 = __pyx_f_8flowstar_8interval_as_str(((*__pyx_v_domain)[0])); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 377, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __pyx_t_8 = NULL;
       __pyx_t_9 = 0;
@@ -5723,7 +5544,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_6, __pyx_t_7};
-        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 412, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 375, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -5733,7 +5554,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_6, __pyx_t_7};
-        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 412, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 375, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -5741,7 +5562,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       } else
       #endif
       {
-        __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 412, __pyx_L1_error)
+        __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 375, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         if (__pyx_t_8) {
           __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
@@ -5752,25 +5573,25 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
         PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_9, __pyx_t_7);
         __pyx_t_6 = 0;
         __pyx_t_7 = 0;
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 412, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 375, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       }
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "flowstar/observers.pyx":412
+      /* "flowstar/observers.pyx":375
  *             if verbosity >= 2:
  *                 print("===")
  *                 print("reached interval eval t={} + {}".format(             # <<<<<<<<<<<<<<
  *                     interval.as_str(t),
  *                     interval.as_str(deref(domain)[0])))
  */
-      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 412, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 375, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "flowstar/observers.pyx":410
+      /* "flowstar/observers.pyx":373
  *                and <cbool>(final_res != <cbool>False)):
  *             t00 = t0
  *             if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -5779,7 +5600,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
     }
 
-    /* "flowstar/observers.pyx":423
+    /* "flowstar/observers.pyx":386
  * 
  *             ### Absolute time domain for current interval
  *             y = t0             # <<<<<<<<<<<<<<
@@ -5788,7 +5609,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
     __pyx_v_y = __pyx_v_t0;
 
-    /* "flowstar/observers.pyx":424
+    /* "flowstar/observers.pyx":387
  *             ### Absolute time domain for current interval
  *             y = t0
  *             y.add_assign(t)             # <<<<<<<<<<<<<<
@@ -5797,7 +5618,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
     (void)(__pyx_v_y.operator+=(__pyx_v_t));
 
-    /* "flowstar/observers.pyx":427
+    /* "flowstar/observers.pyx":390
  * 
  *             ### Skip if there is no overlap
  *             if not interval.overlaps(x, y):             # <<<<<<<<<<<<<<
@@ -5807,7 +5628,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     __pyx_t_2 = ((!(__pyx_f_8flowstar_8interval_overlaps(__pyx_v_x, __pyx_v_y) != 0)) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":428
+      /* "flowstar/observers.pyx":391
  *             ### Skip if there is no overlap
  *             if not interval.overlaps(x, y):
  *                 continue             # <<<<<<<<<<<<<<
@@ -5816,7 +5637,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       goto __pyx_L3_continue;
 
-      /* "flowstar/observers.pyx":427
+      /* "flowstar/observers.pyx":390
  * 
  *             ### Skip if there is no overlap
  *             if not interval.overlaps(x, y):             # <<<<<<<<<<<<<<
@@ -5825,7 +5646,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
     }
 
-    /* "flowstar/observers.pyx":431
+    /* "flowstar/observers.pyx":394
  * 
  *             ### If there is a cached result, use it!
  *             if deref(cached_bool).has_value():             # <<<<<<<<<<<<<<
@@ -5835,7 +5656,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     __pyx_t_2 = ((*__pyx_v_cached_bool).has_value() != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":432
+      /* "flowstar/observers.pyx":395
  *             ### If there is a cached result, use it!
  *             if deref(cached_bool).has_value():
  *                 res = tribool(deref(cached_bool).value())             # <<<<<<<<<<<<<<
@@ -5844,7 +5665,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       __pyx_v_res = boost::logic::tribool((*__pyx_v_cached_bool).value());
 
-      /* "flowstar/observers.pyx":431
+      /* "flowstar/observers.pyx":394
  * 
  *             ### If there is a cached result, use it!
  *             if deref(cached_bool).has_value():             # <<<<<<<<<<<<<<
@@ -5854,7 +5675,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       goto __pyx_L10;
     }
 
-    /* "flowstar/observers.pyx":435
+    /* "flowstar/observers.pyx":398
  *             else:
  *                 ### Intersect and shift back to relative reference
  *                 y.intersect_assign(x)             # <<<<<<<<<<<<<<
@@ -5864,7 +5685,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     /*else*/ {
       __pyx_v_y.intersect_assign(__pyx_v_x);
 
-      /* "flowstar/observers.pyx":436
+      /* "flowstar/observers.pyx":399
  *                 ### Intersect and shift back to relative reference
  *                 y.intersect_assign(x)
  *                 y.sub_assign(t)             # <<<<<<<<<<<<<<
@@ -5873,7 +5694,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       (void)(__pyx_v_y.operator-=(__pyx_v_t));
 
-      /* "flowstar/observers.pyx":437
+      /* "flowstar/observers.pyx":400
  *                 y.intersect_assign(x)
  *                 y.sub_assign(t)
  *                 y.intersect_assign(t0)             # <<<<<<<<<<<<<<
@@ -5882,7 +5703,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       __pyx_v_y.intersect_assign(__pyx_v_t0);
 
-      /* "flowstar/observers.pyx":441
+      /* "flowstar/observers.pyx":404
  *                 ### Retrieve cached symbolically composed functions, or perform
  *                 ### functional composition.
  *                 if self.symbolic_composition and deref(poly_f_fn).has_value():             # <<<<<<<<<<<<<<
@@ -5900,7 +5721,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       __pyx_L12_bool_binop_done:;
       if (__pyx_t_2) {
 
-        /* "flowstar/observers.pyx":442
+        /* "flowstar/observers.pyx":405
  *                 ### functional composition.
  *                 if self.symbolic_composition and deref(poly_f_fn).has_value():
  *                     assert deref(poly_fprime_fn).has_value()             # <<<<<<<<<<<<<<
@@ -5911,12 +5732,12 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
         if (unlikely(!Py_OptimizeFlag)) {
           if (unlikely(!((*__pyx_v_poly_fprime_fn).has_value() != 0))) {
             PyErr_SetNone(PyExc_AssertionError);
-            __PYX_ERR(0, 442, __pyx_L1_error)
+            __PYX_ERR(1, 405, __pyx_L1_error)
           }
         }
         #endif
 
-        /* "flowstar/observers.pyx":444
+        /* "flowstar/observers.pyx":407
  *                     assert deref(poly_fprime_fn).has_value()
  *                     # Retrieve cached composed functions
  *                     f_fn = deref(poly_f_fn).value()             # <<<<<<<<<<<<<<
@@ -5925,7 +5746,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
         __pyx_v_f_fn = (*__pyx_v_poly_f_fn).value();
 
-        /* "flowstar/observers.pyx":445
+        /* "flowstar/observers.pyx":408
  *                     # Retrieve cached composed functions
  *                     f_fn = deref(poly_f_fn).value()
  *                     fprime_fn = deref(poly_fprime_fn).value()             # <<<<<<<<<<<<<<
@@ -5934,7 +5755,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
         __pyx_v_fprime_fn = (*__pyx_v_poly_fprime_fn).value();
 
-        /* "flowstar/observers.pyx":441
+        /* "flowstar/observers.pyx":404
  *                 ### Retrieve cached symbolically composed functions, or perform
  *                 ### functional composition.
  *                 if self.symbolic_composition and deref(poly_f_fn).has_value():             # <<<<<<<<<<<<<<
@@ -5944,7 +5765,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
         goto __pyx_L11;
       }
 
-      /* "flowstar/observers.pyx":448
+      /* "flowstar/observers.pyx":411
  *                 else:
  *                     # Functional composition for polynomial
  *                     f_fn = interval.compose_interval_fn(poly_fn(self.f.c_poly),             # <<<<<<<<<<<<<<
@@ -5953,7 +5774,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       /*else*/ {
 
-        /* "flowstar/observers.pyx":450
+        /* "flowstar/observers.pyx":413
  *                     f_fn = interval.compose_interval_fn(poly_fn(self.f.c_poly),
  *                                                         deref(tmv),
  *                                                         deref(loop_domain))             # <<<<<<<<<<<<<<
@@ -5964,7 +5785,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       }
       __pyx_L11:;
 
-      /* "flowstar/observers.pyx":453
+      /* "flowstar/observers.pyx":416
  * 
  *                 # Evaluate f over the whole domain
  *                 f_domain = f_fn.call(t0)             # <<<<<<<<<<<<<<
@@ -5973,7 +5794,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       __pyx_v_f_domain = __pyx_v_f_fn.operator()(__pyx_v_t0);
 
-      /* "flowstar/observers.pyx":456
+      /* "flowstar/observers.pyx":419
  * 
  *                 # Only do anything if there is a chance of a root
  *                 if not (f_domain.inf() <= 0 <= f_domain.sup()):             # <<<<<<<<<<<<<<
@@ -5987,7 +5808,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       __pyx_t_3 = ((!(__pyx_t_2 != 0)) != 0);
       if (__pyx_t_3) {
 
-        /* "flowstar/observers.pyx":458
+        /* "flowstar/observers.pyx":421
  *                 if not (f_domain.inf() <= 0 <= f_domain.sup()):
  *                     # Annoying code to make Cython allow assignment to a r-value
  *                     (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)             # <<<<<<<<<<<<<<
@@ -5996,7 +5817,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
         ((&(*__pyx_v_cached_bool))[0]) = std::optional<int> ((__pyx_v_f_domain.inf() > 0.0));
 
-        /* "flowstar/observers.pyx":456
+        /* "flowstar/observers.pyx":419
  * 
  *                 # Only do anything if there is a chance of a root
  *                 if not (f_domain.inf() <= 0 <= f_domain.sup()):             # <<<<<<<<<<<<<<
@@ -6006,7 +5827,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
         goto __pyx_L14;
       }
 
-      /* "flowstar/observers.pyx":460
+      /* "flowstar/observers.pyx":423
  *                     (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
  *                 else:
  *                     self._post_retrieve_f(f_fn, fprime_fn,             # <<<<<<<<<<<<<<
@@ -6015,7 +5836,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       /*else*/ {
 
-        /* "flowstar/observers.pyx":463
+        /* "flowstar/observers.pyx":426
  *                                           deref(poly_f_fn),
  *                                           deref(poly_fprime_fn),
  *                                           deref(tmv), loop_domain)             # <<<<<<<<<<<<<<
@@ -6026,7 +5847,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       }
       __pyx_L14:;
 
-      /* "flowstar/observers.pyx":466
+      /* "flowstar/observers.pyx":429
  * 
  *                 ### Interval evaluation over domain
  *                 f_y = f_fn.call(y)             # <<<<<<<<<<<<<<
@@ -6035,7 +5856,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
       __pyx_v_f_y = __pyx_v_f_fn.operator()(__pyx_v_y);
 
-      /* "flowstar/observers.pyx":468
+      /* "flowstar/observers.pyx":431
  *                 f_y = f_fn.call(y)
  *                 # print("f_y =", interval.as_str(f_y))
  *                 if f_y.inf() > 0:             # <<<<<<<<<<<<<<
@@ -6045,7 +5866,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       __pyx_t_3 = ((__pyx_v_f_y.inf() > 0.0) != 0);
       if (__pyx_t_3) {
 
-        /* "flowstar/observers.pyx":470
+        /* "flowstar/observers.pyx":433
  *                 if f_y.inf() > 0:
  *                     # print("res =", True)
  *                     res = tribool(<cbool>True)             # <<<<<<<<<<<<<<
@@ -6054,7 +5875,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
         __pyx_v_res = boost::logic::tribool(((bool)1));
 
-        /* "flowstar/observers.pyx":468
+        /* "flowstar/observers.pyx":431
  *                 f_y = f_fn.call(y)
  *                 # print("f_y =", interval.as_str(f_y))
  *                 if f_y.inf() > 0:             # <<<<<<<<<<<<<<
@@ -6064,7 +5885,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
         goto __pyx_L15;
       }
 
-      /* "flowstar/observers.pyx":471
+      /* "flowstar/observers.pyx":434
  *                     # print("res =", True)
  *                     res = tribool(<cbool>True)
  *                 elif f_y.sup() < 0:             # <<<<<<<<<<<<<<
@@ -6074,7 +5895,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
       __pyx_t_3 = ((__pyx_v_f_y.sup() < 0.0) != 0);
       if (__pyx_t_3) {
 
-        /* "flowstar/observers.pyx":473
+        /* "flowstar/observers.pyx":436
  *                 elif f_y.sup() < 0:
  *                     # print("res =", False)
  *                     res = tribool(<cbool>False)             # <<<<<<<<<<<<<<
@@ -6083,7 +5904,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
  */
         __pyx_v_res = boost::logic::tribool(((bool)0));
 
-        /* "flowstar/observers.pyx":471
+        /* "flowstar/observers.pyx":434
  *                     # print("res =", True)
  *                     res = tribool(<cbool>True)
  *                 elif f_y.sup() < 0:             # <<<<<<<<<<<<<<
@@ -6093,7 +5914,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
         goto __pyx_L15;
       }
 
-      /* "flowstar/observers.pyx":476
+      /* "flowstar/observers.pyx":439
  *                 else:
  *                     # print("res =", None)
  *                     res = tribool(unknown)             # <<<<<<<<<<<<<<
@@ -6107,7 +5928,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     }
     __pyx_L10:;
 
-    /* "flowstar/observers.pyx":478
+    /* "flowstar/observers.pyx":441
  *                     res = tribool(unknown)
  * 
  *             final_res =  tri_and(final_res, res)             # <<<<<<<<<<<<<<
@@ -6118,7 +5939,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
     __pyx_L3_continue:;
   }
 
-  /* "flowstar/observers.pyx":480
+  /* "flowstar/observers.pyx":443
  *             final_res =  tri_and(final_res, res)
  * 
  *         return final_res             # <<<<<<<<<<<<<<
@@ -6128,7 +5949,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
   __pyx_r = __pyx_v_final_res;
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":373
+  /* "flowstar/observers.pyx":336
  *         return RIF(res.inf(), res.sup())
  * 
  *     cdef tribool eval_bool_interval(PolyObserver self, Interval & x,             # <<<<<<<<<<<<<<
@@ -6151,7 +5972,7 @@ static boost::logic::tribool __pyx_f_8flowstar_9observers_12PolyObserver_eval_bo
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":482
+/* "flowstar/observers.pyx":445
  *         return final_res
  * 
  *     def check(self, t, space_domain=None):             # <<<<<<<<<<<<<<
@@ -6195,7 +6016,7 @@ static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_9check(PyObject *_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "check") < 0)) __PYX_ERR(0, 482, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "check") < 0)) __PYX_ERR(1, 445, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -6211,7 +6032,7 @@ static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_9check(PyObject *_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("check", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 482, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("check", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 445, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.observers.PolyObserver.check", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6240,7 +6061,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
   PyObject *__pyx_t_9 = NULL;
   __Pyx_RefNannySetupContext("check", 0);
 
-  /* "flowstar/observers.pyx":483
+  /* "flowstar/observers.pyx":446
  * 
  *     def check(self, t, space_domain=None):
  *         if self.reach is None:             # <<<<<<<<<<<<<<
@@ -6251,7 +6072,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/observers.pyx":484
+    /* "flowstar/observers.pyx":447
  *     def check(self, t, space_domain=None):
  *         if self.reach is None:
  *             return None             # <<<<<<<<<<<<<<
@@ -6262,7 +6083,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "flowstar/observers.pyx":483
+    /* "flowstar/observers.pyx":446
  * 
  *     def check(self, t, space_domain=None):
  *         if self.reach is None:             # <<<<<<<<<<<<<<
@@ -6271,14 +6092,14 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
  */
   }
 
-  /* "flowstar/observers.pyx":486
+  /* "flowstar/observers.pyx":449
  *             return None
  * 
  *         self.reach.prepare()             # <<<<<<<<<<<<<<
  * 
  *         # Convert python interval to flow* interval
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_prepare); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 486, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->reach), __pyx_n_s_prepare); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 449, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -6291,16 +6112,16 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
     }
   }
   if (__pyx_t_5) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 486, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 449, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   } else {
-    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 486, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 449, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "flowstar/observers.pyx":491
+  /* "flowstar/observers.pyx":454
  *         cdef:
  *             tribool res
  *             Interval I = interval.make_interval(t)             # <<<<<<<<<<<<<<
@@ -6309,7 +6130,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
  */
   __pyx_v_I = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_t);
 
-  /* "flowstar/observers.pyx":493
+  /* "flowstar/observers.pyx":456
  *             Interval I = interval.make_interval(t)
  * 
  *         with self.reach.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
@@ -6317,9 +6138,9 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
  * 
  */
   /*with:*/ {
-    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 493, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_exit); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 456, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 493, __pyx_L4_error)
+    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(((PyObject *)__pyx_v_self->reach->global_manager), __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 456, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -6332,10 +6153,10 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 493, __pyx_L4_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 456, __pyx_L4_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 493, __pyx_L4_error)
+      __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 456, __pyx_L4_error)
     }
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6345,7 +6166,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
         (void)__pyx_t_7; (void)__pyx_t_8; (void)__pyx_t_9; /* mark used */
         /*try:*/ {
 
-          /* "flowstar/observers.pyx":494
+          /* "flowstar/observers.pyx":457
  * 
  *         with self.reach.global_manager: #  Use captured globals
  *             res = self.eval_bool_interval(I)             # <<<<<<<<<<<<<<
@@ -6354,7 +6175,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
  */
           __pyx_v_res = ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->eval_bool_interval(__pyx_v_self, __pyx_v_I, NULL);
 
-          /* "flowstar/observers.pyx":493
+          /* "flowstar/observers.pyx":456
  *             Interval I = interval.make_interval(t)
  * 
  *         with self.reach.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
@@ -6369,7 +6190,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
         if (__pyx_t_6) {
           __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_tuple__11, NULL);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-          if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 493, __pyx_L1_error)
+          if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 456, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
@@ -6384,7 +6205,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
     __pyx_L14:;
   }
 
-  /* "flowstar/observers.pyx":496
+  /* "flowstar/observers.pyx":459
  *             res = self.eval_bool_interval(I)
  * 
  *         if <cbool>res:             # <<<<<<<<<<<<<<
@@ -6394,7 +6215,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
   __pyx_t_2 = (((bool)__pyx_v_res) != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/observers.pyx":497
+    /* "flowstar/observers.pyx":460
  * 
  *         if <cbool>res:
  *             return True             # <<<<<<<<<<<<<<
@@ -6406,7 +6227,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
     __pyx_r = Py_True;
     goto __pyx_L0;
 
-    /* "flowstar/observers.pyx":496
+    /* "flowstar/observers.pyx":459
  *             res = self.eval_bool_interval(I)
  * 
  *         if <cbool>res:             # <<<<<<<<<<<<<<
@@ -6415,7 +6236,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
  */
   }
 
-  /* "flowstar/observers.pyx":498
+  /* "flowstar/observers.pyx":461
  *         if <cbool>res:
  *             return True
  *         elif <cbool>(not res):             # <<<<<<<<<<<<<<
@@ -6425,7 +6246,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
   __pyx_t_2 = (((bool)(!__pyx_v_res)) != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/observers.pyx":499
+    /* "flowstar/observers.pyx":462
  *             return True
  *         elif <cbool>(not res):
  *             return False             # <<<<<<<<<<<<<<
@@ -6437,7 +6258,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
     __pyx_r = Py_False;
     goto __pyx_L0;
 
-    /* "flowstar/observers.pyx":498
+    /* "flowstar/observers.pyx":461
  *         if <cbool>res:
  *             return True
  *         elif <cbool>(not res):             # <<<<<<<<<<<<<<
@@ -6446,7 +6267,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
  */
   }
 
-  /* "flowstar/observers.pyx":501
+  /* "flowstar/observers.pyx":464
  *             return False
  *         else:
  *             return None             # <<<<<<<<<<<<<<
@@ -6459,7 +6280,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
     goto __pyx_L0;
   }
 
-  /* "flowstar/observers.pyx":482
+  /* "flowstar/observers.pyx":445
  *         return final_res
  * 
  *     def check(self, t, space_domain=None):             # <<<<<<<<<<<<<<
@@ -6480,7 +6301,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_8check(struct __py
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":505
+/* "flowstar/observers.pyx":468
  *     ### Helper methods
  * 
  *     cdef bint _tm_segment_loop(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -6502,7 +6323,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
   __Pyx_FakeReference<flowstar::Interval> __pyx_t_4;
   __Pyx_RefNannySetupContext("_tm_segment_loop", 0);
 
-  /* "flowstar/observers.pyx":521
+  /* "flowstar/observers.pyx":484
  *         cdef:
  *             clist[TaylorModelVec].iterator tmv_end\
  *                 = self.reach.c_reach.flowpipesCompo.end()             # <<<<<<<<<<<<<<
@@ -6511,7 +6332,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   __pyx_v_tmv_end = __pyx_v_self->reach->c_reach.flowpipesCompo.end();
 
-  /* "flowstar/observers.pyx":523
+  /* "flowstar/observers.pyx":486
  *                 = self.reach.c_reach.flowpipesCompo.end()
  *             clist[vector[Interval]].iterator domain_end\
  *                 = self.reach.c_reach.domains.end()             # <<<<<<<<<<<<<<
@@ -6520,7 +6341,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   __pyx_v_domain_end = __pyx_v_self->reach->c_reach.domains.end();
 
-  /* "flowstar/observers.pyx":524
+  /* "flowstar/observers.pyx":487
  *             clist[vector[Interval]].iterator domain_end\
  *                 = self.reach.c_reach.domains.end()
  *             vector[optional[bint]].iterator cached_bool_end = self.bools.end()             # <<<<<<<<<<<<<<
@@ -6529,7 +6350,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   __pyx_v_cached_bool_end = __pyx_v_self->bools.end();
 
-  /* "flowstar/observers.pyx":526
+  /* "flowstar/observers.pyx":489
  *             vector[optional[bint]].iterator cached_bool_end = self.bools.end()
  *             vector[optional[interval_time_fn]].iterator \
  *                 poly_f_fn_end = self.poly_f_fns.end()             # <<<<<<<<<<<<<<
@@ -6538,7 +6359,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   __pyx_v_poly_f_fn_end = __pyx_v_self->poly_f_fns.end();
 
-  /* "flowstar/observers.pyx":528
+  /* "flowstar/observers.pyx":491
  *                 poly_f_fn_end = self.poly_f_fns.end()
  *             vector[optional[interval_time_fn]].iterator \
  *                 poly_fprime_fn_end = self.poly_fprime_fns.end()             # <<<<<<<<<<<<<<
@@ -6547,7 +6368,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   __pyx_v_poly_fprime_fn_end = __pyx_v_self->poly_fprime_fns.end();
 
-  /* "flowstar/observers.pyx":531
+  /* "flowstar/observers.pyx":494
  * 
  *         ### Increment time and loop iters
  *         if i > 0:             # <<<<<<<<<<<<<<
@@ -6557,7 +6378,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
   __pyx_t_1 = ((__pyx_v_i > 0) != 0);
   if (__pyx_t_1) {
 
-    /* "flowstar/observers.pyx":532
+    /* "flowstar/observers.pyx":495
  *         ### Increment time and loop iters
  *         if i > 0:
  *             (&t)[0] += t0.sup()             # <<<<<<<<<<<<<<
@@ -6566,7 +6387,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     ((&__pyx_v_t)[0]) += __pyx_v_t0.sup();
 
-    /* "flowstar/observers.pyx":535
+    /* "flowstar/observers.pyx":498
  *             # Pad lower endpoint to take into account numerical error in
  *             # endpoints
  *             (&t)[0] += Interval(-1e-53, 0)             # <<<<<<<<<<<<<<
@@ -6575,7 +6396,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     ((&__pyx_v_t)[0]) += flowstar::Interval(-1e-53, 0.0);
 
-    /* "flowstar/observers.pyx":536
+    /* "flowstar/observers.pyx":499
  *             # endpoints
  *             (&t)[0] += Interval(-1e-53, 0)
  *             inc(tmv)             # <<<<<<<<<<<<<<
@@ -6584,7 +6405,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     (void)((++__pyx_v_tmv));
 
-    /* "flowstar/observers.pyx":537
+    /* "flowstar/observers.pyx":500
  *             (&t)[0] += Interval(-1e-53, 0)
  *             inc(tmv)
  *             inc(domain)             # <<<<<<<<<<<<<<
@@ -6593,7 +6414,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     (void)((++__pyx_v_domain));
 
-    /* "flowstar/observers.pyx":538
+    /* "flowstar/observers.pyx":501
  *             inc(tmv)
  *             inc(domain)
  *             inc(poly_f_fn)             # <<<<<<<<<<<<<<
@@ -6602,7 +6423,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     (void)((++__pyx_v_poly_f_fn));
 
-    /* "flowstar/observers.pyx":539
+    /* "flowstar/observers.pyx":502
  *             inc(domain)
  *             inc(poly_f_fn)
  *             inc(poly_fprime_fn)             # <<<<<<<<<<<<<<
@@ -6611,7 +6432,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     (void)((++__pyx_v_poly_fprime_fn));
 
-    /* "flowstar/observers.pyx":540
+    /* "flowstar/observers.pyx":503
  *             inc(poly_f_fn)
  *             inc(poly_fprime_fn)
  *             inc(cached_bool)             # <<<<<<<<<<<<<<
@@ -6620,7 +6441,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     (void)((++__pyx_v_cached_bool));
 
-    /* "flowstar/observers.pyx":542
+    /* "flowstar/observers.pyx":505
  *             inc(cached_bool)
  *             # Restore loop domains
  *             deref(loop_domain)[0] = (&t0)[0] = t00             # <<<<<<<<<<<<<<
@@ -6630,7 +6451,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
     ((*__pyx_v_loop_domain)[0]) = __pyx_v_t00;
     ((&__pyx_v_t0)[0]) = __pyx_v_t00;
 
-    /* "flowstar/observers.pyx":531
+    /* "flowstar/observers.pyx":494
  * 
  *         ### Increment time and loop iters
  *         if i > 0:             # <<<<<<<<<<<<<<
@@ -6639,7 +6460,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   }
 
-  /* "flowstar/observers.pyx":543
+  /* "flowstar/observers.pyx":506
  *             # Restore loop domains
  *             deref(loop_domain)[0] = (&t0)[0] = t00
  *         inc(i)             # <<<<<<<<<<<<<<
@@ -6648,7 +6469,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   (void)((++__pyx_v_i));
 
-  /* "flowstar/observers.pyx":546
+  /* "flowstar/observers.pyx":509
  * 
  *         # Check stopping condition
  *         if (       tmv            == tmv_end             # <<<<<<<<<<<<<<
@@ -6662,7 +6483,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
     goto __pyx_L5_bool_binop_done;
   }
 
-  /* "flowstar/observers.pyx":547
+  /* "flowstar/observers.pyx":510
  *         # Check stopping condition
  *         if (       tmv            == tmv_end
  *                 or domain         == domain_end             # <<<<<<<<<<<<<<
@@ -6676,7 +6497,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
     goto __pyx_L5_bool_binop_done;
   }
 
-  /* "flowstar/observers.pyx":548
+  /* "flowstar/observers.pyx":511
  *         if (       tmv            == tmv_end
  *                 or domain         == domain_end
  *                 or cached_bool    == cached_bool_end             # <<<<<<<<<<<<<<
@@ -6690,7 +6511,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
     goto __pyx_L5_bool_binop_done;
   }
 
-  /* "flowstar/observers.pyx":549
+  /* "flowstar/observers.pyx":512
  *                 or domain         == domain_end
  *                 or cached_bool    == cached_bool_end
  *                 or poly_f_fn      == poly_f_fn_end             # <<<<<<<<<<<<<<
@@ -6704,7 +6525,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
     goto __pyx_L5_bool_binop_done;
   }
 
-  /* "flowstar/observers.pyx":550
+  /* "flowstar/observers.pyx":513
  *                 or cached_bool    == cached_bool_end
  *                 or poly_f_fn      == poly_f_fn_end
  *                 or poly_fprime_fn == poly_fprime_fn_end):             # <<<<<<<<<<<<<<
@@ -6715,7 +6536,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
   __pyx_t_1 = __pyx_t_2;
   __pyx_L5_bool_binop_done:;
 
-  /* "flowstar/observers.pyx":546
+  /* "flowstar/observers.pyx":509
  * 
  *         # Check stopping condition
  *         if (       tmv            == tmv_end             # <<<<<<<<<<<<<<
@@ -6724,7 +6545,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   if (__pyx_t_1) {
 
-    /* "flowstar/observers.pyx":551
+    /* "flowstar/observers.pyx":514
  *                 or poly_f_fn      == poly_f_fn_end
  *                 or poly_fprime_fn == poly_fprime_fn_end):
  *             return False             # <<<<<<<<<<<<<<
@@ -6734,7 +6555,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
     __pyx_r = 0;
     goto __pyx_L0;
 
-    /* "flowstar/observers.pyx":546
+    /* "flowstar/observers.pyx":509
  * 
  *         # Check stopping condition
  *         if (       tmv            == tmv_end             # <<<<<<<<<<<<<<
@@ -6743,7 +6564,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   }
 
-  /* "flowstar/observers.pyx":554
+  /* "flowstar/observers.pyx":517
  *         else:
  *             # TM domain
  *             (&loop_domain)[0] = (&global_domain.value()             # <<<<<<<<<<<<<<
@@ -6752,7 +6573,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
   /*else*/ {
 
-    /* "flowstar/observers.pyx":555
+    /* "flowstar/observers.pyx":518
  *             # TM domain
  *             (&loop_domain)[0] = (&global_domain.value()
  *                                  if global_domain.has_value()             # <<<<<<<<<<<<<<
@@ -6761,7 +6582,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     if ((__pyx_v_global_domain.has_value() != 0)) {
 
-      /* "flowstar/observers.pyx":554
+      /* "flowstar/observers.pyx":517
  *         else:
  *             # TM domain
  *             (&loop_domain)[0] = (&global_domain.value()             # <<<<<<<<<<<<<<
@@ -6771,7 +6592,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
       __pyx_t_3 = (&__pyx_v_global_domain.value());
     } else {
 
-      /* "flowstar/observers.pyx":556
+      /* "flowstar/observers.pyx":519
  *             (&loop_domain)[0] = (&global_domain.value()
  *                                  if global_domain.has_value()
  *                                  else &deref(domain))             # <<<<<<<<<<<<<<
@@ -6781,7 +6602,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
       __pyx_t_3 = (&(*__pyx_v_domain));
     }
 
-    /* "flowstar/observers.pyx":554
+    /* "flowstar/observers.pyx":517
  *         else:
  *             # TM domain
  *             (&loop_domain)[0] = (&global_domain.value()             # <<<<<<<<<<<<<<
@@ -6790,7 +6611,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
  */
     ((&__pyx_v_loop_domain)[0]) = __pyx_t_3;
 
-    /* "flowstar/observers.pyx":559
+    /* "flowstar/observers.pyx":522
  * 
  *             # Absolute time domain for current interval
  *             (&t0)[0] = loop_domain[0][0] = deref(domain).at(0)             # <<<<<<<<<<<<<<
@@ -6801,12 +6622,12 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
       __pyx_t_4 = (*__pyx_v_domain).at(0);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 559, __pyx_L1_error)
+      __PYX_ERR(1, 522, __pyx_L1_error)
     }
     ((&__pyx_v_t0)[0]) = __pyx_t_4;
     ((__pyx_v_loop_domain[0])[0]) = __pyx_t_4;
 
-    /* "flowstar/observers.pyx":561
+    /* "flowstar/observers.pyx":524
  *             (&t0)[0] = loop_domain[0][0] = deref(domain).at(0)
  * 
  *             return True             # <<<<<<<<<<<<<<
@@ -6817,7 +6638,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
     goto __pyx_L0;
   }
 
-  /* "flowstar/observers.pyx":505
+  /* "flowstar/observers.pyx":468
  *     ### Helper methods
  * 
  *     cdef bint _tm_segment_loop(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -6834,7 +6655,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__tm_segment_loop(struct _
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":563
+/* "flowstar/observers.pyx":526
  *             return True
  * 
  *     cdef bint _mask_intersect_check(PolyObserver self, Interval & t,             # <<<<<<<<<<<<<<
@@ -6852,7 +6673,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("_mask_intersect_check", 0);
 
-  /* "flowstar/observers.pyx":567
+  /* "flowstar/observers.pyx":530
  *         """Check there is a mask intersection and, if so, set t0 to the
  *         overlap interval."""
  *         if self.mask is not None:             # <<<<<<<<<<<<<<
@@ -6863,7 +6684,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/observers.pyx":568
+    /* "flowstar/observers.pyx":531
  *         overlap interval."""
  *         if self.mask is not None:
  *             if verbosity >= 4:             # <<<<<<<<<<<<<<
@@ -6873,18 +6694,18 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
     __pyx_t_2 = ((__pyx_v_verbosity >= 4) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":569
+      /* "flowstar/observers.pyx":532
  *         if self.mask is not None:
  *             if verbosity >= 4:
  *                 print("using mask!")             # <<<<<<<<<<<<<<
  *             mask_overlap = self._mask_overlap(t + t0)
  * 
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 569, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 532, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-      /* "flowstar/observers.pyx":568
+      /* "flowstar/observers.pyx":531
  *         overlap interval."""
  *         if self.mask is not None:
  *             if verbosity >= 4:             # <<<<<<<<<<<<<<
@@ -6893,7 +6714,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
     }
 
-    /* "flowstar/observers.pyx":570
+    /* "flowstar/observers.pyx":533
  *             if verbosity >= 4:
  *                 print("using mask!")
  *             mask_overlap = self._mask_overlap(t + t0)             # <<<<<<<<<<<<<<
@@ -6902,7 +6723,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
     __pyx_v_mask_overlap = ((struct __pyx_vtabstruct_8flowstar_9observers_PolyObserver *)__pyx_v_self->__pyx_vtab)->_mask_overlap(__pyx_v_self, (__pyx_v_t + __pyx_v_t0));
 
-    /* "flowstar/observers.pyx":572
+    /* "flowstar/observers.pyx":535
  *             mask_overlap = self._mask_overlap(t + t0)
  * 
  *             if mask_overlap.has_value():             # <<<<<<<<<<<<<<
@@ -6912,7 +6733,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
     __pyx_t_2 = (__pyx_v_mask_overlap.has_value() != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":573
+      /* "flowstar/observers.pyx":536
  * 
  *             if mask_overlap.has_value():
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -6922,24 +6743,24 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
       __pyx_t_2 = ((__pyx_v_verbosity >= 3) != 0);
       if (__pyx_t_2) {
 
-        /* "flowstar/observers.pyx":575
+        /* "flowstar/observers.pyx":538
  *                 if verbosity >= 3:
  *                     print("mask_overlap =",
  *                           interval.as_str(mask_overlap.value()))             # <<<<<<<<<<<<<<
  *                 mask_overlap.value().sub_assign(t)
  *                 if verbosity >= 3:
  */
-        __pyx_t_3 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_mask_overlap.value()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 575, __pyx_L1_error)
+        __pyx_t_3 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_mask_overlap.value()); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 538, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
 
-        /* "flowstar/observers.pyx":574
+        /* "flowstar/observers.pyx":537
  *             if mask_overlap.has_value():
  *                 if verbosity >= 3:
  *                     print("mask_overlap =",             # <<<<<<<<<<<<<<
  *                           interval.as_str(mask_overlap.value()))
  *                 mask_overlap.value().sub_assign(t)
  */
-        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 574, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 537, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_INCREF(__pyx_kp_s_mask_overlap);
         __Pyx_GIVEREF(__pyx_kp_s_mask_overlap);
@@ -6947,12 +6768,12 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
         __Pyx_GIVEREF(__pyx_t_3);
         PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
         __pyx_t_3 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 574, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 537, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-        /* "flowstar/observers.pyx":573
+        /* "flowstar/observers.pyx":536
  * 
  *             if mask_overlap.has_value():
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -6961,7 +6782,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
       }
 
-      /* "flowstar/observers.pyx":576
+      /* "flowstar/observers.pyx":539
  *                     print("mask_overlap =",
  *                           interval.as_str(mask_overlap.value()))
  *                 mask_overlap.value().sub_assign(t)             # <<<<<<<<<<<<<<
@@ -6970,7 +6791,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
       (void)(__pyx_v_mask_overlap.value().operator-=(__pyx_v_t));
 
-      /* "flowstar/observers.pyx":577
+      /* "flowstar/observers.pyx":540
  *                           interval.as_str(mask_overlap.value()))
  *                 mask_overlap.value().sub_assign(t)
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -6980,24 +6801,24 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
       __pyx_t_2 = ((__pyx_v_verbosity >= 3) != 0);
       if (__pyx_t_2) {
 
-        /* "flowstar/observers.pyx":579
+        /* "flowstar/observers.pyx":542
  *                 if verbosity >= 3:
  *                     print("mask_overlap =",
  *                           interval.as_str(mask_overlap.value()))             # <<<<<<<<<<<<<<
  *                 mask_overlap.value().intersect_assign(t0)
  *                 (&t0)[0] = mask_overlap.value()
  */
-        __pyx_t_3 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_mask_overlap.value()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 579, __pyx_L1_error)
+        __pyx_t_3 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_mask_overlap.value()); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 542, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
 
-        /* "flowstar/observers.pyx":578
+        /* "flowstar/observers.pyx":541
  *                 mask_overlap.value().sub_assign(t)
  *                 if verbosity >= 3:
  *                     print("mask_overlap =",             # <<<<<<<<<<<<<<
  *                           interval.as_str(mask_overlap.value()))
  *                 mask_overlap.value().intersect_assign(t0)
  */
-        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 578, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 541, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_INCREF(__pyx_kp_s_mask_overlap);
         __Pyx_GIVEREF(__pyx_kp_s_mask_overlap);
@@ -7005,12 +6826,12 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
         __Pyx_GIVEREF(__pyx_t_3);
         PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
         __pyx_t_3 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 578, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 541, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-        /* "flowstar/observers.pyx":577
+        /* "flowstar/observers.pyx":540
  *                           interval.as_str(mask_overlap.value()))
  *                 mask_overlap.value().sub_assign(t)
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -7019,7 +6840,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
       }
 
-      /* "flowstar/observers.pyx":580
+      /* "flowstar/observers.pyx":543
  *                     print("mask_overlap =",
  *                           interval.as_str(mask_overlap.value()))
  *                 mask_overlap.value().intersect_assign(t0)             # <<<<<<<<<<<<<<
@@ -7028,7 +6849,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
       __pyx_v_mask_overlap.value().intersect_assign(__pyx_v_t0);
 
-      /* "flowstar/observers.pyx":581
+      /* "flowstar/observers.pyx":544
  *                           interval.as_str(mask_overlap.value()))
  *                 mask_overlap.value().intersect_assign(t0)
  *                 (&t0)[0] = mask_overlap.value()             # <<<<<<<<<<<<<<
@@ -7037,7 +6858,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
       ((&__pyx_v_t0)[0]) = __pyx_v_mask_overlap.value();
 
-      /* "flowstar/observers.pyx":582
+      /* "flowstar/observers.pyx":545
  *                 mask_overlap.value().intersect_assign(t0)
  *                 (&t0)[0] = mask_overlap.value()
  *                 if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -7047,16 +6868,16 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
       __pyx_t_2 = ((__pyx_v_verbosity >= 2) != 0);
       if (__pyx_t_2) {
 
-        /* "flowstar/observers.pyx":583
+        /* "flowstar/observers.pyx":546
  *                 (&t0)[0] = mask_overlap.value()
  *                 if verbosity >= 2:
  *                     print("t0 =", interval.as_str(t0))             # <<<<<<<<<<<<<<
  * 
  *                 return True
  */
-        __pyx_t_3 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 583, __pyx_L1_error)
+        __pyx_t_3 = __pyx_f_8flowstar_8interval_as_str(__pyx_v_t0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 546, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 583, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 546, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_INCREF(__pyx_kp_s_t0);
         __Pyx_GIVEREF(__pyx_kp_s_t0);
@@ -7064,12 +6885,12 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
         __Pyx_GIVEREF(__pyx_t_3);
         PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
         __pyx_t_3 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 583, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 546, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-        /* "flowstar/observers.pyx":582
+        /* "flowstar/observers.pyx":545
  *                 mask_overlap.value().intersect_assign(t0)
  *                 (&t0)[0] = mask_overlap.value()
  *                 if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -7078,7 +6899,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
       }
 
-      /* "flowstar/observers.pyx":585
+      /* "flowstar/observers.pyx":548
  *                     print("t0 =", interval.as_str(t0))
  * 
  *                 return True             # <<<<<<<<<<<<<<
@@ -7088,7 +6909,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "flowstar/observers.pyx":572
+      /* "flowstar/observers.pyx":535
  *             mask_overlap = self._mask_overlap(t + t0)
  * 
  *             if mask_overlap.has_value():             # <<<<<<<<<<<<<<
@@ -7097,7 +6918,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
     }
 
-    /* "flowstar/observers.pyx":587
+    /* "flowstar/observers.pyx":550
  *                 return True
  *             else:
  *                 if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -7108,18 +6929,18 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
       __pyx_t_2 = ((__pyx_v_verbosity >= 2) != 0);
       if (__pyx_t_2) {
 
-        /* "flowstar/observers.pyx":588
+        /* "flowstar/observers.pyx":551
  *             else:
  *                 if verbosity >= 2:
  *                     print("outside mask!")             # <<<<<<<<<<<<<<
  *                     # print('t + t0 =', interval.as_str(t + t0))
  *                     # print('mask =', self.mask)
  */
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 588, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 551, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-        /* "flowstar/observers.pyx":587
+        /* "flowstar/observers.pyx":550
  *                 return True
  *             else:
  *                 if verbosity >= 2:             # <<<<<<<<<<<<<<
@@ -7128,7 +6949,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
       }
 
-      /* "flowstar/observers.pyx":592
+      /* "flowstar/observers.pyx":555
  *                     # print('mask =', self.mask)
  * 
  *                 return False             # <<<<<<<<<<<<<<
@@ -7139,7 +6960,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
       goto __pyx_L0;
     }
 
-    /* "flowstar/observers.pyx":567
+    /* "flowstar/observers.pyx":530
  *         """Check there is a mask intersection and, if so, set t0 to the
  *         overlap interval."""
  *         if self.mask is not None:             # <<<<<<<<<<<<<<
@@ -7148,7 +6969,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
   }
 
-  /* "flowstar/observers.pyx":594
+  /* "flowstar/observers.pyx":557
  *                 return False
  *         else:
  *             if verbosity >= 4:             # <<<<<<<<<<<<<<
@@ -7159,18 +6980,18 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
     __pyx_t_2 = ((__pyx_v_verbosity >= 4) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/observers.pyx":595
+      /* "flowstar/observers.pyx":558
  *         else:
  *             if verbosity >= 4:
  *                 print("not using mask!")             # <<<<<<<<<<<<<<
  * 
  *             return True
  */
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 595, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 558, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-      /* "flowstar/observers.pyx":594
+      /* "flowstar/observers.pyx":557
  *                 return False
  *         else:
  *             if verbosity >= 4:             # <<<<<<<<<<<<<<
@@ -7179,7 +7000,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
  */
     }
 
-    /* "flowstar/observers.pyx":597
+    /* "flowstar/observers.pyx":560
  *                 print("not using mask!")
  * 
  *             return True             # <<<<<<<<<<<<<<
@@ -7190,7 +7011,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
     goto __pyx_L0;
   }
 
-  /* "flowstar/observers.pyx":563
+  /* "flowstar/observers.pyx":526
  *             return True
  * 
  *     cdef bint _mask_intersect_check(PolyObserver self, Interval & t,             # <<<<<<<<<<<<<<
@@ -7209,7 +7030,7 @@ static int __pyx_f_8flowstar_9observers_12PolyObserver__mask_intersect_check(str
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":599
+/* "flowstar/observers.pyx":562
  *             return True
  * 
  *     cdef void _pre_retrieve_f(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -7224,7 +7045,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("_pre_retrieve_f", 0);
 
-  /* "flowstar/observers.pyx":612
+  /* "flowstar/observers.pyx":575
  *         functional composition.
  *         """
  *         if self.symbolic_composition and poly_f_fn.has_value():             # <<<<<<<<<<<<<<
@@ -7242,7 +7063,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "flowstar/observers.pyx":613
+    /* "flowstar/observers.pyx":576
  *         """
  *         if self.symbolic_composition and poly_f_fn.has_value():
  *             assert poly_fprime_fn.has_value()             # <<<<<<<<<<<<<<
@@ -7253,23 +7074,23 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
     if (unlikely(!Py_OptimizeFlag)) {
       if (unlikely(!(__pyx_v_poly_fprime_fn.has_value() != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 613, __pyx_L1_error)
+        __PYX_ERR(1, 576, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/observers.pyx":615
+    /* "flowstar/observers.pyx":578
  *             assert poly_fprime_fn.has_value()
  *             # Retrieve cached composed functions
  *             print("retrieving f and fprime polys")             # <<<<<<<<<<<<<<
  *             (&f_fn)[0] = poly_f_fn.value()
  *             (&fprime_fn)[0] = poly_fprime_fn.value()
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 615, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 578, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "flowstar/observers.pyx":616
+    /* "flowstar/observers.pyx":579
  *             # Retrieve cached composed functions
  *             print("retrieving f and fprime polys")
  *             (&f_fn)[0] = poly_f_fn.value()             # <<<<<<<<<<<<<<
@@ -7278,7 +7099,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
  */
     ((&__pyx_v_f_fn)[0]) = __pyx_v_poly_f_fn.value();
 
-    /* "flowstar/observers.pyx":617
+    /* "flowstar/observers.pyx":580
  *             print("retrieving f and fprime polys")
  *             (&f_fn)[0] = poly_f_fn.value()
  *             (&fprime_fn)[0] = poly_fprime_fn.value()             # <<<<<<<<<<<<<<
@@ -7287,7 +7108,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
  */
     ((&__pyx_v_fprime_fn)[0]) = __pyx_v_poly_fprime_fn.value();
 
-    /* "flowstar/observers.pyx":612
+    /* "flowstar/observers.pyx":575
  *         functional composition.
  *         """
  *         if self.symbolic_composition and poly_f_fn.has_value():             # <<<<<<<<<<<<<<
@@ -7297,7 +7118,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
     goto __pyx_L3;
   }
 
-  /* "flowstar/observers.pyx":620
+  /* "flowstar/observers.pyx":583
  *         else:
  *             # Functional composition for polynomial
  *             (&f_fn)[0] = interval.compose_interval_fn(poly_fn(self.f.c_poly),             # <<<<<<<<<<<<<<
@@ -7306,7 +7127,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
  */
   /*else*/ {
 
-    /* "flowstar/observers.pyx":622
+    /* "flowstar/observers.pyx":585
  *             (&f_fn)[0] = interval.compose_interval_fn(poly_fn(self.f.c_poly),
  *                                                       tmv,
  *                                                       deref(loop_domain))             # <<<<<<<<<<<<<<
@@ -7317,7 +7138,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
   }
   __pyx_L3:;
 
-  /* "flowstar/observers.pyx":599
+  /* "flowstar/observers.pyx":562
  *             return True
  * 
  *     cdef void _pre_retrieve_f(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -7334,7 +7155,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f(struct _
   __Pyx_RefNannyFinishContext();
 }
 
-/* "flowstar/observers.pyx":624
+/* "flowstar/observers.pyx":587
  *                                                       deref(loop_domain))
  * 
  *     cdef void _post_retrieve_f(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -7349,7 +7170,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("_post_retrieve_f", 0);
 
-  /* "flowstar/observers.pyx":635
+  /* "flowstar/observers.pyx":598
  *         Retrieve f and fprime, performing symbolic composition if desired.
  *         """
  *         if self.symbolic_composition and not poly_f_fn.has_value():             # <<<<<<<<<<<<<<
@@ -7367,27 +7188,27 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "flowstar/observers.pyx":637
+    /* "flowstar/observers.pyx":600
  *         if self.symbolic_composition and not poly_f_fn.has_value():
  *             # Define f and fprime by symbolically composing polynomials
  *             observable(             # <<<<<<<<<<<<<<
  *                 f_fn, fprime_fn,
  *                 self.f.c_poly, tmv, deref(loop_domain),
  */
-    __pyx_f_8flowstar_9observers_observable(__pyx_v_f_fn, __pyx_v_fprime_fn, __pyx_v_self->f->c_poly, __pyx_v_tmv, (*__pyx_v_loop_domain), __pyx_v_self->reach->c_reach.globalMaxOrder, __pyx_v_self->reach->c_reach.cutoff_threshold);
+    __pyx_f_8flowstar_10observable_observable(__pyx_v_f_fn, __pyx_v_fprime_fn, __pyx_v_self->f->c_poly, __pyx_v_tmv, (*__pyx_v_loop_domain), __pyx_v_self->reach->c_reach.globalMaxOrder, __pyx_v_self->reach->c_reach.cutoff_threshold);
 
-    /* "flowstar/observers.pyx":643
+    /* "flowstar/observers.pyx":606
  *                 self.reach.c_reach.cutoff_threshold,
  *             )
  *             print("setting f and fprime polys")             # <<<<<<<<<<<<<<
  *             # NOTE: Under symbolic composition, the polys depend on the space
  *             # variables and so are invalidated when the space domain is
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 643, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 606, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "flowstar/observers.pyx":647
+    /* "flowstar/observers.pyx":610
  *             # variables and so are invalidated when the space domain is
  *             # restricted
  *             (&poly_f_fn)[0] = optional[interval_time_fn](f_fn)             # <<<<<<<<<<<<<<
@@ -7396,7 +7217,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
  */
     ((&__pyx_v_poly_f_fn)[0]) = std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> (__pyx_v_f_fn);
 
-    /* "flowstar/observers.pyx":648
+    /* "flowstar/observers.pyx":611
  *             # restricted
  *             (&poly_f_fn)[0] = optional[interval_time_fn](f_fn)
  *             (&poly_fprime_fn)[0] = optional[interval_time_fn](fprime_fn)             # <<<<<<<<<<<<<<
@@ -7405,7 +7226,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
  */
     ((&__pyx_v_poly_fprime_fn)[0]) = std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>> (__pyx_v_fprime_fn);
 
-    /* "flowstar/observers.pyx":649
+    /* "flowstar/observers.pyx":612
  *             (&poly_f_fn)[0] = optional[interval_time_fn](f_fn)
  *             (&poly_fprime_fn)[0] = optional[interval_time_fn](fprime_fn)
  *             assert poly_f_fn.has_value()             # <<<<<<<<<<<<<<
@@ -7416,12 +7237,12 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
     if (unlikely(!Py_OptimizeFlag)) {
       if (unlikely(!(__pyx_v_poly_f_fn.has_value() != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 649, __pyx_L1_error)
+        __PYX_ERR(1, 612, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/observers.pyx":635
+    /* "flowstar/observers.pyx":598
  *         Retrieve f and fprime, performing symbolic composition if desired.
  *         """
  *         if self.symbolic_composition and not poly_f_fn.has_value():             # <<<<<<<<<<<<<<
@@ -7431,7 +7252,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
     goto __pyx_L3;
   }
 
-  /* "flowstar/observers.pyx":650
+  /* "flowstar/observers.pyx":613
  *             (&poly_fprime_fn)[0] = optional[interval_time_fn](fprime_fn)
  *             assert poly_f_fn.has_value()
  *         elif not self.symbolic_composition:             # <<<<<<<<<<<<<<
@@ -7441,7 +7262,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
   __pyx_t_1 = ((!(__pyx_v_self->symbolic_composition != 0)) != 0);
   if (__pyx_t_1) {
 
-    /* "flowstar/observers.pyx":653
+    /* "flowstar/observers.pyx":616
  *             # Define fprime as a functional composition, and use f as
  *             # defined similarly above
  *             (&fprime_fn)[0] = interval.compose_interval_fn(             # <<<<<<<<<<<<<<
@@ -7450,7 +7271,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
  */
     ((&__pyx_v_fprime_fn)[0]) = compose_interval_fn(poly_fn(__pyx_v_self->fprime->c_poly), __pyx_v_tmv, (*__pyx_v_loop_domain));
 
-    /* "flowstar/observers.pyx":650
+    /* "flowstar/observers.pyx":613
  *             (&poly_fprime_fn)[0] = optional[interval_time_fn](fprime_fn)
  *             assert poly_f_fn.has_value()
  *         elif not self.symbolic_composition:             # <<<<<<<<<<<<<<
@@ -7460,7 +7281,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
   }
   __pyx_L3:;
 
-  /* "flowstar/observers.pyx":624
+  /* "flowstar/observers.pyx":587
  *                                                       deref(loop_domain))
  * 
  *     cdef void _post_retrieve_f(PolyObserver self,             # <<<<<<<<<<<<<<
@@ -7477,7 +7298,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
   __Pyx_RefNannyFinishContext();
 }
 
-/* "flowstar/observers.pyx":661
+/* "flowstar/observers.pyx":624
  *         # has already been retrieved.
  * 
  *     cdef optional[Interval] _mask_overlap(self, const Interval & x) nogil:             # <<<<<<<<<<<<<<
@@ -7494,7 +7315,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
   flowstar::Interval __pyx_t_3;
   int __pyx_t_4;
 
-  /* "flowstar/observers.pyx":665
+  /* "flowstar/observers.pyx":628
  *         cdef Interval intersection
  * 
  *         for y in self.masked_regions:             # <<<<<<<<<<<<<<
@@ -7509,7 +7330,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
     ++__pyx_t_1;
     __pyx_v_y = __pyx_t_3;
 
-    /* "flowstar/observers.pyx":666
+    /* "flowstar/observers.pyx":629
  * 
  *         for y in self.masked_regions:
  *             if interval.overlaps(x, y):             # <<<<<<<<<<<<<<
@@ -7519,7 +7340,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
     __pyx_t_4 = (__pyx_f_8flowstar_8interval_overlaps(__pyx_v_x, __pyx_v_y) != 0);
     if (__pyx_t_4) {
 
-      /* "flowstar/observers.pyx":667
+      /* "flowstar/observers.pyx":630
  *         for y in self.masked_regions:
  *             if interval.overlaps(x, y):
  *                 if overlap.has_value():             # <<<<<<<<<<<<<<
@@ -7529,7 +7350,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
       __pyx_t_4 = (__pyx_v_overlap.has_value() != 0);
       if (__pyx_t_4) {
 
-        /* "flowstar/observers.pyx":668
+        /* "flowstar/observers.pyx":631
  *             if interval.overlaps(x, y):
  *                 if overlap.has_value():
  *                     interval.interval_union(overlap.value(), x.intersect(y))             # <<<<<<<<<<<<<<
@@ -7538,7 +7359,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
  */
         __pyx_f_8flowstar_8interval_interval_union(__pyx_v_overlap.value(), __pyx_v_x.intersect(__pyx_v_y));
 
-        /* "flowstar/observers.pyx":667
+        /* "flowstar/observers.pyx":630
  *         for y in self.masked_regions:
  *             if interval.overlaps(x, y):
  *                 if overlap.has_value():             # <<<<<<<<<<<<<<
@@ -7548,7 +7369,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
         goto __pyx_L6;
       }
 
-      /* "flowstar/observers.pyx":670
+      /* "flowstar/observers.pyx":633
  *                     interval.interval_union(overlap.value(), x.intersect(y))
  *                 else:
  *                     overlap = optional[Interval](x.intersect(y))             # <<<<<<<<<<<<<<
@@ -7560,7 +7381,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
       }
       __pyx_L6:;
 
-      /* "flowstar/observers.pyx":666
+      /* "flowstar/observers.pyx":629
  * 
  *         for y in self.masked_regions:
  *             if interval.overlaps(x, y):             # <<<<<<<<<<<<<<
@@ -7569,7 +7390,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
  */
     }
 
-    /* "flowstar/observers.pyx":665
+    /* "flowstar/observers.pyx":628
  *         cdef Interval intersection
  * 
  *         for y in self.masked_regions:             # <<<<<<<<<<<<<<
@@ -7578,7 +7399,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
  */
   }
 
-  /* "flowstar/observers.pyx":672
+  /* "flowstar/observers.pyx":635
  *                     overlap = optional[Interval](x.intersect(y))
  * 
  *         return overlap             # <<<<<<<<<<<<<<
@@ -7588,7 +7409,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
   __pyx_r = __pyx_v_overlap;
   goto __pyx_L0;
 
-  /* "flowstar/observers.pyx":661
+  /* "flowstar/observers.pyx":624
  *         # has already been retrieved.
  * 
  *     cdef optional[Interval] _mask_overlap(self, const Interval & x) nogil:             # <<<<<<<<<<<<<<
@@ -7601,7 +7422,7 @@ static std::optional<flowstar::Interval>  __pyx_f_8flowstar_9observers_12PolyObs
   return __pyx_r;
 }
 
-/* "flowstar/observers.pyx":674
+/* "flowstar/observers.pyx":637
  *         return overlap
  * 
  *     cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,             # <<<<<<<<<<<<<<
@@ -7633,7 +7454,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
     }
   }
 
-  /* "flowstar/observers.pyx":679
+  /* "flowstar/observers.pyx":642
  *         """Add new_roots to roots, whilst amalgamating adjacent overlapping
  *         roots."""
  *         for root in new_roots:             # <<<<<<<<<<<<<<
@@ -7647,7 +7468,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
     ++__pyx_t_1;
     __pyx_v_root = __pyx_t_2;
 
-    /* "flowstar/observers.pyx":680
+    /* "flowstar/observers.pyx":643
  *         roots."""
  *         for root in new_roots:
  *             root.add_assign(t)             # <<<<<<<<<<<<<<
@@ -7656,7 +7477,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
  */
     (void)(__pyx_v_root.operator+=(__pyx_v_t));
 
-    /* "flowstar/observers.pyx":681
+    /* "flowstar/observers.pyx":644
  *         for root in new_roots:
  *             root.add_assign(t)
  *             if (not roots.empty()             # <<<<<<<<<<<<<<
@@ -7670,7 +7491,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
       goto __pyx_L6_bool_binop_done;
     }
 
-    /* "flowstar/observers.pyx":682
+    /* "flowstar/observers.pyx":645
  *             root.add_assign(t)
  *             if (not roots.empty()
  *                     and interval.int_min_dist(root, roots.back()) < 1e-9):             # <<<<<<<<<<<<<<
@@ -7681,7 +7502,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
     __pyx_t_3 = __pyx_t_4;
     __pyx_L6_bool_binop_done:;
 
-    /* "flowstar/observers.pyx":681
+    /* "flowstar/observers.pyx":644
  *         for root in new_roots:
  *             root.add_assign(t)
  *             if (not roots.empty()             # <<<<<<<<<<<<<<
@@ -7690,7 +7511,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
  */
     if (__pyx_t_3) {
 
-      /* "flowstar/observers.pyx":683
+      /* "flowstar/observers.pyx":646
  *             if (not roots.empty()
  *                     and interval.int_min_dist(root, roots.back()) < 1e-9):
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -7700,38 +7521,38 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
       __pyx_t_3 = ((__pyx_v_verbosity >= 3) != 0);
       if (__pyx_t_3) {
 
-        /* "flowstar/observers.pyx":684
+        /* "flowstar/observers.pyx":647
  *                     and interval.int_min_dist(root, roots.back()) < 1e-9):
  *                 if verbosity >= 3:
  *                     print("merging intervals:\n[{}..{}]\n[{}..{}]".format(             # <<<<<<<<<<<<<<
  *                         roots.back().inf(), roots.back().sup(),
  *                         root.inf(), root.sup()))
  */
-        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_merging_intervals, __pyx_n_s_format); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 684, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_merging_intervals, __pyx_n_s_format); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 647, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
 
-        /* "flowstar/observers.pyx":685
+        /* "flowstar/observers.pyx":648
  *                 if verbosity >= 3:
  *                     print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
  *                         roots.back().inf(), roots.back().sup(),             # <<<<<<<<<<<<<<
  *                         root.inf(), root.sup()))
  *                 interval.interval_union(roots.back(), root)
  */
-        __pyx_t_7 = PyFloat_FromDouble(__pyx_v_roots.back().inf()); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 685, __pyx_L1_error)
+        __pyx_t_7 = PyFloat_FromDouble(__pyx_v_roots.back().inf()); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 648, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_8 = PyFloat_FromDouble(__pyx_v_roots.back().sup()); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 685, __pyx_L1_error)
+        __pyx_t_8 = PyFloat_FromDouble(__pyx_v_roots.back().sup()); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 648, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
 
-        /* "flowstar/observers.pyx":686
+        /* "flowstar/observers.pyx":649
  *                     print("merging intervals:\n[{}..{}]\n[{}..{}]".format(
  *                         roots.back().inf(), roots.back().sup(),
  *                         root.inf(), root.sup()))             # <<<<<<<<<<<<<<
  *                 interval.interval_union(roots.back(), root)
  *             else:
  */
-        __pyx_t_9 = PyFloat_FromDouble(__pyx_v_root.inf()); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 686, __pyx_L1_error)
+        __pyx_t_9 = PyFloat_FromDouble(__pyx_v_root.inf()); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 649, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_10 = PyFloat_FromDouble(__pyx_v_root.sup()); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 686, __pyx_L1_error)
+        __pyx_t_10 = PyFloat_FromDouble(__pyx_v_root.sup()); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 649, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __pyx_t_11 = NULL;
         __pyx_t_12 = 0;
@@ -7748,7 +7569,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_6)) {
           PyObject *__pyx_temp[5] = {__pyx_t_11, __pyx_t_7, __pyx_t_8, __pyx_t_9, __pyx_t_10};
-          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_12, 4+__pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 684, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_12, 4+__pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 647, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7760,7 +7581,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
           PyObject *__pyx_temp[5] = {__pyx_t_11, __pyx_t_7, __pyx_t_8, __pyx_t_9, __pyx_t_10};
-          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_12, 4+__pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 684, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_12, 4+__pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 647, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7770,7 +7591,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
         } else
         #endif
         {
-          __pyx_t_13 = PyTuple_New(4+__pyx_t_12); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 684, __pyx_L1_error)
+          __pyx_t_13 = PyTuple_New(4+__pyx_t_12); if (unlikely(!__pyx_t_13)) __PYX_ERR(1, 647, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_13);
           if (__pyx_t_11) {
             __Pyx_GIVEREF(__pyx_t_11); PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_11); __pyx_t_11 = NULL;
@@ -7787,25 +7608,25 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
           __pyx_t_8 = 0;
           __pyx_t_9 = 0;
           __pyx_t_10 = 0;
-          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_13, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 684, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_13, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 647, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         }
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-        /* "flowstar/observers.pyx":684
+        /* "flowstar/observers.pyx":647
  *                     and interval.int_min_dist(root, roots.back()) < 1e-9):
  *                 if verbosity >= 3:
  *                     print("merging intervals:\n[{}..{}]\n[{}..{}]".format(             # <<<<<<<<<<<<<<
  *                         roots.back().inf(), roots.back().sup(),
  *                         root.inf(), root.sup()))
  */
-        __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 684, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 647, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-        /* "flowstar/observers.pyx":683
+        /* "flowstar/observers.pyx":646
  *             if (not roots.empty()
  *                     and interval.int_min_dist(root, roots.back()) < 1e-9):
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -7814,7 +7635,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
  */
       }
 
-      /* "flowstar/observers.pyx":687
+      /* "flowstar/observers.pyx":650
  *                         roots.back().inf(), roots.back().sup(),
  *                         root.inf(), root.sup()))
  *                 interval.interval_union(roots.back(), root)             # <<<<<<<<<<<<<<
@@ -7823,7 +7644,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
  */
       __pyx_f_8flowstar_8interval_interval_union(__pyx_v_roots.back(), __pyx_v_root);
 
-      /* "flowstar/observers.pyx":681
+      /* "flowstar/observers.pyx":644
  *         for root in new_roots:
  *             root.add_assign(t)
  *             if (not roots.empty()             # <<<<<<<<<<<<<<
@@ -7833,7 +7654,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
       goto __pyx_L5;
     }
 
-    /* "flowstar/observers.pyx":689
+    /* "flowstar/observers.pyx":652
  *                 interval.interval_union(roots.back(), root)
  *             else:
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -7844,17 +7665,18 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
       __pyx_t_3 = ((__pyx_v_verbosity >= 3) != 0);
       if (__pyx_t_3) {
 
-        /* "flowstar/observers.pyx":690
+        /* "flowstar/observers.pyx":653
  *             else:
  *                 if verbosity >= 3:
  *                     print("new root:\n[{}..{}]".format(root.inf(), root.sup()))             # <<<<<<<<<<<<<<
  *                 roots.push_back(root)
+ * 
  */
-        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_new_root, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 690, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_new_root, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 653, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_13 = PyFloat_FromDouble(__pyx_v_root.inf()); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 690, __pyx_L1_error)
+        __pyx_t_13 = PyFloat_FromDouble(__pyx_v_root.inf()); if (unlikely(!__pyx_t_13)) __PYX_ERR(1, 653, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_13);
-        __pyx_t_10 = PyFloat_FromDouble(__pyx_v_root.sup()); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 690, __pyx_L1_error)
+        __pyx_t_10 = PyFloat_FromDouble(__pyx_v_root.sup()); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 653, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __pyx_t_9 = NULL;
         __pyx_t_12 = 0;
@@ -7871,7 +7693,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_5)) {
           PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_13, __pyx_t_10};
-          __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_12, 2+__pyx_t_12); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 690, __pyx_L1_error)
+          __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_12, 2+__pyx_t_12); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 653, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
@@ -7881,7 +7703,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
           PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_t_13, __pyx_t_10};
-          __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_12, 2+__pyx_t_12); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 690, __pyx_L1_error)
+          __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_12, 2+__pyx_t_12); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 653, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
@@ -7889,7 +7711,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
         } else
         #endif
         {
-          __pyx_t_8 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 690, __pyx_L1_error)
+          __pyx_t_8 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 653, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           if (__pyx_t_9) {
             __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_9); __pyx_t_9 = NULL;
@@ -7900,17 +7722,17 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
           PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_12, __pyx_t_10);
           __pyx_t_13 = 0;
           __pyx_t_10 = 0;
-          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 690, __pyx_L1_error)
+          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 653, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         }
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 690, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 653, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-        /* "flowstar/observers.pyx":689
+        /* "flowstar/observers.pyx":652
  *                 interval.interval_union(roots.back(), root)
  *             else:
  *                 if verbosity >= 3:             # <<<<<<<<<<<<<<
@@ -7919,21 +7741,23 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
  */
       }
 
-      /* "flowstar/observers.pyx":691
+      /* "flowstar/observers.pyx":654
  *                 if verbosity >= 3:
  *                     print("new root:\n[{}..{}]".format(root.inf(), root.sup()))
  *                 roots.push_back(root)             # <<<<<<<<<<<<<<
+ * 
+ *     cdef Poly _fprime_given_f(PolyObserver self):
  */
       try {
         __pyx_v_roots.push_back(__pyx_v_root);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 691, __pyx_L1_error)
+        __PYX_ERR(1, 654, __pyx_L1_error)
       }
     }
     __pyx_L5:;
 
-    /* "flowstar/observers.pyx":679
+    /* "flowstar/observers.pyx":642
  *         """Add new_roots to roots, whilst amalgamating adjacent overlapping
  *         roots."""
  *         for root in new_roots:             # <<<<<<<<<<<<<<
@@ -7942,7 +7766,7 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
  */
   }
 
-  /* "flowstar/observers.pyx":674
+  /* "flowstar/observers.pyx":637
  *         return overlap
  * 
  *     cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,             # <<<<<<<<<<<<<<
@@ -7966,7 +7790,142 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__amalgamate_roots(CYTHON
   __Pyx_RefNannyFinishContext();
 }
 
-/* "flowstar/observers.pxd":28
+/* "flowstar/observers.pyx":656
+ *                 roots.push_back(root)
+ * 
+ *     cdef Poly _fprime_given_f(PolyObserver self):             # <<<<<<<<<<<<<<
+ *         """Find the derivative of f by taking the LieDerivative given odes."""
+ *         cdef Polynomial fprime
+ */
+
+static struct __pyx_obj_8flowstar_4poly_Poly *__pyx_f_8flowstar_9observers_12PolyObserver__fprime_given_f(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self) {
+  flowstar::Polynomial __pyx_v_fprime;
+  struct __pyx_obj_8flowstar_4poly_Poly *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  __Pyx_RefNannySetupContext("_fprime_given_f", 0);
+
+  /* "flowstar/observers.pyx":660
+ *         cdef Polynomial fprime
+ * 
+ *         self.f.c_poly.LieDerivative(fprime, (<CReach?>self.reach).odes)             # <<<<<<<<<<<<<<
+ * 
+ *         return Poly.from_polynomial(fprime, self.f.vars)
+ */
+  if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self->reach), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(1, 660, __pyx_L1_error)
+  __pyx_v_self->f->c_poly.LieDerivative(__pyx_v_fprime, __pyx_v_self->reach->odes);
+
+  /* "flowstar/observers.pyx":662
+ *         self.f.c_poly.LieDerivative(fprime, (<CReach?>self.reach).odes)
+ * 
+ *         return Poly.from_polynomial(fprime, self.f.vars)             # <<<<<<<<<<<<<<
+ */
+  __Pyx_XDECREF(((PyObject *)__pyx_r));
+  __pyx_t_1 = __pyx_v_self->f->vars;
+  __Pyx_INCREF(__pyx_t_1);
+  __pyx_t_2 = ((PyObject *)__pyx_vtabptr_8flowstar_4poly_Poly->from_polynomial(__pyx_v_fprime, __pyx_t_1, NULL)); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 662, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = ((struct __pyx_obj_8flowstar_4poly_Poly *)__pyx_t_2);
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* "flowstar/observers.pyx":656
+ *                 roots.push_back(root)
+ * 
+ *     cdef Poly _fprime_given_f(PolyObserver self):             # <<<<<<<<<<<<<<
+ *         """Find the derivative of f by taking the LieDerivative given odes."""
+ *         cdef Polynomial fprime
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("flowstar.observers.PolyObserver._fprime_given_f", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF((PyObject *)__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/observers.pxd":15
+ * cdef class PolyObserver:
+ *     cdef CReach reach
+ *     cdef readonly Poly f             # <<<<<<<<<<<<<<
+ *     cdef readonly Poly fprime
+ *     cdef vector[optional[interval_time_fn]] poly_f_fns
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_1f_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_1f_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_8flowstar_9observers_12PolyObserver_1f___get__(((struct __pyx_obj_8flowstar_9observers_PolyObserver *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_1f___get__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(((PyObject *)__pyx_v_self->f));
+  __pyx_r = ((PyObject *)__pyx_v_self->f);
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/observers.pxd":16
+ *     cdef CReach reach
+ *     cdef readonly Poly f
+ *     cdef readonly Poly fprime             # <<<<<<<<<<<<<<
+ *     cdef vector[optional[interval_time_fn]] poly_f_fns
+ *     cdef vector[optional[interval_time_fn]] poly_fprime_fns
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_6fprime_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_8flowstar_9observers_12PolyObserver_6fprime_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_8flowstar_9observers_12PolyObserver_6fprime___get__(((struct __pyx_obj_8flowstar_9observers_PolyObserver *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_6fprime___get__(struct __pyx_obj_8flowstar_9observers_PolyObserver *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(((PyObject *)__pyx_v_self->fprime));
+  __pyx_r = ((PyObject *)__pyx_v_self->fprime);
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/observers.pxd":21
  *     cdef vector[optional[bint]] bools
  *     cdef bint symbolic_composition
  *     cdef readonly object mask  # Mask             # <<<<<<<<<<<<<<
@@ -8034,11 +7993,11 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_10__reduce_cython_
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(1, 2, __pyx_L1_error)
+  __PYX_ERR(0, 2, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -8087,11 +8046,11 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_12__setstate_cytho
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(1, 4, __pyx_L1_error)
+  __PYX_ERR(0, 4, __pyx_L1_error)
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
@@ -8133,7 +8092,7 @@ static std::string __pyx_convert_string_from_py_std__in_string(PyObject *__pyx_v
  *     return string(data, length)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_AsStringAndSize(__pyx_v_o, (&__pyx_v_length)); if (unlikely(__pyx_t_1 == ((char const *)NULL))) __PYX_ERR(1, 15, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_AsStringAndSize(__pyx_v_o, (&__pyx_v_length)); if (unlikely(__pyx_t_1 == ((char const *)NULL))) __PYX_ERR(0, 15, __pyx_L1_error)
   __pyx_v_data = __pyx_t_1;
 
   /* "string.from_py":16
@@ -8249,6 +8208,14 @@ static PyObject *__pyx_getprop_8flowstar_9observers_12PolyObserver_time(PyObject
   return __pyx_pw_8flowstar_9observers_12PolyObserver_4time_1__get__(o);
 }
 
+static PyObject *__pyx_getprop_8flowstar_9observers_12PolyObserver_f(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_8flowstar_9observers_12PolyObserver_1f_1__get__(o);
+}
+
+static PyObject *__pyx_getprop_8flowstar_9observers_12PolyObserver_fprime(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_8flowstar_9observers_12PolyObserver_6fprime_1__get__(o);
+}
+
 static PyObject *__pyx_getprop_8flowstar_9observers_12PolyObserver_mask(PyObject *o, CYTHON_UNUSED void *x) {
   return __pyx_pw_8flowstar_9observers_12PolyObserver_4mask_1__get__(o);
 }
@@ -8265,6 +8232,8 @@ static PyMethodDef __pyx_methods_8flowstar_9observers_PolyObserver[] = {
 static struct PyGetSetDef __pyx_getsets_8flowstar_9observers_PolyObserver[] = {
   {(char *)"flowstar_successful", __pyx_getprop_8flowstar_9observers_12PolyObserver_flowstar_successful, 0, (char *)0, 0},
   {(char *)"time", __pyx_getprop_8flowstar_9observers_12PolyObserver_time, 0, (char *)0, 0},
+  {(char *)"f", __pyx_getprop_8flowstar_9observers_12PolyObserver_f, 0, (char *)0, 0},
+  {(char *)"fprime", __pyx_getprop_8flowstar_9observers_12PolyObserver_fprime, 0, (char *)0, 0},
   {(char *)"mask", __pyx_getprop_8flowstar_9observers_12PolyObserver_mask, 0, (char *)0, 0},
   {0, 0, 0, 0, 0}
 };
@@ -8472,7 +8441,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_flowstar_reachability, __pyx_k_flowstar_reachability, sizeof(__pyx_k_flowstar_reachability), 0, 0, 1, 1},
   {&__pyx_n_s_flowstar_successful, __pyx_k_flowstar_successful, sizeof(__pyx_k_flowstar_successful), 0, 0, 1, 1},
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
-  {&__pyx_n_s_fprime, __pyx_k_fprime, sizeof(__pyx_k_fprime), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_init_stored_data, __pyx_k_init_stored_data, sizeof(__pyx_k_init_stored_data), 0, 0, 1, 1},
@@ -8490,7 +8458,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_prepare, __pyx_k_prepare, sizeof(__pyx_k_prepare), 0, 0, 1, 1},
   {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
-  {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_reach, __pyx_k_reach, sizeof(__pyx_k_reach), 0, 0, 1, 1},
   {&__pyx_kp_s_reached_detect_roots_t, __pyx_k_reached_detect_roots_t, sizeof(__pyx_k_reached_detect_roots_t), 0, 0, 1, 0},
   {&__pyx_kp_s_reached_interval_eval_t, __pyx_k_reached_interval_eval_t, sizeof(__pyx_k_reached_interval_eval_t), 0, 0, 1, 0},
@@ -8519,9 +8486,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 48, __pyx_L1_error)
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 220, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(1, 183, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -8537,7 +8503,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns,self.space_domain cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s); if (unlikely(!__pyx_tuple_)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
@@ -8546,150 +8512,150 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns,self.space_domain cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "flowstar/observers.pyx":181
+  /* "flowstar/observers.pyx":144
  *             return None
  * 
  *         with self.reach.global_manager:             # <<<<<<<<<<<<<<
  *             c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)
  * 
  */
-  __pyx_tuple__3 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 181, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(1, 144, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "flowstar/observers.pyx":220
+  /* "flowstar/observers.pyx":183
  *             t00 = t0
  *             if verbosity >= 2:
  *                 print("===")             # <<<<<<<<<<<<<<
  *                 print("reached detect roots t={} + {}".format(
  *                     interval.as_str(t),
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s__4); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 220, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s__4); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(1, 183, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
-  /* "flowstar/observers.pyx":231
+  /* "flowstar/observers.pyx":194
  *             if deref(cached_bool).has_value():
  *                 if verbosity >= 3:
  *                     print("skipping given cached bool!")             # <<<<<<<<<<<<<<
  *                 continue
  * 
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_skipping_given_cached_bool); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 231, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_skipping_given_cached_bool); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(1, 194, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "flowstar/observers.pyx":250
+  /* "flowstar/observers.pyx":213
  *             if not (f_domain.inf() <= 0 <= f_domain.sup()):
  *                 if verbosity >= 3:
  *                     print("skipping given consistent value over domain")             # <<<<<<<<<<<<<<
  *                 # Annoying code to make Cython allow assignment to a r-value
  *                 (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_skipping_given_consistent_value); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 250, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_skipping_given_consistent_value); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(1, 213, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "flowstar/observers.pyx":308
+  /* "flowstar/observers.pyx":271
  *             t00 = t0
  *             if verbosity >= 2:
  *                 print("===")             # <<<<<<<<<<<<<<
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),
  */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s__4); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 308, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s__4); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(1, 271, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "flowstar/observers.pyx":368
+  /* "flowstar/observers.pyx":331
  *             Interval I = interval.make_interval(t)
  * 
  *         with self.reach.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
  *             res = self.eval_interval(I, verbosity=verbosity)
  * 
  */
-  __pyx_tuple__9 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 368, __pyx_L1_error)
+  __pyx_tuple__9 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(1, 331, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
-  /* "flowstar/observers.pyx":411
+  /* "flowstar/observers.pyx":374
  *             t00 = t0
  *             if verbosity >= 2:
  *                 print("===")             # <<<<<<<<<<<<<<
  *                 print("reached interval eval t={} + {}".format(
  *                     interval.as_str(t),
  */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s__4); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 411, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s__4); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(1, 374, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
-  /* "flowstar/observers.pyx":493
+  /* "flowstar/observers.pyx":456
  *             Interval I = interval.make_interval(t)
  * 
  *         with self.reach.global_manager: #  Use captured globals             # <<<<<<<<<<<<<<
  *             res = self.eval_bool_interval(I)
  * 
  */
-  __pyx_tuple__11 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 493, __pyx_L1_error)
+  __pyx_tuple__11 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(1, 456, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__11);
   __Pyx_GIVEREF(__pyx_tuple__11);
 
-  /* "flowstar/observers.pyx":569
+  /* "flowstar/observers.pyx":532
  *         if self.mask is not None:
  *             if verbosity >= 4:
  *                 print("using mask!")             # <<<<<<<<<<<<<<
  *             mask_overlap = self._mask_overlap(t + t0)
  * 
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_using_mask); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 569, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_using_mask); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(1, 532, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "flowstar/observers.pyx":588
+  /* "flowstar/observers.pyx":551
  *             else:
  *                 if verbosity >= 2:
  *                     print("outside mask!")             # <<<<<<<<<<<<<<
  *                     # print('t + t0 =', interval.as_str(t + t0))
  *                     # print('mask =', self.mask)
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_outside_mask); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 588, __pyx_L1_error)
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_outside_mask); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(1, 551, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
 
-  /* "flowstar/observers.pyx":595
+  /* "flowstar/observers.pyx":558
  *         else:
  *             if verbosity >= 4:
  *                 print("not using mask!")             # <<<<<<<<<<<<<<
  * 
  *             return True
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_not_using_mask); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 595, __pyx_L1_error)
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_not_using_mask); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(1, 558, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
 
-  /* "flowstar/observers.pyx":615
+  /* "flowstar/observers.pyx":578
  *             assert poly_fprime_fn.has_value()
  *             # Retrieve cached composed functions
  *             print("retrieving f and fprime polys")             # <<<<<<<<<<<<<<
  *             (&f_fn)[0] = poly_f_fn.value()
  *             (&fprime_fn)[0] = poly_fprime_fn.value()
  */
-  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_retrieving_f_and_fprime_polys); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 615, __pyx_L1_error)
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_retrieving_f_and_fprime_polys); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(1, 578, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
 
-  /* "flowstar/observers.pyx":643
+  /* "flowstar/observers.pyx":606
  *                 self.reach.c_reach.cutoff_threshold,
  *             )
  *             print("setting f and fprime polys")             # <<<<<<<<<<<<<<
  *             # NOTE: Under symbolic composition, the polys depend on the space
  *             # variables and so are invalidated when the space domain is
  */
-  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_setting_f_and_fprime_polys); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 643, __pyx_L1_error)
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_setting_f_and_fprime_polys); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 606, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_GIVEREF(__pyx_tuple__16);
 
@@ -8699,7 +8665,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
 
@@ -8708,18 +8674,18 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
 
-  /* "flowstar/observers.pyx":21
- * from flowstar.reachability import Reach
+  /* "flowstar/observers.pyx":23
+ * 
  * 
  * __all__ = ('RestrictedObserver', 'PolyObserver')             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_tuple__20 = PyTuple_Pack(2, __pyx_n_s_RestrictedObserver, __pyx_n_s_PolyObserver); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_tuple__20 = PyTuple_Pack(2, __pyx_n_s_RestrictedObserver, __pyx_n_s_PolyObserver); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(1, 23, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
   __Pyx_RefNannyFinishContext();
@@ -8730,9 +8696,9 @@ static int __Pyx_InitCachedConstants(void) {
 }
 
 static int __Pyx_InitGlobals(void) {
-  if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  __pyx_float_0_00001 = PyFloat_FromDouble(0.00001); if (unlikely(!__pyx_float_0_00001)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(1, 1, __pyx_L1_error);
+  __pyx_float_0_00001 = PyFloat_FromDouble(0.00001); if (unlikely(!__pyx_float_0_00001)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(1, 1, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -8766,12 +8732,8 @@ static int __Pyx_modinit_function_export_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_export_code", 0);
   /*--- Function export code ---*/
-  if (__Pyx_ExportFunction("observable", (void (*)(void))__pyx_f_8flowstar_9observers_observable, "void (std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, flowstar::Polynomial &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  &, int, flowstar::Interval &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
-  __pyx_L1_error:;
-  __Pyx_RefNannyFinishContext();
-  return -1;
 }
 
 static int __Pyx_modinit_type_init_code(void) {
@@ -8789,28 +8751,29 @@ static int __Pyx_modinit_type_init_code(void) {
   __pyx_vtable_8flowstar_9observers_PolyObserver._pre_retrieve_f = (void (*)(struct __pyx_obj_8flowstar_9observers_PolyObserver *, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  *))__pyx_f_8flowstar_9observers_12PolyObserver__pre_retrieve_f;
   __pyx_vtable_8flowstar_9observers_PolyObserver._post_retrieve_f = (void (*)(struct __pyx_obj_8flowstar_9observers_PolyObserver *, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, std::optional<std::function<flowstar::Interval(const flowstar::Interval &)>>  &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  *))__pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f;
   __pyx_vtable_8flowstar_9observers_PolyObserver._global_domain = (std::optional<std::vector<flowstar::Interval> >  (*)(struct __pyx_obj_8flowstar_9observers_PolyObserver *))__pyx_f_8flowstar_9observers_12PolyObserver__global_domain;
-  if (PyType_Ready(&__pyx_type_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_vtable_8flowstar_9observers_PolyObserver._fprime_given_f = (struct __pyx_obj_8flowstar_4poly_Poly *(*)(struct __pyx_obj_8flowstar_9observers_PolyObserver *))__pyx_f_8flowstar_9observers_12PolyObserver__fprime_given_f;
+  if (PyType_Ready(&__pyx_type_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(1, 90, __pyx_L1_error)
   __pyx_type_8flowstar_9observers_PolyObserver.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_9observers_PolyObserver.tp_dictoffset && __pyx_type_8flowstar_9observers_PolyObserver.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_9observers_PolyObserver.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_8flowstar_9observers_PolyObserver.tp_dict, __pyx_vtabptr_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
-  if (PyObject_SetAttrString(__pyx_m, "PolyObserver", (PyObject *)&__pyx_type_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_8flowstar_9observers_PolyObserver.tp_dict, __pyx_vtabptr_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(1, 90, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "PolyObserver", (PyObject *)&__pyx_type_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(1, 90, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_9observers_PolyObserver) < 0) __PYX_ERR(1, 90, __pyx_L1_error)
   __pyx_ptype_8flowstar_9observers_PolyObserver = &__pyx_type_8flowstar_9observers_PolyObserver;
   __pyx_vtabptr_8flowstar_9observers_RestrictedObserver = &__pyx_vtable_8flowstar_9observers_RestrictedObserver;
   __pyx_vtable_8flowstar_9observers_RestrictedObserver.__pyx_base = *__pyx_vtabptr_8flowstar_9observers_PolyObserver;
   __pyx_vtable_8flowstar_9observers_RestrictedObserver.__pyx_base._global_domain = (std::optional<std::vector<flowstar::Interval> >  (*)(struct __pyx_obj_8flowstar_9observers_PolyObserver *))__pyx_f_8flowstar_9observers_18RestrictedObserver__global_domain;
   __pyx_vtable_8flowstar_9observers_RestrictedObserver._invalidate_indeterminate_polys = (void (*)(struct __pyx_obj_8flowstar_9observers_RestrictedObserver *))__pyx_f_8flowstar_9observers_18RestrictedObserver__invalidate_indeterminate_polys;
   __pyx_type_8flowstar_9observers_RestrictedObserver.tp_base = __pyx_ptype_8flowstar_9observers_PolyObserver;
-  if (PyType_Ready(&__pyx_type_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(0, 64, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(1, 27, __pyx_L1_error)
   __pyx_type_8flowstar_9observers_RestrictedObserver.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_9observers_RestrictedObserver.tp_dictoffset && __pyx_type_8flowstar_9observers_RestrictedObserver.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_9observers_RestrictedObserver.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_8flowstar_9observers_RestrictedObserver.tp_dict, __pyx_vtabptr_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(0, 64, __pyx_L1_error)
-  if (PyObject_SetAttrString(__pyx_m, "RestrictedObserver", (PyObject *)&__pyx_type_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(0, 64, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(0, 64, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_8flowstar_9observers_RestrictedObserver.tp_dict, __pyx_vtabptr_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(1, 27, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "RestrictedObserver", (PyObject *)&__pyx_type_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(1, 27, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_9observers_RestrictedObserver) < 0) __PYX_ERR(1, 27, __pyx_L1_error)
   __pyx_ptype_8flowstar_9observers_RestrictedObserver = &__pyx_type_8flowstar_9observers_RestrictedObserver;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -8823,11 +8786,11 @@ static int __Pyx_modinit_type_import_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(2, 65, __pyx_L1_error)
+  __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType("flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), 1); if (unlikely(!__pyx_ptype_8flowstar_4poly_Poly)) __PYX_ERR(2, 61, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(2, 61, __pyx_L1_error)
   __pyx_ptype_8flowstar_12reachability_CReach = __Pyx_ImportType("flowstar.reachability", "CReach", sizeof(struct __pyx_obj_8flowstar_12reachability_CReach), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_CReach)) __PYX_ERR(3, 10, __pyx_L1_error)
   __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(3, 10, __pyx_L1_error)
-  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(3, 27, __pyx_L1_error)
+  __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType("flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), 1); if (unlikely(!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(3, 28, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -8848,27 +8811,32 @@ static int __Pyx_modinit_function_import_code(void) {
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_import_code", 0);
   /*--- Function import code ---*/
-  __pyx_t_1 = __Pyx_ImportModule("flowstar.interval"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "as_str", (void (**)(void))&__pyx_f_8flowstar_8interval_as_str, "PyObject *(flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "make_interval", (void (**)(void))&__pyx_f_8flowstar_8interval_make_interval, "flowstar::Interval (PyObject *)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "overlaps", (void (**)(void))&__pyx_f_8flowstar_8interval_overlaps, "bool (flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "interval_union", (void (**)(void))&__pyx_f_8flowstar_8interval_interval_union, "void (flowstar::Interval &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "int_min_dist", (void (**)(void))&__pyx_f_8flowstar_8interval_int_min_dist, "double (flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportModule("flowstar.interval"); if (!__pyx_t_1) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "as_str", (void (**)(void))&__pyx_f_8flowstar_8interval_as_str, "PyObject *(flowstar::Interval const &)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "make_interval", (void (**)(void))&__pyx_f_8flowstar_8interval_make_interval, "flowstar::Interval (PyObject *)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "overlaps", (void (**)(void))&__pyx_f_8flowstar_8interval_overlaps, "bool (flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "interval_union", (void (**)(void))&__pyx_f_8flowstar_8interval_interval_union, "void (flowstar::Interval &, flowstar::Interval const &)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "int_min_dist", (void (**)(void))&__pyx_f_8flowstar_8interval_int_min_dist, "double (flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = __Pyx_ImportModule("flowstar.poly"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_2, "compose", (void (**)(void))&__pyx_f_8flowstar_4poly_compose, "flowstar::TaylorModel (flowstar::Polynomial const &, flowstar::TaylorModelVec const , std::vector<flowstar::Interval>  const &, int const , flowstar::Interval const , struct __pyx_opt_args_8flowstar_4poly_compose *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportModule("flowstar.poly"); if (!__pyx_t_2) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_2, "compose", (void (**)(void))&__pyx_f_8flowstar_4poly_compose, "flowstar::TaylorModel (flowstar::Polynomial const &, flowstar::TaylorModelVec const , std::vector<flowstar::Interval>  const &, int const , flowstar::Interval const , struct __pyx_opt_args_8flowstar_4poly_compose *__pyx_optional_args)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_ImportModule("flowstar.root_detection"); if (!__pyx_t_3) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_3, "detect_roots", (void (**)(void))&__pyx_f_8flowstar_14root_detection_detect_roots, "void (std::vector<flowstar::Interval>  &, std::function<flowstar::Interval(const flowstar::Interval &)>, std::function<flowstar::Interval(const flowstar::Interval &)>, flowstar::Interval &, struct __pyx_opt_args_8flowstar_14root_detection_detect_roots *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_ImportModule("flowstar.root_detection"); if (!__pyx_t_3) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_3, "detect_roots", (void (**)(void))&__pyx_f_8flowstar_14root_detection_detect_roots, "void (std::vector<flowstar::Interval>  &, std::function<flowstar::Interval(const flowstar::Interval &)>, std::function<flowstar::Interval(const flowstar::Interval &)>, flowstar::Interval &, struct __pyx_opt_args_8flowstar_14root_detection_detect_roots *__pyx_optional_args)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __Pyx_ImportModule("flowstar.observable"); if (!__pyx_t_4) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_4, "observable", (void (**)(void))&__pyx_f_8flowstar_10observable_observable, "void (std::function<flowstar::Interval(const flowstar::Interval &)> &, std::function<flowstar::Interval(const flowstar::Interval &)> &, flowstar::Polynomial &, flowstar::TaylorModelVec &, std::vector<flowstar::Interval>  &, int, flowstar::Interval &)") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  Py_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_RefNannyFinishContext();
   return -1;
 }
@@ -8965,27 +8933,27 @@ if (!__Pyx_RefNanny) {
 }
 #endif
   __Pyx_RefNannySetupContext("__Pyx_PyMODINIT_FUNC PyInit_observers(void)", 0);
-  if (__Pyx_check_binary_version() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_empty_tuple = PyTuple_New(0); if (unlikely(!__pyx_empty_tuple)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_empty_bytes = PyBytes_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_bytes)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_empty_unicode = PyUnicode_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_unicode)) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_check_binary_version() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_empty_tuple = PyTuple_New(0); if (unlikely(!__pyx_empty_tuple)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_empty_bytes = PyBytes_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_bytes)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_empty_unicode = PyUnicode_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_unicode)) __PYX_ERR(1, 1, __pyx_L1_error)
   #ifdef __Pyx_CyFunction_USED
-  if (__pyx_CyFunction_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__pyx_CyFunction_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_FusedFunction_USED
-  if (__pyx_FusedFunction_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__pyx_FusedFunction_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_Coroutine_USED
-  if (__pyx_Coroutine_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__pyx_Coroutine_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_Generator_USED
-  if (__pyx_Generator_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__pyx_Generator_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_AsyncGen_USED
-  if (__pyx_AsyncGen_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__pyx_AsyncGen_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_StopAsyncIteration_USED
-  if (__pyx_StopAsyncIteration_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__pyx_StopAsyncIteration_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
   /*--- Library function declarations ---*/
   /*--- Threads initialization code ---*/
@@ -9004,47 +8972,47 @@ if (!__Pyx_RefNanny) {
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
-  if (unlikely(!__pyx_m)) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (unlikely(!__pyx_m)) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
-  __pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(1, 1, __pyx_L1_error)
   Py_INCREF(__pyx_d);
-  __pyx_b = PyImport_AddModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_b)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_cython_runtime = PyImport_AddModule((char *) "cython_runtime"); if (unlikely(!__pyx_cython_runtime)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_b = PyImport_AddModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_b)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_cython_runtime = PyImport_AddModule((char *) "cython_runtime"); if (unlikely(!__pyx_cython_runtime)) __PYX_ERR(1, 1, __pyx_L1_error)
   #if CYTHON_COMPILING_IN_PYPY
   Py_INCREF(__pyx_b);
   #endif
-  if (PyObject_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (PyObject_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) __PYX_ERR(1, 1, __pyx_L1_error);
   /*--- Initialize various global constants etc. ---*/
-  if (__Pyx_InitGlobals() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_InitGlobals() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
-  if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
   if (__pyx_module_is_main_flowstar__observers) {
-    if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
-    PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
+    PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(1, 1, __pyx_L1_error)
     if (!PyDict_GetItemString(modules, "flowstar.observers")) {
-      if (unlikely(PyDict_SetItemString(modules, "flowstar.observers", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+      if (unlikely(PyDict_SetItemString(modules, "flowstar.observers", __pyx_m) < 0)) __PYX_ERR(1, 1, __pyx_L1_error)
     }
   }
   #endif
   /*--- Builtin init code ---*/
-  if (__Pyx_InitCachedBuiltins() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_InitCachedBuiltins() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   /*--- Constants init code ---*/
-  if (__Pyx_InitCachedConstants() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_InitCachedConstants() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   /*--- Global type/function init code ---*/
   (void)__Pyx_modinit_global_init_code();
   (void)__Pyx_modinit_variable_export_code();
-  if (unlikely(__Pyx_modinit_function_export_code() != 0)) goto __pyx_L1_error;
+  (void)__Pyx_modinit_function_export_code();
   if (unlikely(__Pyx_modinit_type_init_code() != 0)) goto __pyx_L1_error;
   if (unlikely(__Pyx_modinit_type_import_code() != 0)) goto __pyx_L1_error;
   (void)__Pyx_modinit_variable_import_code();
   if (unlikely(__Pyx_modinit_function_import_code() != 0)) goto __pyx_L1_error;
   /*--- Execution code ---*/
   #if defined(__Pyx_Generator_USED) || defined(__Pyx_Coroutine_USED)
-  if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_patch_abc() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
 
   /* "flowstar/observers.pyx":9
@@ -9054,55 +9022,55 @@ if (!__Pyx_RefNanny) {
  * 
  * cimport flowstar.root_detection as root_detection
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s__19);
   __Pyx_GIVEREF(__pyx_n_s__19);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s__19);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_sage, __pyx_t_2) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_sage, __pyx_t_2) < 0) __PYX_ERR(1, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "flowstar/observers.pyx":19
  * from flowstar.tribool cimport tribool, unknown
  * from flowstar.tribool cimport and_ as tri_and
  * from flowstar.reachability import Reach             # <<<<<<<<<<<<<<
+ * from flowstar.observable cimport observable
  * 
- * __all__ = ('RestrictedObserver', 'PolyObserver')
  */
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s_Reach);
   __Pyx_GIVEREF(__pyx_n_s_Reach);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Reach);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_flowstar_reachability, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_flowstar_reachability, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Reach); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Reach); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Reach, __pyx_t_2) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Reach, __pyx_t_2) < 0) __PYX_ERR(1, 19, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/observers.pyx":21
- * from flowstar.reachability import Reach
+  /* "flowstar/observers.pyx":23
+ * 
  * 
  * __all__ = ('RestrictedObserver', 'PolyObserver')             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_all, __pyx_tuple__20) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_all, __pyx_tuple__20) < 0) __PYX_ERR(1, 23, __pyx_L1_error)
 
   /* "flowstar/observers.pyx":1
  * from __future__ import print_function, division, absolute_import             # <<<<<<<<<<<<<<
  * 
  * from cython.operator cimport dereference as deref
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "string.from_py":13
@@ -9182,72 +9150,6 @@ static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
 #endif
     }
     return result;
-}
-
-/* PyErrFetchRestore */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    tmp_type = tstate->curexc_type;
-    tmp_value = tstate->curexc_value;
-    tmp_tb = tstate->curexc_traceback;
-    tstate->curexc_type = type;
-    tstate->curexc_value = value;
-    tstate->curexc_traceback = tb;
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-}
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-    *type = tstate->curexc_type;
-    *value = tstate->curexc_value;
-    *tb = tstate->curexc_traceback;
-    tstate->curexc_type = 0;
-    tstate->curexc_value = 0;
-    tstate->curexc_traceback = 0;
-}
-#endif
-
-/* WriteUnraisableException */
-static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
-                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
-                                  int full_traceback, CYTHON_UNUSED int nogil) {
-    PyObject *old_exc, *old_val, *old_tb;
-    PyObject *ctx;
-    __Pyx_PyThreadState_declare
-#ifdef WITH_THREAD
-    PyGILState_STATE state;
-    if (nogil)
-        state = PyGILState_Ensure();
-#ifdef _MSC_VER
-    else state = (PyGILState_STATE)-1;
-#endif
-#endif
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
-    if (full_traceback) {
-        Py_XINCREF(old_exc);
-        Py_XINCREF(old_val);
-        Py_XINCREF(old_tb);
-        __Pyx_ErrRestore(old_exc, old_val, old_tb);
-        PyErr_PrintEx(1);
-    }
-    #if PY_MAJOR_VERSION < 3
-    ctx = PyString_FromString(name);
-    #else
-    ctx = PyUnicode_FromString(name);
-    #endif
-    __Pyx_ErrRestore(old_exc, old_val, old_tb);
-    if (!ctx) {
-        PyErr_WriteUnraisable(Py_None);
-    } else {
-        PyErr_WriteUnraisable(ctx);
-        Py_DECREF(ctx);
-    }
-#ifdef WITH_THREAD
-    if (nogil)
-        PyGILState_Release(state);
-#endif
 }
 
 /* RaiseArgTupleInvalid */
@@ -9696,6 +9598,72 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
     return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
 }
 #endif
+
+/* PyErrFetchRestore */
+      #if CYTHON_FAST_THREAD_STATE
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    tmp_type = tstate->curexc_type;
+    tmp_value = tstate->curexc_value;
+    tmp_tb = tstate->curexc_traceback;
+    tstate->curexc_type = type;
+    tstate->curexc_value = value;
+    tstate->curexc_traceback = tb;
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+}
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
+    *type = tstate->curexc_type;
+    *value = tstate->curexc_value;
+    *tb = tstate->curexc_traceback;
+    tstate->curexc_type = 0;
+    tstate->curexc_value = 0;
+    tstate->curexc_traceback = 0;
+}
+#endif
+
+/* WriteUnraisableException */
+      static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
+                                  CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
+                                  int full_traceback, CYTHON_UNUSED int nogil) {
+    PyObject *old_exc, *old_val, *old_tb;
+    PyObject *ctx;
+    __Pyx_PyThreadState_declare
+#ifdef WITH_THREAD
+    PyGILState_STATE state;
+    if (nogil)
+        state = PyGILState_Ensure();
+#ifdef _MSC_VER
+    else state = (PyGILState_STATE)-1;
+#endif
+#endif
+    __Pyx_PyThreadState_assign
+    __Pyx_ErrFetch(&old_exc, &old_val, &old_tb);
+    if (full_traceback) {
+        Py_XINCREF(old_exc);
+        Py_XINCREF(old_val);
+        Py_XINCREF(old_tb);
+        __Pyx_ErrRestore(old_exc, old_val, old_tb);
+        PyErr_PrintEx(1);
+    }
+    #if PY_MAJOR_VERSION < 3
+    ctx = PyString_FromString(name);
+    #else
+    ctx = PyUnicode_FromString(name);
+    #endif
+    __Pyx_ErrRestore(old_exc, old_val, old_tb);
+    if (!ctx) {
+        PyErr_WriteUnraisable(Py_None);
+    } else {
+        PyErr_WriteUnraisable(ctx);
+        Py_DECREF(ctx);
+    }
+#ifdef WITH_THREAD
+    if (nogil)
+        PyGILState_Release(state);
+#endif
+}
 
 /* RaiseException */
       #if PY_MAJOR_VERSION < 3
@@ -10436,195 +10404,6 @@ bad:
     }
 
 /* CIntFromPy */
-        static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *x) {
-    const size_t neg_one = (size_t) -1, const_zero = (size_t) 0;
-    const int is_unsigned = neg_one > const_zero;
-#if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_Check(x))) {
-        if (sizeof(size_t) < sizeof(long)) {
-            __PYX_VERIFY_RETURN_INT(size_t, long, PyInt_AS_LONG(x))
-        } else {
-            long val = PyInt_AS_LONG(x);
-            if (is_unsigned && unlikely(val < 0)) {
-                goto raise_neg_overflow;
-            }
-            return (size_t) val;
-        }
-    } else
-#endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (size_t) 0;
-                case  1: __PYX_VERIFY_RETURN_INT(size_t, digit, digits[0])
-                case 2:
-                    if (8 * sizeof(size_t) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) >= 2 * PyLong_SHIFT) {
-                            return (size_t) (((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(size_t) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) >= 3 * PyLong_SHIFT) {
-                            return (size_t) (((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(size_t) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) >= 4 * PyLong_SHIFT) {
-                            return (size_t) (((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0]));
-                        }
-                    }
-                    break;
-            }
-#endif
-#if CYTHON_COMPILING_IN_CPYTHON
-            if (unlikely(Py_SIZE(x) < 0)) {
-                goto raise_neg_overflow;
-            }
-#else
-            {
-                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
-                if (unlikely(result < 0))
-                    return (size_t) -1;
-                if (unlikely(result == 1))
-                    goto raise_neg_overflow;
-            }
-#endif
-            if (sizeof(size_t) <= sizeof(unsigned long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(size_t, unsigned long, PyLong_AsUnsignedLong(x))
-#ifdef HAVE_LONG_LONG
-            } else if (sizeof(size_t) <= sizeof(unsigned PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(size_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
-#endif
-            }
-        } else {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (size_t) 0;
-                case -1: __PYX_VERIFY_RETURN_INT(size_t, sdigit, (sdigit) (-(sdigit)digits[0]))
-                case  1: __PYX_VERIFY_RETURN_INT(size_t,  digit, +digits[0])
-                case -2:
-                    if (8 * sizeof(size_t) - 1 > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT) {
-                            return (size_t) (((size_t)-1)*(((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 2:
-                    if (8 * sizeof(size_t) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT) {
-                            return (size_t) ((((((size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -3:
-                    if (8 * sizeof(size_t) - 1 > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT) {
-                            return (size_t) (((size_t)-1)*(((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(size_t) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT) {
-                            return (size_t) ((((((((size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -4:
-                    if (8 * sizeof(size_t) - 1 > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) - 1 > 4 * PyLong_SHIFT) {
-                            return (size_t) (((size_t)-1)*(((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(size_t) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(size_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(size_t) - 1 > 4 * PyLong_SHIFT) {
-                            return (size_t) ((((((((((size_t)digits[3]) << PyLong_SHIFT) | (size_t)digits[2]) << PyLong_SHIFT) | (size_t)digits[1]) << PyLong_SHIFT) | (size_t)digits[0])));
-                        }
-                    }
-                    break;
-            }
-#endif
-            if (sizeof(size_t) <= sizeof(long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(size_t, long, PyLong_AsLong(x))
-#ifdef HAVE_LONG_LONG
-            } else if (sizeof(size_t) <= sizeof(PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(size_t, PY_LONG_LONG, PyLong_AsLongLong(x))
-#endif
-            }
-        }
-        {
-#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
-            PyErr_SetString(PyExc_RuntimeError,
-                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
-#else
-            size_t val;
-            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
- #if PY_MAJOR_VERSION < 3
-            if (likely(v) && !PyLong_Check(v)) {
-                PyObject *tmp = v;
-                v = PyNumber_Long(tmp);
-                Py_DECREF(tmp);
-            }
- #endif
-            if (likely(v)) {
-                int one = 1; int is_little = (int)*(unsigned char *)&one;
-                unsigned char *bytes = (unsigned char *)&val;
-                int ret = _PyLong_AsByteArray((PyLongObject *)v,
-                                              bytes, sizeof(val),
-                                              is_little, !is_unsigned);
-                Py_DECREF(v);
-                if (likely(!ret))
-                    return val;
-            }
-#endif
-            return (size_t) -1;
-        }
-    } else {
-        size_t val;
-        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
-        if (!tmp) return (size_t) -1;
-        val = __Pyx_PyInt_As_size_t(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-raise_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "value too large to convert to size_t");
-    return (size_t) -1;
-raise_neg_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "can't convert negative value to size_t");
-    return (size_t) -1;
-}
-
-/* CIntFromPy */
         static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
     const int neg_one = (int) -1, const_zero = (int) 0;
     const int is_unsigned = neg_one > const_zero;
@@ -11147,43 +10926,6 @@ static CYTHON_INLINE int __Pyx_PyErr_GivenExceptionMatches2(PyObject *err, PyObj
         return PyErr_WarnEx(NULL, message, 1);
     }
     return 0;
-}
-
-/* FunctionExport */
-        static int __Pyx_ExportFunction(const char *name, void (*f)(void), const char *sig) {
-    PyObject *d = 0;
-    PyObject *cobj = 0;
-    union {
-        void (*fp)(void);
-        void *p;
-    } tmp;
-    d = PyObject_GetAttrString(__pyx_m, (char *)"__pyx_capi__");
-    if (!d) {
-        PyErr_Clear();
-        d = PyDict_New();
-        if (!d)
-            goto bad;
-        Py_INCREF(d);
-        if (PyModule_AddObject(__pyx_m, (char *)"__pyx_capi__", d) < 0)
-            goto bad;
-    }
-    tmp.fp = f;
-#if PY_VERSION_HEX >= 0x02070000
-    cobj = PyCapsule_New(tmp.p, sig, 0);
-#else
-    cobj = PyCObject_FromVoidPtrAndDesc(tmp.p, (void *)sig, 0);
-#endif
-    if (!cobj)
-        goto bad;
-    if (PyDict_SetItemString(d, name, cobj) < 0)
-        goto bad;
-    Py_DECREF(cobj);
-    Py_DECREF(d);
-    return 0;
-bad:
-    Py_XDECREF(cobj);
-    Py_XDECREF(d);
-    return -1;
 }
 
 /* ModuleImport */

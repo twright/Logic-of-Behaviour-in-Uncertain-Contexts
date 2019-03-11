@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Definition" pattern="file:*.pxd||file:*.h" />
+</component>

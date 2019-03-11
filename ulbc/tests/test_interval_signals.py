@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 import pytest
 from ulbc.interval_signals import Signal, interval_complements
 from ulbc.signal_masks import Mask
@@ -12,6 +14,29 @@ def sig1():
 @pytest.fixture
 def sig2():
     return Signal(RIF(0, 5), [(RIF(1, 3), True)])
+
+
+@pytest.fixture
+def mask1():
+    return Mask(RIF(0, 5), [(RIF(1, 4), True), (RIF(2, 4.5), False)])
+
+
+@pytest.fixture
+def mask2():
+    return Mask(RIF(0, 5), [(RIF(2, 5), True)])
+
+
+@pytest.fixture
+def masked_sig1(mask1):
+    return Signal(RIF(0, 5), [(RIF(1, 2), True), (RIF(3, 4), False)],
+                  mask=mask1)
+
+
+@pytest.fixture
+def sig1_mask2(mask2):
+    return Signal(RIF(0, 5),
+                  [(RIF(1, 2), True), (RIF(3, 4), False), (RIF(4.5, 5), True)],
+                  mask=mask2)
 
 
 def int_dist(I, J):
@@ -84,3 +109,41 @@ class TestSignalMasks(object):
                     [(RIF(2, 5), True), (RIF(0, 3), False)])
         print(sig1.to_mask())
         assert sig1.to_mask().approx_eq(mask)
+
+    def test_to_domain_mask(self, mask1, masked_sig1):
+        sig = masked_sig1.to_domain(RIF(1, 3))
+        assert sig.mask is not None
+        assert sig.mask.approx_eq(mask1.to_domain(RIF(1, 3)))
+
+    def test_G_mask(self, mask1, masked_sig1):
+        sig_G = masked_sig1.G(RIF(0.5, 1)).to_domain(RIF(0, 4.5))
+        mask_shifted = Mask(RIF(0, 4.5),
+                            [(RIF(0.5, 3), True), (RIF(1.5, 3.5), False)])
+        assert mask_shifted.H(RIF(0.5, 1)).to_domain(RIF(0, 5)).approx_eq(
+            mask1)
+        expected_sig = Signal(RIF(0, 4.5),
+                              [(RIF(0.5, 1), True), (RIF(2, 3.5), False)],
+                              mask=mask_shifted)
+        assert sig_G.mask is not None
+        assert sig_G.mask.approx_eq(mask_shifted)
+        assert sig_G.approx_eq(expected_sig)
+
+    def test_F_mask(self, mask1, masked_sig1):
+        sig_F = masked_sig1.F(RIF(0.5, 1)).to_domain(RIF(0, 4.5))
+        mask_shifted = Mask(RIF(0, 4.5),
+                            [(RIF(0.5, 3), True), (RIF(1.5, 3.5), False)])
+        assert mask_shifted.P(RIF(0.5, 1)).to_domain(RIF(0, 5)).approx_eq(
+            mask1)
+        expected_sig = Signal(RIF(0, 4.5),
+                              [(RIF(0, 1.5), True), (RIF(2.5, 3), False)],
+                              mask=mask_shifted)
+        print('sig_F =', sig_F)
+        assert sig_F.mask is not None
+        assert sig_F.mask.approx_eq(mask_shifted)
+        assert sig_F.approx_eq(expected_sig)
+
+    def test_and_masks(self, mask1, mask2, masked_sig1, sig1_mask2):
+        sig = masked_sig1 & sig1_mask2
+        mask = mask1 & mask2
+        assert sig1.mask is not None
+        assert sig1.mask.approx_eq(mask)

@@ -40,32 +40,61 @@ class TestMask(object):
         assert intervals_approx_eq(mask_inv.pos, mask1.neg)
         assert intervals_approx_eq(mask_inv.neg, mask1.pos)
 
-    def test_G_from_time_zero(self):
-        assert mask_zero.G(RIF(1, 2)).approx_eq(
+    def test_H_from_time_zero(self):
+        assert mask_zero.H(RIF(1, 2)).approx_eq(
             Mask(RIF(1, 2),
                  [(RIF(1, 2), False), (RIF(1, 2), True)])
         )
 
-    def test_G(self, mask1):
-        assert mask1.G(RIF(1, 2)).approx_eq(
+    def test_H(self, mask1):
+        assert mask1.H(RIF(1, 2)).approx_eq(
             Mask(RIF(1, 7),
                  [(RIF(1, 5), True),
                   (RIF(3, 6), False),
                   (RIF(4.5, 6.5), True)])
         )
 
-    def test_F_from_time_zero(self):
-        assert mask_zero.F(RIF(1, 2)).approx_eq(
+    def test_P_from_time_zero(self):
+        assert mask_zero.P(RIF(1, 2)).approx_eq(
             Mask(RIF(1, 2),
                  [(RIF(1, 2), False), (RIF(1, 2), True)])
         )
 
-    def test_F(self, mask1):
-        assert mask1.F(RIF(1, 2)).approx_eq(
+    def test_P(self, mask1):
+        assert mask1.P(RIF(1, 2)).approx_eq(
             Mask(RIF(1, 7),
                  [(RIF(1, 5), True),
                   (RIF(3, 6), False),
                   (RIF(4.5, 6.5), True)])
+        )
+
+    def test_H(self, mask1):
+        assert mask1.H(RIF(1, 2)).approx_eq(
+            Mask(RIF(1, 7),
+                 [(RIF(1, 5), True),
+                  (RIF(3, 6), False),
+                  (RIF(4.5, 6.5), True)])
+        )
+
+    def test_P(self, mask1):
+        assert mask1.P(RIF(1, 2)).approx_eq(
+            Mask(RIF(1, 7),
+                 [(RIF(1, 5), True),
+                  (RIF(3, 6), False),
+                  (RIF(4.5, 6.5), True)])
+        )
+
+    def test_G_H_from_time_zero(self):
+        J = RIF(1, 2)
+        print(mask_zero.H(J).G(J))
+        assert mask_zero.H(J).G(J).approx_eq(
+            Mask(RIF(0, 0), [(RIF(0, 0), False), (RIF(0, 0), True)])
+        )
+
+    def test_F_P_from_time_zero(self):
+        J = RIF(1, 2)
+        assert mask_zero.P(J).F(J).approx_eq(
+            Mask(RIF(0, 0), [(RIF(0, 0), False), (RIF(0, 0), True)])
         )
 
     def test_union(self, mask1, mask2):

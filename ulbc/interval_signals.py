@@ -8,21 +8,9 @@ import itertools
 import warnings
 
 from sage.all import RIF, region_plot
-from flowstar.interval import py_int_dist as int_dist
 from ulbc.interval_root_isolation import isolate_roots
 from flowstar.reachability import FlowstarFailedException
-
-
-# def int_dist(I, J):
-#     il, iu = I.edges()
-#     jl, ju = J.edges()
-#     # Round up/down endpoints so as to overapproximate the real distance
-#     return max((il - jl).upper('RNDU'), (jl - il).upper('RNDU'),
-#                (iu - ju).upper('RNDU'), (ju - iu).upper('RNDU'))
-
-# from sage.all import *
-
-# from interval_utils import *
+from ulbc.interval_utils import inner_inverse_minkowski, int_dist
 
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
@@ -41,11 +29,13 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
 
 
 def signal_from_observer(observer, domain):  # , theta=0.01, abs_inf=0.0001):
+    mask = observer.mask
     if not observer.flowstar_successful:
-        return Signal(domain, [])
+        return Signal(domain, [], mask=mask)
     return signal_given_bool_roots((lambda x: observer.check(x)),
                                    observer.roots(),
-                                   domain)
+                                   domain,
+                                   mask=mask)
 
 
 def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
@@ -55,19 +45,25 @@ def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
             return None
         else:
             return res.lower() > 0
-    return signal_given_bool_roots(f, roots, domain)
+    return signal_given_bool_roots(f_bool, roots, domain)
 
 
-def signal_given_bool_roots(f_bool, roots, domain):
+def signal_given_bool_roots_single_seg(f_bool, roots, domain):
     # , theta=0.01, abs_inf=0.0001):
     values = []
     a = domain.lower()
     # while 0 in RIF(f(a)):
     #     a = theta*a + abs_inf
-    print("domain = {}".format(domain.str(style='brackets')))
+    print("seg_domain = {}".format(domain.str(style='brackets')))
     print("roots = [{}]".format(", \n ".join(a.str(style='brackets')
                                              for a in roots)))
+
     for root in roots:
+        # Skip any root which does not overlap the domain
+        if not root.overlaps(domain):
+            continue
+        # root = root.intersection(domain)
+
         if a < root.lower():
             J = RIF(a, root.lower())
             # print("  J  = {}\nf(J) = {}".format(
@@ -89,6 +85,29 @@ def signal_given_bool_roots(f_bool, roots, domain):
     return Signal(domain, values)
 
 
+def signal_given_bool_roots(f_bool, roots, domain, mask=None):
+    # , theta=0.01, abs_inf=0.0001):
+    values = []
+    a = domain.lower()
+    # while 0 in RIF(f(a)):
+    #     a = theta*a + abs_inf
+    print("domain = {}".format(domain.str(style='brackets')))
+    print("roots = [{}]".format(", \n ".join(a.str(style='brackets')
+                                             for a in roots)))
+
+    if mask is None:
+        return signal_given_bool_roots_single_seg(f_bool, roots, domain)
+
+    sig_segs = [
+        signal_given_bool_roots_single_seg(f_bool, roots, seg)
+            for seg in mask.pos
+    ]
+
+    print(sig_segs)
+
+    return reduce(Signal.union, sig_segs, Signal(domain, [])).with_mask(mask)
+
+
 def to_signal_bisection(f, domain, epsilon=0.1):
     J = f(domain)
 
@@ -102,18 +121,6 @@ def to_signal_bisection(f, domain, epsilon=0.1):
         L, M = domain.bisection()
         return to_signal_bisection(f, L, epsilon).union(
             to_signal_bisection(f, M, epsilon))
-
-
-def inner_inverse_minkowski(I, J):
-    # I - J, smallest possible answer
-    il, iu = RIF(I).edges()
-    jl, ju = RIF(J).edges()
-    kl = il - ju
-    ku = iu - jl
-    if kl.overlaps(ku):
-        return None
-    else:
-        return RIF(kl.upper('RNDU'), ku.lower('RNDD'))
 
 
 def shift_F(J, Kb):
@@ -164,7 +171,8 @@ class BaseSignal(object):
         # self._values = list(values) # :: [(RIF, Bool)]
         self._values = list(values)
         self._values = [p for p in self._values if p is not None]
-        self._values = [(v, b) for v, b in self._values if b is not None]
+        self._values = [(v, b) for v, b in self._values
+                        if b is not None and v is not None]
         dup = True
         while dup:
             dup = False
@@ -324,8 +332,13 @@ class Signal(BaseSignal):
 
     def approx_eq(self, other, epsilon=1e-6):
         sig_eq = super(Signal, self).approx_eq(other, epsilon)
-        mask_eq = self.mask is None or self.mask.approx_eq(other, epsilon)
-        return sig_eq and mask_eq
+        mask_eq = (self.mask is None and other.mask is None
+                   or self.mask.approx_eq(other.mask, epsilon))
+        # print('sig_eq  =', sig_eq)
+        # print('mask_eq =', mask_eq)
+        return (sig_eq
+                and (self.mask is None) is (other.mask is None)
+                and mask_eq)
 
     def to_domain(self, J):
         return super(Signal, self).to_domain(
@@ -378,13 +391,23 @@ class Signal(BaseSignal):
 
     def F(self, J):
         J = RIF(J)
+        if self.mask is None:
+            mask = None
+        else:
+            mask = self.mask.F(J)
         return Signal(inner_inverse_minkowski(self.domain, J),
-                      map(partial(shift_F, J), self.values))
+                      map(partial(shift_F, J), self.values),
+                      mask=mask)
 
     def G(self, J):
         J = RIF(J)
+        if self.mask is None:
+            mask = None
+        else:
+            mask = self.mask.G(J)
         return Signal(inner_inverse_minkowski(self.domain, J),
-                      map(partial(shift_G, J), self.values))
+                      map(partial(shift_G, J), self.values),
+                      mask=mask)
 
     def U(self, J, other):
         J = RIF(J)

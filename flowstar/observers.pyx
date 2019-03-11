@@ -17,47 +17,10 @@ from flowstar.interval cimport make_interval, interval_time_fn, interval_fn
 from flowstar.tribool cimport tribool, unknown
 from flowstar.tribool cimport and_ as tri_and
 from flowstar.reachability import Reach
+from flowstar.observable cimport observable
+
 
 __all__ = ('RestrictedObserver', 'PolyObserver')
-
-
-# Cannot return values using ctuples due to Cython bug
-# https://github.com/cython/cython/issues/1427
-cdef void observable(interval_time_fn & f_fn, interval_time_fn & f_prime_fn,
-                     Polynomial & f, TaylorModelVec & tmv,
-                     vector[Interval] & domain,
-                     int order, Interval & cutoff_threshold) nogil:
-    """Given a polynomial f and a vector field defined by a vector of Taylor
-    Models tmv (over a given domain), return a pair of polynomials
-    f, fprime in the variables of the Taylor model which give the values
-    of f and fprime.
-    
-    Returns its results via the references f_fn and fprime_fn.
-    """
-    cdef:
-        TaylorModel f1, f2
-        vector[Interval] space_domain
-        vector[int] varIDs
-        Interval R
-        Polynomial p, p_deriv
-
-    # Compose
-    f1 = compose(f, tmv, domain, order + 1, cutoff_threshold)
-
-    # Separate off space variables from time
-    for i in range(1, domain.size()):
-        varIDs.push_back(i)
-        space_domain.push_back(domain[i])
-
-    # Substitute domain variables
-    f1.substitute(f2, varIDs, space_domain)
-
-    p = f2.expansion + Polynomial(f2.remainder, 1)
-    p.derivative(p_deriv, 0)
-    p.ctrunc(R, domain, order)
-
-    (&f_fn)[0] = poly_time_fn(p + Polynomial(R, 1))
-    (&f_prime_fn)[0] = poly_time_fn(p_deriv)
 
 
 # noinspection PyUnreachableCode
@@ -125,12 +88,12 @@ cdef class RestrictedObserver(PolyObserver):
 
 
 cdef class PolyObserver:
-    def __init__(PolyObserver self, f, fprime, CReach reach,
+    def __init__(PolyObserver self, f, CReach reach,
                  bint symbolic_composition,
                  object mask=None):
         self.f = Poly(f)
-        self.fprime = Poly(fprime)
         self.reach = reach
+        self.fprime = self._fprime_given_f()
         self.symbolic_composition = symbolic_composition
         self.mask = mask
         self._init_stored_data()
@@ -689,3 +652,11 @@ cdef class PolyObserver:
                 if verbosity >= 3:
                     print("new root:\n[{}..{}]".format(root.inf(), root.sup()))
                 roots.push_back(root)
+
+    cdef Poly _fprime_given_f(PolyObserver self):
+        """Find the derivative of f by taking the LieDerivative given odes."""
+        cdef Polynomial fprime
+
+        self.f.c_poly.LieDerivative(fprime, (<CReach?>self.reach).odes)
+
+        return Poly.from_polynomial(fprime, self.f.vars)

@@ -5,10 +5,6 @@ from flowstar.interval cimport interval_fn, interval_time_fn
 
 from libcpp.vector cimport vector
 
-cdef (interval_time_fn, interval_time_fn) observable(
-    Polynomial & f, TaylorModelVec & tmv, vector[Interval] & domain,
-    int order, Interval & cutoff_threshold) nogil
-
 cdef TaylorModel compose(const Polynomial & P,
                          const TaylorModelVec tmv,
                          const vector[Interval] & domain,
@@ -64,7 +60,7 @@ cdef extern from * nogil:
 
 cdef class Poly:
     cdef Polynomial c_poly
-    cdef dict vars
+    cdef readonly dict vars
     cdef readonly bint explicit_time
 
     @staticmethod

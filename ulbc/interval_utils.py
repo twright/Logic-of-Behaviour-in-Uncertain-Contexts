@@ -3,10 +3,39 @@ from __future__ import absolute_import, division, print_function
 from builtins import *  # NOQA
 
 from functools import partial
+from sage.all import RIF
 
 
 __all__ = ('int_dist', 'finterval', 'intervals_approx_eq',
-           'fintervals', 'int_sorted')
+           'fintervals', 'int_sorted', 'inner_inverse_minkowski',
+           'inner_shift_back')
+
+
+def inner_inverse_minkowski(I, J):
+    # I - J, smallest possible answer
+    il, iu = RIF(I).edges()
+    jl, ju = RIF(J).edges()
+    kl = il - ju
+    ku = iu - jl
+    if kl.overlaps(ku):
+        return None
+    else:
+        return RIF(kl.upper('RNDU'), ku.lower('RNDD'))
+
+
+def inner_shift_back(K, J):
+    if J not in RIF:
+        J = RIF(J)
+    tl, tu = J.edges()
+    Ktl = inner_inverse_minkowski(K, tl)
+    Ktu = inner_inverse_minkowski(K, tu)
+
+    if Ktl is None or Ktu is None:
+        return None
+    elif Ktl.overlaps(Ktu):
+        return Ktl.intersection(Ktu)
+    else:
+        return None
 
 
 def finterval(I):

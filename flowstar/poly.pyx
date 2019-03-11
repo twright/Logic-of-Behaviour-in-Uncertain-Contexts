@@ -211,37 +211,7 @@ def do_compose_test():
     return "{} + {}".format(s, i)
 
 
-cdef (interval_time_fn, interval_time_fn) observable(
-        Polynomial & f, TaylorModelVec & tmv,
-        vector[Interval] & domain,
-        int order, Interval & cutoff_threshold) nogil:
-    cdef:
-        interval_fn f_fn
-        TaylorModel f1, f2
-        vector[Interval] space_domain
-        vector[int] varIDs
-        Polynomial p, p_deriv
-
-    # Compose
-    f1 = compose(f, tmv, domain, order, cutoff_threshold)
-
-    # Separate off space variables from time
-    for i in range(1, domain.size()):
-        varIDs.push_back(i)
-        space_domain.push_back(domain[i])
-
-    # Substitute domain variables
-    f1.substitute(f2, varIDs, space_domain)
-
-    # return poly_domain_time_fn(f1.expansion
-    #                                + Polynomial(f1.remainder, domain.size()),
-    #                            domain)
-    p = f2.expansion + Polynomial(f2.remainder, domain.size())
-    p.derivative(p_deriv, 0)
-
-    return (poly_time_fn(p), poly_time_fn(p_deriv))
-
-
+# noinspection PyUnreachableCode
 cdef class Poly:
     # Constructor makes a univariate monomial -- should combine using
     # arithmetic operations
@@ -251,6 +221,9 @@ cdef class Poly:
         #     ', '.join(map(str, args)),
         #     explicit_time
         # ))
+        cdef Poly other
+        # print(args)
+
         if len(args) == 4:
             # print("explicit")
             coeff, var_name, expn, vars = args
@@ -278,6 +251,11 @@ cdef class Poly:
             p = <Poly?>Poly.from_sage(args[0], explicit_time=explicit_time)
             self.vars = p.vars
             self.c_poly = p.c_poly
+        elif len(args) == 1 and isinstance(args[0], Poly):
+            # print("from Poly")
+            other = args[0]
+            self.vars = other.vars
+            self.c_poly = other.c_poly
         elif len(args) == 1:
             # print("from vars")
             vars, = args
@@ -393,10 +371,15 @@ cdef class Poly:
 
     def __repr__(self):
         cdef vector[string] var_names
-        for (name, _) in sorted(self.vars.iteritems(), key=(lambda x: x[1])):
+        # for (name, _) in sorted(self.vars.iteritems(), key=(lambda x: x[1])):
+        #     print("name =", name)
+        var_names.push_back('local_t')
+        for name in self.var_names:
             var_names.push_back(<string>name)
+        print('var_names =', var_names)
         cdef string res
         self.c_poly.toString(res, var_names)
+        print('res =', res)
         return str(res)
 
 

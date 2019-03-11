@@ -3,12 +3,10 @@ from __future__ import absolute_import, division, print_function
 from libc.string cimport strcpy
 from subprocess import call
 
-from flowstar.Polynomial cimport Polynomial
 from flowstar.Continuous cimport ContinuousReachability
 from flowstar.reachability cimport CReach
 from flowstar.poly cimport Poly
-from flowstar.poly import index_fn
-from flowstar.Interval cimport Interval
+import sage.all as sage
 
 
 cdef class FlowstarPlotMixin:
@@ -36,7 +34,8 @@ cdef class FlowstarPlotMixin:
         C.outputAxes.push_back(C.getIDForStateVar(x))
         C.outputAxes.push_back(C.getIDForStateVar(y))
 
-        with self.global_manager:  # Use class's version of flowstar global variables
+        # Use class's version of flowstar global variables
+        with self.global_manager:
             # We set projected to False since we use prepareForDumping
             # which does not project the flowpipes to the output
             # dimensions for us
@@ -59,6 +58,7 @@ cdef class FlowstarPlotMixin:
 cdef class SagePlotMixin:
     def sage_plot(self, poly, duration=None, double step=1e-2, **kwargs):
         from sage.all import plot
+        from flowstar.observers import PolyObserver
 
         # If passed a variable name as an argument, look it up from
         # the field's generators
@@ -66,6 +66,8 @@ cdef class SagePlotMixin:
             poly = Poly({str(g): g for g in self.R.gens()}[poly])
         else:
             poly = Poly(poly)
+
+        poly_observer = PolyObserver(poly, self, self.symbolic_composition)
 
         if duration is None:
             duration = (0, float((<CReach?>self).c_reach.time))
@@ -75,7 +77,7 @@ cdef class SagePlotMixin:
 
         def f(t):
             if t not in ress:
-                ress[t] = (<CReach?>self).eval_poly(poly, (t - step, t + step))
+                ress[t] = poly_observer(sage.RIF(t - step, t + step))
             return ress[t]
         def fl(t):
             return f(t).lower()
@@ -88,8 +90,7 @@ cdef class SagePlotMixin:
                     **kwargs)
 
     def sage_parametric_plot(self, str x, str y, double step=1e-2):
-        from sage.all import parametric_plot, RIF
-        from functools import partial
+        from sage.all import parametric_plot
 
         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
@@ -116,7 +117,8 @@ cdef class SagePlotMixin:
             try:
                 (lo, hi) = res[var_id].endpoints()
             except:
-                print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+                print("warning: eval failed for t in [{}, {}]".format(t,
+                                                                      t+step))
             p += line([(t, lo), (t+step, lo)])
             p += line([(t, lo1), (t, lo)])
             p += line([(t, hi), (t+step, hi)], color='#3bcc00')
@@ -126,14 +128,20 @@ cdef class SagePlotMixin:
 
         return p
 
-    def sage_interval_plot(self, str x, str y, double step=1e-1, poly = None, **kwargs):
+    def sage_interval_plot(self, str x, str y, double step=1e-1, poly = None,
+                           **kwargs):
         from sage.all import Graphics, polygon
+        from flowstar.observers import PolyObserver
 
         p = Graphics()
         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
         cdef double t = 0
         # cdef Interval pres
+        if poly is None:
+            p_observer = None
+        else:
+            p_observer = PolyObserver(poly, self, self.symbolic_composition)
 
         for i in range(int(self.time/step)):
             t = step*i
@@ -142,13 +150,14 @@ cdef class SagePlotMixin:
                 (xlo, xhi) = res[var_id_x].endpoints()
                 (ylo, yhi) = res[var_id_y].endpoints()
             except:
-                print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+                print("warning: eval failed for t in [{}, {}]".format(t,
+                                                                      t+step))
 
             # Choose colour based on p
             # col = 'default'
             col = kwargs.get('color', None)
             if poly is not None:
-                pres = self.eval_poly(Poly(poly), (t, t+step)) #index_fn(poly)(res)
+                pres = p_observer(sage.RIF(t, t+step))
                 if pres.lower() > 0:
                     col = 'green'
                 if pres.upper() < 0:
@@ -166,8 +175,11 @@ cdef class SageTubePlotMixin:
     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):
         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
 
-    def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False, straight=False, tight=False, boundaries=True, joins=True, **kwargs):
-        from sage.all import line, Graphics, RIF, sqrt, arctan, tan, cos, sin, arrow, point, pi, vector
+    def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False,
+                       straight=False, tight=False, boundaries=True,
+                       joins=True, **kwargs):
+        from sage.all import (line, Graphics, RIF, sqrt, arctan, tan, cos,
+                              sin, arrow, point, pi, vector)
 
         p = Graphics()
         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
@@ -188,7 +200,8 @@ cdef class SageTubePlotMixin:
                 Ix = RIF(res[var_id_x])
                 Iy = RIF(res[var_id_y])
             except:
-                print("warning: eval failed for t in [{}, {}]".format(t, t+step))
+                print("warning: eval failed for t in [{}, {}]".format(t,
+                                                                      t+step))
             cx00, cy00 = cx0, cy0
             cx0, cy0 = cx, cy
             tx0, ty0 = tx, ty
@@ -214,7 +227,8 @@ cdef class SageTubePlotMixin:
             elif tight:
                 # This finds where we hit the bounding box -- does not work
                 # well due to the edges interseTruecting
-                if abs(tan(theta)) < 100 and (rx0 < ry0 or abs(tan(theta)) < 0.01):
+                if abs(tan(theta)) < 100 and (rx0 < ry0 or
+                                              abs(tan(theta)) < 0.01):
                     print("A:", rx0, ry0, float(tan(theta)))
                     tx = rx0
                     ty = tx*tan(theta)
@@ -247,7 +261,8 @@ cdef class SageTubePlotMixin:
                 # parallel lines)
                 if boundaries:
                     if ( vector([tx0-tx, ty-ty0])*vector([tx-tx0, ty0-ty])
-                       > vector([tx0 + tx, -ty-ty0])*vector([-tx-tx0, ty+ty0])):
+                       > vector([tx0 + tx, -ty-ty0])
+                            *vector([-tx-tx0, ty+ty0]) ):
                         p += line([(cx00 - tx0, cy00 + ty0),
                                    (cx0 - tx, cy0 + ty)], **kwargs)
                         p += line([(cx00 + tx0, cy00 - ty0),

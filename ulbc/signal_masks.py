@@ -5,11 +5,12 @@ from __future__ import (absolute_import, division,
 from sage.all import RIF
 # import sage.all as sage
 
+from ulbc.interval_utils import inner_inverse_minkowski, inner_shift_back
 from ulbc.interval_signals import BaseSignal
 
 
 class Mask(BaseSignal):
-    def __init__(self, domain, values):
+    def __init__(self, domain, intervals):
         super(Mask, self).__init__(domain, values, expect_consistent=False)
         self._positive = [x for x, b in self._values if b]
         self._negative = [x for x, b in self._values if not b]
@@ -71,11 +72,37 @@ class Mask(BaseSignal):
         return Mask(self.domain + J,
                     [(I + J, b) for I, b in self.values])
 
-    def G(self, J):
+    def shift_back(self, J):
+        # NOTE: mask.shift_back(J) != mask.shift(-J)
+        # since the former inwards (conservatively representing where
+        # information has been requested) and the latter rounds outwards
+        # (liberally over-approximating where we are requesting information)
+        J = RIF(J)
+        return Mask(inner_shift_back(self.domain, J),
+                    [(inner_shift_back(I, J), b)
+                     for I, b in self.values])
+
+    def H(self, J):
+        """Historical analogue of G.
+
+        Within J ago, it was always the case that."""
         return self.shift(J)
+    G_inverse = H
+
+    def P(self, J):
+        """Historical analogue of F.
+
+        Within J ago, at some point it was the case that."""
+        return self.shift(J)
+    F_inverse = P
+
+    def G(self, J):
+        """Translate a mask back for G."""
+        return self.shift_back(J)
 
     def F(self, J):
-        return self.shift(J)
+        """Translate a mask back for F."""
+        return self.shift_back(J)
 
 
 mask_zero = Mask(RIF(0), [(RIF(0), True), (RIF(0), False)])

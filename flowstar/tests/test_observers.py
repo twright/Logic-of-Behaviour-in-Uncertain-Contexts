@@ -21,44 +21,47 @@ def mask1():
 @pytest.fixture
 def observer_masked(ringxy, reach, odes, mask1):
     _, (x, y) = ringxy
-    poly = Atomic(x)
-    return PolyObserver(poly.p, poly.dpdt(odes), reach, False, mask=mask1)
+    return PolyObserver(x, reach, False, mask=mask1)
 
 
 @pytest.fixture
 def observer_masked_sym(ringxy, reach, odes, mask1):
     _, (x, y) = ringxy
-    poly = Atomic(x)
-    return PolyObserver(poly.p, poly.dpdt(odes), reach, True, mask=mask1)
+    return PolyObserver(x, reach, True, mask=mask1)
 
 
 
 @pytest.fixture
 def observer(ringxy, reach, odes):
     _, (x, y) = ringxy
-    poly = Atomic(x)
-    return PolyObserver(poly.p, poly.dpdt(odes), reach, False)
+    return PolyObserver(x, reach, False)
 
 
 @pytest.fixture
 def observer_y(ringxy, reach, odes):
     _, (x, y) = ringxy
-    poly = Atomic(y)
-    return PolyObserver(poly.p, poly.dpdt(odes), reach, False)
+    return PolyObserver(y, reach, False)
 
 
 @pytest.fixture
 def observer_sym(ringxy, reach, odes):
     _, (x, y) = ringxy
-    poly = Atomic(x)
-    return PolyObserver(poly.p, poly.dpdt(odes), reach, True)
+    return PolyObserver(x, reach, True)
 
 
 @pytest.fixture
 def observer_sym_y(ringxy, reach, odes):
     _, (x, y) = ringxy
-    poly = Atomic(y)
-    return PolyObserver(poly.p, poly.dpdt(odes), reach, True)
+    return PolyObserver(y, reach, True)
+
+
+class TestPolyObserver(object):
+    def test_construct_with_implicit_derivative(self, observer):
+        assert observer.f.var_names == ["x", 'y']
+        assert repr(observer.f) == '(([1.0000000000 , 1.0000000000] * x))'
+        assert observer.fprime.var_names == ["x", 'y']
+        assert (repr(observer.fprime)
+                == '(([-1.0000000000 , -1.0000000000] * y))')
 
 
 class TestPolyObserverMask(object):
@@ -238,7 +241,7 @@ class TestPolyObserverEval(object):
     def test_xy_squared_call(self, ringxy, odes, reach):  # NOQA
         _, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
-        observer = PolyObserver(poly.p, poly.dpdt(odes), reach, False)
+        observer = PolyObserver(poly.p, reach, False)
         img = observer(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
@@ -247,7 +250,7 @@ class TestPolyObserverEval(object):
     def test_xy_squared_call_symbolic(self, ringxy, odes, reach):  # NOQA
         _, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
-        observer = PolyObserver(poly.p, poly.dpdt(odes), reach, True)
+        observer = PolyObserver(poly.p, reach, True)
         img = observer(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
@@ -264,7 +267,7 @@ class TestPolyObserverBoolEval(object):
     def test_minus_x_call(self, ringxy, odes, reach):  # NOQA
         _, (x, y) = ringxy
         poly = Atomic(-x)
-        observer = PolyObserver(poly.p, poly.dpdt(odes), reach, False)
+        observer = PolyObserver(poly.p, reach, False)
         res = observer.check(RIF(1, 2))
         assert res is True
 

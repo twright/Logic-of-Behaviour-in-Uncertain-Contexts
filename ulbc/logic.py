@@ -9,11 +9,10 @@ from collections import OrderedDict
 from functools import partial
 
 import sage.all as sage
-import sympy
-from builtins import *  # NOQA
+from sage.all import RIF
+from builtins import *
 from flowstar.poly import Poly
 from flowstar.reachability import Reach, FlowstarFailedException
-from sage.all import RIF
 
 from flowstar.observers import PolyObserver, RestrictedObserver
 from ulbc.context_signals import (ContextSignal,
@@ -22,36 +21,7 @@ from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer)
 from ulbc.interval_utils import finterval
 from ulbc.signal_masks import Mask, mask_zero
-
-
-def convert_mat(m):
-    return sympy.Matrix([[sage.SR(e)._sympy_() for e in r]
-                         for r in m.rows()])
-
-
-def convert_vec(v):
-    return [sage.SR(e)._sympy_() for e in v]
-
-
-def vec_to_numpy(R, v):
-    t_ = sympy.var('t_')
-    return sympy.lambdify((t_, convert_vec(R.gens())),
-                          convert_vec(v),
-                          modules='numpy')
-
-
-def mat_to_numpy(R, m):
-    t_ = sympy.var('t_')
-    return sympy.lambdify((t_, convert_vec(R.gens())),
-                          convert_mat(m),
-                          modules='numpy')
-
-
-def poly_to_numpy(R, p):
-    t_ = sympy.var('t_')
-    return sympy.lambdify((t_, convert_vec(R.gens())),
-                          sage.SR(p)._sympy_(),
-                          modules='numpy')
+from ulbc.matricies import *
 
 
 class Logic(object):
@@ -232,7 +202,7 @@ class Atomic(Logic):
     duration = 0
 
     def __init__(self, p):
-        super().__init__(p.parent())
+        super(Atomic, self).__init__(p.parent())
         self._p = p
 
     @property
@@ -285,10 +255,12 @@ class Atomic(Logic):
 
     def signal(self, R, odes, space_domain=None, mask=None, **kwargs):
         if isinstance(R, PolyObserver):
+            # TODO: attach the mask in this case
             observer = R
         else:
-            observer = PolyObserver(self.p, self.dpdt(odes), R,
-                                    kwargs.get('symbolic_composition', False))
+            observer = PolyObserver(self.p, R,
+                                    kwargs.get('symbolic_composition', False),
+                                    mask=mask)
 
         if space_domain is not None:
             observer = RestrictedObserver(observer, space_domain)
@@ -313,7 +285,7 @@ class Atomic(Logic):
         if isinstance(reach, PolyObserver):
             observer = reach
         else:
-            observer = PolyObserver(self.p, self.dpdt(odes), reach,
+            observer = PolyObserver(self.p, reach,
                                     kwargs.get('symbolic_composition', False))
 
         return ContextSignal(domain, initials,
@@ -345,7 +317,7 @@ class Atomic(Logic):
 
 
 class And(Logic):
-    '''
+    """
     >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> And([Atomic(x**2 + 1), Atomic(y**3 - 2)])
     And([Atomic(x^2 + 1), Atomic(y^3 - 2)])
@@ -363,7 +335,7 @@ class And(Logic):
     x^2 + 1 > 0 & (y^3 - 2 > 0 | x*y - 3 > 0)
     >>> And([Atomic(x**2 + 1), Atomic(y**3 - 2)]).duration
     0
-    '''
+    """
     _priority = 20
 
     def __init__(self, *terms):
@@ -380,7 +352,7 @@ class And(Logic):
                 self._terms.append(term)
 
         if len(self._terms) > 0:
-            super().__init__(self._terms[0].R)
+            super(And, self).__init__(self._terms[0].R)
 
     @property
     def terms(self):
@@ -430,7 +402,7 @@ class And(Logic):
 
 
 class Or(Logic):
-    '''
+    """
     >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> Or([Atomic(x**2 + 1), Atomic(y**3 - 2)])
     Or([Atomic(x^2 + 1), Atomic(y^3 - 2)])
@@ -446,7 +418,7 @@ class Or(Logic):
     Or([Atomic(x^2 + 1), And([Atomic(y^3 - 2), Atomic(x*y - 3)])])
     >>> Or([Atomic(x**2 + 1), Atomic(y**3 - 2)]).duration
     0
-    '''
+    """
     _priority = 30
 
     def __init__(self, *terms):
@@ -513,7 +485,7 @@ class Or(Logic):
 
 
 class Neg(Logic):
-    '''
+    """
     >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> Neg(Atomic(x**3 - 2))
     Neg(Atomic(x^3 - 2))
@@ -529,7 +501,7 @@ class Neg(Logic):
     ~(x^3 - 2 > 0)
     >>> Neg(Atomic(x**2 + 1)).duration
     0
-    '''
+    """
     priority = 7
 
     def __init__(self, p):
@@ -624,7 +596,7 @@ class Context(Logic):
         return sig(0)
 
     def context_jump(self, zs):
-        '''
+        """
         >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
         >>> [y.str(style='brackets') for y in
         ...     ({x: RIF(0.1,0.5)} >> Atomic(x)
@@ -632,12 +604,12 @@ class Context(Logic):
         ... ]  # doctest: +NORMALIZE_WHITESPACE
         ['[3.0999999999999996 .. 4.5000000000000000]',
          '[4.0000000000000000 .. 5.0000000000000000]']
-        '''
+        """
         return [z + self.ctx.get(k, 0.0) for k, z in zip(self.R.gens(), zs)]
 
 
 class C(Context):
-    '''
+    """
     Spacial context operator.
 
     >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
@@ -661,7 +633,7 @@ class C(Context):
     0
     >>> ({x: RIF(1,2), y: RIF(3,4)} >> G(RIF(3,4), Atomic(x**3 - 2))).duration
     0
-    '''
+    """
 
     def __repr__(self):
         return 'C({}, {})'.format(self.ctx_str(), repr(self.phi))
@@ -701,7 +673,7 @@ class C(Context):
 
 
 class D(Context):
-    '''
+    """
     Differential context spatial operator.
 
     >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
@@ -725,7 +697,7 @@ class D(Context):
     0
     >>> ({x: RIF(1,2), y: RIF(3,4)} >> G(RIF(3,4), Atomic(x**3 - 2))).duration
     0
-    '''
+    """
 
     def __repr__(self):
         return 'D({}, {})'.format(self.ctx_str(), repr(self.phi))
@@ -768,7 +740,7 @@ class D(Context):
 
 
 class G(Logic):
-    '''
+    """
     >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> print(repr(G(RIF(1, 2), Atomic(x**3 - 2))))
     G([1 .. 2], Atomic(x^3 - 2))
@@ -778,7 +750,7 @@ class G(Logic):
     2.00000000000000
     >>> G(RIF(1, 2), F(RIF(3,5), Atomic(x**3 - 2))).duration
     7.00000000000000
-    '''
+    """
     priority = 5
 
     def __init__(self, I, phi):
@@ -804,8 +776,12 @@ class G(Logic):
     def __str__(self):
         return 'G({}, {})'.format(finterval(self.interval), str(self.phi))
 
-    def signal(self, reach, odes, **kwargs):
-        return self.phi.signal(reach, odes, **kwargs).G(self.interval)
+    def signal(self, reach, odes, mask=None, **kwargs):
+        print("In G.signal")
+        if mask is not None:
+            mask = mask.H(self.interval)
+        return self.phi.signal(reach, odes, mask=mask, **kwargs).G(
+            self.interval)
 
     def context_signal(self, reach, odes, initials, **kwargs):
         return self.phi.context_signal(reach, odes, initials,
@@ -820,7 +796,7 @@ class G(Logic):
 
 
 class F(Logic):
-    '''
+    """
     >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
     >>> print(repr(G(RIF(1, 2), Atomic(x**3 - 2))))
     G([1 .. 2], Atomic(x^3 - 2))
@@ -828,7 +804,7 @@ class F(Logic):
     G([1 .. 2], x^3 - 2 > 0)
     >>> F(RIF(1, 2), Atomic(x**3 - 2)).duration
     2.00000000000000
-    '''
+    """
     priority = 5
 
     def __init__(self, I, phi):
@@ -854,8 +830,11 @@ class F(Logic):
     def __str__(self):
         return 'F({}, {})'.format(finterval(self.interval), str(self.phi))
 
-    def signal(self, reach, odes, **kwargs):
-        return self.phi.signal(reach, odes, **kwargs).F(self.interval)
+    def signal(self, reach, odes, mask=None, **kwargs):
+        if mask is not None:
+            mask = mask.H(self.interval)
+        return self.phi.signal(reach, odes, mask=mask, **kwargs).F(
+            self.interval)
 
     def context_signal(self, reach, odes, initials, **kwargs):
         return self.phi.context_signal(reach, odes, initials,

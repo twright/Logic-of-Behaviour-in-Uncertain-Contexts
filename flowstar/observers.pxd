@@ -1,6 +1,5 @@
 from flowstar.Interval cimport Interval
 from flowstar.TaylorModel cimport TaylorModelVec
-from flowstar.Polynomial cimport Polynomial
 from flowstar.cppstd cimport optional
 from flowstar.interval cimport interval_time_fn
 from flowstar.poly cimport Poly
@@ -11,16 +10,10 @@ from libcpp.vector cimport vector
 from flowstar.tribool cimport tribool
 
 
-cdef void observable(interval_time_fn & f_fn, interval_time_fn & f_prime_fn,
-                     Polynomial & f, TaylorModelVec & tmv,
-                     vector[Interval] & domain,
-                     int order, Interval & cutoff_threshold) nogil
-
-
 cdef class PolyObserver:
     cdef CReach reach
-    cdef Poly f
-    cdef Poly fprime
+    cdef readonly Poly f
+    cdef readonly Poly fprime
     cdef vector[optional[interval_time_fn]] poly_f_fns
     cdef vector[optional[interval_time_fn]] poly_fprime_fns
     cdef vector[optional[bint]] bools
@@ -66,6 +59,7 @@ cdef class PolyObserver:
                                TaylorModelVec & tmv,
                                vector[Interval] * loop_domain)
     cdef optional[vector[Interval]] _global_domain(self)
+    cdef Poly _fprime_given_f(PolyObserver self)
 
 
 cdef class RestrictedObserver(PolyObserver):

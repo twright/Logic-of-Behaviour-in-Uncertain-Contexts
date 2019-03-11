@@ -65,6 +65,16 @@ extensions = [
         include_dirs=LIB_DIRS,
     ),
     Extension(
+        name='flowstar.observable',
+        sources=['flowstar/observable.pyx'],
+        language='c++',
+        libraries=LIBS,
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+    ),
+    Extension(
         name='flowstar.reachability',
         sources=['flowstar/reachability.pyx'],
         language='c++',

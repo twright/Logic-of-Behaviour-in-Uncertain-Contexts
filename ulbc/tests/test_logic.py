@@ -3,10 +3,11 @@ from __future__ import print_function, division
 import pytest
 import sage.all as sage
 from sage.all import RIF
-from builtins import *  # NOQA
+from builtins import *
 
 from ulbc import Atomic, Signal, G, F, U
 from ulbc.tests.test_context_signals import space_domain_approx_eq
+from ulbc.signal_masks import Mask, mask_zero
 
 
 @pytest.fixture(scope='module')
@@ -16,13 +17,41 @@ def ringxy():
 
 @pytest.fixture(scope='module')
 def odes(ringxy):
-    R, (x, y) = ringxy
+    _, (x, y) = ringxy
     return [-y, x]
 
 
 @pytest.fixture(scope='module')
+def atomic_x(ringxy):
+    _, (x, y) = ringxy
+    return Atomic(x)
+
+
+@pytest.fixture(scope='module')
+def atomic_p(ringxy):
+    _, (x, y) = ringxy
+    return Atomic(x - 3)
+
+
+@pytest.fixture(scope='module')
+def atomic_q(ringxy):
+    _, (x, y) = ringxy
+    return Atomic(3 - y)
+
+
+@pytest.fixture(scope='module')
+def initials():
+    return [RIF(1, 2), RIF(3, 4)]
+
+
+@pytest.fixture(scope='module')
+def initials2():
+    return [RIF(4, 5), RIF(1, 2)]
+
+
+@pytest.fixture(scope='module')
 def odes_whelks(ringxy):
-    R, (x, y) = ringxy
+    _, (x, y) = ringxy
     k = RIF(0.8)
     b = RIF(0.6)
     c = RIF(0.3)
@@ -31,36 +60,68 @@ def odes_whelks(ringxy):
     return [b*x*(RIF(1)-x) - c*x*(k-x)*y, -e*y*(RIF(1)+y)+f*x*(k-x)*y]
 
 
-def test_atomic(ringxy, odes):
-    R, (x, y) = ringxy
-    initials = [RIF(1, 2), RIF(3, 4)]
+def test_atomic(atomic_x, odes, initials):
     expected = Signal(RIF(0, 5),
                       [(RIF(0.00000000000000000, 0.23975290341611911), True),
                        (RIF(0.60634820757971108, 3.3820262152396059), False),
                        (RIF(3.7398418173331680, 5.0000000000000000), True)])
-    assert Atomic(x).signal_for_system(odes, initials, 5).approx_eq(expected,
-                                                                    0.1)
+    assert atomic_x.signal_for_system(odes, initials, 5).approx_eq(expected,
+                                                                   0.1)
 
 
-def test_context_trivial(ringxy, odes):
-    R, (x, y) = ringxy
-    P = {x: RIF(-0.5, 0.5), y: RIF(-0.5, 0.5)} >> Atomic(x)
-    res1 = P.signal_for_system(odes, [RIF(1.5), RIF(3.5)], 5,
+def test_context_trivial(ringxy, atomic_x, odes):
+    _, (x, y) = ringxy
+    prop = {x: RIF(-0.5, 0.5), y: RIF(-0.5, 0.5)} >> Atomic(x)
+    res1 = prop.signal_for_system(odes, [RIF(1.5), RIF(3.5)], 5,
                                epsilon_ctx=0.1)
-    res2 = Atomic(x).signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 5)
+    res2 = atomic_x.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 5)
     assert res1.approx_eq(res2, 0.5)
 
 
+@pytest.mark.slow
 def test_context_with_jump(ringxy, odes):
-    R, (x, y) = ringxy
-    P = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
-    res = P.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
-                              epsilon_ctx=0.1)
+    _, (x, y) = ringxy
+    prop = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
+    res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
+                                 epsilon_ctx=0.1)
     expected = Signal(
         RIF(0.00000000000000000, 6.2831853071795872),
         [(RIF(0.29457118627404310, 2.8475214673157501), False),
          (RIF(3.4366638398638365, 5.9896141209055438), True)])
     assert res.approx_eq(expected, 0.1)
+
+
+class TestMasks(object):
+    def test_standard_mask(self, atomic_p, odes, initials2):
+        mask = Mask(RIF(0, 2*sage.pi), [(RIF(0, 2*sage.pi), True),
+                                        (RIF(0, 2*sage.pi), False)])
+        sig = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                         use_masks=True)
+        assert sig.mask.approx_eq(mask)
+
+    def test_no_mask(self, atomic_p, odes, initials2):
+        sig = atomic_p.signal_for_system(odes, initials2, 2*sage.pi)
+        assert sig.mask is None
+
+    def test_point_mask(self, atomic_p, odes, initials2):
+        sig = atomic_p.signal_for_system(odes, initials2, 0, use_masks=True)
+        assert sig.mask.approx_eq(mask_zero)
+        print("sig =", sig)
+        assert sig(0) is True
+
+    def test_G_point_shift(self, atomic_p, odes, initials2):
+        prop = G(RIF(sage.pi/2, sage.pi/2), atomic_p)
+        sig = prop.signal_for_system(odes, initials2, 0, use_masks=True)
+        assert sig.mask.approx_eq(mask_zero)
+        print("sig =", sig)
+        assert sig(0) is False
+
+    def test_F_point_shift(self, atomic_p, odes, initials2):
+        prop = F(RIF(sage.pi/2, sage.pi/2), atomic_p)
+        sig = prop.signal_for_system(odes, initials2, 0, use_masks=True)
+        assert sig.mask.approx_eq(mask_zero)
+        print("sig =", sig)
+        assert sig(0) is False
 
 
 class TestU(object):
