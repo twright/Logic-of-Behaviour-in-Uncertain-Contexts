@@ -5,7 +5,7 @@ import sage.all as sage
 from sage.all import RIF
 from builtins import *
 
-from ulbc import Atomic, Signal, G, F, U
+from ulbc import Atomic, Signal, G, F, U, And, Or
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
 
@@ -93,8 +93,7 @@ def test_context_with_jump(ringxy, odes):
 
 class TestMasks(object):
     def test_standard_mask(self, atomic_p, odes, initials2):
-        mask = Mask(RIF(0, 2*sage.pi), [(RIF(0, 2*sage.pi), True),
-                                        (RIF(0, 2*sage.pi), False)])
+        mask = Mask(RIF(0, 2*sage.pi), [RIF(0, 2*sage.pi)])
         sig = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
                                          use_masks=True)
         assert sig.mask.approx_eq(mask)
@@ -122,6 +121,54 @@ class TestMasks(object):
         assert sig.mask.approx_eq(mask_zero)
         print("sig =", sig)
         assert sig(0) is False
+
+    def test_and_unary_point(self, atomic_p, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        propb = And(atomic_p)
+        sigb = propb.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True)
+        assert sigb.mask is not None
+        assert sigb.mask.approx_eq(siga.mask)
+
+    def test_and_binary_point(self, atomic_p, atomic_q, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        sigb = atomic_q.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        propc = atomic_p & atomic_q
+        sigc = propc.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True)
+        assert sigc.mask is not None
+        assert sigc.mask.approx_eq(Mask(RIF(0, 2*sage.pi),
+                                        [RIF(0, 2*sage.pi)]))
+        print(sigc)
+        print(siga & sigb)
+        assert sigc.approx_eq(siga & sigb)
+
+    def test_or_unary_point(self, atomic_p, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        propb = Or(atomic_p)
+        sigb = propb.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True)
+        assert sigb.mask is not None
+        assert sigb.mask.approx_eq(siga.mask)
+
+    def test_or_binary_point(self, atomic_p, atomic_q, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        sigb = atomic_q.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        propc = atomic_p | atomic_q
+        sigc = propc.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True)
+        assert sigc.mask is not None
+        assert sigc.mask.approx_eq(Mask(RIF(0, 2*sage.pi),
+                                        [RIF(0, 2*sage.pi)]))
+        print(sigc)
+        print(siga | sigb)
+        assert sigc.approx_eq(siga | sigb)
 
 
 class TestU(object):

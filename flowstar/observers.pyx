@@ -492,7 +492,10 @@ cdef class PolyObserver:
 
         ### Increment time and loop iters
         if i > 0:
-            (&t)[0] += t0.sup()
+            # We should reset by absolute interval width, disregarding any
+            # mask effects, since this is the effect of iterating along
+            # the taylor model segments
+            (&t)[0] += t00.sup()
             # Pad lower endpoint to take into account numerical error in
             # endpoints
             (&t)[0] += Interval(-1e-53, 0)

@@ -234,28 +234,13 @@ class BaseSignal(object):
     def intersection(self, other, **kwargs):
         assert self.domain.overlaps(other.domain)
 
-        def ointersect(x, y):
-            return x.intersection(y)
-
-        # print(self.values)
-        # print(other.values)
         domain = self.domain.intersection(other.domain)
-        # for I, b in self.values:
-        #     for J, c in other.values:
-        #         if b is c:
-        #             print(b, c)
-        #             print(I, J)
-        #             print(b is c)
-        #             print(I.overlaps(J))
-        # print('---')
         values = itertools.chain.from_iterable(
             ((I.intersection(J), b)
              for J, c in other.values
              if (b is c) and I.overlaps(J))
             for I, b in self.values
         )
-        # from ulbc.context_signals import finterval
-        # print('values =', [(finterval(I), b) for I, b in values])
         return self.__class__(domain, values, **kwargs)
 
     def __invert__(self):
@@ -285,6 +270,10 @@ def interval_complements(I, J):
         yield RIF(ju, iu)
 
 
+def _sig_intersect(x, y):
+    return x.intersection(y)
+
+
 class Signal(BaseSignal):
     def __init__(self, domain, values, mask=None):
         super(Signal, self).__init__(domain, values)
@@ -295,33 +284,31 @@ class Signal(BaseSignal):
         else:
             self._mask = mask.to_domain(self.domain)
 
-    def to_mask(self):
+    def to_mask_and(self):
         from ulbc.signal_masks import Mask
 
-        def ointersect(x, y):
-            return x.intersection(y)
-
-        pos_masks = [
+        masks = (
             Mask(self.domain,
-                 [(K, b) for K in interval_complements(self.domain, J)])
-            for J, b in self.values if b is True
-        ]
-        pos_mask = (reduce(ointersect, pos_masks)
-                    if pos_masks else Mask(self.domain, []))
-        neg_masks = [
-            Mask(self.domain,
-                 [(K, b) for K in interval_complements(self.domain, J)])
+                 [K for K in interval_complements(self.domain, J)])
             for J, b in self.values if b is False
-        ]
-        neg_mask = (reduce(ointersect, neg_masks)
-                    if neg_masks else Mask(self.domain, []))
+        )
+        base_mask = (self.mask
+                     if self.mask is not None
+                     else Mask(self.domain, [self.domain]))
+        return reduce(_sig_intersect, masks, base_mask)
 
-        # print('masks =', masks)
+    def to_mask_or(self):
+        from ulbc.signal_masks import Mask
 
-        return pos_mask.union(neg_mask)
-
-    def to_neg_mask(self):
-        return ~self.to_mask()
+        masks = (
+            Mask(self.domain,
+                 [K for K in interval_complements(self.domain, J)])
+            for J, b in self.values if b is True
+        )
+        base_mask = (self.mask
+                     if self.mask is not None
+                     else Mask(self.domain, [self.domain]))
+        return reduce(_sig_intersect, masks, base_mask)
 
     def with_mask(self, mask):
         return Signal(self.domain, self.values, mask=mask)
@@ -384,7 +371,11 @@ class Signal(BaseSignal):
               + [(y, False)
                  for y, by in ys if not by
                  and not any(x.overlaps(y) for x, bx in xs if not bx)])
-        return Signal(self.domain.intersection(other.domain), zs)
+        if self.mask is None or other.mask is None:
+            mask = None
+        else:
+            mask = self.mask.union(other.mask)
+        return Signal(self.domain.intersection(other.domain), zs, mask=mask)
 
     def __or__(self, other):
         return ~((~self) & (~other))

@@ -62,7 +62,7 @@ class Logic(object):
         # Decide on an initial mask.
         if mask is None and use_masks:
             domain = RIF(0, duration)
-            mask = Mask(domain, [(domain, True), (domain, False)])
+            mask = Mask(domain, [domain])
         elif not use_masks:
             mask = None
 
@@ -369,11 +369,12 @@ class And(Logic):
     def duration(self):
         return max(t.duration for t in self.terms)
 
-    def signal(self, reach, odes, **kwargs):
-        return reduce(operator.and_,
-                      (t.signal(reach, odes, **kwargs)
-                       for t in self.terms),
-                      true_signal(RIF(0, reach.time)))
+    def signal(self, reach, odes, mask=None, **kwargs):
+        sig = true_signal(RIF(0, reach.time), mask)
+        for t in self.terms:
+            sig_mask = sig.to_mask_and() if mask is not None else None
+            sig &= t.signal(reach, odes, mask=sig_mask, **kwargs)
+        return sig
 
     def context_signal(self, reach, odes, initials, **kwargs):
         true_ctx_sig = true_context_signal(
@@ -458,11 +459,12 @@ class Or(Logic):
     def __str__(self):
         return ' | '.join(t.bstr(self.priority) for t in self.terms)
 
-    def signal(self, reach, odes, **kwargs):
-        return reduce(operator.or_,
-                      (t.signal(reach, odes, **kwargs)
-                       for t in self.terms),
-                      false_signal(RIF(0, reach.time)))
+    def signal(self, reach, odes, mask=None, **kwargs):
+        sig = false_signal(RIF(0, reach.time), mask)
+        for t in self.terms:
+            sig_mask = sig.to_mask_or() if mask is not None else None
+            sig |= t.signal(reach, odes, mask=sig_mask, **kwargs)
+        return sig
 
     def context_signal(self, reach, odes, initials, **kwargs):
         false_ctx_sig = false_context_signal(

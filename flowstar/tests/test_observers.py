@@ -15,7 +15,7 @@ from flowstar.tests.test_reachability import ringxy, odes, reach, initials
 @pytest.fixture
 def mask1():
     return Mask(RIF(0, 2 * sage.pi),
-                [(RIF(0.15, 0.4), True)])
+                [RIF(0.15, 0.4)])
 
 
 @pytest.fixture

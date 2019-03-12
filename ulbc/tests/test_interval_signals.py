@@ -17,13 +17,18 @@ def sig2():
 
 
 @pytest.fixture
+def sig3():
+    return Signal(RIF(0, 5), [(RIF(2, 4), False)])
+
+
+@pytest.fixture
 def mask1():
-    return Mask(RIF(0, 5), [(RIF(1, 4), True), (RIF(2, 4.5), False)])
+    return Mask(RIF(0, 5), [RIF(1, 4)])
 
 
 @pytest.fixture
 def mask2():
-    return Mask(RIF(0, 5), [(RIF(2, 5), True)])
+    return Mask(RIF(0, 5), [RIF(1.5, 5)])
 
 
 @pytest.fixture
@@ -35,7 +40,9 @@ def masked_sig1(mask1):
 @pytest.fixture
 def sig1_mask2(mask2):
     return Signal(RIF(0, 5),
-                  [(RIF(1, 2), True), (RIF(3, 4), False), (RIF(4.5, 5), True)],
+                  [(RIF(1.5, 2), True),
+                   (RIF(3, 4),   False),
+                   (RIF(4.5, 5), True)],
                   mask=mask2)
 
 
@@ -98,17 +105,39 @@ class TestIntervalComplements(object):
 
 class TestSignalMasks(object):
 
-    def test_simple_signal_to_mask(self, sig2):
-        mask = Mask(RIF(0, 5),
-                    [(RIF(0, 1), True), (RIF(3, 5), True)])
-        print(sig2.to_mask())
-        assert sig2.to_mask().approx_eq(mask)
+    def test_simple_signal_or_mask(self, sig2):
+        mask = Mask(RIF(0, 5), [RIF(0, 1), RIF(3, 5)])
+        print(sig2.to_mask_or())
+        assert sig2.to_mask_or().approx_eq(mask)
 
-    def test_signal_to_mask(self, sig1):
-        mask = Mask(RIF(0, 5),
-                    [(RIF(2, 5), True), (RIF(0, 3), False)])
-        print(sig1.to_mask())
-        assert sig1.to_mask().approx_eq(mask)
+    def test_signal_or_mask(self, sig1):
+        mask = Mask(RIF(0, 5), [RIF(2, 5)])
+        print(sig1.to_mask_or())
+        assert sig1.to_mask_or().approx_eq(mask)
+        
+    def test_simple_signal_or_mask_relative(self, sig2):
+        mask = Mask(RIF(0, 5), [RIF(0.5, 1), RIF(1.5, 4.5)])
+        expected_mask = Mask(RIF(0, 5),
+                             [RIF(0.5, 1), RIF(3, 4.5)])
+        print(sig2.with_mask(mask).to_mask_or())
+        assert sig2.with_mask(mask).to_mask_or().approx_eq(expected_mask)
+
+    def test_simple_signal_and_mask(self, sig3):
+        mask = Mask(RIF(0, 5), [RIF(0, 2), RIF(4, 5)])
+        print(sig3.to_mask_and())
+        assert sig3.to_mask_and().approx_eq(mask)
+
+    def test_signal_and_mask(self, sig1):
+        mask = Mask(RIF(0, 5), [RIF(0, 3)])
+        print(sig1.to_mask_and())
+        assert sig1.to_mask_and().approx_eq(mask)
+
+    def test_simple_signal_and_mask_relative(self, sig3):
+        mask = Mask(RIF(0, 5), [RIF(0.5, 1), RIF(1.5, 4.5)])
+        expected_mask = Mask(RIF(0, 5),
+                             [RIF(0.5, 1), RIF(1.5, 2), RIF(4, 4.5)])
+        print(sig3.with_mask(mask).to_mask_and())
+        assert sig3.with_mask(mask).to_mask_and().approx_eq(expected_mask)
 
     def test_to_domain_mask(self, mask1, masked_sig1):
         sig = masked_sig1.to_domain(RIF(1, 3))
@@ -117,8 +146,9 @@ class TestSignalMasks(object):
 
     def test_G_mask(self, mask1, masked_sig1):
         sig_G = masked_sig1.G(RIF(0.5, 1)).to_domain(RIF(0, 4.5))
-        mask_shifted = Mask(RIF(0, 4.5),
-                            [(RIF(0.5, 3), True), (RIF(1.5, 3.5), False)])
+        mask_shifted = Mask(RIF(0, 4.5), [RIF(0.5, 3)])
+        print(mask_shifted.H(RIF(0.5, 1)).to_domain(RIF(0, 5)))
+        print(mask1)
         assert mask_shifted.H(RIF(0.5, 1)).to_domain(RIF(0, 5)).approx_eq(
             mask1)
         expected_sig = Signal(RIF(0, 4.5),
@@ -130,8 +160,7 @@ class TestSignalMasks(object):
 
     def test_F_mask(self, mask1, masked_sig1):
         sig_F = masked_sig1.F(RIF(0.5, 1)).to_domain(RIF(0, 4.5))
-        mask_shifted = Mask(RIF(0, 4.5),
-                            [(RIF(0.5, 3), True), (RIF(1.5, 3.5), False)])
+        mask_shifted = Mask(RIF(0, 4.5), [RIF(0.5, 3)])
         assert mask_shifted.P(RIF(0.5, 1)).to_domain(RIF(0, 5)).approx_eq(
             mask1)
         expected_sig = Signal(RIF(0, 4.5),
@@ -145,5 +174,16 @@ class TestSignalMasks(object):
     def test_and_masks(self, mask1, mask2, masked_sig1, sig1_mask2):
         sig = masked_sig1 & sig1_mask2
         mask = mask1 & mask2
-        assert sig1.mask is not None
-        assert sig1.mask.approx_eq(mask)
+        assert sig.mask is not None
+        assert sig.mask.approx_eq(mask)
+
+    def test_and_masks(self, mask1, mask2, masked_sig1, sig1_mask2):
+        sig = masked_sig1 | sig1_mask2
+        mask = mask1 | mask2
+        assert sig.mask is not None
+        assert sig.mask.approx_eq(mask)
+
+    def test_neg_masks(self, mask1, masked_sig1):
+        sig = ~masked_sig1
+        assert sig.mask is not None
+        assert sig.mask.approx_eq(mask1)

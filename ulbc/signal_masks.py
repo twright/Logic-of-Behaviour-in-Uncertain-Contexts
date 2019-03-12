@@ -11,43 +11,18 @@ from ulbc.interval_signals import BaseSignal
 
 class Mask(BaseSignal):
     def __init__(self, domain, intervals):
-        super(Mask, self).__init__(domain, values, expect_consistent=False)
-        self._positive = [x for x, b in self._values if b]
-        self._negative = [x for x, b in self._values if not b]
-        # self._positive = positive
-        # for p in positive:
-        #     overlaps = sorted(
-        #         [(i, q) for i, q in enumerate(self._positive)
-        #          if q.overlaps(p)],
-        #         key=lambda (k, v): (-k, v.endpoints()),
-        #     )
-        #     if len(overlaps) == 0:
-        #         self._positive.append(p)
-        #     else:
-        #         for (i, q) in overlaps:
-        #             self._positive.remove(i)
-        #             p = p.union(q)
-        # self._negative = negative
-        # for p in negative:
-        #     overlaps = sorted(
-        #         [(i, q) for i, q in enumerate(self._negative)
-        #          if q.overlaps(p)],
-        #         key=lambda (k, v): (-k, v.endpoints()),
-        #     )
-        #     if len(overlaps) == 0:
-        #         self._negative.append(p)
-        #     else:
-        #         for (i, q) in overlaps:
-        #             self._negative.remove(i)
-        #             p = p.union(q)
+        self._positive = list(intervals)
+        if all(isinstance(x, tuple) for x in self._positive):
+            self._positive = [x for x, _ in self._positive]
+        assert all(x in RIF for x in self._positive), \
+            "intervals = {} is invalid".format(self._positive)
+        super(Mask, self).__init__(domain,
+                                   [(v, True) for v in self._positive],
+                                   expect_consistent=False)
 
     @property
     def pos(self):
         return self._positive
-
-    @property
-    def neg(self):
-        return self._negative
 
     def __contains__(self, x):
         x = RIF(x)
@@ -60,8 +35,8 @@ class Mask(BaseSignal):
     def __repr__(self):
         return 'Mask({}, {})'.format(
             self.domain.str(style='brackets'),
-            "[{}]".format(", ".join("({}, {})".format(
-                v.str(style='brackets'), b) for v, b in self.values)),
+            "[{}]".format(", ".join(
+                v.str(style='brackets') for v in self.pos)),
         )
 
     def shift(self, J):
@@ -70,7 +45,7 @@ class Mask(BaseSignal):
         # of a formula and work downwards)
         J = RIF(J)
         return Mask(self.domain + J,
-                    [(I + J, b) for I, b in self.values])
+                    [I + J for I in self.pos])
 
     def shift_back(self, J):
         # NOTE: mask.shift_back(J) != mask.shift(-J)
@@ -79,14 +54,24 @@ class Mask(BaseSignal):
         # (liberally over-approximating where we are requesting information)
         J = RIF(J)
         return Mask(inner_shift_back(self.domain, J),
-                    [(inner_shift_back(I, J), b)
-                     for I, b in self.values])
+                    [inner_shift_back(I, J) for I in self.pos])
+
+    def __and__(self, other):
+        """Mask and defined as union, since this gives the domain for
+        computing signal and."""
+        return self.union(other)
+
+    def __or__(self, other):
+        """Mask or defined as union, since this gives the domain for
+        computing signal or."""
+        return self.union(other)
 
     def H(self, J):
         """Historical analogue of G.
 
         Within J ago, it was always the case that."""
         return self.shift(J)
+
     G_inverse = H
 
     def P(self, J):
@@ -94,6 +79,7 @@ class Mask(BaseSignal):
 
         Within J ago, at some point it was the case that."""
         return self.shift(J)
+
     F_inverse = P
 
     def G(self, J):
@@ -105,4 +91,4 @@ class Mask(BaseSignal):
         return self.shift_back(J)
 
 
-mask_zero = Mask(RIF(0), [(RIF(0), True), (RIF(0), False)])
+mask_zero = Mask(RIF(0), [RIF(0)])

@@ -10,108 +10,80 @@ from ulbc.interval_utils import finterval, intervals_approx_eq
 
 @pytest.fixture
 def mask1():
-    return Mask(RIF(0, 5), [(RIF(0, 3), True),
-                            (RIF(2, 4), False),
-                            (RIF(3.5, 4.5), True)])
+    return Mask(RIF(0, 5), [RIF(0, 3), RIF(3.5, 4.5)])
 
 
 @pytest.fixture
 def mask2():
-    return Mask(RIF(1, 6), [(RIF(1.5, 3), False),
-                            (RIF(4, 4.75), True)])
+    return Mask(RIF(1, 6), [RIF(4, 4.75)])
 
 
 class TestMask(object):
     def test_repr(self, mask1):
         assert (repr(mask1)
                 == 'Mask([0.00000000000000000 .. 5.0000000000000000], '
-                   '[([0.00000000000000000 .. 3.0000000000000000], True),'
-                   ' ([2.0000000000000000 .. 4.0000000000000000], False),'
-                   ' ([3.5000000000000000 .. 4.5000000000000000], True)])')
+                   '[[0.00000000000000000 .. 3.0000000000000000],'
+                   ' [3.5000000000000000 .. 4.5000000000000000]])')
 
     def test_positive(self, mask1):
         assert intervals_approx_eq(mask1.pos, [RIF(0, 3), RIF(3.5, 4.5)])
 
-    def test_negative(self, mask1):
-        assert intervals_approx_eq(mask1.neg, [RIF(2, 4)])
-
     def test_invert(self, mask1):
         mask_inv = ~mask1
-        assert intervals_approx_eq(mask_inv.pos, mask1.neg)
-        assert intervals_approx_eq(mask_inv.neg, mask1.pos)
+        assert mask_inv.approx_eq(mask1)
 
     def test_H_from_time_zero(self):
         assert mask_zero.H(RIF(1, 2)).approx_eq(
             Mask(RIF(1, 2),
-                 [(RIF(1, 2), False), (RIF(1, 2), True)])
+                 [RIF(1, 2)])
         )
 
     def test_H(self, mask1):
         assert mask1.H(RIF(1, 2)).approx_eq(
-            Mask(RIF(1, 7),
-                 [(RIF(1, 5), True),
-                  (RIF(3, 6), False),
-                  (RIF(4.5, 6.5), True)])
+            Mask(RIF(1, 7), [RIF(1, 5), RIF(4.5, 6.5)])
         )
 
     def test_P_from_time_zero(self):
         assert mask_zero.P(RIF(1, 2)).approx_eq(
-            Mask(RIF(1, 2),
-                 [(RIF(1, 2), False), (RIF(1, 2), True)])
+            Mask(RIF(1, 2), [RIF(1, 2)])
         )
 
     def test_P(self, mask1):
         assert mask1.P(RIF(1, 2)).approx_eq(
-            Mask(RIF(1, 7),
-                 [(RIF(1, 5), True),
-                  (RIF(3, 6), False),
-                  (RIF(4.5, 6.5), True)])
+            Mask(RIF(1, 7), [RIF(1, 5), RIF(4.5, 6.5)])
         )
 
     def test_H(self, mask1):
         assert mask1.H(RIF(1, 2)).approx_eq(
-            Mask(RIF(1, 7),
-                 [(RIF(1, 5), True),
-                  (RIF(3, 6), False),
-                  (RIF(4.5, 6.5), True)])
+            Mask(RIF(1, 7), [RIF(1, 5), RIF(4.5, 6.5)])
         )
 
     def test_P(self, mask1):
         assert mask1.P(RIF(1, 2)).approx_eq(
-            Mask(RIF(1, 7),
-                 [(RIF(1, 5), True),
-                  (RIF(3, 6), False),
-                  (RIF(4.5, 6.5), True)])
+            Mask(RIF(1, 7), [RIF(1, 5), RIF(4.5, 6.5)])
         )
 
     def test_G_H_from_time_zero(self):
         J = RIF(1, 2)
         print(mask_zero.H(J).G(J))
         assert mask_zero.H(J).G(J).approx_eq(
-            Mask(RIF(0, 0), [(RIF(0, 0), False), (RIF(0, 0), True)])
+            Mask(RIF(0, 0), [RIF(0, 0)])
         )
 
     def test_F_P_from_time_zero(self):
         J = RIF(1, 2)
-        assert mask_zero.P(J).F(J).approx_eq(
-            Mask(RIF(0, 0), [(RIF(0, 0), False), (RIF(0, 0), True)])
-        )
+        assert mask_zero.P(J).F(J).approx_eq(mask_zero)
 
     def test_union(self, mask1, mask2):
         print(mask1.union(mask2))
         assert mask1.union(mask2).approx_eq(
             # Should we take the smallest or largest domain?
-            Mask(RIF(0, 6),
-                 [(RIF(0, 3), True),
-                  (RIF(1.5, 4), False),
-                  (RIF(3.5, 4.75), True)])
+            Mask(RIF(0, 6), [RIF(0, 3), RIF(3.5, 4.75)])
         )
 
     def test_intersection(self, mask1, mask2):
         print(mask1.intersection(mask2))
         assert mask1.intersection(mask2).approx_eq(
             # Should we take the smallest or largest domain?
-            Mask(RIF(1, 5),
-                 [(RIF(2, 3), False),
-                  (RIF(4, 4.5), True)])
+            Mask(RIF(1, 5), [RIF(4, 4.5)])
         )
