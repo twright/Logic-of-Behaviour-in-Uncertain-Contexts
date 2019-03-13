@@ -18,7 +18,7 @@ from flowstar.observers import PolyObserver, RestrictedObserver
 from ulbc.context_signals import (ContextSignal,
                                   true_context_signal, false_context_signal)
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
-                                   signal_from_observer)
+                                   signal_from_observer, masked_ctx)
 from ulbc.interval_utils import finterval
 from ulbc.signal_masks import Mask, mask_zero
 from ulbc.matricies import *
@@ -45,6 +45,7 @@ class Logic(object):
 
     def signal_for_system(self, odes, initials, duration, use_masks=False,
                           mask=None, **kwargs):
+        use_masks |= mask is not None
         t0 = time.time()
         if 'order' not in kwargs:
             kwargs['order'] = 10
@@ -63,8 +64,6 @@ class Logic(object):
         if mask is None and use_masks:
             domain = RIF(0, duration)
             mask = Mask(domain, [domain])
-        elif not use_masks:
-            mask = None
 
         # Check that flowstar ran for the whole timeframe
         if not reach.ran or reach.result > 3:
@@ -236,6 +235,7 @@ class Atomic(Logic):
         >>> Atomic(x-2.5).signal_for_system(odes, initials, 0)(0)
         False
         """
+        use_masks |= mask is not None
         # Do the smart thing in the case of duration 0
         if duration == 0:
             mask = mask_zero if use_masks else None
@@ -256,6 +256,7 @@ class Atomic(Logic):
     def signal(self, R, odes, space_domain=None, mask=None, **kwargs):
         if isinstance(R, PolyObserver):
             # TODO: attach the mask in this case
+            print("Case not covered!")
             observer = R
         else:
             observer = PolyObserver(self.p, R,
@@ -582,8 +583,8 @@ class Context(Logic):
         # after it
         return [self]
 
-    def phi_fn(self, kwargs, odes, xs):
-        sig = self.phi.signal_for_system(odes, xs, 1e-3, **kwargs)
+    def phi_fn(self, kwargs, odes, xs, mask=None):
+        sig = self.phi.signal_for_system(odes, xs, 1e-3, mask=mask, **kwargs)
         if kwargs.get('verbosity', 0) >= 3:
             print('sig    =', sig)
             print('sig(0) =', sig(0))
@@ -644,16 +645,20 @@ class C(Context):
         # Put extra brackets for readability even if not necessary
         return '{} >> {}'.format(self.ctx_str(), self.phi.bstr(8))
 
-    def signal(self, reach, odes, **kwargs):
-        return ctx(
+    def signal(self, reach, odes, mask=None, **kwargs):
+        print("In C.signal")
+        print(kwargs)
+        phi_mask = mask_zero if mask else None
+        return masked_ctx(
             odes=odes,
             domain=RIF(0, reach.time),
             C=self.context_jump,
             D=identity,
-            phi=partial(self.phi_fn, kwargs),
+            phi=partial(self.phi_fn, kwargs, mask=phi_mask),
             f=reach,
             epsilon=kwargs.get('epsilon_ctx', 0.5),
-            verbosity=kwargs.get('verbosity', 0)
+            verbosity=kwargs.get('verbosity', 0),
+            mask=mask,
         )
 
     def context_signal(self, reach, odes, initials, refine=0, **kwargs):
@@ -708,16 +713,17 @@ class D(Context):
         # Put extra brackets for readability even if not necessary
         return '{} % {}'.format(self.ctx_str(), self.phi.bstr(8))
 
-    def signal(self, reach, odes, **kwargs):
-        return ctx(
+    def signal(self, reach, odes, mask=None, **kwargs):
+        return masked_ctx(
             odes=odes,
             domain=RIF(0, reach.time),
             C=identity,
             D=self.context_jump,
-            phi=partial(self.phi_fn, kwargs),
+            phi=partial(self.phi_fn, kwargs, mask=mask_zero),
             f=reach,
             epsilon=kwargs.get('epsilon_ctx', 0.5),
             verbosity=kwargs.get('verbosity', 0),
+            mask=mask,
         )
 
     def context_signal(self, reach, odes, initials, refine=0, **kwargs):
@@ -834,7 +840,7 @@ class F(Logic):
 
     def signal(self, reach, odes, mask=None, **kwargs):
         if mask is not None:
-            mask = mask.H(self.interval)
+            mask = mask.P(self.interval)
         return self.phi.signal(reach, odes, mask=mask, **kwargs).F(
             self.interval)
 

@@ -606,7 +606,7 @@ cdef class PolyObserver:
                 self.reach.c_reach.globalMaxOrder,
                 self.reach.c_reach.cutoff_threshold,
             )
-            print("setting f and fprime polys")
+            # print("setting f and fprime polys")
             # NOTE: Under symbolic composition, the polys depend on the space
             # variables and so are invalidated when the space domain is
             # restricted

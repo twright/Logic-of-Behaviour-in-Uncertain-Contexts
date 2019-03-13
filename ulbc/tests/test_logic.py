@@ -170,6 +170,24 @@ class TestMasks(object):
         print(siga | sigb)
         assert sigc.approx_eq(siga | sigb)
 
+    # @pytest.mark.slow
+    def test_masked_context_with_jump(self, ringxy, odes):
+        _, (x, y) = ringxy
+        prop = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
+        mask = Mask(RIF(0, 2*sage.pi),
+                    [RIF(0.2, 2.5), RIF(3.5, 2*sage.pi)])
+        res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
+                                     epsilon_ctx=0.1, mask=mask)
+        expected = Signal(
+            RIF(0.00000000000000000, 6.2831853071795872),
+            [(RIF(0.29457118627404310, 2.5), False),
+             (RIF(3.5, 5.9896141209055438), True)],
+            mask=mask)
+        assert res.mask is not None
+        assert res.mask.approx_eq(mask)
+        print(res)
+        assert res.approx_eq(expected, 0.1)
+
 
 class TestU(object):
     def test_repr_U(self, ringxy):

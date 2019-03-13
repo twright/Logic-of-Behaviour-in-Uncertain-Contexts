@@ -1722,7 +1722,7 @@ static const char __pyx_k_t[] = "t";
 static const char __pyx_k__4[] = "===";
 static const char __pyx_k_t0[] = "t0 =";
 static const char __pyx_k_RIF[] = "RIF";
-static const char __pyx_k__19[] = "*";
+static const char __pyx_k__18[] = "*";
 static const char __pyx_k_all[] = "__all__";
 static const char __pyx_k_pos[] = "pos";
 static const char __pyx_k_res[] = "res = {}";
@@ -1768,7 +1768,6 @@ static const char __pyx_k_symbolic_composition[] = "symbolic_composition";
 static const char __pyx_k_flowstar_reachability[] = "flowstar.reachability";
 static const char __pyx_k_reached_detect_roots_t[] = "reached detect roots t={} + {}";
 static const char __pyx_k_reached_interval_eval_t[] = "reached interval eval t={} + {}";
-static const char __pyx_k_setting_f_and_fprime_polys[] = "setting f and fprime polys";
 static const char __pyx_k_skipping_given_cached_bool[] = "skipping given cached bool!";
 static const char __pyx_k_retrieving_f_and_fprime_polys[] = "retrieving f and fprime polys";
 static const char __pyx_k_skipping_given_consistent_value[] = "skipping given consistent value over domain";
@@ -1779,7 +1778,7 @@ static PyObject *__pyx_n_s_RIF;
 static PyObject *__pyx_n_s_Reach;
 static PyObject *__pyx_n_s_RestrictedObserver;
 static PyObject *__pyx_n_s_TypeError;
-static PyObject *__pyx_n_s__19;
+static PyObject *__pyx_n_s__18;
 static PyObject *__pyx_kp_s__4;
 static PyObject *__pyx_n_s_all;
 static PyObject *__pyx_n_s_cline_in_traceback;
@@ -1821,7 +1820,6 @@ static PyObject *__pyx_kp_s_self_bools_self_masked_regions_s;
 static PyObject *__pyx_kp_s_self_bools_self_masked_regions_s_2;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
-static PyObject *__pyx_kp_s_setting_f_and_fprime_polys;
 static PyObject *__pyx_kp_s_skipping_given_cached_bool;
 static PyObject *__pyx_kp_s_skipping_given_consistent_value;
 static PyObject *__pyx_n_s_space_domain;
@@ -1867,8 +1865,7 @@ static PyObject *__pyx_tuple__14;
 static PyObject *__pyx_tuple__15;
 static PyObject *__pyx_tuple__16;
 static PyObject *__pyx_tuple__17;
-static PyObject *__pyx_tuple__18;
-static PyObject *__pyx_tuple__20;
+static PyObject *__pyx_tuple__19;
 /* Late includes */
 
 /* "flowstar/observers.pyx":28
@@ -7167,7 +7164,6 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   int __pyx_t_2;
-  PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("_post_retrieve_f", 0);
 
   /* "flowstar/observers.pyx":601
@@ -7196,17 +7192,6 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
  *                 self.f.c_poly, tmv, deref(loop_domain),
  */
     __pyx_f_8flowstar_10observable_observable(__pyx_v_f_fn, __pyx_v_fprime_fn, __pyx_v_self->f->c_poly, __pyx_v_tmv, (*__pyx_v_loop_domain), __pyx_v_self->reach->c_reach.globalMaxOrder, __pyx_v_self->reach->c_reach.cutoff_threshold);
-
-    /* "flowstar/observers.pyx":609
- *                 self.reach.c_reach.cutoff_threshold,
- *             )
- *             print("setting f and fprime polys")             # <<<<<<<<<<<<<<
- *             # NOTE: Under symbolic composition, the polys depend on the space
- *             # variables and so are invalidated when the space domain is
- */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 609, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "flowstar/observers.pyx":613
  *             # variables and so are invalidated when the space domain is
@@ -7292,7 +7277,6 @@ static void __pyx_f_8flowstar_9observers_12PolyObserver__post_retrieve_f(struct 
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_WriteUnraisable("flowstar.observers.PolyObserver._post_retrieve_f", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -7993,7 +7977,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_10__reduce_cython_
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8046,7 +8030,7 @@ static PyObject *__pyx_pf_8flowstar_9observers_12PolyObserver_12__setstate_cytho
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8430,7 +8414,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_Reach, __pyx_k_Reach, sizeof(__pyx_k_Reach), 0, 0, 1, 1},
   {&__pyx_n_s_RestrictedObserver, __pyx_k_RestrictedObserver, sizeof(__pyx_k_RestrictedObserver), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
-  {&__pyx_n_s__19, __pyx_k__19, sizeof(__pyx_k__19), 0, 0, 1, 1},
+  {&__pyx_n_s__18, __pyx_k__18, sizeof(__pyx_k__18), 0, 0, 1, 1},
   {&__pyx_kp_s__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 0, 1, 0},
   {&__pyx_n_s_all, __pyx_k_all, sizeof(__pyx_k_all), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
@@ -8472,7 +8456,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_self_bools_self_masked_regions_s_2, __pyx_k_self_bools_self_masked_regions_s_2, sizeof(__pyx_k_self_bools_self_masked_regions_s_2), 0, 0, 1, 0},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
-  {&__pyx_kp_s_setting_f_and_fprime_polys, __pyx_k_setting_f_and_fprime_polys, sizeof(__pyx_k_setting_f_and_fprime_polys), 0, 0, 1, 0},
   {&__pyx_kp_s_skipping_given_cached_bool, __pyx_k_skipping_given_cached_bool, sizeof(__pyx_k_skipping_given_cached_bool), 0, 0, 1, 0},
   {&__pyx_kp_s_skipping_given_consistent_value, __pyx_k_skipping_given_consistent_value, sizeof(__pyx_k_skipping_given_consistent_value), 0, 0, 1, 0},
   {&__pyx_n_s_space_domain, __pyx_k_space_domain, sizeof(__pyx_k_space_domain), 0, 0, 1, 1},
@@ -8648,35 +8631,24 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
 
-  /* "flowstar/observers.pyx":609
- *                 self.reach.c_reach.cutoff_threshold,
- *             )
- *             print("setting f and fprime polys")             # <<<<<<<<<<<<<<
- *             # NOTE: Under symbolic composition, the polys depend on the space
- *             # variables and so are invalidated when the space domain is
- */
-  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_setting_f_and_fprime_polys); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 609, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__16);
-  __Pyx_GIVEREF(__pyx_tuple__16);
-
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__17);
-  __Pyx_GIVEREF(__pyx_tuple__17);
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__16);
+  __Pyx_GIVEREF(__pyx_tuple__16);
 
   /* "(tree fragment)":4
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.bools,self.masked_regions,self.poly_f_fns,self.poly_fprime_fns cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__18);
-  __Pyx_GIVEREF(__pyx_tuple__18);
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_self_bools_self_masked_regions_s_2); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
 
   /* "flowstar/observers.pyx":23
  * 
@@ -8685,9 +8657,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__20 = PyTuple_Pack(2, __pyx_n_s_RestrictedObserver, __pyx_n_s_PolyObserver); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(1, 23, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__20);
-  __Pyx_GIVEREF(__pyx_tuple__20);
+  __pyx_tuple__19 = PyTuple_Pack(2, __pyx_n_s_RestrictedObserver, __pyx_n_s_PolyObserver); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(1, 23, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__19);
+  __Pyx_GIVEREF(__pyx_tuple__19);
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -9024,9 +8996,9 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(__pyx_n_s__19);
-  __Pyx_GIVEREF(__pyx_n_s__19);
-  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s__19);
+  __Pyx_INCREF(__pyx_n_s__18);
+  __Pyx_GIVEREF(__pyx_n_s__18);
+  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s__18);
   __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -9061,7 +9033,7 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_all, __pyx_tuple__20) < 0) __PYX_ERR(1, 23, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_all, __pyx_tuple__19) < 0) __PYX_ERR(1, 23, __pyx_L1_error)
 
   /* "flowstar/observers.pyx":1
  * from __future__ import print_function, division, absolute_import             # <<<<<<<<<<<<<<

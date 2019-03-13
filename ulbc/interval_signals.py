@@ -15,7 +15,7 @@ from ulbc.interval_utils import inner_inverse_minkowski, int_dist
 
 __all__ = ['to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
            'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots',
-           'signal_from_observer', 'signal_given_bool_roots']
+           'signal_from_observer', 'signal_given_bool_roots', 'masked_ctx']
 
 
 def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
@@ -98,12 +98,12 @@ def signal_given_bool_roots(f_bool, roots, domain, mask=None):
     if mask is None:
         return signal_given_bool_roots_single_seg(f_bool, roots, domain)
 
-    sig_segs = [
+    sig_segs = (
         signal_given_bool_roots_single_seg(f_bool, roots, seg)
             for seg in mask.pos
-    ]
-
-    print(sig_segs)
+    )
+    #
+    # print(sig_segs)
 
     return reduce(Signal.union, sig_segs, Signal(domain, [])).with_mask(mask)
 
@@ -295,7 +295,7 @@ class Signal(BaseSignal):
         base_mask = (self.mask
                      if self.mask is not None
                      else Mask(self.domain, [self.domain]))
-        return reduce(_sig_intersect, masks, base_mask)
+        return reduce(Mask.intersection, masks, base_mask)
 
     def to_mask_or(self):
         from ulbc.signal_masks import Mask
@@ -308,7 +308,7 @@ class Signal(BaseSignal):
         base_mask = (self.mask
                      if self.mask is not None
                      else Mask(self.domain, [self.domain]))
-        return reduce(_sig_intersect, masks, base_mask)
+        return reduce(Mask.intersection, masks, base_mask)
 
     def with_mask(self, mask):
         return Signal(self.domain, self.values, mask=mask)
@@ -353,9 +353,6 @@ class Signal(BaseSignal):
         return super(Signal, self).__invert__().with_mask(self.mask)
 
     def __and__(self, other):
-        def ounion(x, y):
-            return x.union(y)
-
         if not isinstance(other, Signal):
             return NotImplemented
 
@@ -364,9 +361,9 @@ class Signal(BaseSignal):
         zs = (sum(([(x.intersection(y), True)
                     for x, bx in xs if x.overlaps(y) and bx]
                    for y, by in ys if by), [])
-              + [(reduce(ounion,
-                         [x] + [y for y, by in ys
-                                if not by and y.overlaps(x)]),
+              + [(reduce(x.__class__.union,
+                         (y for y, by in ys if not by and y.overlaps(x)),
+                         x),
                   False) for x, bx in xs if not bx]
               + [(y, False)
                  for y, by in ys if not by
@@ -435,6 +432,23 @@ def to_signal_piecewise(f, fprime, time, step):
         sig = sig.union(res)
         # print("sig = {}".format(res))
     return sig
+
+
+def masked_ctx(odes, domain, *args, **kwargs):
+    mask = kwargs.pop('mask', None)
+    print("mask =", mask)
+
+    if mask is None:
+        return ctx(odes, domain, *args, **kwargs)
+
+    sig_segs = (
+        ctx(odes, seg, *args, **kwargs)
+            for seg in mask.pos
+    )
+
+    print("mask =", mask)
+
+    return reduce(Signal.union, sig_segs, Signal(domain, [])).with_mask(mask)
 
 
 def ctx(odes, domain, C, D, phi, f, epsilon=0.1, verbosity=0):
