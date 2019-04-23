@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="flowstar"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="flowstar">
+				<Option output="/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/flowstar" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 flowstar"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="flowstar/fast">
+				<Option output="/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/flowstar" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/8/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 flowstar/fast"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/twright/Documents/PhD/Notebooks/flowstar/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Constraints.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Constraints.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Continuous.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Continuous.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Geometry.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Geometry.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Hybrid.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Hybrid.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Interval.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Interval.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Matrix.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Matrix.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Monomial.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Monomial.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Polynomial.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/Polynomial.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/TaylorModel.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/TaylorModel.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/include.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/lex.yy.c">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/modelParser.cpp">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/modelParser.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/modelParser.tab.c">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/flowstar-2.1.0/modelParser.tab.h">
+			<Option target="flowstar"/>
+		</Unit>
+		<Unit filename="/home/twright/Documents/PhD/Notebooks/flowstar/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
