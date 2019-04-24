@@ -23,3 +23,9 @@ flowstar/flowstar-2.1.0-clean/flowstar
 **/.pytest_cache/*
 *.prof
 tags
+**/.debris/*
+**/*.egg-info/*
+*.egg
+*.sublime-workspace
+**/.idea/workspace.xml
+flowstar/flowstar-2.1.0
