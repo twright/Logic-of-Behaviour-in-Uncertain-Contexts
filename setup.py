@@ -20,7 +20,8 @@ Cython.Compiler.Options.fast_fail = True
 LIB_DIRS = ['.', './flowstar/', './ulbc/', './flowstar/flowstar-2.1.0',
             '/usr/include/boost']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
-COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-march=native']
+COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-march=native',
+                '-mtune=native']
 LINK_ARGS = ['-std=c++17']
 
 extensions = [

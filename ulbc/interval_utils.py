@@ -1,19 +1,20 @@
-from __future__ import division, print_function
+from __future__ import division, print_function, annotations
 # absolute_import,
 
 # from builtins import *  # NOQA
 
 from functools import partial
 from sage.all import RIF
+from typing import Optional
 
 
 __all__ = ('int_dist', 'finterval', 'intervals_approx_eq',
            'fintervals', 'int_sorted', 'inner_inverse_minkowski',
-           'inner_shift_back')
+           'inner_shift_back', 'inner_minkowski')
 
 
-def inner_inverse_minkowski(I, J):
-    # I - J, smallest possible answer
+def inner_inverse_minkowski(I : RIF, J : RIF) -> Optional[RIF]:
+    # I - J, smallest possible answer (underapproximate)
     il, iu = RIF(I).edges()
     jl, ju = RIF(J).edges()
     kl = il - ju
@@ -22,6 +23,15 @@ def inner_inverse_minkowski(I, J):
         return None
     else:
         return RIF(kl.upper('RNDU'), ku.lower('RNDD'))
+
+
+def inner_minkowski(I : RIF, J : RIF) -> Optional[RIF]:
+    # I + J, smallest possible answer (overapproximate)
+    il, iu = RIF(I).edges()
+    jl, ju = RIF(J).edges()
+    kl = (il + ju).lower('RNDD')
+    ku = (iu + jl).upper('RNDU')
+    return RIF(kl, ku) if kl <= ku else None
 
 
 def inner_shift_back(K, J):

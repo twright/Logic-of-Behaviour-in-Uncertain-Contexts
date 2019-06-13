@@ -228,6 +228,37 @@ class TestU(object):
                   F(RIF(1, 2), Q & S)).atomic_propositions
                 == [P, Q, S])
 
+    @pytest.mark.parametrize("pstr", ["x - 1", "y - 2", "x**2 + y**2 - 3"])
+    def test_signal_F_equiv(self, pstr, ringxy, odes):
+        R, (x, y) = ringxy
+        Ptrue = Atomic(x + 10000)
+        P = Atomic(eval(pstr))
+        sigU = U(Ptrue, RIF(1, 2), P).signal_for_system(
+            odes, [RIF(4, 5), RIF(1, 2)], 2*sage.pi)
+        sigF = F(RIF(1, 2), P).signal_for_system(
+            odes, [RIF(4, 5), RIF(1, 2)], 2*sage.pi)
+        assert sigU.approx_eq(sigF)
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize("pstr", ["x - 1", "y - 2", "x**2 + y**2 - 3"])
+    @pytest.mark.parametrize("qstr", ["x - 1", "y - 2", "x**2 + y**2 - 3"])
+    # @pytest.mark.parametrize("use_masks", [False, True])
+    def test_signal_connected_F_equiv(self, pstr, qstr, #use_masks,
+                                      ringxy, odes_whelks):
+        R, (x, y) = ringxy
+        P = Atomic(eval(pstr))
+        initials = [RIF(1, 1.2), RIF(4, 6)]
+        # Check the signal is connected
+        sigP = P.signal_for_system(
+            odes_whelks, initials, 5)
+        assert len(sigP.decomposition) == 1
+        Q = Atomic(eval(qstr))
+        sigU = U(P, RIF(1, 2), Q).signal_for_system(
+            odes_whelks, initials, 5)
+        sigF = (P & F(RIF(1, 2), P & Q)).signal_for_system(
+            odes_whelks, initials, 5)
+        assert sigU.approx_eq(sigF)
+
     def test_signal(self, ringxy, odes):
         R, (x, y) = ringxy
         P = Atomic(x - 3)

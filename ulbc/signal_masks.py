@@ -6,25 +6,41 @@ from __future__ import (division,
 from sage.all import RIF
 # import sage.all as sage
 
-from ulbc.interval_utils import inner_shift_back
+from ulbc.interval_utils import (inner_shift_back,
+                                 inner_minkowski,
+                                 fintervals)
 from ulbc.interval_signals import BaseSignal
 from ulbc.context_signals import SignalTree, gen_sub_space_domains
 
 
 __all__ = ('Mask', 'ContextMask', 'mask_zero', 'context_mask_zero',
-           'true_context_mask')
+           'true_context_mask', 'true_mask', 'false_mask')
+
+
+def true_mask(domain):
+    return Mask(domain, [domain])
+
+
+def false_mask(domain):
+    return Mask(domain, [])
 
 
 class Mask(BaseSignal):
-    def __init__(self, domain, intervals):
+    def __init__(self, domain : RIF, intervals):
+        # print("mask intervals =", fintervals(intervals))
         self._positive = list(intervals)
         if all(isinstance(x, tuple) for x in self._positive):
-            self._positive = [x for x, _ in self._positive]
+            self._positive = [x for x, b in self._positive if b]
+        else:
+            self._positive = [x for x in self._positive if x is not None]
         assert all(x in RIF for x in self._positive), \
             "intervals = {} is invalid".format(self._positive)
         super(Mask, self).__init__(domain,
                                    [(v, True) for v in self._positive],
                                    expect_consistent=False)
+        # Update self._positive based on values
+        # in case e.g. super.__init__ merged some intervals
+        self._positive = [x for x, b in self.values if b]
 
     @property
     def pos(self):
@@ -46,12 +62,8 @@ class Mask(BaseSignal):
         )
 
     def shift(self, J):
-        # Unlike in normal signals, operations shift intervals forwards
-        # in time, rather than backwards (since we start at the top
-        # of a formula and work downwards)
         J = RIF(J)
-        return Mask(self.domain + J,
-                    [I + J for I in self.pos])
+        return Mask(self.domain + J, [I + J for I in self.pos])
 
     def shift_back(self, J):
         # NOTE: mask.shift_back(J) != mask.shift(-J)
@@ -74,7 +86,9 @@ class Mask(BaseSignal):
         """Historical analogue of G.
 
         Within J ago, it was always the case that."""
-        return self.shift(J)
+        J = RIF(J)
+        return Mask(RIF(0, self.domain + J),
+                    [inner_minkowski(I, J) for I in self.pos])
 
     G_inverse = H
 
@@ -82,7 +96,15 @@ class Mask(BaseSignal):
         """Historical analogue of F.
 
         Within J ago, at some point it was the case that."""
-        return self.shift(J)
+        # Unlike in normal signals, operations shift intervals forwards
+        # in time, rather than backwards (since we start at the top
+        # of a formula and work downwards)
+        J = RIF(J)
+        return Mask(RIF(0, self.domain + J), [I + J for I in self.pos])
+
+    def __invert__(self):
+        """A mask for an inverse is the same as the orignal mask."""
+        return self
 
     F_inverse = P
 

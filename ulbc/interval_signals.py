@@ -5,8 +5,9 @@ from __future__ import (division,
 from abc import ABCMeta  # , abstractmethod
 
 from functools import partial, reduce
-import itertools
+from itertools import chain, takewhile
 import warnings
+import operator
 
 from sage.all import RIF, region_plot
 from ulbc.interval_root_isolation import isolate_roots
@@ -18,6 +19,20 @@ __all__ = ('to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
            'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots',
            'signal_from_observer', 'signal_given_bool_roots', 'masked_ctx',
            'BaseSignal')
+
+
+def isplit(pred, xs):
+    """Splits an iterator xs into a maximal prefix for which pred is true,
+    and a tail."""
+    xs = iter(xs)
+    trues = []
+    any_false = False
+    for x in xs:
+        if not pred(x):
+            any_false = True
+            break
+        trues.append(x)
+    return trues, chain([x] if any_false else [], xs)
 
 
 def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
@@ -169,12 +184,16 @@ def false_signal(J, mask=None):
 class BaseSignal(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, domain, values, expect_consistent=True):
-        self._domain = domain  # :: RIF
+    def __init__(self, domain : RIF, values, expect_consistent=True):
+        if domain is None:
+            raise ValueError("Domain is None!")
+        self._domain = RIF(max(0, domain.lower()),
+                           domain.upper())  # :: RIF
         # self._values = list(values) # :: [(RIF, Bool)]
         self._values = list(values)
         self._values = [p for p in self._values if p is not None]
-        self._values = [(v, b) for v, b in self._values
+        self._values = [(RIF(max(0, v.lower()), v.upper()), b)
+                        for v, b in self._values
                         if b is not None and v is not None]
         dup = True
         while dup:
@@ -208,6 +227,9 @@ class BaseSignal(object):
         )
 
     def approx_eq(self, other, epsilon=1e-6):
+        if other is None:
+            return False
+
         # For signals, this will not take into account their masks
         if int_dist(self.domain, other.domain) > epsilon:
             return False
@@ -238,7 +260,7 @@ class BaseSignal(object):
         assert self.domain.overlaps(other.domain)
 
         domain = self.domain.intersection(other.domain)
-        values = itertools.chain.from_iterable(
+        values = chain.from_iterable(
             ((I.intersection(J), b)
              for J, c in other.values
              if (b is c) and I.overlaps(J))
@@ -300,6 +322,13 @@ class Signal(BaseSignal):
                      else Mask(self.domain, [self.domain]))
         return reduce(Mask.intersection, masks, base_mask)
 
+    def to_domain_neg(self, J):
+        step = Signal(J,
+                      [(K, False)
+                       for K in interval_complements(J, self.domain)]
+                      + [(self.domain, True)])
+        return step & self.to_domain(J)
+
     def to_mask_or(self):
         from ulbc.signal_masks import Mask
 
@@ -313,8 +342,30 @@ class Signal(BaseSignal):
                      else Mask(self.domain, [self.domain]))
         return reduce(Mask.intersection, masks, base_mask)
 
+    def to_mask_until_decomposed(self, I):
+        from ulbc.signal_masks import Mask
+
+        masks1 = (x.to_mask_and()
+                  for x in self.true_unknown_false_decomposition)
+        masks2 = (m & m.shift(I) for m in masks1)
+        base_mask = Mask(self.domain, [])
+        return reduce(operator.or_, masks2, base_mask)
+
+    def to_mask_until(self, I):
+        # We know that
+        # H[0, b] φ = ⋁_j (φ_j ∧ P[a, b] φ_j)
+        # where φ = ⋁_j φ_j is the unitary decomposition of phi
+        return self.to_mask_and().H(RIF(0, I.lower('RNDD')))
+        and_mask = self.to_mask_and()
+        return and_mask & and_mask.shift(I)
+
     def with_mask(self, mask):
-        return Signal(self.domain, self.values, mask=mask)
+        values = (self.values if mask is None else
+                  [(I.intersection(J), b)
+                   for I, b in self.values
+                   for J in mask.pos
+                   if I.overlaps(J)])
+        return Signal(self.domain, values, mask=mask)
 
     @property
     def mask(self):
@@ -337,6 +388,141 @@ class Signal(BaseSignal):
 
     def decompose(self):
         return (Signal(self.domain, [v]) for v in self.values)
+
+    def _or_decomposition(self):
+        x0 = last_endpoint = self.domain.lower('RNDD')
+        xn = self.domain.upper('RNDU')
+
+        for x, b in self.values:
+            if x0 < x.lower('RNDD'):
+                yield Signal(self.domain,
+                             [(RIF(x0, last_endpoint),
+                               False if x0 < last_endpoint else None),
+                              (RIF(x.lower('RNDU'), xn),
+                               False if x.lower('RNDU') < xn else None)])
+            last_endpoint = x.upper('RNDD')
+            if b is True:
+                yield Signal(self.domain,
+                             [(RIF(x0, x.lower('RNDD')),
+                               False if x0 < x.lower('RNDD') else None),
+                              (x, True),
+                              (RIF(x.upper('RNDU'), xn),
+                               False if x.upper('RNDU') < xn else None)])
+        if x.upper('RNDD') < xn:
+            yield Signal(self.domain,
+                         [(RIF(x0, last_endpoint),
+                           False if x0 < last_endpoint else None)])
+
+    @property
+    def or_decomposition(self):
+        try:
+            return self._or_decomposition_cached
+        except AttributeError:
+            self._or_decomposition_cached = list(self._or_decomposition())
+            return self._or_decomposition_cached
+
+    def _true_unknown_segments_embedded(self):
+        if len(self.values) == 0:
+            return [self]
+
+        x0 = self.domain.lower('RNDD')
+        xn0 = xn = self.domain.upper('RNDU')
+        trues = []
+
+        (x, b), xbs = self.values[0], self.values[1:]
+
+        if b is False:
+            x0 = x.upper('RNDD')
+        else:
+            xbs = [(x, b)] + xbs
+
+        for x, b in xbs:
+            if b:
+                trues.append(true_signal(x).to_domain_neg(self.domain))
+            else:
+                xn = x.lower('RNDU')
+                break
+
+        unknown = [Signal(RIF(x0, xn), []).to_domain_neg(self.domain)]
+        if xn < xn0:
+            rest = [seg.to_domain_neg(self.domain)
+                    for seg
+                    in self.to_domain(RIF(xn, xn0)
+                                      )._true_unknown_segments_embedded()]
+        else:
+            rest = []
+        return unknown + trues + rest
+
+    def _non_negative_segments(self):
+        if len(self.values) == 0:
+            return [self]
+
+        x0 = self.domain.lower('RNDD')
+        xn0 = xn = self.domain.upper('RNDU')
+        ybs = []
+
+        (x, b), xbs = self.values[0], self.values[1:]
+        if b is False:
+            x0 = x.upper('RNDD')
+        else:
+            ybs.append((x, b))
+
+        for x, b in xbs:
+            if b is False:
+                xn = x.lower('RNDU')
+                break
+            else:
+                ybs.append((x, b))
+
+        return ([Signal(RIF(x0, xn), ybs)]
+                + self.to_domain(RIF(xn, xn0))._non_negative_segments())
+
+    def _decomposition(self):
+        xbs = iter(self.values)
+        print("domain   =", self.domain.str(style='brackets'))
+        print("values   =", [(x.str(style='brackets'), b) for x, b in self.values])
+
+        falses1, xbs = isplit(lambda t: not t[1] and t[0].lower() <= self.domain.lower(),
+                              xbs)
+        trues, xbs = isplit(lambda t: t[1], xbs)
+        falses2, xbs = isplit(lambda t: not t[1], xbs)
+        print("falses1  =", [(x.str(style='brackets'), b) for x, b in falses1])
+        print("trues    =", [(x.str(style='brackets'), b) for x, b in trues])
+        print("falses2  =", [(x.str(style='brackets'), b) for x, b in falses2])
+
+        x0 = falses1[-1][0].upper() if len(falses1) else self.domain.lower()
+        xn = falses2[0][0].lower() if len(falses2) else self.domain.upper()
+        u_domain = RIF(x0, xn)
+        print("u_domain =", u_domain.str(style='brackets'))
+
+        if len(trues):
+            for x, _ in trues:
+                yield true_signal(x).to_domain(u_domain).to_domain_neg(self.domain)
+        else:
+            yield Signal(u_domain, []).to_domain_neg(self.domain)
+
+        if not (len(falses2) and x0 < xn):
+            return
+        rest = self.to_domain(RIF(falses2[0][0].upper(), self.domain.upper()))
+        for seg in rest._decomposition():
+            yield seg.to_domain_neg(self.domain)
+
+    @property
+    def decomposition(self):
+        if not hasattr(self, '_decomposition_cached'):
+            self._decomposition_cached = list(self._decomposition())
+        return self._decomposition_cached
+
+    def _true_segments(self):
+        return [Signal(self.domain, [(x, True)]) for x, b in self.values if b]
+
+    @property
+    def true_unknown_false_decomposition(self):
+        if not hasattr(self, '_true_unknown_false_decomposition_cached'):
+            self._true_unknown_false_decomposition_cached =\
+                list(self._true_unknown_segments_embedded())
+
+        return self._true_unknown_false_decomposition_cached
 
     def __repr__(self):
         return 'Signal({}, {}, mask={})'.format(

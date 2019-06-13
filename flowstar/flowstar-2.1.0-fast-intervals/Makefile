@@ -1,7 +1,7 @@
 CXX = g++
 include makefile.local
 LIBS = -lmpfr -lgmp -lgsl -lgslcblas -lm -lglpk
-OFLAGS = -O3 -march=native
+OFLAGS = -O3 -march=native -mtune=native
 CFLAGS = -I . -I $(GMP_HOME) -g $(OFLAGS) -std=c++11 -fPIC -frounding-math
 # --ffast-math
 LINK_FLAGS = -g -L$(GMP_LIB_HOME)

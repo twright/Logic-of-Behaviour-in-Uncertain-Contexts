@@ -1,3 +1,4 @@
 #!/bin/sh
 
-sage -python3 "$@"
+# sage -python3 "$@"
+echo "PYTHONPATH=\"/home/twright/.local/share/JetBrains/Toolbox/apps/PyCharm-P/ch-0/191.6605.12/helpers/pycharm/:\$PYTHONPATH:$PYTHONPATH\" python3 $@" | sage -sh

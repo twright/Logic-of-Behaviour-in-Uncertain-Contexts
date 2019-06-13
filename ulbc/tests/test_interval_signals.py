@@ -2,7 +2,7 @@ from __future__ import print_function
 # absolute_import,
 
 import pytest
-from ulbc.interval_signals import Signal, interval_complements
+from ulbc.interval_signals import Signal, interval_complements, isplit
 from ulbc.signal_masks import Mask
 from sage.all import RIF
 
@@ -20,6 +20,19 @@ def sig2():
 @pytest.fixture
 def sig3():
     return Signal(RIF(0, 5), [(RIF(2, 4), False)])
+
+
+@pytest.fixture
+def sig4():
+    return Signal(
+        RIF(0, 12),
+        [(RIF(0, 1)  , False),
+         (RIF(2, 3)  , True ),
+         (RIF(4, 5)  , True ),
+         (RIF(6, 7)  , False),
+         (RIF(8, 9)  , True ),
+         (RIF(10, 11), False)],
+    ) 
 
 
 @pytest.fixture
@@ -58,6 +71,38 @@ def int_dist(I, J):
 def int_approx_eq(I, J, epsilon=1e-3):
     return int_dist(I, J) <= epsilon
 
+
+class TestISplit:
+    def test_simple_isplit(self):
+        xs = [1, 2, 3, 4, 5]
+        a, b = isplit(lambda x: x < 3, xs)
+        assert a == [1, 2]
+        assert list(b) == [3, 4, 5]
+
+
+class TestDecomposition:
+    def test_decomposition(self, sig4):
+        # [(RIF(0, 1)  , False),
+        #  (RIF(2, 3)  , True ),
+        #  (RIF(4, 5)  , True ),
+        #  (RIF(6, 7)  , False),
+        #  (RIF(8, 9)  , True ),
+        #  (RIF(10, 11), False)],
+        expected = [
+            Signal(RIF(0, 12), [(RIF(0, 1),   False),
+                                (RIF(2, 3),   True),
+                                (RIF(6, 12),  False)]),
+            Signal(RIF(0, 12), [(RIF(0, 1),   False),
+                                (RIF(4, 5),   True),
+                                (RIF(6, 12),  False)]),
+            Signal(RIF(0, 12), [(RIF(0, 7),   False),
+                                (RIF(8, 9),   True),
+                                (RIF(10, 12), False)]),
+            Signal(RIF(0, 12), [(RIF(0, 11),  False)]),
+        ]
+        assert all(seg1.approx_eq(seg2)
+                   for seg1, seg2
+                   in zip(sig4.decomposition, expected))
 
 class TestApproxEq(object):
     def test_exact(self, sig1):
@@ -118,8 +163,10 @@ class TestSignalMasks(object):
         
     def test_simple_signal_or_mask_relative(self, sig2):
         mask = Mask(RIF(0, 5), [RIF(0.5, 1), RIF(1.5, 4.5)])
+        # The 1.5 here arises from the point intersection of (sig2|mask)_or
+        # with mask
         expected_mask = Mask(RIF(0, 5),
-                             [RIF(0.5, 1), RIF(3, 4.5)])
+                             [RIF(0.5, 1), RIF(1.5), RIF(3, 4.5)])
         print(sig2.with_mask(mask).to_mask_or())
         assert sig2.with_mask(mask).to_mask_or().approx_eq(expected_mask)
 
@@ -148,9 +195,9 @@ class TestSignalMasks(object):
     def test_G_mask(self, mask1, masked_sig1):
         sig_G = masked_sig1.G(RIF(0.5, 1)).to_domain(RIF(0, 4.5))
         mask_shifted = Mask(RIF(0, 4.5), [RIF(0.5, 3)])
-        print(mask_shifted.H(RIF(0.5, 1)).to_domain(RIF(0, 5)))
+        print(mask_shifted.P(RIF(0.5, 1)).to_domain(RIF(0, 5)))
         print(mask1)
-        assert mask_shifted.H(RIF(0.5, 1)).to_domain(RIF(0, 5)).approx_eq(
+        assert mask_shifted.P(RIF(0.5, 1)).to_domain(RIF(0, 5)).approx_eq(
             mask1)
         expected_sig = Signal(RIF(0, 4.5),
                               [(RIF(0.5, 1), True), (RIF(2, 3.5), False)],

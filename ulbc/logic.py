@@ -7,7 +7,7 @@ import operator
 import time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
-from functools import partial
+from functools import partial, reduce
 
 import sage.all as sage
 from sage.all import RIF
@@ -250,6 +250,7 @@ class Atomic(Logic):
         # Do the smart thing in the case of duration 0
         if duration == 0:
             mask = mask_zero if use_masks else None
+            # print("our mask =", repr(mask))
             res = Poly(self.p)(initials)
             if res.lower() > 0:
                 return true_signal(RIF(0, 0), mask=mask)
@@ -663,13 +664,18 @@ class C(Context):
 
     def signal(self, reach, odes, mask=None, **kwargs):
         print("In C.signal")
-        print(kwargs)
+        kwargs2 = dict(kwargs)
+        try:
+            del kwargs2['mask']
+        except:
+            pass
+        print(kwargs2)
         return masked_ctx(
             odes=odes,
             domain=RIF(0, reach.time),
             C=self.context_jump,
             D=identity,
-            phi=partial(self.phi_fn, kwargs, use_masks=mask is not None),
+            phi=partial(self.phi_fn, kwargs2, use_masks=mask is not None),
             f=reach,
             epsilon=kwargs.get('epsilon_ctx', 0.5),
             verbosity=kwargs.get('verbosity', 0),
@@ -680,12 +686,17 @@ class C(Context):
         def signal_fn(_, space_domain, mask=None):
             # should we refer to the parent reach object or the child
             # observer?
+            kwargs2 = dict(kwargs)
+            try:
+                del kwargs2['mask']
+            except:
+                pass
             return masked_ctx(
                 odes=odes,
                 domain=RIF(0, reach.time),
                 C=self.context_jump,
                 D=identity,
-                phi=partial(self.context_signal_phi_fn, kwargs,
+                phi=partial(self.context_signal_phi_fn, kwargs2,
                             use_masks=mask is not None,
                             refine=refine),
                 f=partial(reach, space_domain=space_domain),
@@ -807,7 +818,7 @@ class G(Logic):
     def signal(self, reach, odes, mask=None, **kwargs):
         print("In G.signal")
         if mask is not None:
-            mask = mask.H(self.interval)
+            mask = mask.P(self.interval)
         return self.phi.signal(reach, odes, mask=mask, **kwargs).G(
             self.interval)
 
@@ -926,29 +937,19 @@ class U(Logic):
         phi_mask = (mask | mask.P(J)
                     if mask is not None
                     else None)
-        sig_phi = self.phi.signal(reach, odes, **kwargs)
+        sig_phi = self.phi.signal(reach, odes, mask=phi_mask, **kwargs)
 
-        # Initial answer signal
-        sig = false_signal(RIF(0, reach.time), mask)
+        # Monitor psi
+        psi_mask = (sig_phi.to_mask_until(J) & mask.P(J)
+                    if mask is not None
+                    else None)
+        sig_psi = self.psi.signal(reach, odes, mask=psi_mask, **kwargs)
 
-        # Perform monitoring on decomposition
-        mask_j = mask
-        for sig_phi_j in sig_phi.decompose():
-            psi_mask = (sig_phi_j.to_mask_and().P(J) & mask_j.P(J)
-                        if mask is not None
-                        else None)
-            sig_psi = self.psi.signal(reach, odes, mask=psi_mask, **kwargs)
-            sig |= sig_phi_j & (sig_phi_j & sig_psi).F(J)
-
-            if mask is not None:
-                mask_j = mask & sig.to_mask_or()
-                if not len(mask_j.pos):
-                    break
-
-        return sig
-        # Mask free version:
-        # return self.phi.signal(reach, odes, **kwargs).U(
-        #     self.interval, self.psi.signal(reach, odes, **kwargs))
+        # Compute overall answer
+        return reduce(operator.or_,
+                      (sig_phi_j & (sig_phi_j & sig_psi).F(J)
+                       for sig_phi_j in sig_phi.decomposition),
+                      false_signal(RIF(0, reach.time), mask))
 
     def context_signal(self, reach, odes, initials, **kwargs):
         return self.phi.context_signal(reach, odes, initials, **kwargs).U(
@@ -1011,29 +1012,24 @@ class R(Logic):
         phi_mask = (mask | mask.P(J)
                     if mask is not None
                     else None)
-        sig_phi = self.phi.signal(reach, odes, **kwargs)
+        sig_neg_phi = ~self.phi.signal(reach, odes, mask=phi_mask, **kwargs)
 
-        # Initial answer signal
-        sig = true_signal(RIF(0, reach.time), mask)
+        # Monitor psi
+        psi_mask = (sig_neg_phi.to_mask_until(J) & mask.P(J)
+                    if mask is not None
+                    else None)
+        sig_psi = self.psi.signal(reach, odes, mask=psi_mask, **kwargs)
 
-        # Perform monitoring on decomposition
-        mask_j = mask
-        for sig_phi_j in sig_phi.decompose():
-            psi_mask = (sig_phi_j.to_mask_and().H(J) & mask_j.H(J)
-                        if mask is not None
-                        else None)
-            sig_psi = self.psi.signal(reach, odes, mask=psi_mask, **kwargs)
-            sig &= sig_phi_j | (sig_phi_j | sig_psi).G(J)
-
-            if mask is not None:
-                mask_j = mask & sig.to_mask_and()
-                if not len(mask_j.pos):
-                    break
+        # Compute overall answer
+        return reduce(operator.and_,
+                      (~sig_phi_j | (~sig_phi_j | sig_psi).G(J)
+                       for sig_phi_j in sig_phi.decomposition),
+                      true_signal(RIF(0, reach.time), mask))
 
         return sig
         # Mask free version:
-        # return self.phi.signal(reach, odes, **kwargs).U(
-        #     self.interval, self.psi.signal(reach, odes, **kwargs))
+        # return ~(~self.phi.signal(reach, odes, **kwargs)).U(
+        #     self.interval, ~self.psi.signal(reach, odes, **kwargs))
 
     def context_signal(self, reach, odes, initials, **kwargs):
         return ~(~self.phi.context_signal(reach, odes, initials, **kwargs)).U(
