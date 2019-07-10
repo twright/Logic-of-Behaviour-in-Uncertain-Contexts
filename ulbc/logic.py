@@ -24,7 +24,7 @@ from ulbc.interval_utils import finterval
 from ulbc.signal_masks import (Mask, mask_zero, context_mask_zero,
                                true_context_mask)
 from ulbc.matricies import *
-
+from ulbc.bondcalculus import System
 
 class Logic(object):
     __metaclass__ = ABCMeta
@@ -37,19 +37,36 @@ class Logic(object):
             self._R = sage.PolynomialRing(sage.QQ, arg)
             self._vars = OrderedDict(zip(arg, self._R.gens()))
 
-    def signal_for_system(self, odes, initials, duration, use_masks=False,
+    def signal_for_system(self, *args, use_masks=False,
                           mask=None, **kwargs):
+        """
+        call as either 
+        signal_for_system(odes, initials, duration, use_masks=<bool>, mask=<mask>)
+        or
+        signal_for_system(system, duration, use_masks=<bool>, mask=<mask>)
+        """
         use_masks |= mask is not None
         t0 = time.time()
+
+        # argument handling
         if 'order' not in kwargs:
             kwargs['order'] = 10
         if 'step' not in kwargs:
             kwargs['step'] = (0.001, 0.1)
-        reach = Reach(
-            odes,
-            initials,
-            # Run for a little extra time to account for rounding
-            # errors and temporal quantifiers
+
+        if len(args) == 3:
+            odes, initials, duration = args
+            R, x = odes[0].parent().objgens()
+            system = System(R, x, initials, odes)
+        elif len(args) == 2:
+            system, duration = args
+        else:
+            raise ValueError("Wrong number of args!")
+        
+        reach = system.reach(
+            # Run for a little extra time to make sure endpoint of
+            # interval is strictly inside time-domain of reachset
+            # accounting for rounding errors and temporal quantifiers
             self.duration + duration + 1e-3,
             **kwargs
         )
@@ -60,17 +77,18 @@ class Logic(object):
             mask = Mask(domain, [domain])
 
         # Check that flowstar ran for the whole timeframe
-        if not reach.ran or reach.result > 3:
+        if not reach.successful:
             raise FlowstarFailedException(
                 "Did not run successfully!\n"
                 "status = {}\nnum_flowpipes".format(reach.result,
                                                     reach.num_flowpipes))
+        # Report time of each stage of computation
         t1 = time.time()
         print("Computed {} flowpipes in {} sec".format(
             reach.num_flowpipes, t1 - t0))
         reach.prepare()
         t2 = time.time()
-        res = self.signal(reach, odes, mask=mask, **kwargs
+        res = self.signal(reach, system.y, mask=mask, **kwargs
                           ).to_domain(RIF(0, duration))
         t3 = time.time()
         print("Monitored signal {} sec".format(t3 - t2))
@@ -234,7 +252,7 @@ class Atomic(Logic):
 
         return sage.plot((lo, up), (0, R.time))
 
-    def signal_for_system(self, odes, initials, duration, use_masks=False,
+    def signal_for_system(self, *args, use_masks=False,
                           mask=None, **kwargs):
         """
         >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
@@ -246,11 +264,18 @@ class Atomic(Logic):
         >>> Atomic(x-2.5).signal_for_system(odes, initials, 0)(0)
         False
         """
+        duration = args[-1]
         use_masks |= mask is not None
         # Do the smart thing in the case of duration 0
         if duration == 0:
             mask = mask_zero if use_masks else None
             # print("our mask =", repr(mask))
+            if len(args) == 3:
+                initials = args[1]
+            elif len(args) == 2:
+                initials = args[0].y0
+            else:
+                raise ValueError("Wrong number of arguments!")
             res = Poly(self.p)(initials)
             if res.lower() > 0:
                 return true_signal(RIF(0, 0), mask=mask)
@@ -259,8 +284,7 @@ class Atomic(Logic):
             else:
                 return Signal(RIF(0, 0), [], mask=mask)
         else:
-            return super(Atomic, self).signal_for_system(odes, initials,
-                                                         duration,
+            return super(Atomic, self).signal_for_system(*args,
                                                          use_masks=use_masks,
                                                          mask=mask,
                                                          **kwargs)
@@ -607,6 +631,7 @@ class Context(Logic):
 
     def context_signal_phi_fn(self, kwargs, odes, xs, use_masks=False,
                               refine=0):
+        # TODO: mask clearly needs defining!
         ctx_sig = self.phi.context_signal_for_system(odes, xs, 1e-3,
                                                      mask=mask, **kwargs)
         sig = ctx_sig.refined_signal(refine)
@@ -1025,8 +1050,6 @@ class R(Logic):
                       (~sig_phi_j | (~sig_phi_j | sig_psi).G(J)
                        for sig_phi_j in sig_phi.decomposition),
                       true_signal(RIF(0, reach.time), mask))
-
-        return sig
         # Mask free version:
         # return ~(~self.phi.signal(reach, odes, **kwargs)).U(
         #     self.interval, ~self.psi.signal(reach, odes, **kwargs))

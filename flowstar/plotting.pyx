@@ -11,7 +11,7 @@ import sage.all as sage
 
 
 cdef class FlowstarPlotMixin:
-    def plot(CReach self, x, y, bytes filename, plot_type=1):
+    def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):
         if not self.ran:
             raise Exception('Not ran!')
 
@@ -20,14 +20,19 @@ cdef class FlowstarPlotMixin:
 
         C.plotFormat = 0 # GNUPLOT format
         C.plotSetting = plot_type
-        cdef char * c_filename = filename
+        b_filename : bytes = filename.encode()
+        cdef char * c_filename = b_filename
         if len(filename) >= 100:
             raise Exception('Filename too long!')
         strcpy(C.outputFileName, c_filename)
+        # print("filename is", filename, "->", c_filename.decode())
 
         # prepare for plotting -- must be done here, not in run since this
         # depends on the output axes
-        self.prepare()
+        # Must be prepare_for_plotting rather than simply prepare since
+        # we need to compose the Taylor models here to avoid
+        # a segfault when sage tries to manipulate them.
+        self.prepare_for_plotting()
         # set bProjected = True since apparently prepareForPlotting has
         # already projected the flowpipes to the correct dimensions
 
@@ -43,14 +48,15 @@ cdef class FlowstarPlotMixin:
             C.plot_2D(False)
 
         # note: filename is unsanitized
+        # print('trying to process', './outputs/{}.plt'.format(filename))
         call(['gnuplot', './outputs/{}.plt'.format(filename)])
 
-    def wplot(self, str x, str y, int plot_type=1, bytes filename = None):
+    def wplot(self, bytes x, bytes y, int plot_type=1, str filename = None):
         from wand.image import Image
         import uuid
 
         if filename is None:
-            filename = bytes(uuid.uuid4())
+            filename = uuid.uuid4().hex
         self.plot(x, y, filename, plot_type)
         img = Image(filename='./images/{}.eps'.format(filename), format='eps')
         img.rotate(90)

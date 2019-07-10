@@ -539,6 +539,11 @@ cdef class CReach:
         return float(self.c_reach.time)
 
     @property
+    def successful(self) -> bool:
+        """Has flowstar ran successfully for the whole time period."""
+        return self.ran and self.result <= 3
+
+    @property
     def ode_strs(self):
         res = []
         cdef string ode_str
