@@ -2,6 +2,7 @@ from flowstar.Interval cimport Interval
 from flowstar.Polynomial cimport Polynomial
 
 from libcpp.vector cimport vector
+from libcpp.list cimport list as clist
 
 cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
   cdef cppclass TaylorModel:
@@ -21,9 +22,9 @@ cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
                     const int order,
                     const Interval & cutoff_threshold) const
     void mul_ctrunc_assign(const TaylorModel & tm,
-                            const vector[Interval] & domain,
-                            const int order,
-                            const Interval & cutoff_threshold)
+                           const vector[Interval] & domain,
+                           const int order,
+                           const Interval & cutoff_threshold)
     void add(TaylorModel & result, const TaylorModel & tm) const
     void sub(TaylorModel & result, const TaylorModel & tm) const
     void add_assign(const TaylorModel & tm)
@@ -34,6 +35,44 @@ cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
                     const vector[Interval] & intVals) const
     Polynomial expansion
     Interval remainder
+
+    # Conversion/expansion operations
+    void exp_taylor(TaylorModel & result,
+                    clist[Interval] & ranges,
+                    const vector[Interval] & step_exp_table,
+                    const int numVars,
+                    const int order,
+                    const Interval & cutoff_threshold) const
+    void rec_taylor(TaylorModel & result,
+                    clist[Interval] & ranges,
+                    const vector[Interval] & step_exp_table,
+                    const int numVars,
+                    const int order,
+                    const Interval & cutoff_threshold) const
+    void sin_taylor(TaylorModel & result,
+                    clist[Interval] & ranges,
+                    const vector[Interval] & step_exp_table,
+                    const int numVars,
+                    const int order,
+                    const Interval & cutoff_threshold) const
+    void cos_taylor(TaylorModel & result,
+                    clist[Interval] & ranges,
+                    const vector[Interval] & step_exp_table,
+                    const int numVars,
+                    const int order,
+                    const Interval & cutoff_threshold) const
+    void log_taylor(TaylorModel & result,
+                    clist[Interval] & ranges,
+                    const vector[Interval] & step_exp_table,
+                    const int numVars,
+                    const int order,
+                    const Interval & cutoff_threshold) const
+    void sqrt_taylor(TaylorModel & result,
+                     clist[Interval] & ranges,
+                     const vector[Interval] & step_exp_table,
+                     const int numVars,
+                     const int order,
+                     const Interval & cutoff_threshold) const
 
   cdef cppclass TaylorModelVec:
     TaylorModelVec()

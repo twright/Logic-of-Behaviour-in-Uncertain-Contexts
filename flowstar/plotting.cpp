@@ -12,7 +12,7 @@
             "flowstar/flowstar-2.1.0/include.h"
         ],
         "extra_compile_args": [
-            "-O0",
+            "-O3",
             "-std=c++17",
             "-Wno-register",
             "-march=native",

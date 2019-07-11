@@ -3,12 +3,20 @@
 /* BEGIN: Cython Metadata
 {
     "distutils": {
-        "depends": [],
+        "depends": [
+            "flowstar/flowstar-2.1.0/Continuous.h",
+            "flowstar/flowstar-2.1.0/Interval.h",
+            "flowstar/flowstar-2.1.0/Monomial.h",
+            "flowstar/flowstar-2.1.0/Polynomial.h",
+            "flowstar/flowstar-2.1.0/TaylorModel.h",
+            "flowstar/flowstar-2.1.0/include.h"
+        ],
         "extra_compile_args": [
             "-O3",
             "-std=c++17",
             "-Wno-register",
-            "-march=native"
+            "-march=native",
+            "-mtune=native"
         ],
         "extra_link_args": [
             "-std=c++17"

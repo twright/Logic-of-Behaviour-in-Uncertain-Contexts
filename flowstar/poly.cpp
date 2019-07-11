@@ -15,7 +15,8 @@
             "-O3",
             "-std=c++17",
             "-Wno-register",
-            "-march=native"
+            "-march=native",
+            "-mtune=native"
         ],
         "extra_link_args": [
             "-std=c++17"
