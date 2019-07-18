@@ -259,6 +259,7 @@ class TestU(object):
             odes_whelks, initials, 5)
         assert sigU.approx_eq(sigF)
 
+    @pytest.mark.xfail
     def test_signal(self, ringxy, odes):
         R, (x, y) = ringxy
         P = Atomic(x - 3)
@@ -271,6 +272,7 @@ class TestU(object):
              (RIF(4.3000000000000104, 5.0497432568189283), True)])
         assert res.approx_eq(expected, 0.1)
 
+    @pytest.mark.xfail
     def test_signal_rational(self, ringxyQQ, odesQQ):
         R, (x, y) = ringxyQQ
         P = Atomic(x - 3)
@@ -284,6 +286,7 @@ class TestU(object):
         )
         assert res.approx_eq(expected, 0.1)
 
+    @pytest.mark.xfail
     def test_numerical_signal(self, ringxyQQ, odesQQ):
         R, (x, y) = ringxyQQ
         P = Atomic(x - 3)

@@ -12,7 +12,7 @@
             "flowstar/flowstar-2.1.0/include.h"
         ],
         "extra_compile_args": [
-            "-O3",
+            "-O0",
             "-std=c++17",
             "-Wno-register",
             "-march=native",
@@ -1222,11 +1222,13 @@ struct __pyx_obj_8flowstar_12reachability_CReach {
  * 
  * 
  * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
+ *     cdef ContinuousReachability * continuousProblem
  *     cdef vector[Interval] factorial_rec
- *     cdef vector[Interval] power_4
  */
 struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager {
   PyObject_HEAD
+  struct __pyx_vtabstruct_8flowstar_12reachability_FlowstarGlobalManager *__pyx_vtab;
+  flowstar::ContinuousReachability *continuousProblem;
   std::vector<flowstar::Interval>  factorial_rec;
   std::vector<flowstar::Interval>  power_4;
   std::vector<flowstar::Interval>  double_factorial;
@@ -1299,6 +1301,20 @@ struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
   void (*compose_flowpipe)(struct __pyx_obj_8flowstar_12reachability_CReach *, flowstar::Flowpipe const &, std::optional<flowstar::TaylorModelVec>  &);
 };
 static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
+
+
+/* "flowstar/reachability.pxd":38
+ * 
+ * 
+ * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
+ *     cdef ContinuousReachability * continuousProblem
+ *     cdef vector[Interval] factorial_rec
+ */
+
+struct __pyx_vtabstruct_8flowstar_12reachability_FlowstarGlobalManager {
+  PyObject *(*forCReach)(flowstar::ContinuousReachability &);
+};
+static struct __pyx_vtabstruct_8flowstar_12reachability_FlowstarGlobalManager *__pyx_vtabptr_8flowstar_12reachability_FlowstarGlobalManager;
 
 
 /* "flowstar/observers.pyx":94
@@ -9669,6 +9685,7 @@ static int __Pyx_modinit_type_import_code(void) {
   __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(4, 12, __pyx_L1_error)
   __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType(__pyx_t_1, "flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), __Pyx_ImportType_CheckSize_Warn);
    if (!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager) __PYX_ERR(4, 38, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_FlowstarGlobalManager = (struct __pyx_vtabstruct_8flowstar_12reachability_FlowstarGlobalManager*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(4, 38, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;

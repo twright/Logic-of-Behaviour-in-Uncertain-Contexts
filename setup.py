@@ -36,6 +36,26 @@ extensions = [
         include_dirs=LIB_DIRS,
     ),
     Extension(
+        name='flowstar.modelParser',
+        sources=['flowstar/modelParser.pyx'],
+        language='c++',
+        libraries=LIBS,
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+    ),
+    Extension(
+        name='flowstar.taylormodel',
+        sources=['flowstar/taylormodel.pyx'],
+        language='c++',
+        libraries=LIBS,
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+    ),
+    Extension(
         name='flowstar.poly',
         sources=['flowstar/poly.pyx'],
         language='c++',
@@ -172,7 +192,7 @@ class TestCommand(Command):
         self.run_command('build_ext')
         # self.run_command('pytest')
         self.announce('Testing...')
-        cmd = ['./python3', '-m', 'pytest']  # , '--doctest-cython']
+        cmd = ['./python3', '-m', 'pytest', '--disable-pytest-warnings']  # , '--doctest-cython']
         if self.verbose_test:
             cmd.append('-v')
         if self.all:

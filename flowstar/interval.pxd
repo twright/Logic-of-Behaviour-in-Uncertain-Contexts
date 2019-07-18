@@ -8,6 +8,7 @@ cdef str as_str(const Interval &)
 cpdef void set_precision(int prec)
 cpdef int get_precision()
 cdef Interval make_interval(object i)
+cdef vector[Interval] make_intervals(list intervals)
 cdef cbool overlaps(const Interval &, const Interval &) nogil
 cdef void interval_union(Interval&, const Interval&) nogil
 cdef void interval_vect_union(vector[Interval]&, vector[Interval]&) nogil

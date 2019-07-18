@@ -1,0 +1,15 @@
+from libcpp.vector cimport vector
+# from libcpp.list cimport list as clist
+from libcpp.string cimport string
+
+from flowstar.Continuous cimport ContinuousReachability
+
+
+cdef extern from "modelParser.h" nogil:
+    cdef void setContinuousProblem(ContinuousReachability &)
+    cdef void saveContinuousProblem(ContinuousReachability &)
+    cdef ContinuousReachability continuousProblem
+    cdef int yydebug
+
+
+cdef void setYYDebug(bint)

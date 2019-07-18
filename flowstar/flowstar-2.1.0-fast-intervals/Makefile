@@ -24,9 +24,11 @@ lib: $(OBJS) lex.yy.o modelParser.tab.o
 
 modelParser.tab.c: modelParser.y
 	bison -d -v modelParser.y
+	# bison --debug --verbose -d -v modelParser.y
 
 lex.yy.c: modelLexer.l modelParser.tab.c
 	flex modelLexer.l
+	# flex --debug modelLexer.l
 
 clean:
 	rm -f flowstar *.o libflowstar.a *~ modelParser.tab.c modelParser.tab.h modelParser.output lex.yy.c

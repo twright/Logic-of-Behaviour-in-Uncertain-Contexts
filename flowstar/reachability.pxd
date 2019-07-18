@@ -36,7 +36,11 @@ cdef class CReach:
 
 
 cdef class FlowstarGlobalManager:
+    cdef ContinuousReachability * continuousProblem
     cdef vector[Interval] factorial_rec
     cdef vector[Interval] power_4
     cdef vector[Interval] double_factorial
     cdef vector[string] domainVarNames
+
+    @staticmethod
+    cdef forCReach(ContinuousReachability &)

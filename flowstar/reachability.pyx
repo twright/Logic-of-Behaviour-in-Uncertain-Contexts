@@ -5,6 +5,7 @@ from __future__ import division, print_function
 
 from flowstar.Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
 from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
+from flowstar.taylormodel import FlowstarConverter
 from flowstar.Interval cimport Interval, intervalNumPrecision
 from flowstar.Polynomial cimport (Polynomial, power_4, double_factorial,
                                   factorial_rec)
@@ -13,6 +14,7 @@ cimport flowstar.interval as interval
 cimport flowstar.plotting as plotting
 from flowstar.interval cimport interval_time_fn, interval_fn
 from flowstar.observable cimport observable
+from flowstar.modelParser cimport setContinuousProblem, saveContinuousProblem, setYYDebug, continuousProblem
 
 from cython.operator cimport dereference as deref, preincrement as inc
 from libcpp.vector cimport vector
@@ -34,9 +36,165 @@ cdef class CReach:
         if len(args) == 1 or len(args) == 2:
             ## Copy constructor
             self._init_clone(*args)
+        elif isinstance(args[1][0], str):
+            ## Construct from string formatted ODE arguments 
+            self._init_non_polynomial_str_args(*args, **kwargs)
+        elif any(ode in sage.SR for ode in args[1]):
+            print("ode in symbolic ring")
+            ## Construct from sage expressions
+            self._init_non_polynomial_sage_args(*args, **kwargs)
         else:
-            ## Construct from arguments
+            ## Construct polynomial from arguments
             self._init_args(*args, **kwargs)
+
+    def _init_non_polynomial_sage_args(
+        self,
+        vars,
+        odes,
+        *args,
+        **kwargs,
+    ):
+        str_vars = [str(v) for v in vars]
+        converter = FlowstarConverter(str_vars)
+        str_odes = [converter(sage.SR(ode)) for ode in odes]
+        self._init_non_polynomial_str_args(str_vars, str_odes, *args, **kwargs)
+
+    def _init_non_polynomial_str_args(
+        self,
+        vars,
+        odes,
+        initials,
+        time,
+        step=0.01,
+        precondition=0,
+        order=2,
+        orders=None,
+        verbose=True,
+        # Must be NONPOLY_TAYLOR
+        # integrationScheme=2,
+        cutoff_threshold=1e-7,
+        estimation=1e-3,
+        max_remainder_queue=200,
+        maxNumSteps=100,
+        run=True,
+        symbolic_composition=False,
+        precompose_taylor_models=False,
+        **kwargs):
+        global continuousProblem
+
+        self.ran = False
+        self.prepared = False
+        self.prepared_for_plotting = False
+        self.result = 0
+        self.symbolic_composition = symbolic_composition
+
+        print("run =", run)
+
+        # Create global variable manager
+        self.global_manager = FlowstarGlobalManager.forCReach(self.c_reach)
+
+        cdef ContinuousReachability * C
+        cdef Interval zero_int
+        cdef vector[Flowpipe] initials_fpvect
+        cdef vector[string] ode_strs
+        self.var_ring = sage.PolynomialRing(sage.RIF, ', '.join([str(v) for v in vars]))
+
+        with self.global_manager:
+            C = &continuousProblem
+            # --- Steps
+            try:
+                (step_lo, step_hi) = step
+                C.bAdaptiveSteps = True
+            except:
+                step_lo = step_hi = step
+                C.bAdaptiveSteps = False
+            C.miniStep = <double>step_lo
+            C.step = <double>step_hi
+
+            # --- Orders
+            # The orders and order kwargs are mutually exclusive
+            # Note: orderType = 0 means a single, global order
+            # importantly, in both cases we make sure
+            # len(orders) == len(C.orders) == len(vars)
+            if orders is None:
+                orders = [order if isinstance(order, tuple) else (order, order)]
+                orders *= len(vars)
+                C.orderType = 0
+            else:
+                C.orderType = 1
+            order_lo = min((order[0] if isinstance(order, tuple) else order)
+                        for order in orders)
+            order_hi = max((order[1] if isinstance(order, tuple) else order)
+                        for order in orders)
+            C.bAdaptiveOrders = order_lo < order_hi
+            for order in orders:
+                try:
+                    (order_lo, order_hi) = order
+                except:
+                    order_lo = order_hi = order
+                C.orders.push_back(order_lo)
+                C.maxOrders.push_back(order_hi)
+            C.globalMaxOrder = order_hi
+
+            # --- The rest
+            C.time = <double>time
+            C.precondition = precondition
+            C.plotSetting = 1  # We have to set this to something, but should be
+            # set by plot method
+            C.bPrint = verbose
+            C.bSafetyChecking = False
+            C.bPlot = True
+            C.bDump = False
+            C.integrationScheme = 4 # NONPOLY_TAYLOR
+            C.cutoff_threshold = Interval(-cutoff_threshold,cutoff_threshold)
+            for _ in odes:
+                C.estimation.push_back(Interval(-estimation,estimation))
+            C.maxNumSteps = maxNumSteps
+            C.max_remainder_queue = max_remainder_queue
+
+            # Declare state/taylor model variables
+            C.declareTMVar(b"local_t")
+            for i, var in enumerate(vars, 1):
+                var_str = var.encode('utf-8')
+                print('var =', var, 'type(var) =', type(var), 'var_str =',
+                    var_str.decode('utf-8'))
+                C.declareStateVar(<string>var_str)
+                assert i == C.getIDForStateVar(<string>var_str) + 1
+                C.declareTMVar(<string>"local_var_{}".format(i).encode('utf-8'))
+
+            # --- Creating the continuous system ---
+            assert len(odes) == len(initials)
+            assert len(odes) > 0
+            assert all(isinstance(ode, str)
+                    for ode in odes)
+
+            # We should do something about the var ring!
+            # cdef 
+            for ode in odes:
+                ode_strs.push_back(ode.encode('utf-8'))
+
+            # Create initial conditions
+            for initial in initials:
+                self.initials.push_back(interval.make_interval(initial))
+
+            initials_fpvect.push_back(Flowpipe(self.initials, zero_int))
+            print('initials = {}'.format(initials))
+
+            # Create system object
+            # The continuousProblem needs to be setup and set in parser before we call
+            C.system = ContinuousSystem(ode_strs, initials_fpvect)
+
+            # === Set properties ===
+
+        # Run immediately?
+        if run:
+            # setContinuousProblem(deref(C))
+            self.run()
+            if self.ran and precompose_taylor_models:
+                t0 = pytime()
+                self.precompose_taylor_models()
+                t1 = pytime()
+                print("Pre-composing Taylor models: {} sec".format(t1 - t0))
 
     def _init_clone(CReach self, CReach other, initials=None):
         cdef Interval zero_int
@@ -381,6 +539,8 @@ cdef class CReach:
         creates a placeholder array of optionals, since we now perform
         composition on the fly as required.
         """
+        global continuousProblem
+
         if not self.ran:
             raise Exception('Not ran!')
 
@@ -391,7 +551,7 @@ cdef class CReach:
                 # Initialize flowpipes_compo to an empty array of the right
                 # length
                 self.flowpipes_compo = vector[optional[TaylorModelVec]](
-                    self.c_reach.flowpipes.size(),
+                    continuousProblem.flowpipes.size(),
                     optional[TaylorModelVec](),
                 )
                 # print("In prepare! flowpipes_compo.size() =",
@@ -399,28 +559,34 @@ cdef class CReach:
                 self.prepared = True
 
                 # Prepare domains
-                self.c_reach.domains.clear()
-                for fp in self.c_reach.flowpipes:
-                    self.c_reach.domains.push_back(fp.domain)
+                continuousProblem.domains.clear()
+                for fp in continuousProblem.flowpipes:
+                    continuousProblem.domains.push_back(fp.domain)
 
     def prepare_for_plotting(self):
         """Prepare for plotting / evaluating."""
+        global continuousProblem
+
         self.prepare()
 
         self.precompose_taylor_models()
         # print("in prepare for plotting")
 
         cdef:
-            clist[Flowpipe].iterator fp = self.c_reach.flowpipes.begin()
-            clist[Flowpipe].iterator fp_end = self.c_reach.flowpipes.end()
+            clist[Flowpipe].iterator fp
+            clist[Flowpipe].iterator fp_end
             vector[optional[TaylorModelVec]].iterator fp_compo = \
                 self.flowpipes_compo.begin()
             vector[optional[TaylorModelVec]].iterator fp_compo_end = \
                 self.flowpipes_compo.end()
 
-        if not self.prepared_for_plotting:
-            self.c_reach.flowpipesCompo.clear()
-            self.c_reach.domains.clear()
+        with self.global_manager:
+            fp = continuousProblem.flowpipes.begin()
+            fp_end = continuousProblem.flowpipes.end()
+
+            if not self.prepared_for_plotting:
+                continuousProblem.flowpipesCompo.clear()
+                continuousProblem.domains.clear()
 
             # print("fp.size", self.c_reach.flowpipes.size())
             # print("fp_compo.size", self.flowpipes_compo.size())
@@ -428,16 +594,16 @@ cdef class CReach:
             # print('fp eq:      ', fp == fp_end)
             # print('fp_compo eq:', fp_compo == fp_compo_end)
 
-            while fp != fp_end and fp_compo != fp_compo_end:
-                assert deref(fp_compo).has_value()
-                # print("in prep loop")
-                self.c_reach.flowpipesCompo.push_back(deref(fp_compo).value())
-                self.c_reach.domains.push_back(deref(fp).domain)
+                while fp != fp_end and fp_compo != fp_compo_end:
+                    assert deref(fp_compo).has_value()
+                    # print("in prep loop")
+                    continuousProblem.flowpipesCompo.push_back(deref(fp_compo).value())
+                    continuousProblem.domains.push_back(deref(fp).domain)
 
-                inc(fp)
-                inc(fp_compo)
+                    inc(fp)
+                    inc(fp_compo)
 
-            self.prepared_for_plotting = True
+                self.prepared_for_plotting = True
 
     def precompose_taylor_models(self):
         """Prepare for plotting / evaluating."""
@@ -478,9 +644,9 @@ cdef class CReach:
         # Create an empty tmv for result of composition
         (&fp_compo)[0] = optional[TaylorModelVec](TaylorModelVec())
 
-        print("composing fp")
-        print("orders =",
-              repr([o for o in self.c_reach.orders]))
+        # print("composing fp")
+        # print("orders =",
+        #       repr([o for o in self.c_reach.orders]))
         # print("cutoff threshold =",
         #       repr([interval.as_str(o) for o in
         #             self.c_reach.cutoff_threshold]))
@@ -491,12 +657,14 @@ cdef class CReach:
                        self.c_reach.cutoff_threshold)
 
     def run(self):
+        global continuousProblem
         if self.ran:
             raise Exception('Already ran')
         try:
-            FlowstarGlobalManager.clear_global()
-            self.result = int(self.c_reach.run())
-            self.global_manager.capture()
+            with self.global_manager:
+                FlowstarGlobalManager.clear_global()
+                self.result = int(continuousProblem.run())
+
             return self.result
         finally:
             self.ran = self.num_flowpipes > 0
@@ -570,6 +738,12 @@ class Reach(plotting.FlowstarPlotMixin,
 
 cdef class FlowstarGlobalManager:
     @staticmethod
+    cdef forCReach(ContinuousReachability & creach):
+        manager = FlowstarGlobalManager()
+        manager.continuousProblem = &creach
+        return manager
+
+    @staticmethod
     def get_global_domain_var_names():
         global domainVarNames
 
@@ -596,7 +770,9 @@ cdef class FlowstarGlobalManager:
         global power_4
         global double_factorial
         global domainVarNames
+        global continuousProblem
 
+        # continuousProblem = ContinuousReachability()
         factorial_rec.clear()
         power_4.clear()
         double_factorial.clear()
@@ -607,13 +783,16 @@ cdef class FlowstarGlobalManager:
         global power_4
         global double_factorial
         global domainVarNames
+        global continuousProblem
 
+        self.continuousProblem[0] = continuousProblem
         self.domainVarNames = domainVarNames
         self.factorial_rec = factorial_rec
         self.power_4 = power_4
         self.double_factorial = double_factorial
 
     def clear(self):
+        # self.continuousProblem = ContinuousReachability()
         self.domainVarNames.clear()
         self.factorial_rec.clear()
         self.power_4.clear()
@@ -625,7 +804,9 @@ cdef class FlowstarGlobalManager:
         global power_4
         global double_factorial
         global domainVarNames
+        global continuousProblem
 
+        continuousProblem = self.continuousProblem[0]
         domainVarNames = self.domainVarNames
         factorial_rec = self.factorial_rec
         power_4 = self.power_4
@@ -635,4 +816,5 @@ cdef class FlowstarGlobalManager:
         self.restore()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        FlowstarGlobalManager.clear_global()
+        self.capture()
+        # FlowstarGlobalManager.clear_global()

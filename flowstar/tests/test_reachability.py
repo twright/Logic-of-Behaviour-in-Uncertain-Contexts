@@ -37,20 +37,29 @@ class TestConvertSpaceDomain(object):
 
 
 class TestReachability(object):
-    def test_constructor(self, ringxy, odes, initials):
+    @staticmethod
+    def test_constructor(ringxy, odes, initials):
         reach = Reach(odes, initials, 2*sage.pi, (0.001, 0.1), order=10)
         assert reach.ran
         assert reach.result == 2
 
-    def test_copy(self, ringxy, odes, reach):
+    @staticmethod
+    def test_copy(ringxy, odes, reach):
         assert reach.ran
         reach1 = Reach(reach)
         assert reach1.ran
 
-    def test_copy_change_initial(self, ringxy, odes, reach):
+    @staticmethod
+    def test_copy_change_initial(ringxy, odes, reach):
         assert reach.ran
         reach1 = Reach(reach)
         assert reach1.ran
+
+    @staticmethod
+    def test_constructor_str():
+        reach = Reach(["x"], ["-x"], [RIF(1,1)], 1, 0.1, order=5)
+        assert reach.ran
+        assert reach.result == 2
 
 
 class TestEval(object):

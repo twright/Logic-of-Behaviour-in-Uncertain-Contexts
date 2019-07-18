@@ -72,7 +72,7 @@ cdef class SagePlotMixin:
         if isinstance(poly, str):
             poly = Poly({str(g): g for g in self.var_ring.gens()}[poly])
         else:
-            poly = Poly(poly)
+            poly = Poly(self.var_ring(poly))
 
         poly_observer = PolyObserver(poly, self, self.symbolic_composition)
 

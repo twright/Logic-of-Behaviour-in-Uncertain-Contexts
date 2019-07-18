@@ -36,6 +36,15 @@ cdef Interval make_interval(object i):
     return Interval(<double>lo, <double>hi)
 
 
+cdef vector[Interval] make_intervals(list intervals):
+    cdef vector[Interval] res
+
+    for interval in intervals:
+        res.push_back(make_interval(interval))
+
+    return res
+
+
 cdef cbool overlaps(const Interval & I, const Interval & J) nogil:
     # Note: this function is conservative for negative results i.e. it returns
     # true whenever two intervals *might* overlap

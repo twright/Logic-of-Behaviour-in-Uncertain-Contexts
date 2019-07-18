@@ -9,12 +9,20 @@
 
 
 	#include "modelParser.h"
+	#define YYDEBUG 1
 
+	extern void setContinuousProblem(flowstar::ContinuousReachability &);
+	extern void saveContinuousProblem(flowstar::ContinuousReachability &);
 	extern int yyerror(const char *);
 	extern int yyerror(std::string);
 	extern int yylex();
 	extern int yyparse();
 	bool err;
+
+	// int yydebug = 1;
+	// int yy_flex_debug = 1;
+
+	// extern int yy_flex_debug = 1;
 
 	int lineNum = 1;
 
@@ -7052,6 +7060,14 @@ NUM
 
 
 %%
+
+void setContinuousProblem(flowstar::ContinuousReachability & cr) {
+	continuousProblem = cr;
+}
+
+void saveContinuousProblem(flowstar::ContinuousReachability & res) {
+	res = continuousProblem;
+}
 
 int yyerror(const char * what)
 {

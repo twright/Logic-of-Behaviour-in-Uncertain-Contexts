@@ -74,12 +74,20 @@
 
 
 	#include "modelParser.h"
+	#define YYDEBUG 1
 
+	extern void setContinuousProblem(flowstar::ContinuousReachability &);
+	extern void saveContinuousProblem(flowstar::ContinuousReachability &);
 	extern int yyerror(const char *);
 	extern int yyerror(std::string);
 	extern int yylex();
 	extern int yyparse();
 	bool err;
+
+	// int yydebug = 1;
+	// int yy_flex_debug = 1;
+
+	// extern int yy_flex_debug = 1;
 
 	int lineNum = 1;
 
@@ -121,7 +129,7 @@
 		exit(1);
 	}
 
-#line 125 "modelParser.tab.c" /* yacc.c:339  */
+#line 133 "modelParser.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -243,7 +251,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 61 "modelParser.y" /* yacc.c:355  */
+#line 69 "modelParser.y" /* yacc.c:355  */
 
 	double dblVal;
 	int intVal;
@@ -271,7 +279,7 @@ union YYSTYPE
 	LTV_Term *p_LTV_Term;
 	ODE_String *p_ODE_String;
 
-#line 275 "modelParser.tab.c" /* yacc.c:355  */
+#line 283 "modelParser.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -288,7 +296,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 292 "modelParser.tab.c" /* yacc.c:358  */
+#line 300 "modelParser.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -593,41 +601,41 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   165,   165,   266,   392,   493,   621,   663,   682,   702,
-     745,   779,   787,   794,   800,   806,   813,   820,   830,   840,
-     850,   859,   864,   869,   874,   879,   885,   891,   896,   915,
-     936,   949,   963,   976,   992,  1018,  1045,  1070,  1096,  1100,
-    1105,  1140,  1174,  1180,  1187,  1194,  1199,  1215,  1225,  1241,
-    1260,  1282,  1301,  1332,  1366,  1403,  1454,  1697,  1719,  1741,
-    1763,  1785,  1805,  1825,  1849,  1873,  1895,  1917,  1939,  1961,
-    1981,  2001,  2025,  2050,  2061,  2073,  2108,  2127,  2137,  2147,
-    2157,  2167,  2177,  2187,  2197,  2207,  2217,  2227,  2237,  2250,
-    2254,  2258,  2270,  2286,  2291,  2296,  2301,  2317,  2329,  2349,
-    2374,  2401,  2442,  2446,  2477,  2501,  2506,  2533,  2554,  2570,
-    2576,  2581,  2622,  2639,  2659,  2664,  2678,  2695,  2700,  2725,
-    2752,  2783,  2814,  2819,  2852,  2885,  2889,  2934,  2988,  3046,
-    3119,  3172,  3239,  3256,  3273,  3297,  3324,  3341,  3365,  3371,
-    3378,  3428,  3478,  3530,  3580,  3630,  3683,  3691,  3699,  3708,
-    3718,  3730,  3735,  3769,  3809,  3814,  3827,  3847,  3874,  3885,
-    3935,  3994,  4019,  4037,  4059,  4073,  4093,  4108,  4112,  4116,
-    4120,  4126,  4163,  4184,  4221,  4237,  4242,  4247,  4252,  4257,
-    4262,  4269,  4306,  4327,  4352,  4379,  4387,  4395,  4400,  4408,
-    4426,  4433,  4461,  4479,  4487,  4495,  4500,  4508,  4526,  4533,
-    4575,  4582,  4592,  4600,  4608,  4613,  4621,  4639,  4646,  4688,
-    4699,  4707,  4715,  4720,  4728,  4746,  4753,  4795,  4807,  4834,
-    4879,  4887,  4895,  4900,  4908,  4926,  4933,  4991,  5007,  5043,
-    5050,  5057,  5073,  5078,  5097,  5106,  5115,  5124,  5133,  5142,
-    5189,  5196,  5219,  5253,  5260,  5267,  5283,  5288,  5307,  5316,
-    5325,  5334,  5343,  5352,  5408,  5414,  5435,  5462,  5470,  5478,
-    5488,  5493,  5506,  5515,  5524,  5533,  5542,  5551,  5561,  5567,
-    5585,  5613,  5624,  5635,  5646,  5657,  5668,  5679,  5690,  5701,
-    5712,  5723,  5735,  5745,  5773,  5792,  5826,  5843,  5860,  5877,
-    5888,  5905,  5921,  5937,  5953,  5969,  5985,  6002,  6017,  6036,
-    6055,  6194,  6214,  6234,  6254,  6276,  6327,  6378,  6429,  6434,
-    6450,  6462,  6474,  6486,  6500,  6533,  6566,  6599,  6604,  6634,
-    6654,  6674,  6694,  6717,  6767,  6817,  6829,  6841,  6853,  6865,
-    6881,  6913,  6945,  6960,  6968,  6976,  6981,  6989,  7006,  7013,
-    7029,  7035
+       0,   173,   173,   274,   400,   501,   629,   671,   690,   710,
+     753,   787,   795,   802,   808,   814,   821,   828,   838,   848,
+     858,   867,   872,   877,   882,   887,   893,   899,   904,   923,
+     944,   957,   971,   984,  1000,  1026,  1053,  1078,  1104,  1108,
+    1113,  1148,  1182,  1188,  1195,  1202,  1207,  1223,  1233,  1249,
+    1268,  1290,  1309,  1340,  1374,  1411,  1462,  1705,  1727,  1749,
+    1771,  1793,  1813,  1833,  1857,  1881,  1903,  1925,  1947,  1969,
+    1989,  2009,  2033,  2058,  2069,  2081,  2116,  2135,  2145,  2155,
+    2165,  2175,  2185,  2195,  2205,  2215,  2225,  2235,  2245,  2258,
+    2262,  2266,  2278,  2294,  2299,  2304,  2309,  2325,  2337,  2357,
+    2382,  2409,  2450,  2454,  2485,  2509,  2514,  2541,  2562,  2578,
+    2584,  2589,  2630,  2647,  2667,  2672,  2686,  2703,  2708,  2733,
+    2760,  2791,  2822,  2827,  2860,  2893,  2897,  2942,  2996,  3054,
+    3127,  3180,  3247,  3264,  3281,  3305,  3332,  3349,  3373,  3379,
+    3386,  3436,  3486,  3538,  3588,  3638,  3691,  3699,  3707,  3716,
+    3726,  3738,  3743,  3777,  3817,  3822,  3835,  3855,  3882,  3893,
+    3943,  4002,  4027,  4045,  4067,  4081,  4103,  4118,  4122,  4126,
+    4130,  4136,  4173,  4194,  4231,  4247,  4252,  4257,  4262,  4267,
+    4272,  4279,  4316,  4337,  4362,  4389,  4397,  4405,  4410,  4418,
+    4436,  4443,  4471,  4489,  4497,  4505,  4510,  4518,  4536,  4543,
+    4585,  4592,  4602,  4610,  4618,  4623,  4631,  4649,  4656,  4698,
+    4709,  4717,  4725,  4730,  4738,  4756,  4763,  4805,  4817,  4844,
+    4889,  4897,  4905,  4910,  4918,  4936,  4943,  5001,  5017,  5053,
+    5060,  5067,  5083,  5088,  5107,  5116,  5125,  5134,  5143,  5152,
+    5199,  5206,  5229,  5263,  5270,  5277,  5293,  5298,  5317,  5326,
+    5335,  5344,  5353,  5362,  5418,  5424,  5445,  5472,  5480,  5488,
+    5498,  5503,  5516,  5525,  5534,  5543,  5552,  5561,  5571,  5577,
+    5595,  5623,  5634,  5645,  5656,  5667,  5678,  5689,  5700,  5711,
+    5722,  5733,  5745,  5755,  5783,  5802,  5836,  5853,  5870,  5887,
+    5898,  5915,  5931,  5947,  5963,  5979,  5995,  6012,  6027,  6046,
+    6065,  6204,  6224,  6244,  6264,  6286,  6337,  6388,  6439,  6444,
+    6460,  6472,  6484,  6496,  6510,  6543,  6576,  6609,  6614,  6644,
+    6664,  6684,  6704,  6727,  6777,  6827,  6839,  6851,  6863,  6875,
+    6891,  6923,  6955,  6970,  6978,  6986,  6991,  6999,  7016,  7023,
+    7039,  7045
 };
 #endif
 
@@ -2236,7 +2244,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 166 "modelParser.y" /* yacc.c:1648  */
+#line 174 "modelParser.y" /* yacc.c:1648  */
     {
 	int mkres = mkdir(outputDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if(mkres < 0 && errno != EEXIST)
@@ -2336,11 +2344,11 @@ yyreduce:
 		}
 	}
 }
-#line 2340 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2348 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 3:
-#line 267 "modelParser.y" /* yacc.c:1648  */
+#line 275 "modelParser.y" /* yacc.c:1648  */
     {
 	int mkres = mkdir(outputDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if(mkres < 0 && errno != EEXIST)
@@ -2465,11 +2473,11 @@ yyreduce:
 		}
 	}
 }
-#line 2469 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2477 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 4:
-#line 393 "modelParser.y" /* yacc.c:1648  */
+#line 401 "modelParser.y" /* yacc.c:1648  */
     {
 	int mkres = mkdir(outputDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if(mkres < 0 && errno != EEXIST)
@@ -2569,11 +2577,11 @@ yyreduce:
 		}
 	}
 }
-#line 2573 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2581 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 5:
-#line 494 "modelParser.y" /* yacc.c:1648  */
+#line 502 "modelParser.y" /* yacc.c:1648  */
     {
 	int mkres = mkdir(outputDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if(mkres < 0 && errno != EEXIST)
@@ -2700,11 +2708,11 @@ yyreduce:
 		}
 	}
 }
-#line 2704 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2712 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 6:
-#line 622 "modelParser.y" /* yacc.c:1648  */
+#line 630 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-9].dblVal) <= 0)
 	{
@@ -2745,11 +2753,11 @@ yyreduce:
 		continuousProblem.plot_2D(false);
 	}
 }
-#line 2749 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2757 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 7:
-#line 664 "modelParser.y" /* yacc.c:1648  */
+#line 672 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-6].dblVal) <= 0)
 	{
@@ -2767,11 +2775,11 @@ yyreduce:
 		continuousProblem.plot_2D(false);
 	}
 }
-#line 2771 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2779 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 8:
-#line 683 "modelParser.y" /* yacc.c:1648  */
+#line 691 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-13].dblVal) <= 0)
 	{
@@ -2790,11 +2798,11 @@ yyreduce:
 		continuousProblem.plot_2D(false);
 	}
 }
-#line 2794 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2802 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 9:
-#line 703 "modelParser.y" /* yacc.c:1648  */
+#line 711 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-14].dblVal) <= 0)
 	{
@@ -2836,11 +2844,11 @@ yyreduce:
 		continuousProblem.plot_2D(false);
 	}
 }
-#line 2840 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2848 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 10:
-#line 746 "modelParser.y" /* yacc.c:1648  */
+#line 754 "modelParser.y" /* yacc.c:1648  */
     {
 	clock_t begin, end;
 
@@ -2873,69 +2881,69 @@ yyreduce:
 		hybridProblem.plot_2D(false);
 	}
 }
-#line 2877 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2885 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 11:
-#line 780 "modelParser.y" /* yacc.c:1648  */
+#line 788 "modelParser.y" /* yacc.c:1648  */
     {
 	if(hybridProblem.bPlot)
 	{
 		hybridProblem.plot_2D(false);
 	}
 }
-#line 2888 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2896 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 12:
-#line 788 "modelParser.y" /* yacc.c:1648  */
+#line 796 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyvsp[-1].ptm)->getExpansion(parseResult.expansion);
 	parseResult.remainder = (yyvsp[-1].ptm)->getRemainder();
 	delete (yyvsp[-1].ptm);
 }
-#line 2898 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2906 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 13:
-#line 795 "modelParser.y" /* yacc.c:1648  */
+#line 803 "modelParser.y" /* yacc.c:1648  */
     {
 	parseResult.remainder = (*(yyvsp[-1].pint));
 	delete (yyvsp[-1].pint);
 }
-#line 2907 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2915 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 14:
-#line 801 "modelParser.y" /* yacc.c:1648  */
+#line 809 "modelParser.y" /* yacc.c:1648  */
     {
 	parseResult.expansion = (*(yyvsp[-1].poly));
 	delete (yyvsp[-1].poly);
 }
-#line 2916 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2924 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 15:
-#line 807 "modelParser.y" /* yacc.c:1648  */
+#line 815 "modelParser.y" /* yacc.c:1648  */
     {
 	parseResult.strExpansion = (yyvsp[-1].p_ODE_String)->ode;
 	parseResult.constant = (yyvsp[-1].p_ODE_String)->constant;
 	delete (yyvsp[-1].p_ODE_String);
 }
-#line 2926 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2934 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 16:
-#line 814 "modelParser.y" /* yacc.c:1648  */
+#line 822 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::up_parseresult = (*(yyvsp[-1].pUpoly));
 	delete (yyvsp[-1].pUpoly);
 }
-#line 2935 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2943 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 17:
-#line 821 "modelParser.y" /* yacc.c:1648  */
+#line 829 "modelParser.y" /* yacc.c:1648  */
     {
 	strcpy(continuousProblem.outputFileName, (yyvsp[0].identifier)->c_str());
 	strcpy(hybridProblem.outputFileName, (yyvsp[0].identifier)->c_str());
@@ -2944,11 +2952,11 @@ yyreduce:
 	hybridProblem.bDump = true;
 	hybridProblem.bPlot = true;
 }
-#line 2948 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2956 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 18:
-#line 831 "modelParser.y" /* yacc.c:1648  */
+#line 839 "modelParser.y" /* yacc.c:1648  */
     {
 	strcpy(continuousProblem.outputFileName, (yyvsp[0].identifier)->c_str());
 	strcpy(hybridProblem.outputFileName, (yyvsp[0].identifier)->c_str());
@@ -2957,11 +2965,11 @@ yyreduce:
 	hybridProblem.bDump = false;
 	hybridProblem.bPlot = true;
 }
-#line 2961 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2969 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 19:
-#line 841 "modelParser.y" /* yacc.c:1648  */
+#line 849 "modelParser.y" /* yacc.c:1648  */
     {
 	strcpy(continuousProblem.outputFileName, (yyvsp[0].identifier)->c_str());
 	strcpy(hybridProblem.outputFileName, (yyvsp[0].identifier)->c_str());
@@ -2970,75 +2978,75 @@ yyreduce:
 	hybridProblem.bDump = true;
 	hybridProblem.bPlot = false;
 }
-#line 2974 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2982 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 20:
-#line 851 "modelParser.y" /* yacc.c:1648  */
+#line 859 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.bDump = false;
 	continuousProblem.bPlot = false;
 	hybridProblem.bDump = false;
 	hybridProblem.bPlot = false;
 }
-#line 2985 "modelParser.tab.c" /* yacc.c:1648  */
+#line 2993 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 21:
-#line 860 "modelParser.y" /* yacc.c:1648  */
+#line 868 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 2992 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3000 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 22:
-#line 865 "modelParser.y" /* yacc.c:1648  */
+#line 873 "modelParser.y" /* yacc.c:1648  */
     {
-}
-#line 2999 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 23:
-#line 870 "modelParser.y" /* yacc.c:1648  */
-    {
-	(yyval.intVal) = 1;
 }
 #line 3007 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
-  case 24:
-#line 875 "modelParser.y" /* yacc.c:1648  */
+  case 23:
+#line 878 "modelParser.y" /* yacc.c:1648  */
     {
-	(yyval.intVal) = 0;
+	(yyval.intVal) = 1;
 }
 #line 3015 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
-  case 25:
-#line 879 "modelParser.y" /* yacc.c:1648  */
+  case 24:
+#line 883 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.intVal) = 0;
 }
 #line 3023 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
-  case 26:
-#line 886 "modelParser.y" /* yacc.c:1648  */
+  case 25:
+#line 887 "modelParser.y" /* yacc.c:1648  */
     {
-	flowstar::domainVarNames = varlist.varNames; 
+	(yyval.intVal) = 0;
 }
 #line 3031 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
+  case 26:
+#line 894 "modelParser.y" /* yacc.c:1648  */
+    {
+	flowstar::domainVarNames = varlist.varNames; 
+}
+#line 3039 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
   case 27:
-#line 892 "modelParser.y" /* yacc.c:1648  */
+#line 900 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 3038 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3046 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 28:
-#line 897 "modelParser.y" /* yacc.c:1648  */
+#line 905 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.flowpipesCompo.push_back(*(yyvsp[-3].tmVec));
 	continuousProblem.domains.push_back(*(yyvsp[-2].intVec));
@@ -3056,11 +3064,11 @@ yyreduce:
 	delete (yyvsp[-3].tmVec);
 	delete (yyvsp[-2].intVec);
 }
-#line 3060 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3068 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 29:
-#line 916 "modelParser.y" /* yacc.c:1648  */
+#line 924 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.flowpipesCompo.push_back(*(yyvsp[-3].tmVec));
 	continuousProblem.domains.push_back(*(yyvsp[-2].intVec));
@@ -3078,11 +3086,11 @@ yyreduce:
 	delete (yyvsp[-3].tmVec);
 	delete (yyvsp[-2].intVec);
 }
-#line 3082 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3090 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 30:
-#line 937 "modelParser.y" /* yacc.c:1648  */
+#line 945 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Flowpipe initialSet;
 
@@ -3094,11 +3102,11 @@ yyreduce:
 	delete (yyvsp[-2].tmVec);
 	delete (yyvsp[-1].intVec);
 }
-#line 3098 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3106 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 31:
-#line 950 "modelParser.y" /* yacc.c:1648  */
+#line 958 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Flowpipe initialSet;
 
@@ -3110,11 +3118,11 @@ yyreduce:
 	delete (yyvsp[-2].tmVec);
 	delete (yyvsp[-1].intVec);
 }
-#line 3114 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3122 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 32:
-#line 964 "modelParser.y" /* yacc.c:1648  */
+#line 972 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.flowpipesCompo.push_back(*(yyvsp[-1].tmVec));
 	int num = continuousProblem.system.initialSets.size();
@@ -3126,11 +3134,11 @@ yyreduce:
 
 	delete (yyvsp[-1].tmVec);
 }
-#line 3130 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3138 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 33:
-#line 977 "modelParser.y" /* yacc.c:1648  */
+#line 985 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.flowpipesCompo.push_back(*(yyvsp[-1].tmVec));
 
@@ -3143,11 +3151,11 @@ yyreduce:
 
 	delete (yyvsp[-1].tmVec);
 }
-#line 3147 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3155 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 34:
-#line 993 "modelParser.y" /* yacc.c:1648  */
+#line 1001 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModelVec tmvDummy;
 
@@ -3172,11 +3180,11 @@ yyreduce:
 	delete (yyvsp[-13].identifier);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 3176 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3184 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 35:
-#line 1019 "modelParser.y" /* yacc.c:1648  */
+#line 1027 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModelVec tmvDummy;
 
@@ -3201,11 +3209,11 @@ yyreduce:
 	delete (yyvsp[-13].identifier);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 3205 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3213 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 36:
-#line 1046 "modelParser.y" /* yacc.c:1648  */
+#line 1054 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForMode(*(yyvsp[-4].identifier));
 	if(id < 0)
@@ -3229,11 +3237,11 @@ yyreduce:
 	continuousProblem.tmVarTab.clear();
 	continuousProblem.tmVarNames.clear();
 }
-#line 3233 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3241 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 37:
-#line 1071 "modelParser.y" /* yacc.c:1648  */
+#line 1079 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForMode(*(yyvsp[-4].identifier));
 	if(id < 0)
@@ -3257,25 +3265,25 @@ yyreduce:
 	continuousProblem.tmVarTab.clear();
 	continuousProblem.tmVarNames.clear();
 }
-#line 3261 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3269 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 38:
-#line 1097 "modelParser.y" /* yacc.c:1648  */
+#line 1105 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 3268 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3276 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 39:
-#line 1101 "modelParser.y" /* yacc.c:1648  */
+#line 1109 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 3275 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3283 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 40:
-#line 1106 "modelParser.y" /* yacc.c:1648  */
+#line 1114 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForMode(*(yyvsp[0].identifier));
 	if(id < 0)
@@ -3309,11 +3317,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 3313 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3321 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 41:
-#line 1141 "modelParser.y" /* yacc.c:1648  */
+#line 1149 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForMode(*(yyvsp[0].identifier));
 	if(id < 0)
@@ -3345,45 +3353,45 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 3349 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3357 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 42:
-#line 1175 "modelParser.y" /* yacc.c:1648  */
+#line 1183 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.bPrint = true;
 	hybridProblem.bPrint = true;
 }
-#line 3358 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3366 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 43:
-#line 1181 "modelParser.y" /* yacc.c:1648  */
+#line 1189 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.bPrint = false;
 	hybridProblem.bPrint = false;
 }
-#line 3367 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3375 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 44:
-#line 1188 "modelParser.y" /* yacc.c:1648  */
+#line 1196 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.unsafeSet = *(yyvsp[-1].vecConstraints);
 	delete (yyvsp[-1].vecConstraints);
 }
-#line 3376 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3384 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 45:
-#line 1195 "modelParser.y" /* yacc.c:1648  */
+#line 1203 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 3383 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3391 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 46:
-#line 1200 "modelParser.y" /* yacc.c:1648  */
+#line 1208 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForMode(*(yyvsp[-3].identifier));
 	if(id < 0)
@@ -3398,11 +3406,11 @@ yyreduce:
 	hybridProblem.bVecUnderCheck[id] = true;
 	delete (yyvsp[-1].vecConstraints);
 }
-#line 3402 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3410 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 47:
-#line 1215 "modelParser.y" /* yacc.c:1648  */
+#line 1223 "modelParser.y" /* yacc.c:1648  */
     {
 	std::vector<flowstar::PolynomialConstraint> vecEmpty;
 	for(int i=0; i<hybridProblem.modeNames.size(); ++i)
@@ -3411,11 +3419,11 @@ yyreduce:
 		hybridProblem.bVecUnderCheck.push_back(false);
 	}
 }
-#line 3415 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3423 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 48:
-#line 1226 "modelParser.y" /* yacc.c:1648  */
+#line 1234 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-2].poly)->degree() < 1)
 	{
@@ -3430,11 +3438,11 @@ yyreduce:
 
 	delete (yyvsp[-2].poly);
 }
-#line 3434 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3442 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 49:
-#line 1242 "modelParser.y" /* yacc.c:1648  */
+#line 1250 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-2].poly)->degree() < 1)
 	{
@@ -3452,11 +3460,11 @@ yyreduce:
 
 	delete (yyvsp[-2].poly);
 }
-#line 3456 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3464 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 50:
-#line 1261 "modelParser.y" /* yacc.c:1648  */
+#line 1269 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-2].poly)->degree() < 1)
 	{
@@ -3477,11 +3485,11 @@ yyreduce:
 
 	delete (yyvsp[-2].poly);
 }
-#line 3481 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3489 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 51:
-#line 1283 "modelParser.y" /* yacc.c:1648  */
+#line 1291 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-6].poly)->degree() < 1)
 	{
@@ -3499,11 +3507,11 @@ yyreduce:
 
 	delete (yyvsp[-6].poly);
 }
-#line 3503 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3511 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 52:
-#line 1302 "modelParser.y" /* yacc.c:1648  */
+#line 1310 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-2].poly)->degree() < 1)
 	{
@@ -3533,11 +3541,11 @@ yyreduce:
 	delete (yyvsp[-2].poly);
 	delete (yyvsp[0].identifier);
 }
-#line 3537 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3545 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 53:
-#line 1333 "modelParser.y" /* yacc.c:1648  */
+#line 1341 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-2].poly)->degree() < 1)
 	{
@@ -3570,11 +3578,11 @@ yyreduce:
 	delete (yyvsp[-2].poly);
 	delete (yyvsp[0].identifier);
 }
-#line 3574 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3582 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 54:
-#line 1367 "modelParser.y" /* yacc.c:1648  */
+#line 1375 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-2].poly)->degree() < 1)
 	{
@@ -3610,11 +3618,11 @@ yyreduce:
 	delete (yyvsp[-2].poly);
 	delete (yyvsp[0].identifier);
 }
-#line 3614 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3622 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 55:
-#line 1404 "modelParser.y" /* yacc.c:1648  */
+#line 1412 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-6].poly)->degree() < 1)
 	{
@@ -3664,19 +3672,19 @@ yyreduce:
 	delete (yyvsp[-3].identifier);
 	delete (yyvsp[-1].identifier);
 }
-#line 3668 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 56:
-#line 1454 "modelParser.y" /* yacc.c:1648  */
-    {
-	(yyval.vecConstraints) = new std::vector<flowstar::PolynomialConstraint>(0);
-}
 #line 3676 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
+  case 56:
+#line 1462 "modelParser.y" /* yacc.c:1648  */
+    {
+	(yyval.vecConstraints) = new std::vector<flowstar::PolynomialConstraint>(0);
+}
+#line 3684 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
   case 57:
-#line 1698 "modelParser.y" /* yacc.c:1648  */
+#line 1706 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3697,11 +3705,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 3701 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3709 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 58:
-#line 1720 "modelParser.y" /* yacc.c:1648  */
+#line 1728 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3722,11 +3730,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 3726 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3734 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 59:
-#line 1742 "modelParser.y" /* yacc.c:1648  */
+#line 1750 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3747,11 +3755,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 3751 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3759 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 60:
-#line 1764 "modelParser.y" /* yacc.c:1648  */
+#line 1772 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3772,11 +3780,11 @@ yyreduce:
 
 	delete (yyvsp[-5].strVec);
 }
-#line 3776 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3784 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 61:
-#line 1786 "modelParser.y" /* yacc.c:1648  */
+#line 1794 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3795,11 +3803,11 @@ yyreduce:
 		delete (yyvsp[-1].pFlowpipe);
 	}
 }
-#line 3799 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3807 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 62:
-#line 1806 "modelParser.y" /* yacc.c:1648  */
+#line 1814 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3818,11 +3826,11 @@ yyreduce:
 		delete (yyvsp[-1].pFlowpipe);
 	}
 }
-#line 3822 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3830 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 63:
-#line 1826 "modelParser.y" /* yacc.c:1648  */
+#line 1834 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3845,11 +3853,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 3849 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3857 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 64:
-#line 1850 "modelParser.y" /* yacc.c:1648  */
+#line 1858 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3872,11 +3880,11 @@ yyreduce:
 
 	delete (yyvsp[-5].strVec);
 }
-#line 3876 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3884 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 65:
-#line 1874 "modelParser.y" /* yacc.c:1648  */
+#line 1882 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3897,11 +3905,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 3901 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3909 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 66:
-#line 1896 "modelParser.y" /* yacc.c:1648  */
+#line 1904 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3922,11 +3930,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 3926 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3934 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 67:
-#line 1918 "modelParser.y" /* yacc.c:1648  */
+#line 1926 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3947,11 +3955,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 3951 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3959 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 68:
-#line 1940 "modelParser.y" /* yacc.c:1648  */
+#line 1948 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3972,11 +3980,11 @@ yyreduce:
 
 	delete (yyvsp[-5].strVec);
 }
-#line 3976 "modelParser.tab.c" /* yacc.c:1648  */
+#line 3984 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 69:
-#line 1962 "modelParser.y" /* yacc.c:1648  */
+#line 1970 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -3995,11 +4003,11 @@ yyreduce:
 		delete (yyvsp[-1].pFlowpipe);
 	}
 }
-#line 3999 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4007 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 70:
-#line 1982 "modelParser.y" /* yacc.c:1648  */
+#line 1990 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -4018,11 +4026,11 @@ yyreduce:
 		delete (yyvsp[-1].pFlowpipe);
 	}
 }
-#line 4022 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4030 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 71:
-#line 2002 "modelParser.y" /* yacc.c:1648  */
+#line 2010 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -4045,11 +4053,11 @@ yyreduce:
 
 	delete (yyvsp[-5].tmVec);
 }
-#line 4049 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4057 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 72:
-#line 2026 "modelParser.y" /* yacc.c:1648  */
+#line 2034 "modelParser.y" /* yacc.c:1648  */
     {
 	if(initialSets.size() > 0)
 	{
@@ -4072,11 +4080,11 @@ yyreduce:
 
 	delete (yyvsp[-5].strVec);
 }
-#line 4076 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4084 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 73:
-#line 2051 "modelParser.y" /* yacc.c:1648  */
+#line 2059 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-14].dblVal) < 0)
 	{
@@ -4086,11 +4094,11 @@ yyreduce:
 
 	hybridProblem.maxJumps = (int)(yyvsp[-14].dblVal);
 }
-#line 4090 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4098 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 74:
-#line 2062 "modelParser.y" /* yacc.c:1648  */
+#line 2070 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-14].dblVal) < 0)
 	{
@@ -4100,11 +4108,11 @@ yyreduce:
 
 	hybridProblem.maxJumps = (int)(yyvsp[-14].dblVal);
 }
-#line 4104 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4112 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 75:
-#line 2074 "modelParser.y" /* yacc.c:1648  */
+#line 2082 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForMode(*(yyvsp[-3].identifier));
 	if(id < 0)
@@ -4138,11 +4146,11 @@ yyreduce:
 	delete (yyvsp[-3].identifier);
 	delete (yyvsp[-1].intVec);
 }
-#line 4142 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4150 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 76:
-#line 2109 "modelParser.y" /* yacc.c:1648  */
+#line 2117 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForMode(*(yyvsp[-5].identifier));
 	if(id < 0)
@@ -4159,11 +4167,11 @@ yyreduce:
 	delete (yyvsp[-2].tmVec);
 	delete (yyvsp[-1].intVec);
 }
-#line 4163 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4171 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 77:
-#line 2128 "modelParser.y" /* yacc.c:1648  */
+#line 2136 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].tmVec), *(yyvsp[-2].vecConstraints), ONLY_PICARD, mode_local_setting);
 	mode_local_setting.clear();
@@ -4172,11 +4180,11 @@ yyreduce:
 	delete (yyvsp[-6].tmVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4176 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4184 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 78:
-#line 2138 "modelParser.y" /* yacc.c:1648  */
+#line 2146 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].tmVec), *(yyvsp[-2].vecConstraints), ONLY_PICARD, mode_local_setting);
 	mode_local_setting.clear();
@@ -4185,11 +4193,11 @@ yyreduce:
 	delete (yyvsp[-6].tmVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4189 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4197 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 79:
-#line 2148 "modelParser.y" /* yacc.c:1648  */
+#line 2156 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].tmVec), *(yyvsp[-2].vecConstraints), LOW_DEGREE, mode_local_setting);
 	mode_local_setting.clear();
@@ -4198,11 +4206,11 @@ yyreduce:
 	delete (yyvsp[-6].tmVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4202 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4210 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 80:
-#line 2158 "modelParser.y" /* yacc.c:1648  */
+#line 2166 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].tmVec), *(yyvsp[-2].vecConstraints), LOW_DEGREE, mode_local_setting);
 	mode_local_setting.clear();
@@ -4211,11 +4219,11 @@ yyreduce:
 	delete (yyvsp[-6].tmVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4215 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4223 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 81:
-#line 2168 "modelParser.y" /* yacc.c:1648  */
+#line 2176 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].tmVec), *(yyvsp[-2].vecConstraints), HIGH_DEGREE, mode_local_setting);
 	mode_local_setting.clear();
@@ -4224,11 +4232,11 @@ yyreduce:
 	delete (yyvsp[-6].tmVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4228 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4236 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 82:
-#line 2178 "modelParser.y" /* yacc.c:1648  */
+#line 2186 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].tmVec), *(yyvsp[-2].vecConstraints), HIGH_DEGREE, mode_local_setting);
 	mode_local_setting.clear();
@@ -4237,11 +4245,11 @@ yyreduce:
 	delete (yyvsp[-6].tmVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4241 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4249 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 83:
-#line 2188 "modelParser.y" /* yacc.c:1648  */
+#line 2196 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].strVec), *(yyvsp[-2].vecConstraints), NONPOLY_TAYLOR, mode_local_setting);
 	mode_local_setting.clear();
@@ -4250,11 +4258,11 @@ yyreduce:
 	delete (yyvsp[-6].strVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4254 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4262 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 84:
-#line 2198 "modelParser.y" /* yacc.c:1648  */
+#line 2206 "modelParser.y" /* yacc.c:1648  */
     {
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), *(yyvsp[-6].strVec), *(yyvsp[-2].vecConstraints), NONPOLY_TAYLOR, mode_local_setting);
 	mode_local_setting.clear();
@@ -4263,11 +4271,11 @@ yyreduce:
 	delete (yyvsp[-6].strVec);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4267 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4275 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 85:
-#line 2208 "modelParser.y" /* yacc.c:1648  */
+#line 2216 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::LTI_Dynamics lti_dyn(dyn_A, dyn_B);
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), lti_dyn, *(yyvsp[-2].vecConstraints), mode_local_setting);
@@ -4276,11 +4284,11 @@ yyreduce:
 	delete (yyvsp[-11].identifier);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4280 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4288 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 86:
-#line 2218 "modelParser.y" /* yacc.c:1648  */
+#line 2226 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::LTI_Dynamics lti_dyn(dyn_A, dyn_B);
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), lti_dyn, *(yyvsp[-2].vecConstraints), mode_local_setting);
@@ -4289,11 +4297,11 @@ yyreduce:
 	delete (yyvsp[-11].identifier);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4293 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4301 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 87:
-#line 2228 "modelParser.y" /* yacc.c:1648  */
+#line 2236 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::LTV_Dynamics ltv_dyn(dyn_A_t, dyn_B_t);
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), ltv_dyn, *(yyvsp[-2].vecConstraints), mode_local_setting);
@@ -4302,11 +4310,11 @@ yyreduce:
 	delete (yyvsp[-11].identifier);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4306 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4314 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 88:
-#line 2238 "modelParser.y" /* yacc.c:1648  */
+#line 2246 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::LTV_Dynamics ltv_dyn(dyn_A_t, dyn_B_t);
 	hybridProblem.declareMode(*(yyvsp[-11].identifier), ltv_dyn, *(yyvsp[-2].vecConstraints), mode_local_setting);
@@ -4315,25 +4323,25 @@ yyreduce:
 	delete (yyvsp[-11].identifier);
 	delete (yyvsp[-2].vecConstraints);
 }
-#line 4319 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4327 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 89:
-#line 2251 "modelParser.y" /* yacc.c:1648  */
+#line 2259 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 4326 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4334 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 90:
-#line 2254 "modelParser.y" /* yacc.c:1648  */
+#line 2262 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 4333 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4341 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 91:
-#line 2259 "modelParser.y" /* yacc.c:1648  */
+#line 2267 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].dblVal) <= 0)
 	{
@@ -4344,11 +4352,11 @@ yyreduce:
 	mode_local_setting.bAdaptiveSteps = false;
 	mode_local_setting.step = (yyvsp[0].dblVal);
 }
-#line 4348 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4356 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 92:
-#line 2271 "modelParser.y" /* yacc.c:1648  */
+#line 2279 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].dblVal) <= 0)
 	{
@@ -4363,35 +4371,35 @@ yyreduce:
 		mode_local_setting.estimation.push_back(I);
 	}
 }
-#line 4367 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 93:
-#line 2287 "modelParser.y" /* yacc.c:1648  */
-    {
-	mode_local_setting.estimation = *(yyvsp[-1].intVec);
-}
 #line 4375 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
-  case 94:
-#line 2292 "modelParser.y" /* yacc.c:1648  */
+  case 93:
+#line 2295 "modelParser.y" /* yacc.c:1648  */
     {
-	mode_local_setting.precondition = QR_PRE;
+	mode_local_setting.estimation = *(yyvsp[-1].intVec);
 }
 #line 4383 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
-  case 95:
-#line 2297 "modelParser.y" /* yacc.c:1648  */
+  case 94:
+#line 2300 "modelParser.y" /* yacc.c:1648  */
     {
-	mode_local_setting.precondition = ID_PRE;
+	mode_local_setting.precondition = QR_PRE;
 }
 #line 4391 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
+  case 95:
+#line 2305 "modelParser.y" /* yacc.c:1648  */
+    {
+	mode_local_setting.precondition = ID_PRE;
+}
+#line 4399 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
   case 96:
-#line 2302 "modelParser.y" /* yacc.c:1648  */
+#line 2310 "modelParser.y" /* yacc.c:1648  */
     {
 	int order = (int)(yyvsp[0].dblVal);
 
@@ -4406,11 +4414,11 @@ yyreduce:
 	mode_local_setting.orders.push_back(order);
 	mode_local_setting.globalMaxOrder = order;
 }
-#line 4410 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4418 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 97:
-#line 2318 "modelParser.y" /* yacc.c:1648  */
+#line 2326 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].dblVal) <= 0)
 	{
@@ -4421,11 +4429,11 @@ yyreduce:
 	flowstar::Interval I(-(yyvsp[0].dblVal), (yyvsp[0].dblVal));
 	mode_local_setting.cutoff_threshold = I;
 }
-#line 4425 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4433 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 98:
-#line 2330 "modelParser.y" /* yacc.c:1648  */
+#line 2338 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-4].dblVal) <= 0 || (yyvsp[-1].dblVal) <= 0)
 	{
@@ -4444,11 +4452,11 @@ yyreduce:
 	mode_local_setting.miniStep = (yyvsp[-4].dblVal);
 	mode_local_setting.bAdaptiveOrders = false;
 }
-#line 4448 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4456 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 99:
-#line 2350 "modelParser.y" /* yacc.c:1648  */
+#line 2358 "modelParser.y" /* yacc.c:1648  */
     {
 	int minOrder = (int)(yyvsp[-4].dblVal);
 	int maxOrder = (int)(yyvsp[-1].dblVal);
@@ -4472,11 +4480,11 @@ yyreduce:
 	mode_local_setting.maxOrders.push_back(maxOrder);
 	mode_local_setting.globalMaxOrder = maxOrder;
 }
-#line 4476 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4484 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 100:
-#line 2375 "modelParser.y" /* yacc.c:1648  */
+#line 2383 "modelParser.y" /* yacc.c:1648  */
     {
 	mode_local_setting.bAdaptiveOrders = false;
 	mode_local_setting.orderType = MULTI;
@@ -4502,11 +4510,11 @@ yyreduce:
 
 	mode_local_setting.globalMaxOrder = maxOrder;
 }
-#line 4506 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4514 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 101:
-#line 2402 "modelParser.y" /* yacc.c:1648  */
+#line 2410 "modelParser.y" /* yacc.c:1648  */
     {
 	mode_local_setting.bAdaptiveSteps = false;
 	mode_local_setting.bAdaptiveOrders = true;
@@ -4546,18 +4554,18 @@ yyreduce:
 
 	mode_local_setting.globalMaxOrder = maxOrder;
 }
-#line 4550 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4558 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 102:
-#line 2442 "modelParser.y" /* yacc.c:1648  */
+#line 2450 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 4557 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4565 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 103:
-#line 2447 "modelParser.y" /* yacc.c:1648  */
+#line 2455 "modelParser.y" /* yacc.c:1648  */
     {
 	int startID = hybridProblem.getIDForMode(*(yyvsp[-15].identifier));
 	if(startID < 0)
@@ -4587,11 +4595,11 @@ yyreduce:
 		hybridProblem.declareTrans(startID, endID, *(yyvsp[-9].vecConstraints), *(yyvsp[-5].resetMap), PARA_AGGREG, emptyVec);
 	}
 }
-#line 4591 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4599 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 104:
-#line 2478 "modelParser.y" /* yacc.c:1648  */
+#line 2486 "modelParser.y" /* yacc.c:1648  */
     {
 	int startID = hybridProblem.getIDForMode(*(yyvsp[-12].identifier));
 	if(startID < 0)
@@ -4614,19 +4622,19 @@ yyreduce:
 	std::vector<std::vector<double> > empty;
 	hybridProblem.declareTrans(startID, endID, *(yyvsp[-6].vecConstraints), *(yyvsp[-2].resetMap), INTERVAL_AGGREG, empty);
 }
-#line 4618 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 105:
-#line 2501 "modelParser.y" /* yacc.c:1648  */
-    {
-	hybridProblem.declareTrans();
-}
 #line 4626 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
+  case 105:
+#line 2509 "modelParser.y" /* yacc.c:1648  */
+    {
+	hybridProblem.declareTrans();
+}
+#line 4634 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
   case 106:
-#line 2507 "modelParser.y" /* yacc.c:1648  */
+#line 2515 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.resetMap) = (yyvsp[-10].resetMap);
 
@@ -4652,11 +4660,11 @@ yyreduce:
 
 	delete (yyvsp[-6].poly);
 }
-#line 4656 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4664 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 107:
-#line 2534 "modelParser.y" /* yacc.c:1648  */
+#line 2542 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.resetMap) = (yyvsp[-4].resetMap);
 
@@ -4676,11 +4684,11 @@ yyreduce:
 
 	delete (yyvsp[0].poly);
 }
-#line 4680 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4688 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 108:
-#line 2554 "modelParser.y" /* yacc.c:1648  */
+#line 2562 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = hybridProblem.stateVarNames.size();
 
@@ -4695,28 +4703,28 @@ yyreduce:
 
 	(yyval.resetMap) = new flowstar::ResetMap(tmvReset);
 }
-#line 4699 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4707 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 109:
-#line 2571 "modelParser.y" /* yacc.c:1648  */
+#line 2579 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.dVecVec)->push_back(*(yyvsp[0].dVec));
 	delete (yyvsp[0].dVec);
 }
-#line 4708 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 110:
-#line 2576 "modelParser.y" /* yacc.c:1648  */
-    {
-	(yyval.dVecVec) = new std::vector<std::vector<double> >(0);
-}
 #line 4716 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
+  case 110:
+#line 2584 "modelParser.y" /* yacc.c:1648  */
+    {
+	(yyval.dVecVec) = new std::vector<std::vector<double> >(0);
+}
+#line 4724 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
   case 111:
-#line 2582 "modelParser.y" /* yacc.c:1648  */
+#line 2590 "modelParser.y" /* yacc.c:1648  */
     {
 	int rangeDim = (yyvsp[-1].dVec)->size();
 
@@ -4755,11 +4763,11 @@ yyreduce:
 
 	delete (yyvsp[-1].dVec);
 }
-#line 4759 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4767 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 112:
-#line 2623 "modelParser.y" /* yacc.c:1648  */
+#line 2631 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = hybridProblem.getIDForStateVar(*(yyvsp[-2].identifier));
 
@@ -4775,11 +4783,11 @@ yyreduce:
 	(*(yyval.dVec))[id] = (yyvsp[0].dblVal);
 	delete (yyvsp[-2].identifier);
 }
-#line 4779 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4787 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 113:
-#line 2640 "modelParser.y" /* yacc.c:1648  */
+#line 2648 "modelParser.y" /* yacc.c:1648  */
     {
 	int num = hybridProblem.stateVarNames.size();
 	(yyval.dVec) = new std::vector<double>(num);
@@ -4797,18 +4805,18 @@ yyreduce:
 	(*(yyval.dVec))[id] = (yyvsp[0].dblVal);
 	delete (yyvsp[-2].identifier);
 }
-#line 4801 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4809 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 114:
-#line 2660 "modelParser.y" /* yacc.c:1648  */
+#line 2668 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 4808 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4816 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 115:
-#line 2665 "modelParser.y" /* yacc.c:1648  */
+#line 2673 "modelParser.y" /* yacc.c:1648  */
     {
 	if(!continuousProblem.declareStateVar(*(yyvsp[0].identifier)))
 	{
@@ -4821,11 +4829,11 @@ yyreduce:
 	hybridProblem.declareStateVar(*(yyvsp[0].identifier));
 	delete (yyvsp[0].identifier);
 }
-#line 4825 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4833 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 116:
-#line 2679 "modelParser.y" /* yacc.c:1648  */
+#line 2687 "modelParser.y" /* yacc.c:1648  */
     {
 	if(!continuousProblem.declareStateVar(*(yyvsp[0].identifier)))
 	{
@@ -4838,18 +4846,18 @@ yyreduce:
 	hybridProblem.declareStateVar(*(yyvsp[0].identifier));
 	delete (yyvsp[0].identifier);
 }
-#line 4842 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4850 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 117:
-#line 2696 "modelParser.y" /* yacc.c:1648  */
+#line 2704 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 4849 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4857 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 118:
-#line 2701 "modelParser.y" /* yacc.c:1648  */
+#line 2709 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier)) != -1)
 	{
@@ -4873,11 +4881,11 @@ yyreduce:
 		hybridProblem.declarePar(*(yyvsp[-2].identifier), range);
 	}
 }
-#line 4877 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4885 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 119:
-#line 2726 "modelParser.y" /* yacc.c:1648  */
+#line 2734 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier)) != -1)
 	{
@@ -4901,11 +4909,11 @@ yyreduce:
 		hybridProblem.declarePar(*(yyvsp[-2].identifier), range);
 	}
 }
-#line 4905 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4913 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 120:
-#line 2753 "modelParser.y" /* yacc.c:1648  */
+#line 2761 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.getIDForStateVar(*(yyvsp[0].identifier)) != -1)
 	{
@@ -4935,11 +4943,11 @@ yyreduce:
 		}
 	}
 }
-#line 4939 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4947 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 121:
-#line 2784 "modelParser.y" /* yacc.c:1648  */
+#line 2792 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.getIDForStateVar(*(yyvsp[0].identifier)) != -1)
 	{
@@ -4969,18 +4977,18 @@ yyreduce:
 		}
 	}
 }
-#line 4973 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4981 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 122:
-#line 2814 "modelParser.y" /* yacc.c:1648  */
+#line 2822 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 4980 "modelParser.tab.c" /* yacc.c:1648  */
+#line 4988 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 123:
-#line 2820 "modelParser.y" /* yacc.c:1648  */
+#line 2828 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.getIDForStateVar(*(yyvsp[0].identifier)) != -1)
 	{
@@ -5012,11 +5020,11 @@ yyreduce:
 //		hybridProblem.declareUnc(*$2, range);
 	}
 }
-#line 5016 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5024 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 124:
-#line 2853 "modelParser.y" /* yacc.c:1648  */
+#line 2861 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.getIDForStateVar(*(yyvsp[0].identifier)) != -1)
 	{
@@ -5048,18 +5056,18 @@ yyreduce:
 //		hybridProblem.declareUnc(*$1, range);
 	}
 }
-#line 5052 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5060 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 125:
-#line 2885 "modelParser.y" /* yacc.c:1648  */
+#line 2893 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 5059 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5067 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 126:
-#line 2890 "modelParser.y" /* yacc.c:1648  */
+#line 2898 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-12].dblVal) <= 0)
 	{
@@ -5103,11 +5111,11 @@ yyreduce:
 
 	intervalNumPrecision = (int)(yyvsp[-1].dblVal);
 }
-#line 5107 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5115 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 127:
-#line 2935 "modelParser.y" /* yacc.c:1648  */
+#line 2943 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-18].dblVal) <= 0)
 	{
@@ -5160,11 +5168,11 @@ yyreduce:
 
 	intervalNumPrecision = (int)(yyvsp[-1].dblVal);
 }
-#line 5164 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5172 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 128:
-#line 2989 "modelParser.y" /* yacc.c:1648  */
+#line 2997 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-14].dblVal) <= 0)
 	{
@@ -5221,11 +5229,11 @@ yyreduce:
 
 	delete (yyvsp[-6].iVec);
 }
-#line 5225 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5233 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 129:
-#line 3047 "modelParser.y" /* yacc.c:1648  */
+#line 3055 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-22].dblVal) <= 0)
 	{
@@ -5297,11 +5305,11 @@ yyreduce:
 	delete (yyvsp[-12].iVec);
 	delete (yyvsp[-7].iVec);
 }
-#line 5301 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5309 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 130:
-#line 3120 "modelParser.y" /* yacc.c:1648  */
+#line 3128 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-16].dblVal) <= 0 || (yyvsp[-13].dblVal) <= 0)
 	{
@@ -5353,11 +5361,11 @@ yyreduce:
 
 	intervalNumPrecision = (int)(yyvsp[-1].dblVal);
 }
-#line 5357 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5365 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 131:
-#line 3173 "modelParser.y" /* yacc.c:1648  */
+#line 3181 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[-18].dblVal) <= 0 || (yyvsp[-15].dblVal) <= 0)
 	{
@@ -5422,11 +5430,11 @@ yyreduce:
 
 	delete (yyvsp[-6].iVec);
 }
-#line 5426 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5434 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 132:
-#line 3240 "modelParser.y" /* yacc.c:1648  */
+#line 3248 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].dblVal) <= 0)
 	{
@@ -5442,11 +5450,11 @@ yyreduce:
 		hybridProblem.global_setting.estimation.push_back(I);
 	}
 }
-#line 5446 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5454 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 133:
-#line 3257 "modelParser.y" /* yacc.c:1648  */
+#line 3265 "modelParser.y" /* yacc.c:1648  */
     {
 	for(int i=0; i<(yyvsp[-1].intVec)->size(); ++i)
 	{
@@ -5461,11 +5469,11 @@ yyreduce:
 	hybridProblem.global_setting.estimation = *(yyvsp[-1].intVec);
 	delete (yyvsp[-1].intVec);
 }
-#line 5465 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5473 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 134:
-#line 3274 "modelParser.y" /* yacc.c:1648  */
+#line 3282 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.intVec) = (yyvsp[-8].intVec);
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-6].identifier));
@@ -5488,11 +5496,11 @@ yyreduce:
 	(*(yyval.intVec))[id] = I;
 	delete (yyvsp[-6].identifier);
 }
-#line 5492 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5500 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 135:
-#line 3298 "modelParser.y" /* yacc.c:1648  */
+#line 3306 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size();
 	(yyval.intVec) = new std::vector<flowstar::Interval>(numVars);
@@ -5517,11 +5525,11 @@ yyreduce:
 	(*(yyval.intVec))[id] = I;
 	delete (yyvsp[-6].identifier);
 }
-#line 5521 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5529 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 136:
-#line 3325 "modelParser.y" /* yacc.c:1648  */
+#line 3333 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.iVec) = (yyvsp[-4].iVec);
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier));
@@ -5537,11 +5545,11 @@ yyreduce:
 	(*(yyval.iVec))[id] = (int)(yyvsp[0].dblVal);
 	delete (yyvsp[-2].identifier);
 }
-#line 5541 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5549 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 137:
-#line 3342 "modelParser.y" /* yacc.c:1648  */
+#line 3350 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size();
 	(yyval.iVec) = new std::vector<int>(numVars);
@@ -5563,29 +5571,29 @@ yyreduce:
 	(*(yyval.iVec))[id] = (int)(yyvsp[0].dblVal);
 	delete (yyvsp[-2].identifier);
 }
-#line 5567 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5575 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 138:
-#line 3366 "modelParser.y" /* yacc.c:1648  */
+#line 3374 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.precondition = QR_PRE;
 	hybridProblem.global_setting.precondition = QR_PRE;
 }
-#line 5576 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5584 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 139:
-#line 3372 "modelParser.y" /* yacc.c:1648  */
+#line 3380 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.precondition = ID_PRE;
 	hybridProblem.global_setting.precondition = ID_PRE;
 }
-#line 5585 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5593 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 140:
-#line 3379 "modelParser.y" /* yacc.c:1648  */
+#line 3387 "modelParser.y" /* yacc.c:1648  */
     {
 	int x = continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier));
 	int y = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
@@ -5634,11 +5642,11 @@ yyreduce:
 	delete (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 5638 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5646 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 141:
-#line 3429 "modelParser.y" /* yacc.c:1648  */
+#line 3437 "modelParser.y" /* yacc.c:1648  */
     {
 	int x = continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier));
 	int y = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
@@ -5687,11 +5695,11 @@ yyreduce:
 	delete (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 5691 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5699 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 142:
-#line 3479 "modelParser.y" /* yacc.c:1648  */
+#line 3487 "modelParser.y" /* yacc.c:1648  */
     {
 	int x = continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier));
 	int y = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
@@ -5742,11 +5750,11 @@ yyreduce:
 	delete (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 5746 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5754 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 143:
-#line 3531 "modelParser.y" /* yacc.c:1648  */
+#line 3539 "modelParser.y" /* yacc.c:1648  */
     {
 	int x = continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier));
 	int y = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
@@ -5795,11 +5803,11 @@ yyreduce:
 	delete (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 5799 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5807 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 144:
-#line 3581 "modelParser.y" /* yacc.c:1648  */
+#line 3589 "modelParser.y" /* yacc.c:1648  */
     {
 	int x = continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier));
 	int y = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
@@ -5848,11 +5856,11 @@ yyreduce:
 	delete (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 5852 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5860 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 145:
-#line 3631 "modelParser.y" /* yacc.c:1648  */
+#line 3639 "modelParser.y" /* yacc.c:1648  */
     {
 	int x = continuousProblem.getIDForStateVar(*(yyvsp[-2].identifier));
 	int y = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
@@ -5903,44 +5911,44 @@ yyreduce:
 	delete (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 5907 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5915 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 146:
-#line 3684 "modelParser.y" /* yacc.c:1648  */
+#line 3692 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pFlowpipe) = new flowstar::Flowpipe(*(yyvsp[-1].tmVec), *(yyvsp[0].intVec));
 
 	delete (yyvsp[-1].tmVec);
 	delete (yyvsp[0].intVec);
 }
-#line 5918 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5926 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 147:
-#line 3692 "modelParser.y" /* yacc.c:1648  */
+#line 3700 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intZero;
 	(yyval.pFlowpipe) = new flowstar::Flowpipe(*(yyvsp[0].intVec), intZero);
 
 	delete (yyvsp[0].intVec);
 }
-#line 5929 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5937 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 148:
-#line 3700 "modelParser.y" /* yacc.c:1648  */
+#line 3708 "modelParser.y" /* yacc.c:1648  */
     {
 	initialSets = *(yyvsp[0].pVecFlowpipe);
 	(yyval.pFlowpipe) = NULL;
 
 	delete (yyvsp[0].pVecFlowpipe);
 }
-#line 5940 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5948 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 149:
-#line 3709 "modelParser.y" /* yacc.c:1648  */
+#line 3717 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intZero;
 	flowstar::Flowpipe flowpipe(*(yyvsp[-1].intVec), intZero);
@@ -5949,11 +5957,11 @@ yyreduce:
 
 	delete (yyvsp[-1].intVec);
 }
-#line 5953 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5961 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 150:
-#line 3719 "modelParser.y" /* yacc.c:1648  */
+#line 3727 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pVecFlowpipe) = new std::vector<flowstar::Flowpipe>(1);
 
@@ -5963,18 +5971,18 @@ yyreduce:
 
 	delete (yyvsp[-1].intVec);
 }
-#line 5967 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5975 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 151:
-#line 3731 "modelParser.y" /* yacc.c:1648  */
+#line 3739 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 5974 "modelParser.tab.c" /* yacc.c:1648  */
+#line 5982 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 152:
-#line 3736 "modelParser.y" /* yacc.c:1648  */
+#line 3744 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
 
@@ -6007,11 +6015,11 @@ yyreduce:
 	hybridProblem.declareTMVar(*(yyvsp[0].identifier));
 	delete (yyvsp[0].identifier);
 }
-#line 6011 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6019 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 153:
-#line 3770 "modelParser.y" /* yacc.c:1648  */
+#line 3778 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string tVar("local_t");
 	continuousProblem.declareTMVar(tVar);
@@ -6048,18 +6056,18 @@ yyreduce:
 	hybridProblem.declareTMVar(*(yyvsp[0].identifier));
 	delete (yyvsp[0].identifier);
 }
-#line 6052 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6060 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 154:
-#line 3810 "modelParser.y" /* yacc.c:1648  */
+#line 3818 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 6059 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6067 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 155:
-#line 3815 "modelParser.y" /* yacc.c:1648  */
+#line 3823 "modelParser.y" /* yacc.c:1648  */
     {
 	if(!varlist.declareVar(*(yyvsp[0].identifier)))
 	{
@@ -6071,11 +6079,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 6075 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6083 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 156:
-#line 3828 "modelParser.y" /* yacc.c:1648  */
+#line 3836 "modelParser.y" /* yacc.c:1648  */
     {
 	varlist.clear();
 
@@ -6092,11 +6100,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 6096 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6104 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 157:
-#line 3848 "modelParser.y" /* yacc.c:1648  */
+#line 3856 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-8].identifier));
 
@@ -6122,11 +6130,11 @@ yyreduce:
 	delete (yyvsp[-8].identifier);
 	delete (yyvsp[-6].poly);
 }
-#line 6126 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6134 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 158:
-#line 3874 "modelParser.y" /* yacc.c:1648  */
+#line 3882 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmEmpty;
 	(yyval.tmVec) = new flowstar::TaylorModelVec;
@@ -6136,11 +6144,11 @@ yyreduce:
 		(yyval.tmVec)->tms.push_back(tmEmpty);
 	}
 }
-#line 6140 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6148 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 159:
-#line 3886 "modelParser.y" /* yacc.c:1648  */
+#line 3894 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.tmVarNames.size() == 0)
 	{
@@ -6189,11 +6197,11 @@ yyreduce:
 
 	delete (yyvsp[-6].identifier);
 }
-#line 6193 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6201 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 160:
-#line 3936 "modelParser.y" /* yacc.c:1648  */
+#line 3944 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.tmVarNames.size() == 0)
 	{
@@ -6250,11 +6258,11 @@ yyreduce:
 
 	delete (yyvsp[-6].identifier);
 }
-#line 6254 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6262 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 161:
-#line 3995 "modelParser.y" /* yacc.c:1648  */
+#line 4003 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-6].identifier));
 
@@ -6278,11 +6286,11 @@ yyreduce:
 
 	delete (yyvsp[-6].identifier);
 }
-#line 6282 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6290 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 162:
-#line 4019 "modelParser.y" /* yacc.c:1648  */
+#line 4027 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size();
 	(yyval.intVec) = new std::vector<flowstar::Interval>(numVars);
@@ -6299,11 +6307,11 @@ yyreduce:
 		continuousProblem.declareTMVar(tmVarName);
 	}
 }
-#line 6303 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6311 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 163:
-#line 4038 "modelParser.y" /* yacc.c:1648  */
+#line 4046 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.tmVec) = (yyvsp[-4].tmVec);
 
@@ -6324,11 +6332,11 @@ yyreduce:
 	delete (yyvsp[-3].identifier);
 	delete (yyvsp[0].poly);
 }
-#line 6328 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6336 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 164:
-#line 4059 "modelParser.y" /* yacc.c:1648  */
+#line 4067 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size();
 
@@ -6341,15 +6349,17 @@ yyreduce:
 		(yyval.tmVec)->tms.push_back(tmTemp);
 	}
 }
-#line 6345 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6353 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 165:
-#line 4074 "modelParser.y" /* yacc.c:1648  */
+#line 4082 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.strVec) = (yyvsp[-4].strVec);
 
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-3].identifier));
+
+	printf("in npode with $1 = %s", (yyvsp[-4].strVec));
 
 	if(id < 0)
 	{
@@ -6364,11 +6374,11 @@ yyreduce:
 	delete (yyvsp[-3].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 6368 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6378 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 166:
-#line 4093 "modelParser.y" /* yacc.c:1648  */
+#line 4103 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size();
 	(yyval.strVec) = new std::vector<std::string>;
@@ -6381,39 +6391,39 @@ yyreduce:
 		(yyval.strVec)->push_back(empty);
 	}
 }
-#line 6385 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6395 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 167:
-#line 4109 "modelParser.y" /* yacc.c:1648  */
+#line 4119 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 6392 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6402 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 168:
-#line 4113 "modelParser.y" /* yacc.c:1648  */
+#line 4123 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 6399 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6409 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 169:
-#line 4117 "modelParser.y" /* yacc.c:1648  */
+#line 4127 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 6406 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6416 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 170:
-#line 4121 "modelParser.y" /* yacc.c:1648  */
+#line 4131 "modelParser.y" /* yacc.c:1648  */
     {
 }
-#line 6413 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6423 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 171:
-#line 4127 "modelParser.y" /* yacc.c:1648  */
+#line 4137 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-3].identifier));
 	flowstar::Interval intZero;
@@ -6449,11 +6459,11 @@ yyreduce:
 
 	delete (yyvsp[-3].identifier);
 }
-#line 6453 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6463 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 172:
-#line 4163 "modelParser.y" /* yacc.c:1648  */
+#line 4173 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = (int)continuousProblem.stateVarNames.size();
 	int numTIPar = (int)continuousProblem.TI_Par_Names.size();
@@ -6472,11 +6482,11 @@ yyreduce:
 	dyn_ti_row = im_ti_row;
 	dyn_tv_row = im_tv_row;
 }
-#line 6476 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6486 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 173:
-#line 4185 "modelParser.y" /* yacc.c:1648  */
+#line 4195 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-3].identifier));
 	flowstar::Interval intZero;
@@ -6512,11 +6522,11 @@ yyreduce:
 */
 	delete (yyvsp[-3].identifier);
 }
-#line 6516 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6526 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 174:
-#line 4221 "modelParser.y" /* yacc.c:1648  */
+#line 4231 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = (int)hybridProblem.stateVarNames.size();
 
@@ -6529,59 +6539,59 @@ yyreduce:
 	dyn_A_row = im_A_row;
 	dyn_B_row = im_B_row;
 }
-#line 6533 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6543 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 175:
-#line 4238 "modelParser.y" /* yacc.c:1648  */
-    {
-	continuousProblem.maxNumSteps = -1;
-}
-#line 6541 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 176:
-#line 4243 "modelParser.y" /* yacc.c:1648  */
-    {
-	continuousProblem.maxNumSteps = (yyvsp[-6].dblVal);
-}
-#line 6549 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 177:
 #line 4248 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.maxNumSteps = -1;
 }
-#line 6557 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6551 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
-  case 178:
+  case 176:
 #line 4253 "modelParser.y" /* yacc.c:1648  */
-    {
-	continuousProblem.maxNumSteps = -1;
-}
-#line 6565 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 179:
-#line 4258 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.maxNumSteps = (yyvsp[-6].dblVal);
 }
-#line 6573 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6559 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
-  case 180:
+  case 177:
+#line 4258 "modelParser.y" /* yacc.c:1648  */
+    {
+	continuousProblem.maxNumSteps = -1;
+}
+#line 6567 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
+  case 178:
 #line 4263 "modelParser.y" /* yacc.c:1648  */
     {
 	continuousProblem.maxNumSteps = -1;
 }
-#line 6581 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6575 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
+  case 179:
+#line 4268 "modelParser.y" /* yacc.c:1648  */
+    {
+	continuousProblem.maxNumSteps = (yyvsp[-6].dblVal);
+}
+#line 6583 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
+  case 180:
+#line 4273 "modelParser.y" /* yacc.c:1648  */
+    {
+	continuousProblem.maxNumSteps = -1;
+}
+#line 6591 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 181:
-#line 4270 "modelParser.y" /* yacc.c:1648  */
+#line 4280 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-3].identifier));
 	flowstar::UnivariatePolynomial polyZero;
@@ -6617,11 +6627,11 @@ yyreduce:
 
 	delete (yyvsp[-3].identifier);
 }
-#line 6621 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6631 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 182:
-#line 4306 "modelParser.y" /* yacc.c:1648  */
+#line 4316 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = (int)continuousProblem.stateVarNames.size();
 	int numTIPar = (int)continuousProblem.TI_Par_Names.size();
@@ -6640,11 +6650,11 @@ yyreduce:
 	dyn_ti_t_row = upm_ti_t_row;
 	dyn_tv_t_row = upm_tv_t_row;
 }
-#line 6644 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6654 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 183:
-#line 4328 "modelParser.y" /* yacc.c:1648  */
+#line 4338 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-3].identifier));
 	flowstar::UnivariatePolynomial polyZero;
@@ -6668,11 +6678,11 @@ yyreduce:
 
 	delete (yyvsp[-3].identifier);
 }
-#line 6672 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6682 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 184:
-#line 4352 "modelParser.y" /* yacc.c:1648  */
+#line 4362 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = (int)continuousProblem.stateVarNames.size();
 
@@ -6685,52 +6695,52 @@ yyreduce:
 	dyn_A_t_row = upm_A_t_row;
 	dyn_B_t_row = upm_B_t_row;
 }
-#line 6689 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6699 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 185:
-#line 4380 "modelParser.y" /* yacc.c:1648  */
+#line 4390 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) += (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6700 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6710 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 186:
-#line 4388 "modelParser.y" /* yacc.c:1648  */
+#line 4398 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) -= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6711 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6721 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 187:
-#line 4396 "modelParser.y" /* yacc.c:1648  */
+#line 4406 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-1].poly); 
 }
-#line 6719 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6729 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 188:
-#line 4401 "modelParser.y" /* yacc.c:1648  */
+#line 4411 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) *= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6730 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6740 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 189:
-#line 4409 "modelParser.y" /* yacc.c:1648  */
+#line 4419 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int) (yyvsp[0].dblVal);
 
@@ -6747,21 +6757,21 @@ yyreduce:
 
 	delete (yyvsp[-2].poly);
 }
-#line 6751 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6761 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 190:
-#line 4427 "modelParser.y" /* yacc.c:1648  */
+#line 4437 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I(-1);
 	(yyval.poly) = (yyvsp[0].poly);
 	(yyval.poly)->mul_assign(I);
 }
-#line 6761 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6771 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 191:
-#line 4434 "modelParser.y" /* yacc.c:1648  */
+#line 4444 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForTMVar(*(yyvsp[0].identifier));
 
@@ -6788,62 +6798,62 @@ yyreduce:
 	(yyval.poly) = new flowstar::Polynomial(monomial);
 	delete (yyvsp[0].identifier);
 }
-#line 6792 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6802 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 192:
-#line 4462 "modelParser.y" /* yacc.c:1648  */
+#line 4472 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.tmVarNames.size();
 	flowstar::Interval I((yyvsp[0].dblVal));
 	(yyval.poly) = new flowstar::Polynomial(I, numVars);
 }
-#line 6802 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6812 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 193:
-#line 4480 "modelParser.y" /* yacc.c:1648  */
+#line 4490 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) += (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6813 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6823 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 194:
-#line 4488 "modelParser.y" /* yacc.c:1648  */
+#line 4498 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) -= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6824 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6834 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 195:
-#line 4496 "modelParser.y" /* yacc.c:1648  */
+#line 4506 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-1].poly); 
 }
-#line 6832 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6842 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 196:
-#line 4501 "modelParser.y" /* yacc.c:1648  */
+#line 4511 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) *= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6843 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6853 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 197:
-#line 4509 "modelParser.y" /* yacc.c:1648  */
+#line 4519 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int) (yyvsp[0].dblVal);
 
@@ -6860,21 +6870,21 @@ yyreduce:
 
 	delete (yyvsp[-2].poly);
 }
-#line 6864 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6874 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 198:
-#line 4527 "modelParser.y" /* yacc.c:1648  */
+#line 4537 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I(-1);
 	(yyval.poly) = (yyvsp[0].poly);
 	(yyval.poly)->mul_assign(I);
 }
-#line 6874 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6884 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 199:
-#line 4534 "modelParser.y" /* yacc.c:1648  */
+#line 4544 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForPar(*(yyvsp[0].identifier));
 
@@ -6915,72 +6925,72 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 6919 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6929 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 200:
-#line 4576 "modelParser.y" /* yacc.c:1648  */
+#line 4586 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size()+1;
 	flowstar::Interval I((yyvsp[-3].dblVal), (yyvsp[-1].dblVal));
 	(yyval.poly) = new flowstar::Polynomial(I, numVars);
 }
-#line 6929 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6939 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 201:
-#line 4583 "modelParser.y" /* yacc.c:1648  */
+#line 4593 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size()+1;
 	flowstar::Interval I((yyvsp[0].dblVal));
 	(yyval.poly) = new flowstar::Polynomial(I, numVars);
 }
-#line 6939 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6949 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 202:
-#line 4593 "modelParser.y" /* yacc.c:1648  */
+#line 4603 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) += (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6950 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6960 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 203:
-#line 4601 "modelParser.y" /* yacc.c:1648  */
+#line 4611 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) -= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6961 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6971 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 204:
-#line 4609 "modelParser.y" /* yacc.c:1648  */
+#line 4619 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-1].poly); 
 }
-#line 6969 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6979 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 205:
-#line 4614 "modelParser.y" /* yacc.c:1648  */
+#line 4624 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) *= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 6980 "modelParser.tab.c" /* yacc.c:1648  */
+#line 6990 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 206:
-#line 4622 "modelParser.y" /* yacc.c:1648  */
+#line 4632 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int) (yyvsp[0].dblVal);
 
@@ -6996,22 +7006,22 @@ yyreduce:
 	}
 
 	delete (yyvsp[-2].poly);
-}
-#line 7001 "modelParser.tab.c" /* yacc.c:1648  */
-    break;
-
-  case 207:
-#line 4640 "modelParser.y" /* yacc.c:1648  */
-    {
-	flowstar::Interval I(-1);
-	(yyval.poly) = (yyvsp[0].poly);
-	(yyval.poly)->mul_assign(I);
 }
 #line 7011 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
+  case 207:
+#line 4650 "modelParser.y" /* yacc.c:1648  */
+    {
+	flowstar::Interval I(-1);
+	(yyval.poly) = (yyvsp[0].poly);
+	(yyval.poly)->mul_assign(I);
+}
+#line 7021 "modelParser.tab.c" /* yacc.c:1648  */
+    break;
+
   case 208:
-#line 4647 "modelParser.y" /* yacc.c:1648  */
+#line 4657 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForPar(*(yyvsp[0].identifier));
 
@@ -7052,62 +7062,62 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 7056 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7066 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 209:
-#line 4689 "modelParser.y" /* yacc.c:1648  */
+#line 4699 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size()+1;
 	flowstar::Interval I((yyvsp[0].dblVal));
 	(yyval.poly) = new flowstar::Polynomial(I, numVars);
 }
-#line 7066 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7076 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 210:
-#line 4700 "modelParser.y" /* yacc.c:1648  */
+#line 4710 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) += (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7077 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7087 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 211:
-#line 4708 "modelParser.y" /* yacc.c:1648  */
+#line 4718 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) -= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7088 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7098 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 212:
-#line 4716 "modelParser.y" /* yacc.c:1648  */
+#line 4726 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-1].poly); 
 }
-#line 7096 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7106 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 213:
-#line 4721 "modelParser.y" /* yacc.c:1648  */
+#line 4731 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) *= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7107 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7117 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 214:
-#line 4729 "modelParser.y" /* yacc.c:1648  */
+#line 4739 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int) (yyvsp[0].dblVal);
 
@@ -7124,21 +7134,21 @@ yyreduce:
 
 	delete (yyvsp[-2].poly);
 }
-#line 7128 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7138 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 215:
-#line 4747 "modelParser.y" /* yacc.c:1648  */
+#line 4757 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I(-1);
 	(yyval.poly) = (yyvsp[0].poly);
 	(yyval.poly)->mul_assign(I);
 }
-#line 7138 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7148 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 216:
-#line 4754 "modelParser.y" /* yacc.c:1648  */
+#line 4764 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForPar(*(yyvsp[0].identifier));
 
@@ -7179,21 +7189,21 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 7183 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7193 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 217:
-#line 4796 "modelParser.y" /* yacc.c:1648  */
+#line 4806 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size()+1;
 	flowstar::Interval I((yyvsp[0].dblVal));
 	(yyval.poly) = new flowstar::Polynomial(I, numVars);
 }
-#line 7193 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7203 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 218:
-#line 4808 "modelParser.y" /* yacc.c:1648  */
+#line 4818 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[-8].identifier));
 
@@ -7219,11 +7229,11 @@ yyreduce:
 	delete (yyvsp[-8].identifier);
 	delete (yyvsp[-6].poly);
 }
-#line 7223 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7233 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 219:
-#line 4835 "modelParser.y" /* yacc.c:1648  */
+#line 4845 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmEmpty;
 	(yyval.tmVec) = new flowstar::TaylorModelVec;
@@ -7257,52 +7267,52 @@ yyreduce:
 	delete (yyvsp[-8].identifier);
 	delete (yyvsp[-6].poly);
 }
-#line 7261 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7271 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 220:
-#line 4880 "modelParser.y" /* yacc.c:1648  */
+#line 4890 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) += (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7272 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7282 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 221:
-#line 4888 "modelParser.y" /* yacc.c:1648  */
+#line 4898 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) -= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7283 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7293 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 222:
-#line 4896 "modelParser.y" /* yacc.c:1648  */
+#line 4906 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-1].poly); 
 }
-#line 7291 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7301 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 223:
-#line 4901 "modelParser.y" /* yacc.c:1648  */
+#line 4911 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) *= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7302 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7312 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 224:
-#line 4909 "modelParser.y" /* yacc.c:1648  */
+#line 4919 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int) (yyvsp[0].dblVal);
 
@@ -7319,21 +7329,21 @@ yyreduce:
 
 	delete (yyvsp[-2].poly);
 }
-#line 7323 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7333 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 225:
-#line 4927 "modelParser.y" /* yacc.c:1648  */
+#line 4937 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I(-1);
 	(yyval.poly) = (yyvsp[0].poly);
 	(yyval.poly)->mul_assign(I);
 }
-#line 7333 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7343 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 226:
-#line 4934 "modelParser.y" /* yacc.c:1648  */
+#line 4944 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.tmVarNames.size() == 0)
 	{
@@ -7390,11 +7400,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 7394 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7404 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 227:
-#line 4992 "modelParser.y" /* yacc.c:1648  */
+#line 5002 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.tmVarNames.size() == 0)
 	{
@@ -7409,11 +7419,11 @@ yyreduce:
 		(yyval.poly) = new flowstar::Polynomial(I, numVars);
 	}
 }
-#line 7413 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7423 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 228:
-#line 5008 "modelParser.y" /* yacc.c:1648  */
+#line 5018 "modelParser.y" /* yacc.c:1648  */
     {
 	if(continuousProblem.tmVarNames.size() == 0)
 	{
@@ -7428,31 +7438,31 @@ yyreduce:
 		(yyval.poly) = new flowstar::Polynomial(I, numVars);
 	}
 }
-#line 7432 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7442 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 229:
-#line 5044 "modelParser.y" /* yacc.c:1648  */
+#line 5054 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.ptm) = (yyvsp[-2].ptm);
 	(yyvsp[-2].ptm)->add_assign(*(yyvsp[0].ptm));
 	delete (yyvsp[0].ptm);
 }
-#line 7442 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7452 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 230:
-#line 5051 "modelParser.y" /* yacc.c:1648  */
+#line 5061 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.ptm) = (yyvsp[-2].ptm);
 	(yyvsp[-2].ptm)->sub_assign(*(yyvsp[0].ptm));
 	delete (yyvsp[0].ptm);
 }
-#line 7452 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7462 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 231:
-#line 5058 "modelParser.y" /* yacc.c:1648  */
+#line 5068 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.ptm) = (yyvsp[-2].ptm);
 
@@ -7467,19 +7477,19 @@ yyreduce:
 
 	delete (yyvsp[0].ptm);
 }
-#line 7471 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7481 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 232:
-#line 5074 "modelParser.y" /* yacc.c:1648  */
+#line 5084 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.ptm) = (yyvsp[-1].ptm);
 }
-#line 7479 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7489 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 233:
-#line 5079 "modelParser.y" /* yacc.c:1648  */
+#line 5089 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmTemp;
 	(yyvsp[0].ptm)->rec_taylor(tmTemp, parseSetting.ranges, parseSetting.step_exp_table, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7497,11 +7507,11 @@ yyreduce:
 
 	delete (yyvsp[0].ptm);
 }
-#line 7501 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7511 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 234:
-#line 5098 "modelParser.y" /* yacc.c:1648  */
+#line 5108 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmTemp;
 	(yyvsp[-1].ptm)->exp_taylor(tmTemp, parseSetting.ranges, parseSetting.step_exp_table, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7509,11 +7519,11 @@ yyreduce:
 	*(yyvsp[-1].ptm) = tmTemp;
 	(yyval.ptm) = (yyvsp[-1].ptm);
 }
-#line 7513 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7523 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 235:
-#line 5107 "modelParser.y" /* yacc.c:1648  */
+#line 5117 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmTemp;
 	(yyvsp[-1].ptm)->sin_taylor(tmTemp, parseSetting.ranges, parseSetting.step_exp_table, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7521,11 +7531,11 @@ yyreduce:
 	*(yyvsp[-1].ptm) = tmTemp;
 	(yyval.ptm) = (yyvsp[-1].ptm);
 }
-#line 7525 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7535 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 236:
-#line 5116 "modelParser.y" /* yacc.c:1648  */
+#line 5126 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmTemp;
 	(yyvsp[-1].ptm)->cos_taylor(tmTemp, parseSetting.ranges, parseSetting.step_exp_table, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7533,11 +7543,11 @@ yyreduce:
 	*(yyvsp[-1].ptm) = tmTemp;
 	(yyval.ptm) = (yyvsp[-1].ptm);
 }
-#line 7537 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7547 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 237:
-#line 5125 "modelParser.y" /* yacc.c:1648  */
+#line 5135 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmTemp;
 	(yyvsp[-1].ptm)->log_taylor(tmTemp, parseSetting.ranges, parseSetting.step_exp_table, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7545,11 +7555,11 @@ yyreduce:
 	*(yyvsp[-1].ptm) = tmTemp;
 	(yyval.ptm) = (yyvsp[-1].ptm);
 }
-#line 7549 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7559 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 238:
-#line 5134 "modelParser.y" /* yacc.c:1648  */
+#line 5144 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::TaylorModel tmTemp;
 	(yyvsp[-1].ptm)->sqrt_taylor(tmTemp, parseSetting.ranges, parseSetting.step_exp_table, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7557,11 +7567,11 @@ yyreduce:
 	*(yyvsp[-1].ptm) = tmTemp;
 	(yyval.ptm) = (yyvsp[-1].ptm);
 }
-#line 7561 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7571 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 239:
-#line 5143 "modelParser.y" /* yacc.c:1648  */
+#line 5153 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int)(yyvsp[0].dblVal);
 
@@ -7607,21 +7617,21 @@ yyreduce:
 
 	delete (yyvsp[-2].ptm);
 }
-#line 7611 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7621 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 240:
-#line 5190 "modelParser.y" /* yacc.c:1648  */
+#line 5200 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I(-1);
 	(yyval.ptm) = (yyvsp[0].ptm);
 	(yyval.ptm)->mul_assign(I);
 }
-#line 7621 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7631 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 241:
-#line 5197 "modelParser.y" /* yacc.c:1648  */
+#line 5207 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
 
@@ -7643,41 +7653,41 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 7647 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7657 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 242:
-#line 5220 "modelParser.y" /* yacc.c:1648  */
+#line 5230 "modelParser.y" /* yacc.c:1648  */
     {
 	int numVars = continuousProblem.stateVarNames.size()+1;
 	flowstar::Interval I((yyvsp[-3].dblVal), (yyvsp[-1].dblVal));
 	(yyval.ptm) = new flowstar::TaylorModel(I, numVars);
 }
-#line 7657 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7667 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 243:
-#line 5254 "modelParser.y" /* yacc.c:1648  */
+#line 5264 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pint) = (yyvsp[-2].pint);
 	(*(yyval.pint)) += (*(yyvsp[0].pint));
 	delete (yyvsp[0].pint);
 }
-#line 7667 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7677 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 244:
-#line 5261 "modelParser.y" /* yacc.c:1648  */
+#line 5271 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pint) = (yyvsp[-2].pint);
 	(*(yyval.pint)) -= (*(yyvsp[0].pint));
 	delete (yyvsp[0].pint);
 }
-#line 7677 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7687 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 245:
-#line 5268 "modelParser.y" /* yacc.c:1648  */
+#line 5278 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pint) = new flowstar::Interval;
 
@@ -7692,19 +7702,19 @@ yyreduce:
 	delete (yyvsp[-2].pint);
 	delete (yyvsp[0].pint);
 }
-#line 7696 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7706 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 246:
-#line 5284 "modelParser.y" /* yacc.c:1648  */
+#line 5294 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pint) = (yyvsp[-1].pint);
 }
-#line 7704 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7714 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 247:
-#line 5289 "modelParser.y" /* yacc.c:1648  */
+#line 5299 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intTemp;
 	rec_taylor_only_remainder(intTemp, *(yyvsp[0].pint), parseSetting.iterRange, parseSetting.order);
@@ -7722,11 +7732,11 @@ yyreduce:
 	delete (yyvsp[-2].pint);
 	delete (yyvsp[0].pint);
 }
-#line 7726 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7736 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 248:
-#line 5308 "modelParser.y" /* yacc.c:1648  */
+#line 5318 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intTemp;
 	exp_taylor_only_remainder(intTemp, *(yyvsp[-1].pint), parseSetting.iterRange, parseSetting.order);
@@ -7734,11 +7744,11 @@ yyreduce:
 	(*(yyvsp[-1].pint)) = intTemp;
 	(yyval.pint) = (yyvsp[-1].pint);
 }
-#line 7738 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7748 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 249:
-#line 5317 "modelParser.y" /* yacc.c:1648  */
+#line 5327 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intTemp;
 	sin_taylor_only_remainder(intTemp, *(yyvsp[-1].pint), parseSetting.iterRange, parseSetting.order);
@@ -7746,11 +7756,11 @@ yyreduce:
 	(*(yyvsp[-1].pint)) = intTemp;
 	(yyval.pint) = (yyvsp[-1].pint);
 }
-#line 7750 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7760 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 250:
-#line 5326 "modelParser.y" /* yacc.c:1648  */
+#line 5336 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intTemp;
 	cos_taylor_only_remainder(intTemp, *(yyvsp[-1].pint), parseSetting.iterRange, parseSetting.order);
@@ -7758,11 +7768,11 @@ yyreduce:
 	(*(yyvsp[-1].pint)) = intTemp;
 	(yyval.pint) = (yyvsp[-1].pint);
 }
-#line 7762 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7772 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 251:
-#line 5335 "modelParser.y" /* yacc.c:1648  */
+#line 5345 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intTemp;
 	log_taylor_only_remainder(intTemp, *(yyvsp[-1].pint), parseSetting.iterRange, parseSetting.order);
@@ -7770,11 +7780,11 @@ yyreduce:
 	(*(yyvsp[-1].pint)) = intTemp;
 	(yyval.pint) = (yyvsp[-1].pint);
 }
-#line 7774 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7784 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 252:
-#line 5344 "modelParser.y" /* yacc.c:1648  */
+#line 5354 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval intTemp;
 	sqrt_taylor_only_remainder(intTemp, *(yyvsp[-1].pint), parseSetting.iterRange, parseSetting.order);
@@ -7782,11 +7792,11 @@ yyreduce:
 	(*(yyvsp[-1].pint)) = intTemp;
 	(yyval.pint) = (yyvsp[-1].pint);
 }
-#line 7786 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7796 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 253:
-#line 5353 "modelParser.y" /* yacc.c:1648  */
+#line 5363 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int)(yyvsp[0].dblVal);
 
@@ -7841,20 +7851,20 @@ yyreduce:
 
 	delete (yyvsp[-2].pint);
 }
-#line 7845 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7855 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 254:
-#line 5409 "modelParser.y" /* yacc.c:1648  */
+#line 5419 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pint) = (yyvsp[0].pint);
 	(yyval.pint)->inv_assign();
 }
-#line 7854 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7864 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 255:
-#line 5415 "modelParser.y" /* yacc.c:1648  */
+#line 5425 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
 
@@ -7874,41 +7884,41 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 7878 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7888 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 256:
-#line 5436 "modelParser.y" /* yacc.c:1648  */
+#line 5446 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pint) = new flowstar::Interval;
 }
-#line 7886 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7896 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 257:
-#line 5463 "modelParser.y" /* yacc.c:1648  */
+#line 5473 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) += (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7897 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7907 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 258:
-#line 5471 "modelParser.y" /* yacc.c:1648  */
+#line 5481 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) -= (*(yyvsp[0].poly));
 
 	delete (yyvsp[0].poly);
 }
-#line 7908 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7918 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 259:
-#line 5479 "modelParser.y" /* yacc.c:1648  */
+#line 5489 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-2].poly);
 	(*(yyval.poly)) *= (*(yyvsp[0].poly));
@@ -7917,19 +7927,19 @@ yyreduce:
 
 	delete (yyvsp[0].poly);
 }
-#line 7921 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7931 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 260:
-#line 5489 "modelParser.y" /* yacc.c:1648  */
+#line 5499 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[-1].poly);
 }
-#line 7929 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7939 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 261:
-#line 5494 "modelParser.y" /* yacc.c:1648  */
+#line 5504 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Polynomial polyTemp;
 	(yyvsp[0].poly)->rec_taylor(polyTemp, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7941,11 +7951,11 @@ yyreduce:
 
 	delete (yyvsp[0].poly);
 }
-#line 7945 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7955 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 262:
-#line 5507 "modelParser.y" /* yacc.c:1648  */
+#line 5517 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Polynomial polyTemp;
 	(yyvsp[-1].poly)->exp_taylor(polyTemp, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7953,11 +7963,11 @@ yyreduce:
 	(*(yyvsp[-1].poly)) = polyTemp;
 	(yyval.poly) = (yyvsp[-1].poly);
 }
-#line 7957 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7967 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 263:
-#line 5516 "modelParser.y" /* yacc.c:1648  */
+#line 5526 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Polynomial polyTemp;
 	(yyvsp[-1].poly)->sin_taylor(polyTemp, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7965,11 +7975,11 @@ yyreduce:
 	(*(yyvsp[-1].poly)) = polyTemp;
 	(yyval.poly) = (yyvsp[-1].poly);
 }
-#line 7969 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7979 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 264:
-#line 5525 "modelParser.y" /* yacc.c:1648  */
+#line 5535 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Polynomial polyTemp;
 	(yyvsp[-1].poly)->cos_taylor(polyTemp, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7977,11 +7987,11 @@ yyreduce:
 	(*(yyvsp[-1].poly)) = polyTemp;
 	(yyval.poly) = (yyvsp[-1].poly);
 }
-#line 7981 "modelParser.tab.c" /* yacc.c:1648  */
+#line 7991 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 265:
-#line 5534 "modelParser.y" /* yacc.c:1648  */
+#line 5544 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Polynomial polyTemp;
 	(yyvsp[-1].poly)->log_taylor(polyTemp, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -7989,11 +7999,11 @@ yyreduce:
 	(*(yyvsp[-1].poly)) = polyTemp;
 	(yyval.poly) = (yyvsp[-1].poly);
 }
-#line 7993 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8003 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 266:
-#line 5543 "modelParser.y" /* yacc.c:1648  */
+#line 5553 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Polynomial polyTemp;
 	(yyvsp[-1].poly)->sqrt_taylor(polyTemp, continuousProblem.stateVarNames.size()+1, parseSetting.order, parseSetting.cutoff_threshold);
@@ -8001,11 +8011,11 @@ yyreduce:
 	(*(yyvsp[-1].poly)) = polyTemp;
 	(yyval.poly) = (yyvsp[-1].poly);
 }
-#line 8005 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8015 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 267:
-#line 5552 "modelParser.y" /* yacc.c:1648  */
+#line 5562 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int) (yyvsp[0].dblVal);
 	
@@ -8014,20 +8024,20 @@ yyreduce:
 	(*(yyvsp[-2].poly)).pow(*(yyval.poly), exp, parseSetting.order);
 	(yyval.poly)->cutoff(parseSetting.cutoff_threshold);
 }
-#line 8018 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8028 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 268:
-#line 5562 "modelParser.y" /* yacc.c:1648  */
+#line 5572 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.poly) = (yyvsp[0].poly);
 	(yyval.poly)->inv_assign();
 }
-#line 8027 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8037 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 269:
-#line 5568 "modelParser.y" /* yacc.c:1648  */
+#line 5578 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
 
@@ -8044,20 +8054,20 @@ yyreduce:
 	
 	(*(yyval.poly)).nctrunc(parseSetting.order);
 }
-#line 8048 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8058 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 270:
-#line 5586 "modelParser.y" /* yacc.c:1648  */
+#line 5596 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I((yyvsp[-3].dblVal), (yyvsp[-1].dblVal));
 	(yyval.poly) = new flowstar::Polynomial(I, continuousProblem.stateVarNames.size()+1);
 }
-#line 8057 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8067 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 271:
-#line 5614 "modelParser.y" /* yacc.c:1648  */
+#line 5624 "modelParser.y" /* yacc.c:1648  */
     {
 	(*(yyvsp[-2].identifier)) += ' ';
 	(*(yyvsp[-2].identifier)) += '+';
@@ -8067,11 +8077,11 @@ yyreduce:
 	(yyval.identifier) = (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 8071 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8081 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 272:
-#line 5625 "modelParser.y" /* yacc.c:1648  */
+#line 5635 "modelParser.y" /* yacc.c:1648  */
     {
 	(*(yyvsp[-2].identifier)) += ' ';
 	(*(yyvsp[-2].identifier)) += '-';
@@ -8081,11 +8091,11 @@ yyreduce:
 	(yyval.identifier) = (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 8085 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8095 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 273:
-#line 5636 "modelParser.y" /* yacc.c:1648  */
+#line 5646 "modelParser.y" /* yacc.c:1648  */
     {
 	(*(yyvsp[-2].identifier)) += ' ';
 	(*(yyvsp[-2].identifier)) += '*';
@@ -8095,11 +8105,11 @@ yyreduce:
 	(yyval.identifier) = (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 8099 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8109 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 274:
-#line 5647 "modelParser.y" /* yacc.c:1648  */
+#line 5657 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str;
 	str += '(';
@@ -8109,11 +8119,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[-1].identifier);
 }
-#line 8113 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8123 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 275:
-#line 5658 "modelParser.y" /* yacc.c:1648  */
+#line 5668 "modelParser.y" /* yacc.c:1648  */
     {
 	(*(yyvsp[-2].identifier)) += ' ';
 	(*(yyvsp[-2].identifier)) += '/';
@@ -8123,11 +8133,11 @@ yyreduce:
 	(yyval.identifier) = (yyvsp[-2].identifier);
 	delete (yyvsp[0].identifier);
 }
-#line 8127 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8137 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 276:
-#line 5669 "modelParser.y" /* yacc.c:1648  */
+#line 5679 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("exp");
 	str += '(';
@@ -8137,11 +8147,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[-1].identifier);
 }
-#line 8141 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8151 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 277:
-#line 5680 "modelParser.y" /* yacc.c:1648  */
+#line 5690 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("sin");
 	str += '(';
@@ -8151,11 +8161,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[-1].identifier);
 }
-#line 8155 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8165 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 278:
-#line 5691 "modelParser.y" /* yacc.c:1648  */
+#line 5701 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("cos");
 	str += '(';
@@ -8165,11 +8175,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[-1].identifier);
 }
-#line 8169 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8179 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 279:
-#line 5702 "modelParser.y" /* yacc.c:1648  */
+#line 5712 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("log");
 	str += '(';
@@ -8179,11 +8189,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[-1].identifier);
 }
-#line 8183 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8193 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 280:
-#line 5713 "modelParser.y" /* yacc.c:1648  */
+#line 5723 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("sqrt");
 	str += '(';
@@ -8193,11 +8203,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[-1].identifier);
 }
-#line 8197 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8207 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 281:
-#line 5724 "modelParser.y" /* yacc.c:1648  */
+#line 5734 "modelParser.y" /* yacc.c:1648  */
     {
 	(*(yyvsp[-2].identifier)) += '^';
 
@@ -8208,11 +8218,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[-2].identifier);
 }
-#line 8212 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8222 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 282:
-#line 5736 "modelParser.y" /* yacc.c:1648  */
+#line 5746 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str;
 	str += '-';
@@ -8221,11 +8231,11 @@ yyreduce:
 
 	(yyval.identifier) = (yyvsp[0].identifier);
 }
-#line 8225 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8235 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 283:
-#line 5746 "modelParser.y" /* yacc.c:1648  */
+#line 5756 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForPar(*(yyvsp[0].identifier));
 
@@ -8252,11 +8262,11 @@ yyreduce:
 		(yyval.identifier) = (yyvsp[0].identifier);
 	}
 }
-#line 8256 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8266 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 284:
-#line 5774 "modelParser.y" /* yacc.c:1648  */
+#line 5784 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.identifier) = new std::string;
 	char strNum_lo[NUM_LENGTH], strNum_up[NUM_LENGTH];
@@ -8274,11 +8284,11 @@ yyreduce:
 	(*(yyval.identifier)) += num_up;
 	(*(yyval.identifier)) += ']';
 }
-#line 8278 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8288 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 285:
-#line 5793 "modelParser.y" /* yacc.c:1648  */
+#line 5803 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.identifier) = new std::string;
 	char strNum[NUM_LENGTH];
@@ -8293,11 +8303,11 @@ yyreduce:
 	(*(yyval.identifier)) += num;
 	(*(yyval.identifier)) += ']';
 }
-#line 8297 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8307 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 286:
-#line 5827 "modelParser.y" /* yacc.c:1648  */
+#line 5837 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyvsp[-2].p_ODE_String)->ode += ' ';
 	(yyvsp[-2].p_ODE_String)->ode += '+';
@@ -8313,11 +8323,11 @@ yyreduce:
 
 	delete (yyvsp[0].p_ODE_String);
 }
-#line 8317 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8327 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 287:
-#line 5844 "modelParser.y" /* yacc.c:1648  */
+#line 5854 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyvsp[-2].p_ODE_String)->ode += ' ';
 	(yyvsp[-2].p_ODE_String)->ode += '-';
@@ -8333,11 +8343,11 @@ yyreduce:
 
 	delete (yyvsp[0].p_ODE_String);
 }
-#line 8337 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8347 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 288:
-#line 5861 "modelParser.y" /* yacc.c:1648  */
+#line 5871 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyvsp[-2].p_ODE_String)->ode += ' ';
 	(yyvsp[-2].p_ODE_String)->ode += '*';
@@ -8353,11 +8363,11 @@ yyreduce:
 
 	delete (yyvsp[0].p_ODE_String);
 }
-#line 8357 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8367 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 289:
-#line 5878 "modelParser.y" /* yacc.c:1648  */
+#line 5888 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str;
 	str += '(';
@@ -8367,11 +8377,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[-1].p_ODE_String);
 }
-#line 8371 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8381 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 290:
-#line 5889 "modelParser.y" /* yacc.c:1648  */
+#line 5899 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyvsp[-2].p_ODE_String)->ode += ' ';
 	(yyvsp[-2].p_ODE_String)->ode += '/';
@@ -8387,11 +8397,11 @@ yyreduce:
 
 	delete (yyvsp[0].p_ODE_String);
 }
-#line 8391 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8401 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 291:
-#line 5906 "modelParser.y" /* yacc.c:1648  */
+#line 5916 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("exp");
 	str += '(';
@@ -8406,11 +8416,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[-1].p_ODE_String);
 }
-#line 8410 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8420 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 292:
-#line 5922 "modelParser.y" /* yacc.c:1648  */
+#line 5932 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("sin");
 	str += '(';
@@ -8425,11 +8435,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[-1].p_ODE_String);
 }
-#line 8429 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8439 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 293:
-#line 5938 "modelParser.y" /* yacc.c:1648  */
+#line 5948 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("cos");
 	str += '(';
@@ -8444,11 +8454,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[-1].p_ODE_String);
 }
-#line 8448 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8458 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 294:
-#line 5954 "modelParser.y" /* yacc.c:1648  */
+#line 5964 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("log");
 	str += '(';
@@ -8463,11 +8473,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[-1].p_ODE_String);
 }
-#line 8467 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8477 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 295:
-#line 5970 "modelParser.y" /* yacc.c:1648  */
+#line 5980 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str("sqrt");
 	str += '(';
@@ -8482,11 +8492,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[-1].p_ODE_String);
 }
-#line 8486 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8496 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 296:
-#line 5986 "modelParser.y" /* yacc.c:1648  */
+#line 5996 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyvsp[-2].p_ODE_String)->ode += '^';
 
@@ -8502,11 +8512,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[-2].p_ODE_String);
 }
-#line 8506 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8516 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 297:
-#line 6003 "modelParser.y" /* yacc.c:1648  */
+#line 6013 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string str;
 	str += '-';
@@ -8520,11 +8530,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = (yyvsp[0].p_ODE_String);
 }
-#line 8524 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8534 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 298:
-#line 6018 "modelParser.y" /* yacc.c:1648  */
+#line 6028 "modelParser.y" /* yacc.c:1648  */
     {
 	int id = continuousProblem.getIDForStateVar(*(yyvsp[0].identifier));
 
@@ -8542,11 +8552,11 @@ yyreduce:
 
 	(yyval.p_ODE_String) = new ODE_String(*(yyvsp[0].identifier), intZero);
 }
-#line 8546 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8556 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 299:
-#line 6037 "modelParser.y" /* yacc.c:1648  */
+#line 6047 "modelParser.y" /* yacc.c:1648  */
     {
 	char strNum[NUM_LENGTH];
 	sprintf(strNum, "%.20e", ((yyvsp[-3].dblVal)+(yyvsp[-1].dblVal))/2);
@@ -8564,11 +8574,11 @@ yyreduce:
 	flowstar::Interval I((yyvsp[-3].dblVal), (yyvsp[-1].dblVal));
 	(yyval.p_ODE_String) = new ODE_String(strOde, I);
 }
-#line 8568 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8578 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 300:
-#line 6056 "modelParser.y" /* yacc.c:1648  */
+#line 6066 "modelParser.y" /* yacc.c:1648  */
     {
 	char strNum[NUM_LENGTH];
 	sprintf(strNum, "%.20e", (yyvsp[0].dblVal));
@@ -8585,11 +8595,11 @@ yyreduce:
 	flowstar::Interval I((yyvsp[0].dblVal));
 	(yyval.p_ODE_String) = new ODE_String(strOde, I);
 }
-#line 8589 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8599 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 301:
-#line 6195 "modelParser.y" /* yacc.c:1648  */
+#line 6205 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8608,11 +8618,11 @@ yyreduce:
 		dyn_B_row[0][0] += (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8612 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8622 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 302:
-#line 6215 "modelParser.y" /* yacc.c:1648  */
+#line 6225 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8631,11 +8641,11 @@ yyreduce:
 		dyn_B_row[0][0] -= (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8635 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8645 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 303:
-#line 6235 "modelParser.y" /* yacc.c:1648  */
+#line 6245 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8654,11 +8664,11 @@ yyreduce:
 		dyn_B_row[0][0] -= (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8658 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8668 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 304:
-#line 6255 "modelParser.y" /* yacc.c:1648  */
+#line 6265 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8677,11 +8687,11 @@ yyreduce:
 		dyn_B_row[0][0] = (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8681 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8691 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 305:
-#line 6277 "modelParser.y" /* yacc.c:1648  */
+#line 6287 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term;
 
@@ -8731,11 +8741,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 8735 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8745 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 306:
-#line 6328 "modelParser.y" /* yacc.c:1648  */
+#line 6338 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term;
 
@@ -8785,11 +8795,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 8789 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8799 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 307:
-#line 6379 "modelParser.y" /* yacc.c:1648  */
+#line 6389 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term;
 
@@ -8839,27 +8849,27 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 8843 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8853 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 308:
-#line 6430 "modelParser.y" /* yacc.c:1648  */
+#line 6440 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term((yyvsp[-3].dblVal), (yyvsp[-1].dblVal), -1, -1, -1);
 }
-#line 8851 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8861 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 309:
-#line 6435 "modelParser.y" /* yacc.c:1648  */
+#line 6445 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term((yyvsp[0].dblVal), (yyvsp[0].dblVal), -1, -1, -1);
 }
-#line 8859 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8869 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 310:
-#line 6451 "modelParser.y" /* yacc.c:1648  */
+#line 6461 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8870,11 +8880,11 @@ yyreduce:
 		dyn_B_row[0][0] += (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8874 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8884 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 311:
-#line 6463 "modelParser.y" /* yacc.c:1648  */
+#line 6473 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8885,11 +8895,11 @@ yyreduce:
 		dyn_B_row[0][0] -= (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8889 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8899 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 312:
-#line 6475 "modelParser.y" /* yacc.c:1648  */
+#line 6485 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8900,11 +8910,11 @@ yyreduce:
 		dyn_B_row[0][0] -= (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8904 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8914 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 313:
-#line 6487 "modelParser.y" /* yacc.c:1648  */
+#line 6497 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTI_Term)->stateVar_id >= 0)
 	{
@@ -8915,11 +8925,11 @@ yyreduce:
 		dyn_B_row[0][0] = (yyvsp[0].p_LTI_Term)->coefficient;
 	}
 }
-#line 8919 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8929 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 314:
-#line 6501 "modelParser.y" /* yacc.c:1648  */
+#line 6511 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term;
 
@@ -8951,11 +8961,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 8955 "modelParser.tab.c" /* yacc.c:1648  */
+#line 8965 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 315:
-#line 6534 "modelParser.y" /* yacc.c:1648  */
+#line 6544 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term;
 
@@ -8987,11 +8997,11 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 8991 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9001 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 316:
-#line 6567 "modelParser.y" /* yacc.c:1648  */
+#line 6577 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term;
 
@@ -9023,27 +9033,27 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 9027 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9037 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 317:
-#line 6600 "modelParser.y" /* yacc.c:1648  */
+#line 6610 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term((yyvsp[-3].dblVal), (yyvsp[-1].dblVal), -1, -1, -1);
 }
-#line 9035 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9045 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 318:
-#line 6605 "modelParser.y" /* yacc.c:1648  */
+#line 6615 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTI_Term) = new LTI_Term((yyvsp[0].dblVal), (yyvsp[0].dblVal), -1, -1, -1);
 }
-#line 9043 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9053 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 319:
-#line 6635 "modelParser.y" /* yacc.c:1648  */
+#line 6645 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9062,11 +9072,11 @@ yyreduce:
 		dyn_B_t_row[0][0] += (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9066 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9076 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 320:
-#line 6655 "modelParser.y" /* yacc.c:1648  */
+#line 6665 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9085,11 +9095,11 @@ yyreduce:
 		dyn_B_t_row[0][0] -= (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9089 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9099 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 321:
-#line 6675 "modelParser.y" /* yacc.c:1648  */
+#line 6685 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9108,11 +9118,11 @@ yyreduce:
 		dyn_B_t_row[0][0] -= (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9112 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9122 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 322:
-#line 6695 "modelParser.y" /* yacc.c:1648  */
+#line 6705 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9131,11 +9141,11 @@ yyreduce:
 		dyn_B_t_row[0][0] = (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9135 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9145 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 323:
-#line 6718 "modelParser.y" /* yacc.c:1648  */
+#line 6728 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTV_Term) = new LTV_Term;
 	
@@ -9184,11 +9194,11 @@ yyreduce:
 	delete (yyvsp[-3].pUpoly);
 	delete (yyvsp[0].identifier);
 }
-#line 9188 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9198 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 324:
-#line 6768 "modelParser.y" /* yacc.c:1648  */
+#line 6778 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTV_Term) = new LTV_Term;
 	flowstar::Interval intOne(1);
@@ -9237,21 +9247,21 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 9241 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9251 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 325:
-#line 6818 "modelParser.y" /* yacc.c:1648  */
+#line 6828 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTV_Term) = new LTV_Term(*(yyvsp[-1].pUpoly), -1, -1, -1);
 
 	delete (yyvsp[-1].pUpoly);
 }
-#line 9251 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9261 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 326:
-#line 6830 "modelParser.y" /* yacc.c:1648  */
+#line 6840 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9262,11 +9272,11 @@ yyreduce:
 		dyn_B_t_row[0][0] += (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9266 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9276 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 327:
-#line 6842 "modelParser.y" /* yacc.c:1648  */
+#line 6852 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9277,11 +9287,11 @@ yyreduce:
 		dyn_B_t_row[0][0] -= (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9281 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9291 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 328:
-#line 6854 "modelParser.y" /* yacc.c:1648  */
+#line 6864 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9292,11 +9302,11 @@ yyreduce:
 		dyn_B_t_row[0][0] -= (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9296 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9306 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 329:
-#line 6866 "modelParser.y" /* yacc.c:1648  */
+#line 6876 "modelParser.y" /* yacc.c:1648  */
     {
 	if((yyvsp[0].p_LTV_Term)->stateVar_id >= 0)
 	{
@@ -9307,11 +9317,11 @@ yyreduce:
 		dyn_B_t_row[0][0] = (yyvsp[0].p_LTV_Term)->coefficient;
 	}
 }
-#line 9311 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9321 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 330:
-#line 6882 "modelParser.y" /* yacc.c:1648  */
+#line 6892 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTV_Term) = new LTV_Term;
 	
@@ -9342,11 +9352,11 @@ yyreduce:
 	delete (yyvsp[-3].pUpoly);
 	delete (yyvsp[0].identifier);
 }
-#line 9346 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9356 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 331:
-#line 6914 "modelParser.y" /* yacc.c:1648  */
+#line 6924 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTV_Term) = new LTV_Term;
 	flowstar::Interval intOne(1);
@@ -9377,62 +9387,62 @@ yyreduce:
 
 	delete (yyvsp[0].identifier);
 }
-#line 9381 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9391 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 332:
-#line 6946 "modelParser.y" /* yacc.c:1648  */
+#line 6956 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.p_LTV_Term) = new LTV_Term(*(yyvsp[-1].pUpoly), -1, -1, -1);
 
 	delete (yyvsp[-1].pUpoly);
 }
-#line 9391 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9401 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 333:
-#line 6961 "modelParser.y" /* yacc.c:1648  */
+#line 6971 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pUpoly) = (yyvsp[-2].pUpoly);
 	(*(yyval.pUpoly)) += (*(yyvsp[0].pUpoly));
 
 	delete (yyvsp[0].pUpoly);
 }
-#line 9402 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9412 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 334:
-#line 6969 "modelParser.y" /* yacc.c:1648  */
+#line 6979 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pUpoly) = (yyvsp[-2].pUpoly);
 	(*(yyval.pUpoly)) -= (*(yyvsp[0].pUpoly));
 
 	delete (yyvsp[0].pUpoly);
 }
-#line 9413 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9423 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 335:
-#line 6977 "modelParser.y" /* yacc.c:1648  */
+#line 6987 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pUpoly) = (yyvsp[-1].pUpoly); 
 }
-#line 9421 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9431 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 336:
-#line 6982 "modelParser.y" /* yacc.c:1648  */
+#line 6992 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pUpoly) = (yyvsp[-2].pUpoly);
 	(*(yyval.pUpoly)) *= (*(yyvsp[0].pUpoly));
 
 	delete (yyvsp[0].pUpoly);
 }
-#line 9432 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9442 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 337:
-#line 6990 "modelParser.y" /* yacc.c:1648  */
+#line 7000 "modelParser.y" /* yacc.c:1648  */
     {
 	int exp = (int) (yyvsp[0].dblVal);
 
@@ -9448,21 +9458,21 @@ yyreduce:
 
 	delete (yyvsp[-2].pUpoly);
 }
-#line 9452 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9462 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 338:
-#line 7007 "modelParser.y" /* yacc.c:1648  */
+#line 7017 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I(-1);
 	(yyval.pUpoly) = (yyvsp[0].pUpoly);
 	(*(yyval.pUpoly)) *= I;
 }
-#line 9462 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9472 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 339:
-#line 7014 "modelParser.y" /* yacc.c:1648  */
+#line 7024 "modelParser.y" /* yacc.c:1648  */
     {
 	std::string tVar("t");
 	if((yyvsp[0].identifier)->compare(tVar) == 0)
@@ -9477,28 +9487,28 @@ yyreduce:
 		exit(1);
 	}
 }
-#line 9481 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9491 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 340:
-#line 7030 "modelParser.y" /* yacc.c:1648  */
+#line 7040 "modelParser.y" /* yacc.c:1648  */
     {
 	flowstar::Interval I((yyvsp[-3].dblVal), (yyvsp[-1].dblVal));
 	(yyval.pUpoly) = new flowstar::UnivariatePolynomial(I);
 }
-#line 9490 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9500 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
   case 341:
-#line 7036 "modelParser.y" /* yacc.c:1648  */
+#line 7046 "modelParser.y" /* yacc.c:1648  */
     {
 	(yyval.pUpoly) = new flowstar::UnivariatePolynomial((yyvsp[0].dblVal));
 }
-#line 9498 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9508 "modelParser.tab.c" /* yacc.c:1648  */
     break;
 
 
-#line 9502 "modelParser.tab.c" /* yacc.c:1648  */
+#line 9512 "modelParser.tab.c" /* yacc.c:1648  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -9726,8 +9736,16 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 7054 "modelParser.y" /* yacc.c:1907  */
+#line 7064 "modelParser.y" /* yacc.c:1907  */
 
+
+void setContinuousProblem(flowstar::ContinuousReachability & cr) {
+	continuousProblem = cr;
+}
+
+void saveContinuousProblem(flowstar::ContinuousReachability & res) {
+	res = continuousProblem;
+}
 
 int yyerror(const char * what)
 {

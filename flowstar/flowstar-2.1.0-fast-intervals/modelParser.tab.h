@@ -132,7 +132,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 61 "modelParser.y" /* yacc.c:1910  */
+#line 69 "modelParser.y" /* yacc.c:1910  */
 
 	double dblVal;
 	int intVal;

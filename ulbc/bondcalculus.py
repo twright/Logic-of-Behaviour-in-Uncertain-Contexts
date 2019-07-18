@@ -18,11 +18,11 @@ class BondwbException(Exception):
 
 class System:
     def __init__(self,
-            R : sg.PolynomialRing,
+            R,
             x : tuple,
             y0 : tuple,
             y : tuple,
-            varmap : Optional[dict] = None ):
+            varmap : Optional[dict] = None):
         self._R = R
         self._x = x
         self._y0 = y0
@@ -53,9 +53,8 @@ class System:
             return System(data['R'], data['x'], data['y0'], data['y'],
                           varmap=data['varmap'])
         else:
-            return System(sg.SR, tuple(map(sg.SR, data['x'])),
-                data['y0'], data['ysage'],
-                varmap={k: sg.SR(v) for k, v in data['varmap'].items()})
+            return System(sg.SR, data['xsr'], data['y0'], data['ysr'],
+                varmap={k: v for k, v in data['varmapsr'].items()})
         
     @property
     def R(self) -> sg.PolynomialRing:
@@ -120,12 +119,23 @@ class System:
         )
 
     def reach(self, duration, **kwargs) -> Reach:
-        return Reach(
-            self.y,
-            self.y0,
-            duration,
-            **kwargs,
-        )
+        if self.R == sg.SR:
+            # Non-Polynomial case
+            return Reach(
+                self.x,
+                self.y,
+                self.y0,
+                duration,
+                **kwargs,
+            )
+        else:
+            # Polynomial case
+            return Reach(
+                self.y,
+                self.y0,
+                duration,
+                **kwargs,
+            )
 
 
 class BondModel:

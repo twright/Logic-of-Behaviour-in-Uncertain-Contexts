@@ -12,8 +12,13 @@
 #include "Hybrid.h"
 
 extern int lineNum;
-
+extern void setContinuousProblem(flowstar::ContinuousReachability &);
+extern void saveContinuousProblem(flowstar::ContinuousReachability &);
+extern flowstar::ContinuousReachability continuousProblem;
 extern int yyparse();
+extern int yydebug;
+// extern void setContinuousProblem(ContinuousReachability & cr);
+// extern void saveContinuousProblem(ContinuousReachability & res);
 
 void parseError(const char *str, int lnum);
 

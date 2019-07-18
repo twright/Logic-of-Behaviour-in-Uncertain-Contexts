@@ -12,6 +12,9 @@ from libcpp.map cimport map as cmap
 cdef extern from "Continuous.h" namespace "flowstar" nogil:
     cdef vector[string] domainVarNames
 
+    cdef void construct_step_exp_table(vector[Interval] & step_exp_table, vector[Interval] & step_end_exp_table, const double step, const int order)
+    cdef void construct_step_exp_table(vector[Interval] & step_exp_table, const Interval & step, const int order)
+
     cdef cppclass Flowpipe:
         Flowpipe()
         Flowpipe(const TaylorModelVec & tmvPre_input,
@@ -43,6 +46,8 @@ cdef extern from "Continuous.h" namespace "flowstar" nogil:
 
         vector[Flowpipe] initialSets
         TaylorModelVec tmvOde
+        vector[string] strOde
+        vector[string] strOde_centered # Hopefully we don't need to set/change this
 
         cbool bAuto
 
