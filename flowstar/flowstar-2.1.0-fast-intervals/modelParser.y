@@ -4084,6 +4084,8 @@ npode: npode IDENT '\'' EQ non_polynomial_rhs_string
 
 	int id = continuousProblem.getIDForStateVar(*$2);
 
+//	printf("in npode with $1 = %s", $1);
+
 	if(id < 0)
 	{
 		char errMsg[MSG_SIZE];

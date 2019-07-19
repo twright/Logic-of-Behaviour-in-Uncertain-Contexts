@@ -2,6 +2,7 @@ import pexpect
 from typing import Optional, Any
 import sage.all as sg
 from pathlib import Path
+import tempfile
 import random
 from flowstar.reachability import Reach
 from ulbc.interval_utils import fintervals
@@ -82,6 +83,10 @@ class System:
     def v(self, name : str) -> Any: 
         """Lookup a variable with a given name."""
         return self.varmap[name]
+
+    def n(self, name : str) -> Any: 
+        """Lookup the bond-calculus name for a variable with a given name."""
+        return str(self.varmap[name])
     
     def varname(self, var) -> str:
         """Lookup the name of a given variable."""
@@ -203,10 +208,14 @@ class BondProcess:
 
     @property
     def as_system(self) -> System:
-        filename = Path("/tmp/",
-            "bond-script-{}.py".format(random.randint(int(10e5), int(10e6))))
+        temp = tempfile.NamedTemporaryFile(
+            suffix='.py',
+            prefix='bond-sage-script-',
+            delete=False,
+        )
+        filename = temp.name
 
-        self.extract(filename.as_posix())
+        self.extract(filename)
         
-        return System.load_from_script(filename.as_posix())
+        return System.load_from_script(filename)
 

@@ -23,7 +23,8 @@ from sage.symbolic.operators import arithmetic_operators
 
 from sage.symbolic.expression_conversions import ExpressionTreeWalker, Converter
 
-__all__ = ('TaylorModelExpander', 'TaylorModel')
+__all__ = ('TaylorModelExpander', 'TaylorModel', 'FlowstarConverter',
+           'TaylorModelContext')
 
 # All global settings/parameters for TaylorModel operations
 # including variable domains, working order, cutoff_threshold,
@@ -179,7 +180,7 @@ class FlowstarConverter(Converter):
             if expn == -1:
                 # Flowstar seems to cope much better with a fraction than a negative
                 # power
-                return "[1 , 1]/{}".format(operands[0])
+                return "[1 , 1]/({})".format(operands[0])
             else:
                 # We had better hope that the exponent is some king of number
                 return '({})^{}'.format(operands[0], expn)

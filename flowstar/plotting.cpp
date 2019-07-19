@@ -12,7 +12,7 @@
             "flowstar/flowstar-2.1.0/include.h"
         ],
         "extra_compile_args": [
-            "-O0",
+            "-O3",
             "-std=c++17",
             "-Wno-register",
             "-march=native",
@@ -2297,7 +2297,7 @@ static PyObject *__pyx_codeobj__22;
 /* "flowstar/plotting.pyx":14
  * 
  * cdef class FlowstarPlotMixin:
- *     def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):             # <<<<<<<<<<<<<<
+ *     def plot(CReach self, str x, str y, str filename, plot_type=1):             # <<<<<<<<<<<<<<
  *         if not self.ran:
  *             raise Exception('Not ran!')
  */
@@ -2382,8 +2382,8 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17FlowstarPlotMixin_1plot(PyObject
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyBytes_Type), 1, "x", 1))) __PYX_ERR(0, 14, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyBytes_Type), 1, "y", 1))) __PYX_ERR(0, 14, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyUnicode_Type), 1, "x", 1))) __PYX_ERR(0, 14, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyUnicode_Type), 1, "y", 1))) __PYX_ERR(0, 14, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyUnicode_Type), 1, "filename", 1))) __PYX_ERR(0, 14, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(((struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_y, __pyx_v_filename, __pyx_v_plot_type);
 
@@ -2422,7 +2422,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
 
   /* "flowstar/plotting.pyx":15
  * cdef class FlowstarPlotMixin:
- *     def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):
+ *     def plot(CReach self, str x, str y, str filename, plot_type=1):
  *         if not self.ran:             # <<<<<<<<<<<<<<
  *             raise Exception('Not ran!')
  * 
@@ -2435,7 +2435,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
   if (unlikely(__pyx_t_3)) {
 
     /* "flowstar/plotting.pyx":16
- *     def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):
+ *     def plot(CReach self, str x, str y, str filename, plot_type=1):
  *         if not self.ran:
  *             raise Exception('Not ran!')             # <<<<<<<<<<<<<<
  * 
@@ -2449,7 +2449,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
 
     /* "flowstar/plotting.pyx":15
  * cdef class FlowstarPlotMixin:
- *     def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):
+ *     def plot(CReach self, str x, str y, str filename, plot_type=1):
  *         if not self.ran:             # <<<<<<<<<<<<<<
  *             raise Exception('Not ran!')
  * 
@@ -2603,19 +2603,26 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
  *         # already projected the flowpipes to the correct dimensions
  * 
  *         C.outputAxes.clear()             # <<<<<<<<<<<<<<
- *         C.outputAxes.push_back(C.getIDForStateVar(x))
- *         C.outputAxes.push_back(C.getIDForStateVar(y))
+ *         C.outputAxes.push_back(C.getIDForStateVar(x.encode('utf-8')))
+ *         C.outputAxes.push_back(C.getIDForStateVar(y.encode('utf-8')))
  */
   __pyx_v_C->outputAxes.clear();
 
   /* "flowstar/plotting.pyx":40
  * 
  *         C.outputAxes.clear()
- *         C.outputAxes.push_back(C.getIDForStateVar(x))             # <<<<<<<<<<<<<<
- *         C.outputAxes.push_back(C.getIDForStateVar(y))
+ *         C.outputAxes.push_back(C.getIDForStateVar(x.encode('utf-8')))             # <<<<<<<<<<<<<<
+ *         C.outputAxes.push_back(C.getIDForStateVar(y.encode('utf-8')))
  * 
  */
-  __pyx_t_9 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L1_error)
+  if (unlikely(__pyx_v_x == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
+    __PYX_ERR(0, 40, __pyx_L1_error)
+  }
+  __pyx_t_1 = PyUnicode_AsUTF8String(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_9 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   try {
     __pyx_v_C->outputAxes.push_back(__pyx_v_C->getIDForStateVar(__pyx_t_9));
   } catch(...) {
@@ -2625,12 +2632,19 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
 
   /* "flowstar/plotting.pyx":41
  *         C.outputAxes.clear()
- *         C.outputAxes.push_back(C.getIDForStateVar(x))
- *         C.outputAxes.push_back(C.getIDForStateVar(y))             # <<<<<<<<<<<<<<
+ *         C.outputAxes.push_back(C.getIDForStateVar(x.encode('utf-8')))
+ *         C.outputAxes.push_back(C.getIDForStateVar(y.encode('utf-8')))             # <<<<<<<<<<<<<<
  * 
  *         # Use class's version of flowstar global variables
  */
-  __pyx_t_9 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 41, __pyx_L1_error)
+  if (unlikely(__pyx_v_y == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
+    __PYX_ERR(0, 41, __pyx_L1_error)
+  }
+  __pyx_t_1 = PyUnicode_AsUTF8String(__pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_9 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 41, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   try {
     __pyx_v_C->outputAxes.push_back(__pyx_v_C->getIDForStateVar(__pyx_t_9));
   } catch(...) {
@@ -2718,7 +2732,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
  *         # print('trying to process', './outputs/{}.plt'.format(filename))
  *         call(['gnuplot', './outputs/{}.plt'.format(filename)])             # <<<<<<<<<<<<<<
  * 
- *     def wplot(self, bytes x, bytes y, int plot_type=1, str filename = None):
+ *     def wplot(self, str x, str y, int plot_type=1, str filename = None):
  */
   __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_call); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
@@ -2768,7 +2782,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
   /* "flowstar/plotting.pyx":14
  * 
  * cdef class FlowstarPlotMixin:
- *     def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):             # <<<<<<<<<<<<<<
+ *     def plot(CReach self, str x, str y, str filename, plot_type=1):             # <<<<<<<<<<<<<<
  *         if not self.ran:
  *             raise Exception('Not ran!')
  */
@@ -2795,7 +2809,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_plot(struct __
 /* "flowstar/plotting.pyx":54
  *         call(['gnuplot', './outputs/{}.plt'.format(filename)])
  * 
- *     def wplot(self, bytes x, bytes y, int plot_type=1, str filename = None):             # <<<<<<<<<<<<<<
+ *     def wplot(self, str x, str y, int plot_type=1, str filename = None):             # <<<<<<<<<<<<<<
  *         from wand.image import Image
  *         import uuid
  */
@@ -2885,8 +2899,8 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17FlowstarPlotMixin_3wplot(PyObjec
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyBytes_Type), 1, "x", 1))) __PYX_ERR(0, 54, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyBytes_Type), 1, "y", 1))) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyUnicode_Type), 1, "x", 1))) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_y), (&PyUnicode_Type), 1, "y", 1))) __PYX_ERR(0, 54, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_filename), (&PyUnicode_Type), 1, "filename", 1))) __PYX_ERR(0, 54, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_2wplot(((struct __pyx_obj_8flowstar_8plotting_FlowstarPlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_y, __pyx_v_plot_type, __pyx_v_filename);
 
@@ -2918,7 +2932,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_2wplot(struct 
 
   /* "flowstar/plotting.pyx":55
  * 
- *     def wplot(self, bytes x, bytes y, int plot_type=1, str filename = None):
+ *     def wplot(self, str x, str y, int plot_type=1, str filename = None):
  *         from wand.image import Image             # <<<<<<<<<<<<<<
  *         import uuid
  * 
@@ -2939,7 +2953,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_2wplot(struct 
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "flowstar/plotting.pyx":56
- *     def wplot(self, bytes x, bytes y, int plot_type=1, str filename = None):
+ *     def wplot(self, str x, str y, int plot_type=1, str filename = None):
  *         from wand.image import Image
  *         import uuid             # <<<<<<<<<<<<<<
  * 
@@ -3143,7 +3157,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17FlowstarPlotMixin_2wplot(struct 
   /* "flowstar/plotting.pyx":54
  *         call(['gnuplot', './outputs/{}.plt'.format(filename)])
  * 
- *     def wplot(self, bytes x, bytes y, int plot_type=1, str filename = None):             # <<<<<<<<<<<<<<
+ *     def wplot(self, str x, str y, int plot_type=1, str filename = None):             # <<<<<<<<<<<<<<
  *         from wand.image import Image
  *         import uuid
  */
@@ -4592,7 +4606,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_3sage_parametric_p
 }
 
 /* "flowstar/plotting.pyx":107
- *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  * 
  *         def f(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_x].center()
@@ -4692,7 +4706,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_20sage_parametric_
   goto __pyx_L0;
 
   /* "flowstar/plotting.pyx":107
- *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  * 
  *         def f(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_x].center()
@@ -4879,7 +4893,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
  *     def sage_parametric_plot(self, str x, str y, double step=1e-2):
  *         from sage.all import parametric_plot             # <<<<<<<<<<<<<<
  * 
- *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
+ *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
  */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -4899,27 +4913,41 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
   /* "flowstar/plotting.pyx":104
  *         from sage.all import parametric_plot
  * 
- *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
- *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))             # <<<<<<<<<<<<<<
+ *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  * 
  */
   if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 104, __pyx_L1_error)
-  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
+  if (unlikely(__pyx_v_x == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
+    __PYX_ERR(0, 104, __pyx_L1_error)
+  }
+  __pyx_t_2 = PyUnicode_AsUTF8String(__pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_cur_scope->__pyx_v_var_id_x = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_cur_scope->__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_3);
 
   /* "flowstar/plotting.pyx":105
  * 
- *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
- *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)             # <<<<<<<<<<<<<<
+ *         cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
+ *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))             # <<<<<<<<<<<<<<
  * 
  *         def f(t):
  */
   if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_cur_scope->__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 105, __pyx_L1_error)
-  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
+  if (unlikely(__pyx_v_y == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
+    __PYX_ERR(0, 105, __pyx_L1_error)
+  }
+  __pyx_t_2 = PyUnicode_AsUTF8String(__pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_cur_scope->__pyx_v_var_id_y = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_cur_scope->__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_3);
 
   /* "flowstar/plotting.pyx":107
- *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  * 
  *         def f(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_x].center()
@@ -4947,7 +4975,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
  * 
  *         return parametric_plot((f, g), (0, float(self.c_reach.time)))             # <<<<<<<<<<<<<<
  * 
- *     def sage_plot_manual(self, x, double step=1e-1):
+ *     def sage_plot_manual(self, str x, double step=1e-1):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 112, __pyx_L1_error)
@@ -5059,7 +5087,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_2sage_parametric_p
 /* "flowstar/plotting.pyx":114
  *         return parametric_plot((f, g), (0, float(self.c_reach.time)))
  * 
- *     def sage_plot_manual(self, x, double step=1e-1):             # <<<<<<<<<<<<<<
+ *     def sage_plot_manual(self, str x, double step=1e-1):             # <<<<<<<<<<<<<<
  *         from sage.all import Graphics, line
  * 
  */
@@ -5110,7 +5138,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_5sage_plot_manual(
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_x = values[0];
+    __pyx_v_x = ((PyObject*)values[0]);
     if (values[1]) {
       __pyx_v_step = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_step == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 114, __pyx_L3_error)
     } else {
@@ -5125,9 +5153,14 @@ static PyObject *__pyx_pw_8flowstar_8plotting_13SagePlotMixin_5sage_plot_manual(
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyUnicode_Type), 1, "x", 1))) __PYX_ERR(0, 114, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(((struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_step);
 
   /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
@@ -5170,7 +5203,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
 
   /* "flowstar/plotting.pyx":115
  * 
- *     def sage_plot_manual(self, x, double step=1e-1):
+ *     def sage_plot_manual(self, str x, double step=1e-1):
  *         from sage.all import Graphics, line             # <<<<<<<<<<<<<<
  * 
  *         p = Graphics()
@@ -5202,7 +5235,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
  *         from sage.all import Graphics, line
  * 
  *         p = Graphics()             # <<<<<<<<<<<<<<
- *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
  *         res1 = self((-1e-7,1e-7))[var_id]
  */
   __Pyx_INCREF(__pyx_v_Graphics);
@@ -5227,17 +5260,24 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   /* "flowstar/plotting.pyx":118
  * 
  *         p = Graphics()
- *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))             # <<<<<<<<<<<<<<
  *         res1 = self((-1e-7,1e-7))[var_id]
  *         lo1, hi1 = res1.lower(), res1.upper()
  */
   if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 118, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L1_error)
+  if (unlikely(__pyx_v_x == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
+    __PYX_ERR(0, 118, __pyx_L1_error)
+  }
+  __pyx_t_2 = PyUnicode_AsUTF8String(__pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_var_id = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
   /* "flowstar/plotting.pyx":119
  *         p = Graphics()
- *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
  *         res1 = self((-1e-7,1e-7))[var_id]             # <<<<<<<<<<<<<<
  *         lo1, hi1 = res1.lower(), res1.upper()
  *         cdef double t = 0
@@ -5265,7 +5305,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   __pyx_t_1 = 0;
 
   /* "flowstar/plotting.pyx":120
- *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
  *         res1 = self((-1e-7,1e-7))[var_id]
  *         lo1, hi1 = res1.lower(), res1.upper()             # <<<<<<<<<<<<<<
  *         cdef double t = 0
@@ -5948,7 +5988,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
   /* "flowstar/plotting.pyx":114
  *         return parametric_plot((f, g), (0, float(self.c_reach.time)))
  * 
- *     def sage_plot_manual(self, x, double step=1e-1):             # <<<<<<<<<<<<<<
+ *     def sage_plot_manual(self, str x, double step=1e-1):             # <<<<<<<<<<<<<<
  *         from sage.all import Graphics, line
  * 
  */
@@ -8117,8 +8157,8 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
  *                               sin, arrow, point, pi, vector)
  * 
  *         p = Graphics()             # <<<<<<<<<<<<<<
- *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
- *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
+ *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  */
   __Pyx_INCREF(__pyx_v_Graphics);
   __pyx_t_1 = __pyx_v_Graphics; __pyx_t_3 = NULL;
@@ -8142,28 +8182,42 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   /* "flowstar/plotting.pyx":198
  * 
  *         p = Graphics()
- *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)             # <<<<<<<<<<<<<<
- *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))             # <<<<<<<<<<<<<<
+ *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  *         cx0 = cy0 = None
  */
   if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 198, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_x); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 198, __pyx_L1_error)
+  if (unlikely(__pyx_v_x == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
+    __PYX_ERR(0, 198, __pyx_L1_error)
+  }
+  __pyx_t_2 = PyUnicode_AsUTF8String(__pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 198, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_var_id_x = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
   /* "flowstar/plotting.pyx":199
  *         p = Graphics()
- *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
- *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)             # <<<<<<<<<<<<<<
+ *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
+ *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))             # <<<<<<<<<<<<<<
  *         cx0 = cy0 = None
  *         cx = cy = None
  */
   if (!(likely(__Pyx_TypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_12reachability_CReach)))) __PYX_ERR(0, 199, __pyx_L1_error)
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_v_y); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 199, __pyx_L1_error)
+  if (unlikely(__pyx_v_y == Py_None)) {
+    PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
+    __PYX_ERR(0, 199, __pyx_L1_error)
+  }
+  __pyx_t_2 = PyUnicode_AsUTF8String(__pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 199, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 199, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_var_id_y = ((struct __pyx_obj_8flowstar_12reachability_CReach *)__pyx_v_self)->c_reach.getIDForStateVar(__pyx_t_4);
 
   /* "flowstar/plotting.pyx":200
- *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
- *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
+ *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  *         cx0 = cy0 = None             # <<<<<<<<<<<<<<
  *         cx = cy = None
  *         tx = ty = None
@@ -8174,7 +8228,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   __pyx_v_cy0 = Py_None;
 
   /* "flowstar/plotting.pyx":201
- *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  *         cx0 = cy0 = None
  *         cx = cy = None             # <<<<<<<<<<<<<<
  *         tx = ty = None
@@ -12494,7 +12548,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
   /* "flowstar/plotting.pyx":16
- *     def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):
+ *     def plot(CReach self, str x, str y, str filename, plot_type=1):
  *         if not self.ran:
  *             raise Exception('Not ran!')             # <<<<<<<<<<<<<<
  * 
@@ -12563,7 +12617,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_plotting_pyx, __pyx_n_s_fu, 91, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 91, __pyx_L1_error)
 
   /* "flowstar/plotting.pyx":107
- *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+ *         cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
  * 
  *         def f(t):             # <<<<<<<<<<<<<<
  *             return self((t, t+step))[var_id_x].center()
@@ -12588,7 +12642,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "flowstar/plotting.pyx":119
  *         p = Graphics()
- *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
+ *         cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
  *         res1 = self((-1e-7,1e-7))[var_id]             # <<<<<<<<<<<<<<
  *         lo1, hi1 = res1.lower(), res1.upper()
  *         cdef double t = 0

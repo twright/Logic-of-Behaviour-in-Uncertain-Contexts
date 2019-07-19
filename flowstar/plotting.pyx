@@ -11,7 +11,7 @@ import sage.all as sage
 
 
 cdef class FlowstarPlotMixin:
-    def plot(CReach self, bytes x, bytes y, str filename, plot_type=1):
+    def plot(CReach self, str x, str y, str filename, plot_type=1):
         if not self.ran:
             raise Exception('Not ran!')
 
@@ -37,8 +37,8 @@ cdef class FlowstarPlotMixin:
         # already projected the flowpipes to the correct dimensions
 
         C.outputAxes.clear()
-        C.outputAxes.push_back(C.getIDForStateVar(x))
-        C.outputAxes.push_back(C.getIDForStateVar(y))
+        C.outputAxes.push_back(C.getIDForStateVar(x.encode('utf-8')))
+        C.outputAxes.push_back(C.getIDForStateVar(y.encode('utf-8')))
 
         # Use class's version of flowstar global variables
         with self.global_manager:
@@ -51,7 +51,7 @@ cdef class FlowstarPlotMixin:
         # print('trying to process', './outputs/{}.plt'.format(filename))
         call(['gnuplot', './outputs/{}.plt'.format(filename)])
 
-    def wplot(self, bytes x, bytes y, int plot_type=1, str filename = None):
+    def wplot(self, str x, str y, int plot_type=1, str filename = None):
         from wand.image import Image
         import uuid
 
@@ -101,8 +101,8 @@ cdef class SagePlotMixin:
     def sage_parametric_plot(self, str x, str y, double step=1e-2):
         from sage.all import parametric_plot
 
-        cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
-        cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+        cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
+        cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
 
         def f(t):
             return self((t, t+step))[var_id_x].center()
@@ -111,11 +111,11 @@ cdef class SagePlotMixin:
 
         return parametric_plot((f, g), (0, float(self.c_reach.time)))
 
-    def sage_plot_manual(self, x, double step=1e-1):
+    def sage_plot_manual(self, str x, double step=1e-1):
         from sage.all import Graphics, line
 
         p = Graphics()
-        cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x)
+        cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
         res1 = self((-1e-7,1e-7))[var_id]
         lo1, hi1 = res1.lower(), res1.upper()
         cdef double t = 0
@@ -195,8 +195,8 @@ cdef class SageTubePlotMixin:
                               sin, arrow, point, pi, vector)
 
         p = Graphics()
-        var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x)
-        var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y)
+        var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
+        var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
         cx0 = cy0 = None
         cx = cy = None
         tx = ty = None
