@@ -1,3 +1,4 @@
+%option prefix="fyy"
 %{
 /*---
   Flow*: A Verification Tool for Cyber-Physical Systems.
@@ -117,9 +118,9 @@ number ("-"?)(({digit}+)|({digit}*"."{digit}*)|({digit}+"e"(({digit}+)|("-"{digi
 
 
 
-{number} { yylval.dblVal = atof( (char *)yytext ); return NUM; }
+{number} { fyylval.dblVal = atof( (char *)fyytext ); return NUM; }
 
-{ident}	{ yylval.identifier = new std::string(yytext); return IDENT; }
+{ident}	{ fyylval.identifier = new std::string(fyytext); return IDENT; }
 
 {whitespace} 
 
@@ -139,12 +140,12 @@ number ("-"?)(({digit}+)|({digit}*"."{digit}*)|({digit}+"e"(({digit}+)|("-"{digi
 	}
 }
 
-.  { printf("Unknown Character in line %d : %s -- Ignored\n", lineNum, yytext); }
+.  { printf("Unknown Character in line %d : %s -- Ignored\n", lineNum, fyytext); }
 
 %%
 
 
-int yywrap()
+int fyywrap()
 {
 	return 1;
 }
@@ -158,13 +159,13 @@ void parseODE()
 
 	YY_BUFFER_STATE current = YY_CURRENT_BUFFER;
 
-	YY_BUFFER_STATE yybs = yy_scan_string(strODE);
+	YY_BUFFER_STATE fyybs = fyy_scan_string(strODE);
 
-	yy_switch_to_buffer(yybs);
-	yyparse();
-    yy_delete_buffer(yybs);
+	fyy_switch_to_buffer(fyybs);
+	fyyparse();
+    fyy_delete_buffer(fyybs);
 
-	yy_switch_to_buffer(current);
+	fyy_switch_to_buffer(current);
 
 	delete [] strODE;
 }
@@ -178,13 +179,13 @@ void parseUnivariatePolynomial(const std::string & strPolynomial)
 
 	YY_BUFFER_STATE current = YY_CURRENT_BUFFER;
 
-	YY_BUFFER_STATE yybs = yy_scan_string(strInput);
+	YY_BUFFER_STATE fyybs = fyy_scan_string(strInput);
 
-	yy_switch_to_buffer(yybs);
-	yyparse();
-    yy_delete_buffer(yybs);
+	fyy_switch_to_buffer(fyybs);
+	fyyparse();
+    fyy_delete_buffer(fyybs);
 
-	yy_switch_to_buffer(current);
+	fyy_switch_to_buffer(current);
 
 	delete [] strInput;
 }

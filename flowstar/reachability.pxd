@@ -13,6 +13,7 @@ cdef class CReach:
     cdef public FlowstarGlobalManager global_manager
 
     cdef ContinuousReachability c_reach
+    cdef readonly object system
     cdef readonly bint ran
     cdef readonly bint prepared
     cdef readonly bint prepared_for_plotting

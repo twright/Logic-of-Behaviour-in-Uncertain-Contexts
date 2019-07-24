@@ -185,8 +185,8 @@ cdef class SagePlotMixin:
 
 
 cdef class SageTubePlotMixin:
-    def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):
-        return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
+    def sage_time_tube_plot(self, str x, double step=1e-1,joins=True, str t='t'):
+        return self.sage_tube_plot(t, x, step, straight=True, joins=joins)
 
     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False,
                        straight=False, tight=False, boundaries=True,

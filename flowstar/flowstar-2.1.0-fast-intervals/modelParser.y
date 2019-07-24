@@ -1,3 +1,8 @@
+/* We set this option to rename all functions with yy in the name to use
+ * to use fyy instead to avoid conflics with other linked bison parsers
+ * (e.g. those used within sagemath).
+ */
+%define api.prefix {fyy}
 %{
 	/*---
 	Flow*: A Verification Tool for Cyber-Physical Systems.
@@ -9,20 +14,20 @@
 
 
 	#include "modelParser.h"
-	#define YYDEBUG 1
+	#define FYYDEBUG 1
 
 	extern void setContinuousProblem(flowstar::ContinuousReachability &);
 	extern void saveContinuousProblem(flowstar::ContinuousReachability &);
-	extern int yyerror(const char *);
-	extern int yyerror(std::string);
-	extern int yylex();
-	extern int yyparse();
+	extern int fyyerror(const char *);
+	extern int fyyerror(std::string);
+	extern int fyylex();
+	extern int fyyparse();
 	bool err;
 
-	// int yydebug = 1;
-	// int yy_flex_debug = 1;
+	// int fyydebug = 1;
+	// int fyy_flex_debug = 1;
 
-	// extern int yy_flex_debug = 1;
+	// extern int fyy_flex_debug = 1;
 
 	int lineNum = 1;
 
@@ -93,7 +98,6 @@
 	LTV_Term *p_LTV_Term;
 	ODE_String *p_ODE_String;
 }
-
 
 %token <dblVal> NUM
 %token <identifier> IDENT
@@ -4084,7 +4088,7 @@ npode: npode IDENT '\'' EQ non_polynomial_rhs_string
 
 	int id = continuousProblem.getIDForStateVar(*$2);
 
-//	printf("in npode with $1 = %s", $1);
+	// printf("in npode with $1 = %s", $1);
 
 	if(id < 0)
 	{
@@ -7071,14 +7075,14 @@ void saveContinuousProblem(flowstar::ContinuousReachability & res) {
 	res = continuousProblem;
 }
 
-int yyerror(const char * what)
+int fyyerror(const char * what)
 {
 	fprintf(stderr, "Error line %d: %s\n", lineNum, what);
 	err = true;
 	return 1;
 }
 
-int yyerror(std::string what)
+int fyyerror(std::string what)
 {
 	std::cerr << "Error line "<< lineNum << " " << what << std::endl;
 	err = true;

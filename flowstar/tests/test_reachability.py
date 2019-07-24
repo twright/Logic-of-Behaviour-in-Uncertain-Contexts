@@ -1,6 +1,8 @@
 import pytest
-import sage.all as sage
+# Must import reachability before sage to avoid breaking
+# flow* parser!
 from flowstar.reachability import Reach
+import sage.all as sage
 from sage.all import RIF
 
 from ulbc.interval_utils import (finterval, intervals_approx_eq)

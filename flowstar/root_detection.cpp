@@ -719,6 +719,20 @@ static CYTHON_INLINE float __PYX_NAN() {
         };
     }
     
+
+    typedef std::function<flowstar::Interval(
+        void*, std::vector<flowstar::Interval> &
+    )> partial_interval_fn_t;
+    
+    // flowstar::Interval (*partial_interval_fn)(void* obj, flowstar::Interval & x)
+
+    std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>
+    partial_interval_fn(partial_interval_fn_t func, void* obj) {
+        return [func, obj] (std::vector<flowstar::Interval> & x) -> flowstar::Interval {
+            return func(obj, x);
+        };
+    }
+    
 #include "include.h"
 #include <utility>
 #include <map>

@@ -15,8 +15,8 @@ extern int lineNum;
 extern void setContinuousProblem(flowstar::ContinuousReachability &);
 extern void saveContinuousProblem(flowstar::ContinuousReachability &);
 extern flowstar::ContinuousReachability continuousProblem;
-extern int yyparse();
-extern int yydebug;
+extern int fyyparse();
+extern int fyydebug;
 // extern void setContinuousProblem(ContinuousReachability & cr);
 // extern void saveContinuousProblem(ContinuousReachability & res);
 

@@ -145,13 +145,13 @@ class FlowstarConverter(Converter):
         return str(ex)
 
     def pyobject(self, ex, obj):
-        print("pyobject(ex={}, obj={}, type={})".format(
-            repr(ex), repr(obj), repr(type(obj)),
-        ))
+        # print("pyobject(ex={}, obj={}, type={})".format(
+        #     repr(ex), repr(obj), repr(type(obj)),
+        # ))
         if obj in sg.QQ or obj in sg.RR:
-            return '[{0} , {0}]'.format(obj)
-        elif obj in sg.RIF:
-            return "[{}, {}]".format(*obj.endpoints()) 
+            return '[{0}, {0}]'.format(sg.RR(obj))
+        elif obj in sg.RR or obj in sg.RIF:
+            return "[{}, {}]".format(*sg.RIF(obj).endpoints()) 
         else:
             raise NotImplementedError
 
@@ -160,8 +160,8 @@ class FlowstarConverter(Converter):
         op_table[operator.neg] = 'neg'
         op_symb = op_table[op]
         operands = [self(operand) for operand in ex.operands()]
-        print("ex = {}, op = {}, op_symb = {}, operands = {}".format(
-            repr(ex), repr(op), repr(op_symb), repr(operands)))
+        # print("ex = {}, op = {}, op_symb = {}, operands = {}".format(
+        #     repr(ex), repr(op), repr(op_symb), repr(operands)))
 
         if op_symb == "*":
             return '*'.join(operands)
@@ -180,7 +180,7 @@ class FlowstarConverter(Converter):
             if expn == -1:
                 # Flowstar seems to cope much better with a fraction than a negative
                 # power
-                return "[1 , 1]/({})".format(operands[0])
+                return "[1, 1]/({})".format(operands[0])
             else:
                 # We had better hope that the exponent is some king of number
                 return '({})^{}'.format(operands[0], expn)

@@ -248,6 +248,8 @@ cdef class Poly:
             self.c_poly = Polynomial(make_interval(coeff), num_vars)
         elif len(args) == 1 and hasattr(args[0], 'exponents'):
             # print("from sage")
+            # import sage.rings.polynomial.multi_polynomial_element as mpe
+            # assert isinstance(args[0], mpe.MPolynomial_polydict)
             p = <Poly?>Poly.from_sage(args[0], explicit_time=explicit_time)
             self.vars = p.vars
             self.c_poly = p.c_poly
@@ -291,6 +293,7 @@ cdef class Poly:
     @staticmethod
     def from_sage(p, explicit_time=False):
         vars = list(map(str, p.parent().gens()))
+        # print(f"parent = {p.parent()}, vars = {vars}")
         zero = Poly(vars, explicit_time=explicit_time)
         if hasattr(p, 'list'):
             # Univariate polynomials handle interval coefficients containing
@@ -325,9 +328,11 @@ cdef class Poly:
 
     @property
     def var_names(self):
-        return [k for k,v in
-                    sorted(list(self.vars.items()), key=operator.itemgetter(0))
-                    if k != 'local_t']
+        # Sorting the var_names is a terrible idea since this uses lexicographical
+        # ordering on variable names.
+        # This is not necessary anyway since Python 3.7+ guarentees that dicts are
+        # ordered.
+        return [k for k,v in self.vars.items() if k != 'local_t']
 
     def __add__(self, other):
         if isinstance(self, Poly) and isinstance(other, Poly):

@@ -25,6 +25,7 @@ from libcpp.algorithm cimport sort as csort
 import sage.all as sage
 from sage.all import RIF
 from time import time as pytime
+from warnings import warn
 
 
 class FlowstarFailedException(Exception):
@@ -33,19 +34,32 @@ class FlowstarFailedException(Exception):
 
 cdef class CReach:
     def __cinit__(CReach self, *args, **kwargs):
+        # Create global variable manager
+        self.global_manager = FlowstarGlobalManager.forCReach(self.c_reach)
+        # Associate system object
+        self.system = kwargs.get('system', None)
+
         if len(args) == 1 or len(args) == 2:
             ## Copy constructor
             self._init_clone(*args)
         elif isinstance(args[1][0], str):
             ## Construct from string formatted ODE arguments 
             self._init_non_polynomial_str_args(*args, **kwargs)
-        elif any(ode in sage.SR for ode in args[1]):
+        elif any(isinstance(ode, sage.Expression) for ode in args[1]):
             print("ode in symbolic ring")
             ## Construct from sage expressions
             self._init_non_polynomial_sage_args(*args, **kwargs)
         else:
+            print("ode in polynomial ring")
             ## Construct polynomial from arguments
             self._init_args(*args, **kwargs)
+
+    @property
+    def vars(self):
+        if self.system is None:
+            return None
+        else:
+            return [v for _, v in self.system.varmap.items()]
 
     def _init_non_polynomial_sage_args(
         self,
@@ -57,6 +71,7 @@ cdef class CReach:
         str_vars = [str(v) for v in vars]
         converter = FlowstarConverter(str_vars)
         str_odes = [converter(sage.SR(ode)) for ode in odes]
+        print('str_odes =', repr(str_odes))
         self._init_non_polynomial_str_args(str_vars, str_odes, *args, **kwargs)
 
     def _init_non_polynomial_str_args(
@@ -77,7 +92,7 @@ cdef class CReach:
         max_remainder_queue=200,
         maxNumSteps=100,
         run=True,
-        symbolic_composition=False,
+        symbolic_composition=True,
         precompose_taylor_models=False,
         **kwargs):
         global continuousProblem
@@ -90,14 +105,14 @@ cdef class CReach:
 
         print("run =", run)
 
-        # Create global variable manager
-        self.global_manager = FlowstarGlobalManager.forCReach(self.c_reach)
-
         cdef ContinuousReachability * C
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
         cdef vector[string] ode_strs
         self.var_ring = sage.PolynomialRing(sage.RIF, ', '.join([str(v) for v in vars]))
+
+        if symbolic_composition == False:
+            warn("Manual composition being used on a non-polynomial systems.")
 
         with self.global_manager:
             C = &continuousProblem
@@ -183,6 +198,8 @@ cdef class CReach:
             # Create system object
             # The continuousProblem needs to be setup and set in parser before we call
             C.system = ContinuousSystem(ode_strs, initials_fpvect)
+            if not all([s.size() > 0 for s in C.system.strOde_centered]):
+                raise Exception("Flow* failed to parse ODEs!")
 
             # === Set properties ===
 
@@ -200,11 +217,11 @@ cdef class CReach:
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
 
+        self.system = other.system
         self.ran = False
         self.prepared = False
         self.result = 0
         self.symbolic_composition = other.symbolic_composition
-        self.global_manager = FlowstarGlobalManager()
         if initials is None:
             self.initials = other.initials
             self.c_reach.system = other.c_reach.system
@@ -265,10 +282,12 @@ cdef class CReach:
         maxNumSteps=100,
         vars=None,
         run=True,
+        system=None,
         symbolic_composition=False,
         precompose_taylor_models=False,
         **kwargs):
         cdef ContinuousReachability * C = &self.c_reach
+        self.system = system
         self.ran = False
         self.prepared = False
         self.prepared_for_plotting = False
@@ -278,7 +297,7 @@ cdef class CReach:
         print("run =", run)
 
         # Create global variable manager
-        self.global_manager = FlowstarGlobalManager()
+        # self.global_manager = FlowstarGlobalManager()
 
         # --- Creating the continuous system ---
         assert len(odes) == len(initials)
@@ -469,7 +488,7 @@ cdef class CReach:
         while (    domain   != domain_end
                and fp       != fp_end
                and fp_compo != fp_compo_end):
-            print("in loop")
+            # print("in loop")
             T = deref(domain)[0]
             loop_domain = (&composed_domain
                            if space_domain.has_value()

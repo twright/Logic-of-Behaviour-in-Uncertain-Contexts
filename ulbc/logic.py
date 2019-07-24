@@ -8,6 +8,7 @@ import time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from functools import partial, reduce
+from warnings import warn
 
 import sage.all as sage
 from sage.all import RIF
@@ -15,7 +16,7 @@ from builtins import *
 from flowstar.poly import Poly
 from flowstar.reachability import Reach, FlowstarFailedException
 
-from flowstar.observers import PolyObserver, RestrictedObserver
+from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver)
 from ulbc.context_signals import (ContextSignal,
                                   true_context_signal, false_context_signal)
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
@@ -32,9 +33,12 @@ class Logic(object):
     def __init__(self, arg):
         if hasattr(arg, 'gens'):
             self._R = arg
-            self._vars = OrderedDict((str(x), x) for x in arg.gens())
+            if self._R != sage.SR:
+                self._vars = OrderedDict((str(x), x) for x in arg.gens())
+            else:
+                self._vars = None
         else:
-            self._R = sage.PolynomialRing(sage.QQ, arg)
+            self._R = sage.PolynomialRing(sage.RIF, arg)
             self._vars = OrderedDict(zip(arg, self._R.gens()))
 
     def signal_for_system(self, *args, use_masks=False,
@@ -57,6 +61,7 @@ class Logic(object):
         if len(args) == 3:
             odes, initials, duration = args
             R, x = odes[0].parent().objgens()
+            print(f"R = {R}")
             system = System(R, x, initials, odes)
         elif len(args) == 2:
             system, duration = args
@@ -212,6 +217,11 @@ class Logic(object):
         pass
 
 
+def is_polynomial(f, vars):
+    f = sage.SR(f)
+    return all(f.is_polynomial(x) for x in vars)
+
+
 class Atomic(Logic):
     """
     >>> R, (x, y) = sage.PolynomialRing(sage.RIF, 'x, y').objgens()
@@ -237,20 +247,54 @@ class Atomic(Logic):
     def p(self):
         return self._p
 
-    def dpdt(self, odes):
-        return (sage.vector(map(self.p.derivative, self.vars.values()))
-                * sage.vector(odes))
+    def dpdt(self, odes, vars=None):
+        if vars is None:
+            vars = list(self.vars.values())
+        assert vars is not None
+        # print(f"vars = {vars}, p = {self.p}")
+        # import pytest
+        # pytest.set_trace()
+        diffs = [sage.diff(self.p, x) for x in vars]
+        # print(f"vars = {vars}, diffs = {diffs}, odes = {odes}")
+        return sage.vector(diffs) * sage.vector(odes)
 
-    def sage_plot(self, R):
-        idx = Poly(self.p)
+    def sage_plot(self, observer, *args, symbolic_composition=False, tentative_unpreconditioning=True, **kwargs):
+        # idx = Poly(self.p)
+
+        observer = self.observer(observer,
+                                 symbolic_composition=symbolic_composition,
+                                 tentative_unpreconditioning=tentative_unpreconditioning)
 
         def up(t):
-            return idx(R(t)).upper()
+            return observer(t).upper()
 
         def lo(t):
-            return idx(R(t)).lower()
+            return observer(t).lower()
 
-        return sage.plot((lo, up), (0, R.time))
+        if 'color' not in kwargs:
+            kwargs['color'] = ('blue', 'blue')
+        if 'fillcolor' not in kwargs:
+            kwargs['fillcolor'] = ('blue',)
+
+        return sage.plot((lo, up), (0, observer.time), *args, fill={0:[1]}, **kwargs)
+
+    def visualize(self, *args, **kwargs):
+        reach = kwargs.get('reach', None)
+        system = kwargs.get('system', args[0] if len(args) > 0 else None)
+        odes = kwargs.get('odes', system.y)
+        if reach is None:
+            if system is not None:
+                reach = system.reach(args[1]
+                                     if len(args) > 1
+                                     else kwargs['duration'])
+            else:
+                raise ValueError("No system!")
+        sig = self.signal(reach, odes, **kwargs)
+
+        sage_plot = self.sage_plot(reach)
+        axes_range = sage_plot.get_axes_range()
+        sig_plot = sig.plot(y_range=(axes_range['ymin'], axes_range['ymax']))
+        return sig_plot + sage_plot 
 
     def signal_for_system(self, *args, use_masks=False,
                           mask=None, **kwargs):
@@ -289,26 +333,80 @@ class Atomic(Logic):
                                                          mask=mask,
                                                          **kwargs)
 
-    def signal(self, reach, odes, space_domain=None, mask=None, **kwargs):
-        if isinstance(reach, PolyObserver):
-            observer = reach.with_mask(mask)
+    def observer(self, reach, space_domain=None, mask=None, symbolic_composition=False,
+                 tentative_unpreconditioning=False):
+        if reach.system is not None: 
+            fprime = self.dpdt(reach.system.y, reach.system.x)
         else:
-            observer = PolyObserver(self.p, reach,
-                                    kwargs.get('symbolic_composition', False),
-                                    kwargs.get('tentative_unpreconditioning',
-                                               True),
-                                    mask=mask)
+            fprime=None
+        if isinstance(reach, (PolyObserver, SageObserver)):
+            observer = reach.with_mask(mask)
+        elif (is_polynomial(self.p, reach.system.x)
+              and is_polynomial(fprime, reach.system.x)):
+            observer = PolyObserver(
+                reach.system.PR(self.p),
+                reach,
+                reach.system.PR(fprime),
+                symbolic_composition,
+                tentative_unpreconditioning,
+                mask=mask,
+            )
+        elif (is_polynomial(self.p, reach.system.x)
+              and symbolic_composition):
+            observer = PolyObserver(
+                reach.system.PR(self.p),
+                reach,
+                None,
+                symbolic_composition,
+                tentative_unpreconditioning,
+                mask=mask,
+            )
+        else:
+        # elif (reach.system is not None
+        #     and ((isinstance(self.p, sage.Expression) and
+        #           any(not self.p.is_polynomial(v)
+        #               for v in self.p.free_variables()))
+        #         or (reach.system.R == sage.SR and not symbolic_composition))):
+            if symbolic_composition:
+                warn("symbolic_composition not supported for non-polynomial properties")
+                symbolic_composition = False
+            observer = SageObserver(
+                sage.SR(self.p),
+                reach,
+                sage.SR(fprime),
+                symbolic_composition, # False
+                tentative_unpreconditioning,
+                mask=mask,
+            )
 
         if space_domain is not None:
             observer = RestrictedObserver(observer, space_domain)
 
-        return signal_from_observer(observer, RIF(0, reach.time - 1e-3),
-                                    verbosity=kwargs.get('verbosity', 0))
+        return observer
+
+    def signal(self, reach, odes, space_domain=None, mask=None, **kwargs):
+        observer = self.observer(
+            reach, space_domain, mask,
+            kwargs.get('symbolic_composition', False),
+            kwargs.get('tentative_unpreconditioning', True),
+        )
+
+        print(f"symbolic_composition={observer.symbolic_composition}, tentative_unpreconditioning={observer.tentative_unpreconditioning}")
+
+        return signal_from_observer(
+            observer,
+            RIF(0, reach.time - 1e-3),
+            verbosity=kwargs.get('verbosity', 0),
+        )
 
     def signal_fn(self, odes, r, space_domain, mask=None, **kwargs):
-        return self.signal(r, odes, space_domain=space_domain, mask=mask,
-                           **kwargs)\
-                   .to_domain(RIF(0, RIF(0, r.time - 1e-3)))
+        return self.signal(
+            r,
+            odes,
+            space_domain=space_domain,
+            mask=mask,
+            **kwargs,
+        ).to_domain(RIF(0, RIF(0, r.time - 1e-3)))
 
     def context_signal(self, reach, odes, initials, mask=None, **kwargs):
         domain = RIF(0, reach.time - 1e-3)
@@ -316,7 +414,7 @@ class Atomic(Logic):
             observer = reach.with_mask(mask)
         else:
             observer = PolyObserver(self.p, reach,
-                                    kwargs.get('symbolic_composition', False))
+                                    symbolic_composition=kwargs.get('symbolic_composition', False))
 
         return ContextSignal(domain, initials,
                              partial(self.signal_fn, odes, **kwargs),

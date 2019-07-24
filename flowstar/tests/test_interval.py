@@ -1,6 +1,17 @@
-from flowstar.interval import py_int_dist, py_int_min_dist, py_overlaps
+from flowstar.interval import (py_int_dist, py_int_min_dist, py_overlaps,
+                               py_make_interval_fn)
 from sage.all import RIF
 
+
+class TestMakeIntervalFn:
+    @staticmethod
+    def test_basic_fn():
+        def f(x, y):
+            # print(f"calling f with x = {x}, y = {y}")
+            return 2*x + y**2
+
+        h = py_make_interval_fn(f)
+        assert h(3, 2) == 10
 
 class TestIntDist(object):
     def test_identity(self):

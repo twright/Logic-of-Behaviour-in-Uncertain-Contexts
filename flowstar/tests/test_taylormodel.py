@@ -109,7 +109,8 @@ class TestFlowstarConverter:
 
     @staticmethod
     def test_constant(flowstar_converter):
-        assert ( flowstar_converter(sg.SR(2.5)) == "2.5" )
+        assert ( flowstar_converter(sg.SR(2.5))
+            == "[2.50000000000000, 2.50000000000000]" )
 
     @staticmethod
     def test_constant_interval(flowstar_converter):
@@ -119,27 +120,27 @@ class TestFlowstarConverter:
     @staticmethod
     def test_mul(flowstar_converter, x):
         assert ( flowstar_converter(2.5 * x)
-            == "x*2.5" )
+            == "x*[2.50000000000000, 2.50000000000000]" )
 
     @staticmethod
     def test_add(flowstar_converter, x):
         assert ( flowstar_converter(2.5 + x)
-            == "x + 2.5")
+            == "x + [2.50000000000000, 2.50000000000000]")
 
     @staticmethod
     def test_sub(flowstar_converter, x):
         assert ( flowstar_converter(2.5 - x)
-            == "-(x) + 2.5" )
+            == "-(x) + [2.50000000000000, 2.50000000000000]" )
 
     @staticmethod
     def test_simple_div(flowstar_converter, x):
         assert ( flowstar_converter((10 - x)/5)
-            == "x*(-1/5) + 2")
+            == "x*[-0.200000000000000, -0.200000000000000] + [2.00000000000000, 2.00000000000000]")
 
     @staticmethod
     def test_full_div(flowstar_converter, x):
         assert ( flowstar_converter((10 - x)/(x - 5))
-            == "(-(x + (-10)))/(x + (-5))" )
+            == "(-(x + [-10.0000000000000, -10.0000000000000]))/(x + [-5.00000000000000, -5.00000000000000])" )
 
 
 class TestTaylorModel:

@@ -18,6 +18,8 @@ cdef double int_dist(const Interval &, const Interval &) nogil
 cdef double int_min_dist(const Interval &, const Interval &) nogil
 cdef cbool int_diff(Interval& L, Interval& U, cbool& split, const Interval& a, const Interval& b) nogil
 cdef cbool extdiv(Interval& L, Interval& U, cbool& split, const Interval& d, const Interval& a, const Interval& b) nogil
+cdef interval_fn make_interval_fn(object f)
+cdef Interval apply_interval(void*, vector[Interval] &)
 
 
 cdef extern from "<functional>" namespace "std" nogil:
@@ -59,3 +61,22 @@ cdef extern from * nogil:
     }
     """
     interval_time_fn compose_interval_fn(interval_fn f, interval_vector_fn g)
+
+# Allow partiallly evaluating a cdef function into a C interval fn callback
+cdef extern from *:
+    """
+    typedef std::function<flowstar::Interval(
+        void*, std::vector<flowstar::Interval> &
+    )> partial_interval_fn_t;
+    
+    // flowstar::Interval (*partial_interval_fn)(void* obj, flowstar::Interval & x)
+
+    std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>
+    partial_interval_fn(partial_interval_fn_t func, void* obj) {
+        return [func, obj] (std::vector<flowstar::Interval> & x) -> flowstar::Interval {
+            return func(obj, x);
+        };
+    }
+    """ 
+    interval_fn partial_interval_fn(void* func, void* obj)
+    ctypedef Interval (*partial_interval_fn_t)(void* obj, vector[Interval] &)

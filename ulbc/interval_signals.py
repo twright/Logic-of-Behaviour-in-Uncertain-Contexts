@@ -48,7 +48,7 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
 def signal_from_observer(observer, domain, verbosity=0):  # , theta=0.01,
     # abs_inf=0.0001):
     mask = observer.mask
-    if not observer.flowstar_successful:
+    if not observer.reach.successful:
         return Signal(domain, [], mask=mask)
     return signal_given_bool_roots((lambda x: observer.check(x)),
                                    observer.roots(verbosity=verbosity),
@@ -279,10 +279,12 @@ class BaseSignal(object):
         def falses(x, _):
             return any(not b and x in II for II, b in self.values)
 
-        return (region_plot(trues, self.domain.endpoints(), (-1, 1),
-                            incol='lightgreen', **kwargs)
-                + region_plot(falses, self.domain.endpoints(), (-1, 1),
-                              incol='pink', **kwargs))
+        y_range = kwargs.pop('y_range', (-1, 1))
+
+        return (region_plot(trues, self.domain.endpoints(), y_range,
+                            incol='lightgreen', borderwidth=0, **kwargs)
+                + region_plot(falses, self.domain.endpoints(), y_range,
+                              incol='pink', borderwidth=0, **kwargs))
 
 
 def interval_complements(I, J):

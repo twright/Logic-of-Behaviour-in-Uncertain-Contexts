@@ -1181,7 +1181,7 @@ static PyObject *__pyx_n_s_test;
  * 
  * 
  * cdef void setYYDebug(bint debug):             # <<<<<<<<<<<<<<
- *     global yydebug
+ *     global fyydebug
  * 
  */
 
@@ -1190,17 +1190,17 @@ static void __pyx_f_8flowstar_11modelParser_setYYDebug(int __pyx_v_debug) {
   __Pyx_RefNannySetupContext("setYYDebug", 0);
 
   /* "flowstar/modelParser.pyx":11
- *     global yydebug
+ *     global fyydebug
  * 
- *     yydebug = debug             # <<<<<<<<<<<<<<
+ *     fyydebug = debug             # <<<<<<<<<<<<<<
  */
-  yydebug = __pyx_v_debug;
+  fyydebug = __pyx_v_debug;
 
   /* "flowstar/modelParser.pyx":8
  * 
  * 
  * cdef void setYYDebug(bint debug):             # <<<<<<<<<<<<<<
- *     global yydebug
+ *     global fyydebug
  * 
  */
 

@@ -6,6 +6,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.vector cimport vector
 from libcpp cimport bool as cbool
+import sage.all as sg
 
 
 cdef str as_str(const Interval & I):
@@ -22,6 +23,35 @@ cpdef int get_precision():
     global intervalNumPrecision
 
     return intervalNumPrecision
+
+
+def py_make_interval_fn(f):
+    """Python wrapper around make_interval_fn for testing purposes."""
+    def h(*xs):
+        cdef interval_fn g = make_interval_fn(f)
+        cdef vector[Interval] x_c
+        # Dummy time variable
+        x_c.push_back(make_interval(0))
+        for x in xs:
+            x_c.push_back(make_interval(x))
+        cdef Interval y_c = g.call(x_c)
+        return sg.RIF(y_c.inf(), y_c.sup())
+
+    return h
+
+
+cdef interval_fn make_interval_fn(object f):
+    print(f"make_interval_fn with f = {f}")
+    return partial_interval_fn(&apply_interval, <void*>f)
+
+
+cdef Interval apply_interval(void* f, vector[Interval] & xs):
+    x_py = [sg.RIF(x.inf(), x.sup()) for x in xs][1:]
+    print(f"args = {x_py}")
+    print(f"f = {<object?>f}")
+    y_py = (<object?>f)(*x_py)
+    print(f"y_py = {y_py}")
+    return make_interval(y_py)
 
 
 cdef Interval make_interval(object i):

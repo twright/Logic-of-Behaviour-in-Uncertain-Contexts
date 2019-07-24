@@ -150,7 +150,7 @@ class TestContextSignal(object):
              (RIF(3.73984181733316800, 5.00000000000000000), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, False)
+        observer = PolyObserver(atomic.p, reach, symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         assert ctx.signal.approx_eq(expected, 0.1)
@@ -174,7 +174,7 @@ class TestContextSignal(object):
         observer = PolyObserver(atomic.p,
                                 Reach(odes, initials, 5, (0.001, 0.1),
                                       order=10),
-                                False)
+                                symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         print(ctx.signal)
@@ -196,7 +196,7 @@ class TestContextSignal(object):
              (RIF(3.66473142161714090, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, False)
+        observer = PolyObserver(atomic.p, reach, symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         child_context_sig = ctx.children[3]
@@ -221,7 +221,8 @@ class TestContextSignal(object):
              (RIF(3.58023176070767980, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, False)
+        observer = PolyObserver(atomic.p, reach,
+            symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         assert space_domain_approx_eq(ctx.sub_space_domains[3],
@@ -245,7 +246,8 @@ class TestContextSignal(object):
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, False)
+        observer = PolyObserver(atomic.p, reach,
+            symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         assert ctx.refined_signal(0).approx_eq(ctx.signal, 0.01)
@@ -266,7 +268,8 @@ class TestContextSignal(object):
              (RIF(3.73207557917046400, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, False)
+        observer = PolyObserver(atomic.p, reach,
+            symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         print(ctx.refined_signal(1))
@@ -288,7 +291,7 @@ class TestContextSignal(object):
              (RIF(3.73078272148854980, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, False)
+        observer = PolyObserver(atomic.p, reach, symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         for c in ctx.children:

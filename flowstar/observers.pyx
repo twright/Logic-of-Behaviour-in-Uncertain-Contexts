@@ -6,8 +6,10 @@ from cython.operator cimport preincrement as inc
 from libcpp.vector cimport vector
 from libcpp.list cimport list as clist
 from libcpp cimport bool as cbool
+from warnings import warn
 
 import sage.all as sage
+from sage.ext.fast_callable import fast_callable
 
 cimport flowstar.root_detection as root_detection
 from flowstar.Polynomial cimport Polynomial
@@ -16,11 +18,15 @@ from flowstar.poly cimport (Poly, poly_fn,
 from flowstar.TaylorModel cimport TaylorModel
 from flowstar.Continuous cimport Flowpipe
 cimport flowstar.interval as interval
-from flowstar.interval cimport make_interval, interval_time_fn, interval_fn
+from flowstar.interval cimport (make_interval, interval_time_fn, interval_fn,
+                                partial_interval_fn,
+                                make_interval_fn)
+from ulbc.interval_utils import fintervals
 from flowstar.tribool cimport tribool, unknown
 from flowstar.tribool cimport and_ as tri_and
 from flowstar.reachability import Reach
 from flowstar.observable cimport observable
+
 
 
 __all__ = ('RestrictedObserver', 'PolyObserver')
@@ -38,11 +44,13 @@ cdef class RestrictedObserver(PolyObserver):
         self.symbolic_composition = p.symbolic_composition
         self.tentative_unpreconditioning = p.tentative_unpreconditioning
         self.reach = p.reach
+        self.f_interval_fn = p.f_interval_fn
+        self.fprime_interval_fn = p.fprime_interval_fn
         self.mask = p.mask
         self.masked_regions = p.masked_regions
         cdef optional[vector[Interval]] c_space_domain
         if self.reach is not None:
-            if not self.flowstar_successful:
+            if not self.reach.successful:
                 self.reach = Reach(self.reach, space_domain)
                 self._init_stored_data()
 
@@ -50,9 +58,9 @@ cdef class RestrictedObserver(PolyObserver):
             assert c_space_domain.has_value()
             self.space_domain = c_space_domain.value()
 
-        # Invalidate any composed polynomials for indeterminate intervals
-        if p.flowstar_successful:
-            self._invalidate_indeterminate_polys()
+            # Invalidate any composed polynomials for indeterminate intervals
+            if self.reach.successful:
+                self._invalidate_indeterminate_polys()
 
 
     cdef void _invalidate_indeterminate_polys(RestrictedObserver self):
@@ -91,43 +99,34 @@ cdef class RestrictedObserver(PolyObserver):
         return optional[vector[Interval]](domain)
 
 
-cdef class PolyObserver:
-    def __init__(PolyObserver self, f, CReach reach,
-                 bint symbolic_composition=False,
-                 bint tentative_unpreconditioning=False,
-                 object mask=None):
-        from ulbc.signal_masks import Mask
+cdef class FunctionObserver:
+    """Base class for observers of funcions over reach sequences.
+    
+    Contains some polynomial-specific code for symbolic_composition
+    and some code for domain-restriction to reduce differences
+    between algorithm/helper methods in subclasses. That is,
+    since we are using implementation inheritance, 
+    the atomic proposition monitoring algorithm of FunctionObserver
+    supports the combined functionality of all of its subclasses,
+    baring a few details they must fill in.
+    """
 
-        self.f = Poly(f)
-        self.reach = reach
-        self.fprime = self._fprime_given_f()
-        self.tentative_unpreconditioning = tentative_unpreconditioning
-        self.symbolic_composition = symbolic_composition
-        assert mask is None or isinstance(mask, Mask),\
-            'mask = {}'.format(repr(mask))
-        self.mask = mask
-        self._init_stored_data()
+    @property
+    def time(self):
+        if self.reach is not None:
+            return self.reach.time
+        else:
+            return None
 
-    def with_mask(self, mask):
-        from ulbc.signal_masks import Mask
-
-        assert mask is None or isinstance(mask, Mask)
-
-        observer = PolyObserver(
-            self.f,
-            self.reach,
-            symbolic_composition=self.symbolic_composition,
-            tentative_unpreconditioning=self.tentative_unpreconditioning,
-            mask=mask,
-        )
-        observer.bools = self.bools
-        observer.poly_f_fns = self.poly_f_fns
-        observer.poly_fprime_fns = self.poly_fprime_fns
-
-        return observer
+    @property
+    def system(self):
+        if self.reach is not None:
+            return self.reach.system
+        else:
+            return None
 
     def _init_stored_data(self):
-        if self.reach is not None and self.flowstar_successful:
+        if self.reach is not None and self.reach.successful:
             # We should be able to avoid composing Flowpipes at this stage
             self.reach.prepare()
 
@@ -146,24 +145,13 @@ cdef class PolyObserver:
             for I in self.mask.pos:
                 self.masked_regions.push_back(make_interval(I))
 
-    @property
-    def flowstar_successful(self):
-        return self.reach.ran and self.reach.result <= 3
-
-    @property
-    def time(self):
-        if self.reach is not None:
-            return self.reach.time
-        else:
-            return None
-
-    cdef optional[vector[Interval]] _global_domain(PolyObserver self):
-        return optional[vector[Interval]]()
-
-    def roots(PolyObserver self, space_domain=None,
+    def roots(FunctionObserver self, space_domain=None,
               epsilon=0.00001, verbosity=0):
-        # if not self.flowstar_successful:
+        # if not self.reach.successful:
         #     return [sage.RIF(0, self.time)]
+        print("roots(space_domain={}, epsilon={}, verbosity={})".format(
+            space_domain, epsilon, verbosity,
+        ))
 
         cdef vector[Interval] c_res
 
@@ -173,9 +161,11 @@ cdef class PolyObserver:
         with self.reach.global_manager:
             c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)
 
-        return [sage.RIF(r.inf(), r.sup()) for r in c_res]
+        res = [sage.RIF(r.inf(), r.sup()) for r in c_res]
+        print("roots =", fintervals(res))
+        return res
 
-    cdef vector[Interval] c_roots(PolyObserver self,
+    cdef vector[Interval] c_roots(FunctionObserver self,
                                   double epsilon=0.00001, int verbosity=0):
         cdef:
             # clist[TaylorModelVec].iterator tmv =\
@@ -292,7 +282,7 @@ cdef class PolyObserver:
 
         return roots
 
-    cdef Interval eval_interval(PolyObserver self, Interval & x,
+    cdef Interval eval_interval(FunctionObserver self, Interval & x,
                                 int verbosity=0):
         cdef:
             clist[Flowpipe].iterator fp = \
@@ -404,7 +394,7 @@ cdef class PolyObserver:
 
         return RIF(res.inf(), res.sup())
 
-    cdef tribool eval_bool_interval(PolyObserver self, Interval & x,
+    cdef tribool eval_bool_interval(FunctionObserver self, Interval & x,
                                     int verbosity=0):
         cdef:
             clist[Flowpipe].iterator fp = \
@@ -538,7 +528,7 @@ cdef class PolyObserver:
 
     ### Helper methods
 
-    cdef bint _tm_segment_loop(PolyObserver self,
+    cdef bint _tm_segment_loop(FunctionObserver self,
                                int & i,
                                vector[Interval]* & loop_domain,
                                optional[vector[Interval]] & global_domain,
@@ -614,7 +604,7 @@ cdef class PolyObserver:
 
             return True
 
-    cdef bint _mask_intersect_check(PolyObserver self, Interval & t,
+    cdef bint _mask_intersect_check(FunctionObserver self, Interval & t,
                                     Interval & t0, int verbosity):
         """Check there is a mask intersection and, if so, set t0 to the
         overlap interval."""
@@ -651,7 +641,7 @@ cdef class PolyObserver:
             return True
 
     cdef void _unpreconditioned_pre_retrieve_f(
-            PolyObserver self,
+            FunctionObserver self,
             interval_time_fn & f_fn,
             Flowpipe & fp,
             vector[Interval] * loop_domain):
@@ -664,11 +654,11 @@ cdef class PolyObserver:
         # Functional composition for polynomial
         # print("functionally precomposing f")
         (&f_fn)[0] = interval.compose_interval_fn(
-            poly_fn(self.f.c_poly),
+            self.f_interval_fn,
             fp_interval_fn(fp, deref(loop_domain)),
         )
 
-    cdef void _pre_retrieve_f(PolyObserver self,
+    cdef void _pre_retrieve_f(FunctionObserver self,
                               interval_time_fn & f_fn,
                               interval_time_fn & fprime_fn,
                               optional[interval_time_fn] & poly_f_fn,
@@ -691,11 +681,11 @@ cdef class PolyObserver:
             # Functional composition for polynomial
             # print("functional composition for f")
             (&f_fn)[0] = interval.compose_interval_fn(
-                poly_fn(self.f.c_poly),
+                self.f_interval_fn,
                 tmv_interval_fn(tmv, deref(loop_domain)),
             )
 
-    cdef void _post_retrieve_f(PolyObserver self,
+    cdef void _post_retrieve_f(FunctionObserver self,
                                interval_time_fn & f_fn,
                                interval_time_fn & fprime_fn,
                                optional[interval_time_fn] & poly_f_fn,
@@ -711,7 +701,7 @@ cdef class PolyObserver:
             # print("Performing symbolic composition!")
             observable(
                 f_fn, fprime_fn,
-                self.f.c_poly, tmv, deref(loop_domain),
+                (<Poly?>self.f).c_poly, tmv, deref(loop_domain),
                 self.reach.c_reach.globalMaxOrder,
                 self.reach.c_reach.cutoff_threshold,
             )
@@ -726,8 +716,10 @@ cdef class PolyObserver:
             # Define fprime as a functional composition, and use f as
             # defined similarly above
             # print("functional composition for fprime")
+            if self.fprime is None:
+                raise ValueError("Manual functional composition of polynomials does not work for non-polynomial systems.")
             (&fprime_fn)[0] = interval.compose_interval_fn(
-                poly_fn(self.fprime.c_poly),
+                self.fprime_interval_fn,
                 tmv_interval_fn(tmv, deref(loop_domain)),
             )
         # else:
@@ -749,7 +741,7 @@ cdef class PolyObserver:
 
         return overlap
 
-    cdef void _amalgamate_roots(PolyObserver self, vector[Interval] & roots,
+    cdef void _amalgamate_roots(FunctionObserver self, vector[Interval] & roots,
                                 vector[Interval] & new_roots,
                                 Interval & t, int verbosity=0):
         """Add new_roots to roots, whilst amalgamating adjacent overlapping 
@@ -768,9 +760,167 @@ cdef class PolyObserver:
                     print("new root:\n[{}..{}]".format(root.inf(), root.sup()))
                 roots.push_back(root)
 
+    cdef optional[vector[Interval]] _global_domain(FunctionObserver self):
+        return optional[vector[Interval]]()
+
+
+cdef object interval_fn_from_sage(interval_fn & res, f, vars):
+    # We must return the fast callable object ff since otherwise
+    # Python might garbage collect it whilst it is still in use
+    # with C++ code.
+    # The caller should keep it around as long as they wish to
+    # use the interval fn
+    ff = fast_callable(f, vars=vars, domain=sage.RIF)
+    (&res)[0] = make_interval_fn(ff)
+    return ff
+
+
+def py_interval_fn_from_sage(f, vars):
+    """Python wrapper around interval_fn_from_sage for testing purposes."""
+    # fff = None
+    def h(*xs):
+        cdef interval_fn g
+        h.ff = interval_fn_from_sage(g, f, vars)
+        cdef vector[Interval] x_c
+        # Dummy local time variable
+        x_c.push_back(make_interval(0))
+        for x in xs:
+            x_c.push_back(make_interval(x))
+        cdef Interval y_c = g.call(x_c)
+        return sage.RIF(y_c.inf(), y_c.sup())
+
+    return h
+
+cdef class SageObserver(FunctionObserver):
+    def __init__(SageObserver self, f, CReach reach,
+                 object fprime=None,
+                 bint symbolic_composition=False,
+                 bint tentative_unpreconditioning=False,
+                 object mask=None):
+        from ulbc.signal_masks import Mask
+
+        if symbolic_composition:
+            warn("symbolic_composition not supported for SageObserver")
+
+        print("SageObserver({}, {}, symbolic_composition={}, "
+              "tentative_unpreconditioning={}, mask={})".format(
+            f, reach, symbolic_composition, tentative_unpreconditioning,
+            mask,
+        ))
+
+        self.f = sage.SR(f)
+        self.reach = reach
+        assert self.reach.system is not None
+        if fprime is not None:
+            self.fprime = sage.SR(fprime)
+        else:
+            self.fprime = self._fprime_given_f()
+        self._define_callables()
+        self.tentative_unpreconditioning = tentative_unpreconditioning
+        self.symbolic_composition = False
+        assert mask is None or isinstance(mask, Mask),\
+            'mask = {}'.format(repr(mask))
+        self.mask = mask
+        self._init_stored_data()
+
+    def with_mask(self, mask):
+        from ulbc.signal_masks import Mask
+
+        assert mask is None or isinstance(mask, Mask)
+
+        observer = SageObserver(
+            self.f,
+            self.reach,
+            fprime=self.fprime,
+            symbolic_composition=self.symbolic_composition,
+            tentative_unpreconditioning=self.tentative_unpreconditioning,
+            mask=mask,
+        )
+        observer.bools = self.bools
+        observer.poly_f_fns = self.poly_f_fns
+        observer.poly_fprime_fns = self.poly_fprime_fns
+
+        return observer
+
+    cdef _define_callables(SageObserver self):
+        # Define f_fn and fprime_fn by conversion from sage
+        # Store the associated Sage fast_callable objects on self so they are not 
+        # reaped by the Python garbage collector.
+        self._ff = interval_fn_from_sage(self.f_interval_fn, self.f, self.reach.vars)
+        self._fprimef = interval_fn_from_sage(self.fprime_interval_fn, self.fprime, self.reach.vars)
+
+    def _fprime_given_f(SageObserver self):
+        # Calculate f' using the Lie derivative
+        return sage.vector([self.f.diff(v) for v in self.reach.vars]) * self.reach.system.y
+
+
+cdef class PolyObserver(FunctionObserver):
+    def __init__(PolyObserver self, f, CReach reach,
+                 object fprime=None,
+                 bint symbolic_composition=False,
+                 bint tentative_unpreconditioning=False,
+                 object mask=None):
+        from ulbc.signal_masks import Mask
+
+        print("PolyObserver({}, {}, symbolic_composition={}, "
+              "tentative_unpreconditioning={}, mask={})".format(
+            f, reach, symbolic_composition, tentative_unpreconditioning,
+            mask,
+        ))
+
+        # This now works if fprime is passed explicitly
+        # (and, presumably, is also a polynomial)
+        # if (reach.system is not None
+        #     and reach.system.R == sage.SR
+        #     and fprime is None):
+        #     raise ValueError("PolyObserver can only be used with "
+        #         "non-polynomial systems when symbolic_composition "
+        #         "is enabled!")
+
+        self.f = Poly(f)
+        self.reach = reach
+        if fprime is not None:
+            self.fprime = Poly(fprime)
+        else:
+            self.fprime = self._fprime_given_f()
+        self.tentative_unpreconditioning = tentative_unpreconditioning
+        self.symbolic_composition = symbolic_composition
+        assert mask is None or isinstance(mask, Mask),\
+            'mask = {}'.format(repr(mask))
+        self.mask = mask
+        self._init_stored_data()
+        self.f_interval_fn = poly_fn(self.f.c_poly)
+        if self.fprime is not None:
+            self.fprime_interval_fn = poly_fn(self.fprime.c_poly)
+        else:
+            self.fprime_interval_fn = <interval_fn>NULL
+
+    def with_mask(self, mask):
+        from ulbc.signal_masks import Mask
+
+        assert mask is None or isinstance(mask, Mask)
+
+        observer = PolyObserver(
+            self.f,
+            self.reach,
+            fprime=self.fprime,
+            symbolic_composition=self.symbolic_composition,
+            tentative_unpreconditioning=self.tentative_unpreconditioning,
+            mask=mask,
+        )
+        observer.bools = self.bools
+        observer.poly_f_fns = self.poly_f_fns
+        observer.poly_fprime_fns = self.poly_fprime_fns
+
+        return observer
+
     cdef Poly _fprime_given_f(PolyObserver self):
         """Find the derivative of f by taking the LieDerivative given odes."""
         cdef Polynomial fprime
+
+        # print(f"_fprime_given_f with odes = {self.}")
+        if (<CReach?>self.reach).odes.size() == 0:
+            return None
 
         self.f.c_poly.LieDerivative(fprime, (<CReach?>self.reach).odes)
 

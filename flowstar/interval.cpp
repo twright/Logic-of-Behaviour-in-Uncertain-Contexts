@@ -717,6 +717,20 @@ static CYTHON_INLINE float __PYX_NAN() {
         };
     }
     
+
+    typedef std::function<flowstar::Interval(
+        void*, std::vector<flowstar::Interval> &
+    )> partial_interval_fn_t;
+    
+    // flowstar::Interval (*partial_interval_fn)(void* obj, flowstar::Interval & x)
+
+    std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>
+    partial_interval_fn(partial_interval_fn_t func, void* obj) {
+        return [func, obj] (std::vector<flowstar::Interval> & x) -> flowstar::Interval {
+            return func(obj, x);
+        };
+    }
+    
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
@@ -944,6 +958,7 @@ static const char *__pyx_f[] = {
 
 
 /*--- Type declarations ---*/
+struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn;
 
 /* "flowstar/Monomial.pxd":74
  *         vector[int] getDegrees()
@@ -974,6 +989,19 @@ typedef PolyWrap *__pyx_t_8flowstar_10Polynomial_PolyWrapPtr;
  * ctypedef Polynomial* PolynomialPtr             # <<<<<<<<<<<<<<
  */
 typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
+
+/* "flowstar/interval.pyx":28
+ * 
+ * 
+ * def py_make_interval_fn(f):             # <<<<<<<<<<<<<<
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):
+ */
+struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn {
+  PyObject_HEAD
+  PyObject *__pyx_v_f;
+};
+
 
 /* --- Runtime support code (head) --- */
 /* Refnanny.proto */
@@ -1174,6 +1202,125 @@ static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_ve
 static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
 #endif
 
+/* KeywordStringCheck.proto */
+static int __Pyx_CheckKeywordStrings(PyObject *kwdict, const char* function_name, int kw_allowed);
+
+/* None.proto */
+static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname);
+
+/* FetchCommonType.proto */
+static PyTypeObject* __Pyx_FetchCommonType(PyTypeObject* type);
+
+/* CythonFunction.proto */
+#define __Pyx_CyFunction_USED 1
+#define __Pyx_CYFUNCTION_STATICMETHOD  0x01
+#define __Pyx_CYFUNCTION_CLASSMETHOD   0x02
+#define __Pyx_CYFUNCTION_CCLASS        0x04
+#define __Pyx_CyFunction_GetClosure(f)\
+    (((__pyx_CyFunctionObject *) (f))->func_closure)
+#define __Pyx_CyFunction_GetClassObj(f)\
+    (((__pyx_CyFunctionObject *) (f))->func_classobj)
+#define __Pyx_CyFunction_Defaults(type, f)\
+    ((type *)(((__pyx_CyFunctionObject *) (f))->defaults))
+#define __Pyx_CyFunction_SetDefaultsGetter(f, g)\
+    ((__pyx_CyFunctionObject *) (f))->defaults_getter = (g)
+typedef struct {
+    PyCFunctionObject func;
+#if PY_VERSION_HEX < 0x030500A0
+    PyObject *func_weakreflist;
+#endif
+    PyObject *func_dict;
+    PyObject *func_name;
+    PyObject *func_qualname;
+    PyObject *func_doc;
+    PyObject *func_globals;
+    PyObject *func_code;
+    PyObject *func_closure;
+    PyObject *func_classobj;
+    void *defaults;
+    int defaults_pyobjects;
+    int flags;
+    PyObject *defaults_tuple;
+    PyObject *defaults_kwdict;
+    PyObject *(*defaults_getter)(PyObject *);
+    PyObject *func_annotations;
+} __pyx_CyFunctionObject;
+static PyTypeObject *__pyx_CyFunctionType = 0;
+#define __Pyx_CyFunction_Check(obj)  (__Pyx_TypeCheck(obj, __pyx_CyFunctionType))
+#define __Pyx_CyFunction_NewEx(ml, flags, qualname, self, module, globals, code)\
+    __Pyx_CyFunction_New(__pyx_CyFunctionType, ml, flags, qualname, self, module, globals, code)
+static PyObject *__Pyx_CyFunction_New(PyTypeObject *, PyMethodDef *ml,
+                                      int flags, PyObject* qualname,
+                                      PyObject *self,
+                                      PyObject *module, PyObject *globals,
+                                      PyObject* code);
+static CYTHON_INLINE void *__Pyx_CyFunction_InitDefaults(PyObject *m,
+                                                         size_t size,
+                                                         int pyobjects);
+static CYTHON_INLINE void __Pyx_CyFunction_SetDefaultsTuple(PyObject *m,
+                                                            PyObject *tuple);
+static CYTHON_INLINE void __Pyx_CyFunction_SetDefaultsKwDict(PyObject *m,
+                                                             PyObject *dict);
+static CYTHON_INLINE void __Pyx_CyFunction_SetAnnotationsDict(PyObject *m,
+                                                              PyObject *dict);
+static int __pyx_CyFunction_init(void);
+
+/* PyObjectFormatSimple.proto */
+#if CYTHON_COMPILING_IN_PYPY
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        PyObject_Format(s, f))
+#elif PY_MAJOR_VERSION < 3
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        likely(PyString_CheckExact(s)) ? PyUnicode_FromEncodedObject(s, NULL, "strict") :\
+        PyObject_Format(s, f))
+#elif CYTHON_USE_TYPE_SLOTS
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        likely(PyLong_CheckExact(s)) ? PyLong_Type.tp_str(s) :\
+        likely(PyFloat_CheckExact(s)) ? PyFloat_Type.tp_str(s) :\
+        PyObject_Format(s, f))
+#else
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        PyObject_Format(s, f))
+#endif
+
+/* PyObjectCallMethO.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
+#endif
+
+/* PyObjectCallOneArg.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
+
+/* ListCompAppend.proto */
+#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
+static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
+    PyListObject* L = (PyListObject*) list;
+    Py_ssize_t len = Py_SIZE(list);
+    if (likely(L->allocated > len)) {
+        Py_INCREF(x);
+        PyList_SET_ITEM(list, len, x);
+        Py_SIZE(list) = len+1;
+        return 0;
+    }
+    return PyList_Append(list, x);
+}
+#else
+#define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
+#endif
+
+/* SliceTupleAndList.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyList_GetSlice(PyObject* src, Py_ssize_t start, Py_ssize_t stop);
+static CYTHON_INLINE PyObject* __Pyx_PyTuple_GetSlice(PyObject* src, Py_ssize_t start, Py_ssize_t stop);
+#else
+#define __Pyx_PyList_GetSlice(seq, start, stop)   PySequence_GetSlice(seq, start, stop)
+#define __Pyx_PyTuple_GetSlice(seq, start, stop)  PySequence_GetSlice(seq, start, stop)
+#endif
+
 /* RaiseTooManyValuesToUnpack.proto */
 static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
 
@@ -1210,20 +1357,12 @@ static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject 
 static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
 #endif
 
-/* PyObjectCallMethO.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
-#endif
-
 /* PyObjectCallNoArg.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
 #else
 #define __Pyx_PyObject_CallNoArg(func) __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL)
 #endif
-
-/* PyObjectCallOneArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
 
 /* RaiseArgTupleInvalid.proto */
 static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
@@ -1237,22 +1376,18 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
     const char* function_name);
 
-/* ListCompAppend.proto */
-#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
-static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
-    PyListObject* L = (PyListObject*) list;
-    Py_ssize_t len = Py_SIZE(list);
-    if (likely(L->allocated > len)) {
-        Py_INCREF(x);
-        PyList_SET_ITEM(list, len, x);
-        Py_SIZE(list) = len+1;
-        return 0;
-    }
-    return PyList_Append(list, x);
-}
+/* IncludeStringH.proto */
+#include <string.h>
+
+/* PyObject_GenericGetAttrNoDict.proto */
+#if CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP && PY_VERSION_HEX < 0x03070000
+static CYTHON_INLINE PyObject* __Pyx_PyObject_GenericGetAttrNoDict(PyObject* obj, PyObject* attr_name);
 #else
-#define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
+#define __Pyx_PyObject_GenericGetAttrNoDict PyObject_GenericGetAttr
 #endif
+
+/* Import.proto */
+static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
 
 /* CLineInTraceback.proto */
 #ifdef CYTHON_CLINE_IN_TRACEBACK
@@ -1380,6 +1515,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 /* Module declarations from 'flowstar.utils' */
 
 /* Module declarations from 'flowstar.interval' */
+static PyTypeObject *__pyx_ptype_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn = 0;
 static void __pyx_f_8flowstar_8interval_set_precision(int, int __pyx_skip_dispatch); /*proto*/
 static int __pyx_f_8flowstar_8interval_get_precision(int __pyx_skip_dispatch); /*proto*/
 static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *); /*proto*/
@@ -1390,6 +1526,8 @@ static double __pyx_f_8flowstar_8interval_int_dist(flowstar::Interval const &, f
 static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const &, flowstar::Interval const &); /*proto*/
 static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &, flowstar::Interval &, bool &, flowstar::Interval const &, flowstar::Interval const &); /*proto*/
 static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &, flowstar::Interval &, bool &, flowstar::Interval const &, flowstar::Interval const &, flowstar::Interval const &); /*proto*/
+static std::function<flowstar::Interval(std::vector<flowstar::Interval> &)> __pyx_f_8flowstar_8interval_make_interval_fn(PyObject *); /*proto*/
+static flowstar::Interval __pyx_f_8flowstar_8interval_apply_interval(void *, std::vector<flowstar::Interval>  &); /*proto*/
 #define __Pyx_MODULE_NAME "flowstar.interval"
 extern int __pyx_module_is_main_flowstar__interval;
 int __pyx_module_is_main_flowstar__interval = 0;
@@ -1407,16 +1545,31 @@ static const char __pyx_k_U[] = "U";
 static const char __pyx_k_a[] = "a";
 static const char __pyx_k_b[] = "b";
 static const char __pyx_k_d[] = "d";
+static const char __pyx_k_f[] = "f = ";
+static const char __pyx_k_g[] = "g";
+static const char __pyx_k_h[] = "h";
+static const char __pyx_k_x[] = "x";
+static const char __pyx_k__4[] = "*";
+static const char __pyx_k_sg[] = "sg";
+static const char __pyx_k_xs[] = "xs";
+static const char __pyx_k_RIF[] = "RIF";
+static const char __pyx_k_f_2[] = "f";
 static const char __pyx_k_res[] = "res";
+static const char __pyx_k_x_c[] = "x_c";
+static const char __pyx_k_y_c[] = "y_c";
+static const char __pyx_k_args[] = "args = ";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
+static const char __pyx_k_y_py[] = "y_py = ";
 static const char __pyx_k_lower[] = "lower";
 static const char __pyx_k_print[] = "print";
 static const char __pyx_k_split[] = "split";
 static const char __pyx_k_upper[] = "upper";
 static const char __pyx_k_format[] = "format";
+static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_main_2[] = "main";
+static const char __pyx_k_sage_all[] = "sage.all";
 static const char __pyx_k_py_extdiv[] = "py_extdiv";
 static const char __pyx_k_py_int_diff[] = "py_int_diff";
 static const char __pyx_k_py_int_dist[] = "py_int_dist";
@@ -1424,10 +1577,13 @@ static const char __pyx_k_py_overlaps[] = "py_overlaps";
 static const char __pyx_k_py_int_min_dist[] = "py_int_min_dist";
 static const char __pyx_k_flowstar_interval[] = "flowstar.interval";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
-static const char __pyx_k_py_extdiv_line_206[] = "py_extdiv (line 206)";
+static const char __pyx_k_py_extdiv_line_236[] = "py_extdiv (line 236)";
+static const char __pyx_k_py_make_interval_fn[] = "py_make_interval_fn";
 static const char __pyx_k_intervalNumPrecision[] = "intervalNumPrecision";
-static const char __pyx_k_py_int_diff_line_142[] = "py_int_diff (line 142)";
+static const char __pyx_k_py_int_diff_line_172[] = "py_int_diff (line 172)";
 static const char __pyx_k_flowstar_interval_pyx[] = "flowstar/interval.pyx";
+static const char __pyx_k_make_interval_fn_with_f[] = "make_interval_fn with f = ";
+static const char __pyx_k_py_make_interval_fn_locals_h[] = "py_make_interval_fn.<locals>.h";
 static const char __pyx_k_py_int_diff_1_3_2_4_True_False[] = "\n    >>> py_int_diff((1,3), (2,4))\n    (True, False, (1.0, 2.0), ...)\n    >>> py_int_diff((1,3), (4,5))\n    (True, False, (1.0, 3.0), ...)\n    >>> py_int_diff((1,3), (0,2))\n    (True, False, (2.0, 3.0), ...)\n    >>> py_int_diff((1,3), (2,4))\n    (True, False, (1.0, 2.0), ...)\n    >>> py_int_diff((1,5), (2,4))\n    (True, True, (1.0, 2.0), (4.0, 5.0))\n    >>> py_int_diff((2,4), (1,5))\n    (False, False, ..., ...)\n    ";
 static const char __pyx_k_py_extdiv_0_5_4_4_2_2_True_Fals[] = "\n    >>> py_extdiv((0,5), (4,4), (2,2))\n    (True, False, (2.0, 2.0), ...)\n    >>> py_extdiv((-5,5), (4,4), (-2,2))\n    (True, True, (-5.0, -2.0), (2.0, 5.0))\n    >>> py_extdiv((-5,5), (4,4), (-2,0.0))\n    (True, False, (-5.0, -2.0), ...)\n    ";
 static PyObject *__pyx_kp_u_;
@@ -1437,56 +1593,82 @@ static PyObject *__pyx_n_s_D;
 static PyObject *__pyx_n_s_I;
 static PyObject *__pyx_n_s_J;
 static PyObject *__pyx_n_s_L;
+static PyObject *__pyx_n_s_RIF;
 static PyObject *__pyx_n_s_U;
+static PyObject *__pyx_n_s__4;
 static PyObject *__pyx_n_s_a;
+static PyObject *__pyx_kp_u_args;
 static PyObject *__pyx_n_s_b;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_d;
+static PyObject *__pyx_kp_u_f;
+static PyObject *__pyx_n_s_f_2;
 static PyObject *__pyx_n_s_flowstar_interval;
 static PyObject *__pyx_kp_s_flowstar_interval_pyx;
 static PyObject *__pyx_n_s_format;
+static PyObject *__pyx_n_s_g;
+static PyObject *__pyx_n_s_h;
+static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_intervalNumPrecision;
 static PyObject *__pyx_n_s_lower;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_main_2;
+static PyObject *__pyx_kp_u_make_interval_fn_with_f;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_py_extdiv;
 static PyObject *__pyx_kp_u_py_extdiv_0_5_4_4_2_2_True_Fals;
-static PyObject *__pyx_kp_u_py_extdiv_line_206;
+static PyObject *__pyx_kp_u_py_extdiv_line_236;
 static PyObject *__pyx_n_s_py_int_diff;
 static PyObject *__pyx_kp_u_py_int_diff_1_3_2_4_True_False;
-static PyObject *__pyx_kp_u_py_int_diff_line_142;
+static PyObject *__pyx_kp_u_py_int_diff_line_172;
 static PyObject *__pyx_n_s_py_int_dist;
 static PyObject *__pyx_n_s_py_int_min_dist;
+static PyObject *__pyx_n_s_py_make_interval_fn;
+static PyObject *__pyx_n_s_py_make_interval_fn_locals_h;
 static PyObject *__pyx_n_s_py_overlaps;
 static PyObject *__pyx_n_s_res;
+static PyObject *__pyx_n_s_sage_all;
+static PyObject *__pyx_n_s_sg;
 static PyObject *__pyx_n_s_split;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_upper;
+static PyObject *__pyx_n_s_x;
+static PyObject *__pyx_n_s_x_c;
+static PyObject *__pyx_n_s_xs;
+static PyObject *__pyx_n_s_y_c;
+static PyObject *__pyx_kp_u_y_py;
 static PyObject *__pyx_pf_8flowstar_8interval_set_precision(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_prec); /* proto */
 static PyObject *__pyx_pf_8flowstar_8interval_2get_precision(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
-static PyObject *__pyx_pf_8flowstar_8interval_4py_overlaps(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J); /* proto */
-static PyObject *__pyx_pf_8flowstar_8interval_6py_int_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J); /* proto */
-static PyObject *__pyx_pf_8flowstar_8interval_8py_int_min_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J); /* proto */
-static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a, PyObject *__pyx_v_b); /* proto */
-static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_d, PyObject *__pyx_v_a, PyObject *__pyx_v_b); /* proto */
-static PyObject *__pyx_pf_8flowstar_8interval_14main(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_19py_make_interval_fn_h(PyObject *__pyx_self, PyObject *__pyx_v_xs); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_4py_make_interval_fn(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_f); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_6py_overlaps(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_8py_int_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_10py_int_min_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_12py_int_diff(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a, PyObject *__pyx_v_b); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_14py_extdiv(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_d, PyObject *__pyx_v_a, PyObject *__pyx_v_b); /* proto */
+static PyObject *__pyx_pf_8flowstar_8interval_16main(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_tp_new_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_int_0;
 static PyObject *__pyx_tuple__2;
-static PyObject *__pyx_tuple__4;
-static PyObject *__pyx_tuple__6;
-static PyObject *__pyx_tuple__8;
-static PyObject *__pyx_tuple__10;
-static PyObject *__pyx_tuple__12;
+static PyObject *__pyx_tuple__5;
+static PyObject *__pyx_tuple__7;
+static PyObject *__pyx_tuple__9;
+static PyObject *__pyx_tuple__11;
+static PyObject *__pyx_tuple__13;
+static PyObject *__pyx_tuple__15;
+static PyObject *__pyx_tuple__17;
 static PyObject *__pyx_codeobj__3;
-static PyObject *__pyx_codeobj__5;
-static PyObject *__pyx_codeobj__7;
-static PyObject *__pyx_codeobj__9;
-static PyObject *__pyx_codeobj__11;
-static PyObject *__pyx_codeobj__13;
+static PyObject *__pyx_codeobj__6;
+static PyObject *__pyx_codeobj__8;
+static PyObject *__pyx_codeobj__10;
+static PyObject *__pyx_codeobj__12;
+static PyObject *__pyx_codeobj__14;
+static PyObject *__pyx_codeobj__16;
+static PyObject *__pyx_codeobj__18;
 /* Late includes */
 
-/* "flowstar/interval.pyx":11
+/* "flowstar/interval.pyx":12
  * 
  * 
  * cdef str as_str(const Interval & I):             # <<<<<<<<<<<<<<
@@ -1506,7 +1688,7 @@ static PyObject *__pyx_f_8flowstar_8interval_as_str(flowstar::Interval const &__
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("as_str", 0);
 
-  /* "flowstar/interval.pyx":13
+  /* "flowstar/interval.pyx":14
  * cdef str as_str(const Interval & I):
  *     # This is a test 3
  *     return "[{}..{}]".format(I.inf(), I.sup())             # <<<<<<<<<<<<<<
@@ -1514,11 +1696,11 @@ static PyObject *__pyx_f_8flowstar_8interval_as_str(flowstar::Interval const &__
  * cpdef void set_precision(int prec):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u_, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u_, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_I.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_I.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_I.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_I.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = NULL;
   __pyx_t_6 = 0;
@@ -1535,7 +1717,7 @@ static PyObject *__pyx_f_8flowstar_8interval_as_str(flowstar::Interval const &__
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_2)) {
     PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_3, __pyx_t_4};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1545,7 +1727,7 @@ static PyObject *__pyx_f_8flowstar_8interval_as_str(flowstar::Interval const &__
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
     PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_3, __pyx_t_4};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1553,7 +1735,7 @@ static PyObject *__pyx_f_8flowstar_8interval_as_str(flowstar::Interval const &__
   } else
   #endif
   {
-    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 14, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     if (__pyx_t_5) {
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -1564,17 +1746,17 @@ static PyObject *__pyx_f_8flowstar_8interval_as_str(flowstar::Interval const &__
     PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_4);
     __pyx_t_3 = 0;
     __pyx_t_4 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(PyUnicode_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 13, __pyx_L1_error)
+  if (!(likely(PyUnicode_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 14, __pyx_L1_error)
   __pyx_r = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":11
+  /* "flowstar/interval.pyx":12
  * 
  * 
  * cdef str as_str(const Interval & I):             # <<<<<<<<<<<<<<
@@ -1598,7 +1780,7 @@ static PyObject *__pyx_f_8flowstar_8interval_as_str(flowstar::Interval const &__
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":15
+/* "flowstar/interval.pyx":16
  *     return "[{}..{}]".format(I.inf(), I.sup())
  * 
  * cpdef void set_precision(int prec):             # <<<<<<<<<<<<<<
@@ -1612,19 +1794,19 @@ static void __pyx_f_8flowstar_8interval_set_precision(int __pyx_v_prec, CYTHON_U
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("set_precision", 0);
 
-  /* "flowstar/interval.pyx":18
+  /* "flowstar/interval.pyx":19
  *     global intervalNumPrecision
  * 
  *     intervalNumPrecision = prec             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_prec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_prec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_intervalNumPrecision, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_intervalNumPrecision, __pyx_t_1) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/interval.pyx":15
+  /* "flowstar/interval.pyx":16
  *     return "[{}..{}]".format(I.inf(), I.sup())
  * 
  * cpdef void set_precision(int prec):             # <<<<<<<<<<<<<<
@@ -1649,7 +1831,7 @@ static PyObject *__pyx_pw_8flowstar_8interval_1set_precision(PyObject *__pyx_sel
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("set_precision (wrapper)", 0);
   assert(__pyx_arg_prec); {
-    __pyx_v_prec = __Pyx_PyInt_As_int(__pyx_arg_prec); if (unlikely((__pyx_v_prec == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L3_error)
+    __pyx_v_prec = __Pyx_PyInt_As_int(__pyx_arg_prec); if (unlikely((__pyx_v_prec == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 16, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -1670,7 +1852,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_set_precision(CYTHON_UNUSED PyObje
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("set_precision", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_8flowstar_8interval_set_precision(__pyx_v_prec, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_8flowstar_8interval_set_precision(__pyx_v_prec, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1687,7 +1869,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_set_precision(CYTHON_UNUSED PyObje
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":21
+/* "flowstar/interval.pyx":22
  * 
  * 
  * cpdef int get_precision():             # <<<<<<<<<<<<<<
@@ -1703,21 +1885,21 @@ static int __pyx_f_8flowstar_8interval_get_precision(CYTHON_UNUSED int __pyx_ski
   int __pyx_t_2;
   __Pyx_RefNannySetupContext("get_precision", 0);
 
-  /* "flowstar/interval.pyx":24
+  /* "flowstar/interval.pyx":25
  *     global intervalNumPrecision
  * 
  *     return intervalNumPrecision             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_intervalNumPrecision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_intervalNumPrecision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":21
+  /* "flowstar/interval.pyx":22
  * 
  * 
  * cpdef int get_precision():             # <<<<<<<<<<<<<<
@@ -1754,7 +1936,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_2get_precision(CYTHON_UNUSED PyObj
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("get_precision", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_f_8flowstar_8interval_get_precision(0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_f_8flowstar_8interval_get_precision(0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1771,7 +1953,597 @@ static PyObject *__pyx_pf_8flowstar_8interval_2get_precision(CYTHON_UNUSED PyObj
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":27
+/* "flowstar/interval.pyx":28
+ * 
+ * 
+ * def py_make_interval_fn(f):             # <<<<<<<<<<<<<<
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8flowstar_8interval_5py_make_interval_fn(PyObject *__pyx_self, PyObject *__pyx_v_f); /*proto*/
+static char __pyx_doc_8flowstar_8interval_4py_make_interval_fn[] = "Python wrapper around make_interval_fn for testing purposes.";
+static PyMethodDef __pyx_mdef_8flowstar_8interval_5py_make_interval_fn = {"py_make_interval_fn", (PyCFunction)__pyx_pw_8flowstar_8interval_5py_make_interval_fn, METH_O, __pyx_doc_8flowstar_8interval_4py_make_interval_fn};
+static PyObject *__pyx_pw_8flowstar_8interval_5py_make_interval_fn(PyObject *__pyx_self, PyObject *__pyx_v_f) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("py_make_interval_fn (wrapper)", 0);
+  __pyx_r = __pyx_pf_8flowstar_8interval_4py_make_interval_fn(__pyx_self, ((PyObject *)__pyx_v_f));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/interval.pyx":30
+ * def py_make_interval_fn(f):
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):             # <<<<<<<<<<<<<<
+ *         cdef interval_fn g = make_interval_fn(f)
+ *         cdef vector[Interval] x_c
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8flowstar_8interval_19py_make_interval_fn_1h(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8interval_19py_make_interval_fn_1h = {"h", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_19py_make_interval_fn_1h, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8flowstar_8interval_19py_make_interval_fn_1h(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_xs = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("h (wrapper)", 0);
+  if (unlikely(__pyx_kwds) && unlikely(PyDict_Size(__pyx_kwds) > 0) && unlikely(!__Pyx_CheckKeywordStrings(__pyx_kwds, "h", 0))) return NULL;
+  __Pyx_INCREF(__pyx_args);
+  __pyx_v_xs = __pyx_args;
+  __pyx_r = __pyx_pf_8flowstar_8interval_19py_make_interval_fn_h(__pyx_self, __pyx_v_xs);
+
+  /* function exit code */
+  __Pyx_XDECREF(__pyx_v_xs);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8flowstar_8interval_19py_make_interval_fn_h(PyObject *__pyx_self, PyObject *__pyx_v_xs) {
+  struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *__pyx_cur_scope;
+  struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *__pyx_outer_scope;
+  std::function<flowstar::Interval(std::vector<flowstar::Interval> &)> __pyx_v_g;
+  std::vector<flowstar::Interval>  __pyx_v_x_c;
+  PyObject *__pyx_v_x = NULL;
+  flowstar::Interval __pyx_v_y_c;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  Py_ssize_t __pyx_t_2;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_7;
+  PyObject *__pyx_t_8 = NULL;
+  __Pyx_RefNannySetupContext("h", 0);
+  __pyx_outer_scope = (struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *) __Pyx_CyFunction_GetClosure(__pyx_self);
+  __pyx_cur_scope = __pyx_outer_scope;
+
+  /* "flowstar/interval.pyx":31
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):
+ *         cdef interval_fn g = make_interval_fn(f)             # <<<<<<<<<<<<<<
+ *         cdef vector[Interval] x_c
+ *         # Dummy time variable
+ */
+  if (unlikely(!__pyx_cur_scope->__pyx_v_f)) { __Pyx_RaiseClosureNameError("f"); __PYX_ERR(0, 31, __pyx_L1_error) }
+  __pyx_t_1 = __pyx_cur_scope->__pyx_v_f;
+  __Pyx_INCREF(__pyx_t_1);
+  __pyx_v_g = __pyx_f_8flowstar_8interval_make_interval_fn(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "flowstar/interval.pyx":34
+ *         cdef vector[Interval] x_c
+ *         # Dummy time variable
+ *         x_c.push_back(make_interval(0))             # <<<<<<<<<<<<<<
+ *         for x in xs:
+ *             x_c.push_back(make_interval(x))
+ */
+  try {
+    __pyx_v_x_c.push_back(__pyx_f_8flowstar_8interval_make_interval(__pyx_int_0));
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    __PYX_ERR(0, 34, __pyx_L1_error)
+  }
+
+  /* "flowstar/interval.pyx":35
+ *         # Dummy time variable
+ *         x_c.push_back(make_interval(0))
+ *         for x in xs:             # <<<<<<<<<<<<<<
+ *             x_c.push_back(make_interval(x))
+ *         cdef Interval y_c = g.call(x_c)
+ */
+  __pyx_t_1 = __pyx_v_xs; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
+  for (;;) {
+    if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_3); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 35, __pyx_L1_error)
+    #else
+    __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    #endif
+    __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_3);
+    __pyx_t_3 = 0;
+
+    /* "flowstar/interval.pyx":36
+ *         x_c.push_back(make_interval(0))
+ *         for x in xs:
+ *             x_c.push_back(make_interval(x))             # <<<<<<<<<<<<<<
+ *         cdef Interval y_c = g.call(x_c)
+ *         return sg.RIF(y_c.inf(), y_c.sup())
+ */
+    try {
+      __pyx_v_x_c.push_back(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_x));
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 36, __pyx_L1_error)
+    }
+
+    /* "flowstar/interval.pyx":35
+ *         # Dummy time variable
+ *         x_c.push_back(make_interval(0))
+ *         for x in xs:             # <<<<<<<<<<<<<<
+ *             x_c.push_back(make_interval(x))
+ *         cdef Interval y_c = g.call(x_c)
+ */
+  }
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "flowstar/interval.pyx":37
+ *         for x in xs:
+ *             x_c.push_back(make_interval(x))
+ *         cdef Interval y_c = g.call(x_c)             # <<<<<<<<<<<<<<
+ *         return sg.RIF(y_c.inf(), y_c.sup())
+ * 
+ */
+  __pyx_v_y_c = __pyx_v_g.operator()(__pyx_v_x_c);
+
+  /* "flowstar/interval.pyx":38
+ *             x_c.push_back(make_interval(x))
+ *         cdef Interval y_c = g.call(x_c)
+ *         return sg.RIF(y_c.inf(), y_c.sup())             # <<<<<<<<<<<<<<
+ * 
+ *     return h
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_sg); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_RIF); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_y_c.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_y_c.sup()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_6 = NULL;
+  __pyx_t_7 = 0;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_6)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_6);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+      __pyx_t_7 = 1;
+    }
+  }
+  #if CYTHON_FAST_PYCALL
+  if (PyFunction_Check(__pyx_t_4)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_6, __pyx_t_3, __pyx_t_5};
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  } else
+  #endif
+  #if CYTHON_FAST_PYCCALL
+  if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_6, __pyx_t_3, __pyx_t_5};
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  } else
+  #endif
+  {
+    __pyx_t_8 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 38, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    if (__pyx_t_6) {
+      __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_6); __pyx_t_6 = NULL;
+    }
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyTuple_SET_ITEM(__pyx_t_8, 0+__pyx_t_7, __pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_7, __pyx_t_5);
+    __pyx_t_3 = 0;
+    __pyx_t_5 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "flowstar/interval.pyx":30
+ * def py_make_interval_fn(f):
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):             # <<<<<<<<<<<<<<
+ *         cdef interval_fn g = make_interval_fn(f)
+ *         cdef vector[Interval] x_c
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_AddTraceback("flowstar.interval.py_make_interval_fn.h", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_x);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/interval.pyx":28
+ * 
+ * 
+ * def py_make_interval_fn(f):             # <<<<<<<<<<<<<<
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):
+ */
+
+static PyObject *__pyx_pf_8flowstar_8interval_4py_make_interval_fn(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_f) {
+  struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *__pyx_cur_scope;
+  PyObject *__pyx_v_h = 0;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("py_make_interval_fn", 0);
+  __pyx_cur_scope = (struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *)__pyx_tp_new_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn(__pyx_ptype_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn, __pyx_empty_tuple, NULL);
+  if (unlikely(!__pyx_cur_scope)) {
+    __pyx_cur_scope = ((struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *)Py_None);
+    __Pyx_INCREF(Py_None);
+    __PYX_ERR(0, 28, __pyx_L1_error)
+  } else {
+    __Pyx_GOTREF(__pyx_cur_scope);
+  }
+  __pyx_cur_scope->__pyx_v_f = __pyx_v_f;
+  __Pyx_INCREF(__pyx_cur_scope->__pyx_v_f);
+  __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_f);
+
+  /* "flowstar/interval.pyx":30
+ * def py_make_interval_fn(f):
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):             # <<<<<<<<<<<<<<
+ *         cdef interval_fn g = make_interval_fn(f)
+ *         cdef vector[Interval] x_c
+ */
+  __pyx_t_1 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_8interval_19py_make_interval_fn_1h, 0, __pyx_n_s_py_make_interval_fn_locals_h, ((PyObject*)__pyx_cur_scope), __pyx_n_s_flowstar_interval, __pyx_d, ((PyObject *)__pyx_codeobj__3)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_h = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "flowstar/interval.pyx":40
+ *         return sg.RIF(y_c.inf(), y_c.sup())
+ * 
+ *     return h             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(__pyx_v_h);
+  __pyx_r = __pyx_v_h;
+  goto __pyx_L0;
+
+  /* "flowstar/interval.pyx":28
+ * 
+ * 
+ * def py_make_interval_fn(f):             # <<<<<<<<<<<<<<
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("flowstar.interval.py_make_interval_fn", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_h);
+  __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/interval.pyx":43
+ * 
+ * 
+ * cdef interval_fn make_interval_fn(object f):             # <<<<<<<<<<<<<<
+ *     print(f"make_interval_fn with f = {f}")
+ *     return partial_interval_fn(&apply_interval, <void*>f)
+ */
+
+static std::function<flowstar::Interval(std::vector<flowstar::Interval> &)> __pyx_f_8flowstar_8interval_make_interval_fn(PyObject *__pyx_v_f) {
+  std::function<flowstar::Interval(std::vector<flowstar::Interval> &)> __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  __Pyx_RefNannySetupContext("make_interval_fn", 0);
+
+  /* "flowstar/interval.pyx":44
+ * 
+ * cdef interval_fn make_interval_fn(object f):
+ *     print(f"make_interval_fn with f = {f}")             # <<<<<<<<<<<<<<
+ *     return partial_interval_fn(&apply_interval, <void*>f)
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_f, __pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyUnicode_Concat(__pyx_kp_u_make_interval_fn_with_f, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "flowstar/interval.pyx":45
+ * cdef interval_fn make_interval_fn(object f):
+ *     print(f"make_interval_fn with f = {f}")
+ *     return partial_interval_fn(&apply_interval, <void*>f)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = partial_interval_fn((&__pyx_f_8flowstar_8interval_apply_interval), ((void *)__pyx_v_f));
+  goto __pyx_L0;
+
+  /* "flowstar/interval.pyx":43
+ * 
+ * 
+ * cdef interval_fn make_interval_fn(object f):             # <<<<<<<<<<<<<<
+ *     print(f"make_interval_fn with f = {f}")
+ *     return partial_interval_fn(&apply_interval, <void*>f)
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_WriteUnraisable("flowstar.interval.make_interval_fn", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_pretend_to_initialize(&__pyx_r);
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/interval.pyx":48
+ * 
+ * 
+ * cdef Interval apply_interval(void* f, vector[Interval] & xs):             # <<<<<<<<<<<<<<
+ *     x_py = [sg.RIF(x.inf(), x.sup()) for x in xs][1:]
+ *     print(f"args = {x_py}")
+ */
+
+static flowstar::Interval __pyx_f_8flowstar_8interval_apply_interval(void *__pyx_v_f, std::vector<flowstar::Interval>  &__pyx_v_xs) {
+  PyObject *__pyx_v_x_py = NULL;
+  PyObject *__pyx_v_y_py = NULL;
+  flowstar::Interval __pyx_7genexpr__pyx_v_x;
+  flowstar::Interval __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  std::vector<flowstar::Interval> ::iterator __pyx_t_2;
+  flowstar::Interval __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8 = NULL;
+  int __pyx_t_9;
+  PyObject *__pyx_t_10 = NULL;
+  __Pyx_RefNannySetupContext("apply_interval", 0);
+
+  /* "flowstar/interval.pyx":49
+ * 
+ * cdef Interval apply_interval(void* f, vector[Interval] & xs):
+ *     x_py = [sg.RIF(x.inf(), x.sup()) for x in xs][1:]             # <<<<<<<<<<<<<<
+ *     print(f"args = {x_py}")
+ *     print(f"f = {<object?>f}")
+ */
+  { /* enter inner scope */
+    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_2 = __pyx_v_xs.begin();
+    for (;;) {
+      if (!(__pyx_t_2 != __pyx_v_xs.end())) break;
+      __pyx_t_3 = *__pyx_t_2;
+      ++__pyx_t_2;
+      __pyx_7genexpr__pyx_v_x = __pyx_t_3;
+      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_sg); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_RIF); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 49, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __pyx_t_5 = PyFloat_FromDouble(__pyx_7genexpr__pyx_v_x.inf()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_7genexpr__pyx_v_x.sup()); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 49, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_7);
+      __pyx_t_8 = NULL;
+      __pyx_t_9 = 0;
+      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+        __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
+        if (likely(__pyx_t_8)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+          __Pyx_INCREF(__pyx_t_8);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_6, function);
+          __pyx_t_9 = 1;
+        }
+      }
+      #if CYTHON_FAST_PYCALL
+      if (PyFunction_Check(__pyx_t_6)) {
+        PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_5, __pyx_t_7};
+        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __Pyx_GOTREF(__pyx_t_4);
+        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      } else
+      #endif
+      #if CYTHON_FAST_PYCCALL
+      if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
+        PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_5, __pyx_t_7};
+        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        __Pyx_GOTREF(__pyx_t_4);
+        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      } else
+      #endif
+      {
+        __pyx_t_10 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 49, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_10);
+        if (__pyx_t_8) {
+          __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
+        }
+        __Pyx_GIVEREF(__pyx_t_5);
+        PyTuple_SET_ITEM(__pyx_t_10, 0+__pyx_t_9, __pyx_t_5);
+        __Pyx_GIVEREF(__pyx_t_7);
+        PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_9, __pyx_t_7);
+        __pyx_t_5 = 0;
+        __pyx_t_7 = 0;
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+      }
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 49, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    }
+  } /* exit inner scope */
+  __pyx_t_4 = __Pyx_PyList_GetSlice(__pyx_t_1, 1, PY_SSIZE_T_MAX); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_x_py = ((PyObject*)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "flowstar/interval.pyx":50
+ * cdef Interval apply_interval(void* f, vector[Interval] & xs):
+ *     x_py = [sg.RIF(x.inf(), x.sup()) for x in xs][1:]
+ *     print(f"args = {x_py}")             # <<<<<<<<<<<<<<
+ *     print(f"f = {<object?>f}")
+ *     y_py = (<object?>f)(*x_py)
+ */
+  __pyx_t_4 = __Pyx_PyObject_FormatSimple(__pyx_v_x_py, __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = __Pyx_PyUnicode_Concat(__pyx_kp_u_args, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+  /* "flowstar/interval.pyx":51
+ *     x_py = [sg.RIF(x.inf(), x.sup()) for x in xs][1:]
+ *     print(f"args = {x_py}")
+ *     print(f"f = {<object?>f}")             # <<<<<<<<<<<<<<
+ *     y_py = (<object?>f)(*x_py)
+ *     print(f"y_py = {y_py}")
+ */
+  __pyx_t_4 = __Pyx_PyObject_FormatSimple(((PyObject *)__pyx_v_f), __pyx_empty_unicode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = __Pyx_PyUnicode_Concat(__pyx_kp_u_f, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+  /* "flowstar/interval.pyx":52
+ *     print(f"args = {x_py}")
+ *     print(f"f = {<object?>f}")
+ *     y_py = (<object?>f)(*x_py)             # <<<<<<<<<<<<<<
+ *     print(f"y_py = {y_py}")
+ *     return make_interval(y_py)
+ */
+  __pyx_t_4 = PySequence_Tuple(__pyx_v_x_py); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_v_f), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_v_y_py = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "flowstar/interval.pyx":53
+ *     print(f"f = {<object?>f}")
+ *     y_py = (<object?>f)(*x_py)
+ *     print(f"y_py = {y_py}")             # <<<<<<<<<<<<<<
+ *     return make_interval(y_py)
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_y_py, __pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = __Pyx_PyUnicode_Concat(__pyx_kp_u_y_py, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "flowstar/interval.pyx":54
+ *     y_py = (<object?>f)(*x_py)
+ *     print(f"y_py = {y_py}")
+ *     return make_interval(y_py)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_y_py);
+  goto __pyx_L0;
+
+  /* "flowstar/interval.pyx":48
+ * 
+ * 
+ * cdef Interval apply_interval(void* f, vector[Interval] & xs):             # <<<<<<<<<<<<<<
+ *     x_py = [sg.RIF(x.inf(), x.sup()) for x in xs][1:]
+ *     print(f"args = {x_py}")
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_XDECREF(__pyx_t_10);
+  __Pyx_WriteUnraisable("flowstar.interval.apply_interval", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __Pyx_pretend_to_initialize(&__pyx_r);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_x_py);
+  __Pyx_XDECREF(__pyx_v_y_py);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/interval.pyx":57
  * 
  * 
  * cdef Interval make_interval(object i):             # <<<<<<<<<<<<<<
@@ -1802,7 +2574,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
   double __pyx_t_16;
   __Pyx_RefNannySetupContext("make_interval", 0);
 
-  /* "flowstar/interval.pyx":28
+  /* "flowstar/interval.pyx":58
  * 
  * cdef Interval make_interval(object i):
  *     try:             # <<<<<<<<<<<<<<
@@ -1818,7 +2590,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "flowstar/interval.pyx":29
+      /* "flowstar/interval.pyx":59
  * cdef Interval make_interval(object i):
  *     try:
  *         (lo, hi) = i             # <<<<<<<<<<<<<<
@@ -1831,7 +2603,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
         if (unlikely(size != 2)) {
           if (size > 2) __Pyx_RaiseTooManyValuesError(2);
           else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-          __PYX_ERR(0, 29, __pyx_L3_error)
+          __PYX_ERR(0, 59, __pyx_L3_error)
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
         if (likely(PyTuple_CheckExact(sequence))) {
@@ -1844,21 +2616,21 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
         __Pyx_INCREF(__pyx_t_4);
         __Pyx_INCREF(__pyx_t_5);
         #else
-        __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 29, __pyx_L3_error)
+        __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L3_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 29, __pyx_L3_error)
+        __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L3_error)
         __Pyx_GOTREF(__pyx_t_5);
         #endif
       } else {
         Py_ssize_t index = -1;
-        __pyx_t_6 = PyObject_GetIter(__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 29, __pyx_L3_error)
+        __pyx_t_6 = PyObject_GetIter(__pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L3_error)
         __Pyx_GOTREF(__pyx_t_6);
         __pyx_t_7 = Py_TYPE(__pyx_t_6)->tp_iternext;
         index = 0; __pyx_t_4 = __pyx_t_7(__pyx_t_6); if (unlikely(!__pyx_t_4)) goto __pyx_L9_unpacking_failed;
         __Pyx_GOTREF(__pyx_t_4);
         index = 1; __pyx_t_5 = __pyx_t_7(__pyx_t_6); if (unlikely(!__pyx_t_5)) goto __pyx_L9_unpacking_failed;
         __Pyx_GOTREF(__pyx_t_5);
-        if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_6), 2) < 0) __PYX_ERR(0, 29, __pyx_L3_error)
+        if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_6), 2) < 0) __PYX_ERR(0, 59, __pyx_L3_error)
         __pyx_t_7 = NULL;
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         goto __pyx_L10_unpacking_done;
@@ -1866,7 +2638,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         __pyx_t_7 = NULL;
         if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-        __PYX_ERR(0, 29, __pyx_L3_error)
+        __PYX_ERR(0, 59, __pyx_L3_error)
         __pyx_L10_unpacking_done:;
       }
       __pyx_v_lo = __pyx_t_4;
@@ -1874,7 +2646,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
       __pyx_v_hi = __pyx_t_5;
       __pyx_t_5 = 0;
 
-      /* "flowstar/interval.pyx":28
+      /* "flowstar/interval.pyx":58
  * 
  * cdef Interval make_interval(object i):
  *     try:             # <<<<<<<<<<<<<<
@@ -1891,7 +2663,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "flowstar/interval.pyx":30
+    /* "flowstar/interval.pyx":60
  *     try:
  *         (lo, hi) = i
  *     except:             # <<<<<<<<<<<<<<
@@ -1900,12 +2672,12 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
  */
     /*except:*/ {
       __Pyx_AddTraceback("flowstar.interval.make_interval", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_6) < 0) __PYX_ERR(0, 30, __pyx_L5_except_error)
+      if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_6) < 0) __PYX_ERR(0, 60, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
 
-      /* "flowstar/interval.pyx":31
+      /* "flowstar/interval.pyx":61
  *         (lo, hi) = i
  *     except:
  *         try:             # <<<<<<<<<<<<<<
@@ -1921,14 +2693,14 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
         __Pyx_XGOTREF(__pyx_t_10);
         /*try:*/ {
 
-          /* "flowstar/interval.pyx":32
+          /* "flowstar/interval.pyx":62
  *     except:
  *         try:
  *             (lo, hi) = i.lower(), i.upper()             # <<<<<<<<<<<<<<
  *         except:
  *             lo = hi = i
  */
-          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_i, __pyx_n_s_lower); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 32, __pyx_L13_error)
+          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_i, __pyx_n_s_lower); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 62, __pyx_L13_error)
           __Pyx_GOTREF(__pyx_t_12);
           __pyx_t_13 = NULL;
           if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_12))) {
@@ -1942,10 +2714,10 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
           }
           __pyx_t_11 = (__pyx_t_13) ? __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_13) : __Pyx_PyObject_CallNoArg(__pyx_t_12);
           __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
-          if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 32, __pyx_L13_error)
+          if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 62, __pyx_L13_error)
           __Pyx_GOTREF(__pyx_t_11);
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-          __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_i, __pyx_n_s_upper); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 32, __pyx_L13_error)
+          __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_i, __pyx_n_s_upper); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 62, __pyx_L13_error)
           __Pyx_GOTREF(__pyx_t_13);
           __pyx_t_14 = NULL;
           if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_13))) {
@@ -1959,7 +2731,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
           }
           __pyx_t_12 = (__pyx_t_14) ? __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_14) : __Pyx_PyObject_CallNoArg(__pyx_t_13);
           __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
-          if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 32, __pyx_L13_error)
+          if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 62, __pyx_L13_error)
           __Pyx_GOTREF(__pyx_t_12);
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
           __Pyx_XDECREF_SET(__pyx_v_lo, __pyx_t_11);
@@ -1967,7 +2739,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
           __Pyx_XDECREF_SET(__pyx_v_hi, __pyx_t_12);
           __pyx_t_12 = 0;
 
-          /* "flowstar/interval.pyx":31
+          /* "flowstar/interval.pyx":61
  *         (lo, hi) = i
  *     except:
  *         try:             # <<<<<<<<<<<<<<
@@ -1985,7 +2757,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
         __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
         __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-        /* "flowstar/interval.pyx":33
+        /* "flowstar/interval.pyx":63
  *         try:
  *             (lo, hi) = i.lower(), i.upper()
  *         except:             # <<<<<<<<<<<<<<
@@ -1994,12 +2766,12 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
  */
         /*except:*/ {
           __Pyx_AddTraceback("flowstar.interval.make_interval", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_11, &__pyx_t_13) < 0) __PYX_ERR(0, 33, __pyx_L15_except_error)
+          if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_11, &__pyx_t_13) < 0) __PYX_ERR(0, 63, __pyx_L15_except_error)
           __Pyx_GOTREF(__pyx_t_12);
           __Pyx_GOTREF(__pyx_t_11);
           __Pyx_GOTREF(__pyx_t_13);
 
-          /* "flowstar/interval.pyx":34
+          /* "flowstar/interval.pyx":64
  *             (lo, hi) = i.lower(), i.upper()
  *         except:
  *             lo = hi = i             # <<<<<<<<<<<<<<
@@ -2017,7 +2789,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
         }
         __pyx_L15_except_error:;
 
-        /* "flowstar/interval.pyx":31
+        /* "flowstar/interval.pyx":61
  *         (lo, hi) = i
  *     except:
  *         try:             # <<<<<<<<<<<<<<
@@ -2043,7 +2815,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
     }
     __pyx_L5_except_error:;
 
-    /* "flowstar/interval.pyx":28
+    /* "flowstar/interval.pyx":58
  * 
  * cdef Interval make_interval(object i):
  *     try:             # <<<<<<<<<<<<<<
@@ -2063,19 +2835,19 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
     __pyx_L8_try_end:;
   }
 
-  /* "flowstar/interval.pyx":36
+  /* "flowstar/interval.pyx":66
  *             lo = hi = i
  * 
  *     return Interval(<double>lo, <double>hi)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_v_lo); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L1_error)
-  __pyx_t_16 = __pyx_PyFloat_AsDouble(__pyx_v_hi); if (unlikely((__pyx_t_16 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_v_lo); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_16 = __pyx_PyFloat_AsDouble(__pyx_v_hi); if (unlikely((__pyx_t_16 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
   __pyx_r = flowstar::Interval(((double)__pyx_t_15), ((double)__pyx_t_16));
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":27
+  /* "flowstar/interval.pyx":57
  * 
  * 
  * cdef Interval make_interval(object i):             # <<<<<<<<<<<<<<
@@ -2101,7 +2873,7 @@ static flowstar::Interval __pyx_f_8flowstar_8interval_make_interval(PyObject *__
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":39
+/* "flowstar/interval.pyx":69
  * 
  * 
  * cdef vector[Interval] make_intervals(list intervals):             # <<<<<<<<<<<<<<
@@ -2119,7 +2891,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_8interval_make_interva
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("make_intervals", 0);
 
-  /* "flowstar/interval.pyx":42
+  /* "flowstar/interval.pyx":72
  *     cdef vector[Interval] res
  * 
  *     for interval in intervals:             # <<<<<<<<<<<<<<
@@ -2128,21 +2900,21 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_8interval_make_interva
  */
   if (unlikely(__pyx_v_intervals == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-    __PYX_ERR(0, 42, __pyx_L1_error)
+    __PYX_ERR(0, 72, __pyx_L1_error)
   }
   __pyx_t_1 = __pyx_v_intervals; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
   for (;;) {
     if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_3); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
+    __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_3); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 72, __pyx_L1_error)
     #else
-    __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 42, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     #endif
     __Pyx_XDECREF_SET(__pyx_v_interval, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/interval.pyx":43
+    /* "flowstar/interval.pyx":73
  * 
  *     for interval in intervals:
  *         res.push_back(make_interval(interval))             # <<<<<<<<<<<<<<
@@ -2153,10 +2925,10 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_8interval_make_interva
       __pyx_v_res.push_back(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_interval));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 43, __pyx_L1_error)
+      __PYX_ERR(0, 73, __pyx_L1_error)
     }
 
-    /* "flowstar/interval.pyx":42
+    /* "flowstar/interval.pyx":72
  *     cdef vector[Interval] res
  * 
  *     for interval in intervals:             # <<<<<<<<<<<<<<
@@ -2166,7 +2938,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_8interval_make_interva
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/interval.pyx":45
+  /* "flowstar/interval.pyx":75
  *         res.push_back(make_interval(interval))
  * 
  *     return res             # <<<<<<<<<<<<<<
@@ -2176,7 +2948,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_8interval_make_interva
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":39
+  /* "flowstar/interval.pyx":69
  * 
  * 
  * cdef vector[Interval] make_intervals(list intervals):             # <<<<<<<<<<<<<<
@@ -2196,7 +2968,7 @@ static std::vector<flowstar::Interval>  __pyx_f_8flowstar_8interval_make_interva
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":48
+/* "flowstar/interval.pyx":78
  * 
  * 
  * cdef cbool overlaps(const Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2215,7 +2987,7 @@ static bool __pyx_f_8flowstar_8interval_overlaps(flowstar::Interval const &__pyx
   int __pyx_t_3;
   int __pyx_t_4;
 
-  /* "flowstar/interval.pyx":51
+  /* "flowstar/interval.pyx":81
  *     # Note: this function is conservative for negative results i.e. it returns
  *     # true whenever two intervals *might* overlap
  *     il, iu = I.inf(), I.sup()             # <<<<<<<<<<<<<<
@@ -2227,7 +2999,7 @@ static bool __pyx_f_8flowstar_8interval_overlaps(flowstar::Interval const &__pyx
   __pyx_v_il = __pyx_t_1;
   __pyx_v_iu = __pyx_t_2;
 
-  /* "flowstar/interval.pyx":52
+  /* "flowstar/interval.pyx":82
  *     # true whenever two intervals *might* overlap
  *     il, iu = I.inf(), I.sup()
  *     jl, ju = J.inf(), J.sup()             # <<<<<<<<<<<<<<
@@ -2239,7 +3011,7 @@ static bool __pyx_f_8flowstar_8interval_overlaps(flowstar::Interval const &__pyx
   __pyx_v_jl = __pyx_t_2;
   __pyx_v_ju = __pyx_t_1;
 
-  /* "flowstar/interval.pyx":53
+  /* "flowstar/interval.pyx":83
  *     il, iu = I.inf(), I.sup()
  *     jl, ju = J.inf(), J.sup()
  *     return not (iu < jl or ju < il)             # <<<<<<<<<<<<<<
@@ -2258,7 +3030,7 @@ static bool __pyx_f_8flowstar_8interval_overlaps(flowstar::Interval const &__pyx
   __pyx_r = (!__pyx_t_3);
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":48
+  /* "flowstar/interval.pyx":78
  * 
  * 
  * cdef cbool overlaps(const Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2271,7 +3043,7 @@ static bool __pyx_f_8flowstar_8interval_overlaps(flowstar::Interval const &__pyx
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":56
+/* "flowstar/interval.pyx":86
  * 
  * 
  * def py_overlaps(I, J):             # <<<<<<<<<<<<<<
@@ -2280,9 +3052,9 @@ static bool __pyx_f_8flowstar_8interval_overlaps(flowstar::Interval const &__pyx
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8interval_5py_overlaps(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_8interval_5py_overlaps = {"py_overlaps", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_5py_overlaps, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_8flowstar_8interval_5py_overlaps(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8flowstar_8interval_7py_overlaps(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8interval_7py_overlaps = {"py_overlaps", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_7py_overlaps, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8flowstar_8interval_7py_overlaps(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_I = 0;
   PyObject *__pyx_v_J = 0;
   PyObject *__pyx_r = 0;
@@ -2311,11 +3083,11 @@ static PyObject *__pyx_pw_8flowstar_8interval_5py_overlaps(PyObject *__pyx_self,
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_J)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("py_overlaps", 1, 2, 2, 1); __PYX_ERR(0, 56, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_overlaps", 1, 2, 2, 1); __PYX_ERR(0, 86, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_overlaps") < 0)) __PYX_ERR(0, 56, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_overlaps") < 0)) __PYX_ERR(0, 86, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2328,26 +3100,26 @@ static PyObject *__pyx_pw_8flowstar_8interval_5py_overlaps(PyObject *__pyx_self,
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("py_overlaps", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 56, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("py_overlaps", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 86, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.interval.py_overlaps", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8flowstar_8interval_4py_overlaps(__pyx_self, __pyx_v_I, __pyx_v_J);
+  __pyx_r = __pyx_pf_8flowstar_8interval_6py_overlaps(__pyx_self, __pyx_v_I, __pyx_v_J);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8interval_4py_overlaps(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J) {
+static PyObject *__pyx_pf_8flowstar_8interval_6py_overlaps(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("py_overlaps", 0);
 
-  /* "flowstar/interval.pyx":57
+  /* "flowstar/interval.pyx":87
  * 
  * def py_overlaps(I, J):
  *     return overlaps(make_interval(I), make_interval(J))             # <<<<<<<<<<<<<<
@@ -2355,13 +3127,13 @@ static PyObject *__pyx_pf_8flowstar_8interval_4py_overlaps(CYTHON_UNUSED PyObjec
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_f_8flowstar_8interval_overlaps(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_I), __pyx_f_8flowstar_8interval_make_interval(__pyx_v_J))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_f_8flowstar_8interval_overlaps(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_I), __pyx_f_8flowstar_8interval_make_interval(__pyx_v_J))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":56
+  /* "flowstar/interval.pyx":86
  * 
  * 
  * def py_overlaps(I, J):             # <<<<<<<<<<<<<<
@@ -2380,7 +3152,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_4py_overlaps(CYTHON_UNUSED PyObjec
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":60
+/* "flowstar/interval.pyx":90
  * 
  * 
  * cdef void interval_union(Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2390,7 +3162,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_4py_overlaps(CYTHON_UNUSED PyObjec
 
 static void __pyx_f_8flowstar_8interval_interval_union(flowstar::Interval &__pyx_v_I, flowstar::Interval const &__pyx_v_J) {
 
-  /* "flowstar/interval.pyx":61
+  /* "flowstar/interval.pyx":91
  * 
  * cdef void interval_union(Interval & I, const Interval & J) nogil:
  *     I.setInf(cmin(I.inf(), J.inf()))             # <<<<<<<<<<<<<<
@@ -2399,7 +3171,7 @@ static void __pyx_f_8flowstar_8interval_interval_union(flowstar::Interval &__pyx
  */
   __pyx_v_I.setInf(std::min<double>(__pyx_v_I.inf(), __pyx_v_J.inf()));
 
-  /* "flowstar/interval.pyx":62
+  /* "flowstar/interval.pyx":92
  * cdef void interval_union(Interval & I, const Interval & J) nogil:
  *     I.setInf(cmin(I.inf(), J.inf()))
  *     I.setSup(cmax(I.sup(), J.sup()))             # <<<<<<<<<<<<<<
@@ -2408,7 +3180,7 @@ static void __pyx_f_8flowstar_8interval_interval_union(flowstar::Interval &__pyx
  */
   __pyx_v_I.setSup(std::max<double>(__pyx_v_I.sup(), __pyx_v_J.sup()));
 
-  /* "flowstar/interval.pyx":60
+  /* "flowstar/interval.pyx":90
  * 
  * 
  * cdef void interval_union(Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2419,7 +3191,7 @@ static void __pyx_f_8flowstar_8interval_interval_union(flowstar::Interval &__pyx
   /* function exit code */
 }
 
-/* "flowstar/interval.pyx":65
+/* "flowstar/interval.pyx":95
  * 
  * 
  * cdef void interval_vect_union(vector[Interval] & Is,             # <<<<<<<<<<<<<<
@@ -2433,7 +3205,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
   int __pyx_t_1;
   int __pyx_t_2;
 
-  /* "flowstar/interval.pyx":68
+  /* "flowstar/interval.pyx":98
  *                               vector[Interval] & Js) nogil:
  *     cdef:
  *         vector[Interval].iterator itI = Is.begin()             # <<<<<<<<<<<<<<
@@ -2442,7 +3214,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
  */
   __pyx_v_itI = __pyx_v_Is.begin();
 
-  /* "flowstar/interval.pyx":69
+  /* "flowstar/interval.pyx":99
  *     cdef:
  *         vector[Interval].iterator itI = Is.begin()
  *         vector[Interval].iterator itJ = Js.begin()             # <<<<<<<<<<<<<<
@@ -2451,7 +3223,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
  */
   __pyx_v_itJ = __pyx_v_Js.begin();
 
-  /* "flowstar/interval.pyx":71
+  /* "flowstar/interval.pyx":101
  *         vector[Interval].iterator itJ = Js.begin()
  * 
  *     while itI != Is.end() and itJ != Js.end():             # <<<<<<<<<<<<<<
@@ -2470,7 +3242,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
     __pyx_L5_bool_binop_done:;
     if (!__pyx_t_1) break;
 
-    /* "flowstar/interval.pyx":72
+    /* "flowstar/interval.pyx":102
  * 
  *     while itI != Is.end() and itJ != Js.end():
  *         interval_union(deref(itI), deref(itJ))             # <<<<<<<<<<<<<<
@@ -2479,7 +3251,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
  */
     __pyx_f_8flowstar_8interval_interval_union((*__pyx_v_itI), (*__pyx_v_itJ));
 
-    /* "flowstar/interval.pyx":74
+    /* "flowstar/interval.pyx":104
  *         interval_union(deref(itI), deref(itJ))
  * 
  *         inc(itI)             # <<<<<<<<<<<<<<
@@ -2488,7 +3260,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
  */
     (void)((++__pyx_v_itI));
 
-    /* "flowstar/interval.pyx":75
+    /* "flowstar/interval.pyx":105
  * 
  *         inc(itI)
  *         inc(itJ)             # <<<<<<<<<<<<<<
@@ -2498,7 +3270,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
     (void)((++__pyx_v_itJ));
   }
 
-  /* "flowstar/interval.pyx":65
+  /* "flowstar/interval.pyx":95
  * 
  * 
  * cdef void interval_vect_union(vector[Interval] & Is,             # <<<<<<<<<<<<<<
@@ -2509,7 +3281,7 @@ static void __pyx_f_8flowstar_8interval_interval_vect_union(std::vector<flowstar
   /* function exit code */
 }
 
-/* "flowstar/interval.pyx":78
+/* "flowstar/interval.pyx":108
  * 
  * 
  * cdef tuple interval_to_tuple(Interval & I):             # <<<<<<<<<<<<<<
@@ -2525,7 +3297,7 @@ static PyObject *__pyx_f_8flowstar_8interval_interval_to_tuple(flowstar::Interva
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("interval_to_tuple", 0);
 
-  /* "flowstar/interval.pyx":79
+  /* "flowstar/interval.pyx":109
  * 
  * cdef tuple interval_to_tuple(Interval & I):
  *     return (float(I.inf()), float(I.sup()))             # <<<<<<<<<<<<<<
@@ -2533,11 +3305,11 @@ static PyObject *__pyx_f_8flowstar_8interval_interval_to_tuple(flowstar::Interva
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_I.inf()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_I.inf()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_I.sup()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_I.sup()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -2549,7 +3321,7 @@ static PyObject *__pyx_f_8flowstar_8interval_interval_to_tuple(flowstar::Interva
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":78
+  /* "flowstar/interval.pyx":108
  * 
  * 
  * cdef tuple interval_to_tuple(Interval & I):             # <<<<<<<<<<<<<<
@@ -2570,7 +3342,7 @@ static PyObject *__pyx_f_8flowstar_8interval_interval_to_tuple(flowstar::Interva
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":82
+/* "flowstar/interval.pyx":112
  * 
  * 
  * cdef list intervals_to_list(vector[Interval] & intervals):             # <<<<<<<<<<<<<<
@@ -2579,7 +3351,7 @@ static PyObject *__pyx_f_8flowstar_8interval_interval_to_tuple(flowstar::Interva
  */
 
 static PyObject *__pyx_f_8flowstar_8interval_intervals_to_list(std::vector<flowstar::Interval>  &__pyx_v_intervals) {
-  flowstar::Interval __pyx_7genexpr__pyx_v_I;
+  flowstar::Interval __pyx_8genexpr1__pyx_v_I;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -2588,7 +3360,7 @@ static PyObject *__pyx_f_8flowstar_8interval_intervals_to_list(std::vector<flows
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("intervals_to_list", 0);
 
-  /* "flowstar/interval.pyx":83
+  /* "flowstar/interval.pyx":113
  * 
  * cdef list intervals_to_list(vector[Interval] & intervals):
  *     return [interval_to_tuple(I) for I in intervals]             # <<<<<<<<<<<<<<
@@ -2597,17 +3369,17 @@ static PyObject *__pyx_f_8flowstar_8interval_intervals_to_list(std::vector<flows
  */
   __Pyx_XDECREF(__pyx_r);
   { /* enter inner scope */
-    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
+    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 113, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_2 = __pyx_v_intervals.begin();
     for (;;) {
       if (!(__pyx_t_2 != __pyx_v_intervals.end())) break;
       __pyx_t_3 = *__pyx_t_2;
       ++__pyx_t_2;
-      __pyx_7genexpr__pyx_v_I = __pyx_t_3;
-      __pyx_t_4 = __pyx_f_8flowstar_8interval_interval_to_tuple(__pyx_7genexpr__pyx_v_I); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 83, __pyx_L1_error)
+      __pyx_8genexpr1__pyx_v_I = __pyx_t_3;
+      __pyx_t_4 = __pyx_f_8flowstar_8interval_interval_to_tuple(__pyx_8genexpr1__pyx_v_I); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 83, __pyx_L1_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
   } /* exit inner scope */
@@ -2615,7 +3387,7 @@ static PyObject *__pyx_f_8flowstar_8interval_intervals_to_list(std::vector<flows
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":82
+  /* "flowstar/interval.pyx":112
  * 
  * 
  * cdef list intervals_to_list(vector[Interval] & intervals):             # <<<<<<<<<<<<<<
@@ -2635,7 +3407,7 @@ static PyObject *__pyx_f_8flowstar_8interval_intervals_to_list(std::vector<flows
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":86
+/* "flowstar/interval.pyx":116
  * 
  * 
  * cdef double int_dist(const Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2652,7 +3424,7 @@ static double __pyx_f_8flowstar_8interval_int_dist(flowstar::Interval const &__p
   double __pyx_t_1;
   double __pyx_t_2;
 
-  /* "flowstar/interval.pyx":88
+  /* "flowstar/interval.pyx":118
  * cdef double int_dist(const Interval & I, const Interval & J) nogil:
  *     cdef double il, iu, jl, ju
  *     il, iu = I.inf(), I.sup()             # <<<<<<<<<<<<<<
@@ -2664,7 +3436,7 @@ static double __pyx_f_8flowstar_8interval_int_dist(flowstar::Interval const &__p
   __pyx_v_il = __pyx_t_1;
   __pyx_v_iu = __pyx_t_2;
 
-  /* "flowstar/interval.pyx":89
+  /* "flowstar/interval.pyx":119
  *     cdef double il, iu, jl, ju
  *     il, iu = I.inf(), I.sup()
  *     jl, ju = J.inf(), J.sup()             # <<<<<<<<<<<<<<
@@ -2676,7 +3448,7 @@ static double __pyx_f_8flowstar_8interval_int_dist(flowstar::Interval const &__p
   __pyx_v_jl = __pyx_t_2;
   __pyx_v_ju = __pyx_t_1;
 
-  /* "flowstar/interval.pyx":91
+  /* "flowstar/interval.pyx":121
  *     jl, ju = J.inf(), J.sup()
  *     # Round up/down endpoints so as to overapproximate the real distance
  *     return cmax(cabs(il - jl), cabs(iu - ju))             # <<<<<<<<<<<<<<
@@ -2686,7 +3458,7 @@ static double __pyx_f_8flowstar_8interval_int_dist(flowstar::Interval const &__p
   __pyx_r = std::max<double>(std::abs((__pyx_v_il - __pyx_v_jl)), std::abs((__pyx_v_iu - __pyx_v_ju)));
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":86
+  /* "flowstar/interval.pyx":116
  * 
  * 
  * cdef double int_dist(const Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2699,7 +3471,7 @@ static double __pyx_f_8flowstar_8interval_int_dist(flowstar::Interval const &__p
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":96
+/* "flowstar/interval.pyx":126
  *     double INFINITY
  * 
  * cdef double int_min_dist(const Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2719,7 +3491,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   double __pyx_t_2;
   double __pyx_t_3;
 
-  /* "flowstar/interval.pyx":98
+  /* "flowstar/interval.pyx":128
  * cdef double int_min_dist(const Interval & I, const Interval & J) nogil:
  *     cdef double il, iu, jl, ju, d1, d2
  *     if overlaps(I, J):             # <<<<<<<<<<<<<<
@@ -2729,7 +3501,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   __pyx_t_1 = (__pyx_f_8flowstar_8interval_overlaps(__pyx_v_I, __pyx_v_J) != 0);
   if (__pyx_t_1) {
 
-    /* "flowstar/interval.pyx":99
+    /* "flowstar/interval.pyx":129
  *     cdef double il, iu, jl, ju, d1, d2
  *     if overlaps(I, J):
  *         return 0.0             # <<<<<<<<<<<<<<
@@ -2739,7 +3511,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
     __pyx_r = 0.0;
     goto __pyx_L0;
 
-    /* "flowstar/interval.pyx":98
+    /* "flowstar/interval.pyx":128
  * cdef double int_min_dist(const Interval & I, const Interval & J) nogil:
  *     cdef double il, iu, jl, ju, d1, d2
  *     if overlaps(I, J):             # <<<<<<<<<<<<<<
@@ -2748,7 +3520,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
  */
   }
 
-  /* "flowstar/interval.pyx":101
+  /* "flowstar/interval.pyx":131
  *         return 0.0
  * 
  *     il, iu = I.inf(), I.sup()             # <<<<<<<<<<<<<<
@@ -2760,7 +3532,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   __pyx_v_il = __pyx_t_2;
   __pyx_v_iu = __pyx_t_3;
 
-  /* "flowstar/interval.pyx":102
+  /* "flowstar/interval.pyx":132
  * 
  *     il, iu = I.inf(), I.sup()
  *     jl, ju = J.inf(), J.sup()             # <<<<<<<<<<<<<<
@@ -2772,7 +3544,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   __pyx_v_jl = __pyx_t_3;
   __pyx_v_ju = __pyx_t_2;
 
-  /* "flowstar/interval.pyx":103
+  /* "flowstar/interval.pyx":133
  *     il, iu = I.inf(), I.sup()
  *     jl, ju = J.inf(), J.sup()
  *     d1 = il - ju if il >= ju else INFINITY             # <<<<<<<<<<<<<<
@@ -2786,7 +3558,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   }
   __pyx_v_d1 = __pyx_t_2;
 
-  /* "flowstar/interval.pyx":104
+  /* "flowstar/interval.pyx":134
  *     jl, ju = J.inf(), J.sup()
  *     d1 = il - ju if il >= ju else INFINITY
  *     d2 = jl - iu if jl >= iu else INFINITY             # <<<<<<<<<<<<<<
@@ -2800,7 +3572,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   }
   __pyx_v_d2 = __pyx_t_2;
 
-  /* "flowstar/interval.pyx":105
+  /* "flowstar/interval.pyx":135
  *     d1 = il - ju if il >= ju else INFINITY
  *     d2 = jl - iu if jl >= iu else INFINITY
  *     return cmin(d1, d2)             # <<<<<<<<<<<<<<
@@ -2810,7 +3582,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   __pyx_r = std::min<double>(__pyx_v_d1, __pyx_v_d2);
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":96
+  /* "flowstar/interval.pyx":126
  *     double INFINITY
  * 
  * cdef double int_min_dist(const Interval & I, const Interval & J) nogil:             # <<<<<<<<<<<<<<
@@ -2823,7 +3595,7 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":107
+/* "flowstar/interval.pyx":137
  *     return cmin(d1, d2)
  * 
  * def py_int_dist(I, J):             # <<<<<<<<<<<<<<
@@ -2832,9 +3604,9 @@ static double __pyx_f_8flowstar_8interval_int_min_dist(flowstar::Interval const 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8interval_7py_int_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_8interval_7py_int_dist = {"py_int_dist", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_7py_int_dist, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_8flowstar_8interval_7py_int_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8flowstar_8interval_9py_int_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8interval_9py_int_dist = {"py_int_dist", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_9py_int_dist, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8flowstar_8interval_9py_int_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_I = 0;
   PyObject *__pyx_v_J = 0;
   PyObject *__pyx_r = 0;
@@ -2863,11 +3635,11 @@ static PyObject *__pyx_pw_8flowstar_8interval_7py_int_dist(PyObject *__pyx_self,
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_J)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("py_int_dist", 1, 2, 2, 1); __PYX_ERR(0, 107, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_int_dist", 1, 2, 2, 1); __PYX_ERR(0, 137, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_int_dist") < 0)) __PYX_ERR(0, 107, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_int_dist") < 0)) __PYX_ERR(0, 137, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2880,26 +3652,26 @@ static PyObject *__pyx_pw_8flowstar_8interval_7py_int_dist(PyObject *__pyx_self,
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("py_int_dist", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 107, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("py_int_dist", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 137, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.interval.py_int_dist", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8flowstar_8interval_6py_int_dist(__pyx_self, __pyx_v_I, __pyx_v_J);
+  __pyx_r = __pyx_pf_8flowstar_8interval_8py_int_dist(__pyx_self, __pyx_v_I, __pyx_v_J);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8interval_6py_int_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J) {
+static PyObject *__pyx_pf_8flowstar_8interval_8py_int_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("py_int_dist", 0);
 
-  /* "flowstar/interval.pyx":108
+  /* "flowstar/interval.pyx":138
  * 
  * def py_int_dist(I, J):
  *     return float(int_dist(make_interval(I),             # <<<<<<<<<<<<<<
@@ -2908,20 +3680,20 @@ static PyObject *__pyx_pf_8flowstar_8interval_6py_int_dist(CYTHON_UNUSED PyObjec
  */
   __Pyx_XDECREF(__pyx_r);
 
-  /* "flowstar/interval.pyx":109
+  /* "flowstar/interval.pyx":139
  * def py_int_dist(I, J):
  *     return float(int_dist(make_interval(I),
  *                           make_interval(J)))             # <<<<<<<<<<<<<<
  * 
  * def py_int_min_dist(I, J):
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_8flowstar_8interval_int_dist(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_I), __pyx_f_8flowstar_8interval_make_interval(__pyx_v_J))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_8flowstar_8interval_int_dist(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_I), __pyx_f_8flowstar_8interval_make_interval(__pyx_v_J))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 138, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":107
+  /* "flowstar/interval.pyx":137
  *     return cmin(d1, d2)
  * 
  * def py_int_dist(I, J):             # <<<<<<<<<<<<<<
@@ -2940,7 +3712,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_6py_int_dist(CYTHON_UNUSED PyObjec
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":111
+/* "flowstar/interval.pyx":141
  *                           make_interval(J)))
  * 
  * def py_int_min_dist(I, J):             # <<<<<<<<<<<<<<
@@ -2949,9 +3721,9 @@ static PyObject *__pyx_pf_8flowstar_8interval_6py_int_dist(CYTHON_UNUSED PyObjec
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8interval_9py_int_min_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_8interval_9py_int_min_dist = {"py_int_min_dist", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_9py_int_min_dist, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_8flowstar_8interval_9py_int_min_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8flowstar_8interval_11py_int_min_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8interval_11py_int_min_dist = {"py_int_min_dist", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_11py_int_min_dist, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8flowstar_8interval_11py_int_min_dist(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_I = 0;
   PyObject *__pyx_v_J = 0;
   PyObject *__pyx_r = 0;
@@ -2980,11 +3752,11 @@ static PyObject *__pyx_pw_8flowstar_8interval_9py_int_min_dist(PyObject *__pyx_s
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_J)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("py_int_min_dist", 1, 2, 2, 1); __PYX_ERR(0, 111, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_int_min_dist", 1, 2, 2, 1); __PYX_ERR(0, 141, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_int_min_dist") < 0)) __PYX_ERR(0, 111, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_int_min_dist") < 0)) __PYX_ERR(0, 141, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2997,26 +3769,26 @@ static PyObject *__pyx_pw_8flowstar_8interval_9py_int_min_dist(PyObject *__pyx_s
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("py_int_min_dist", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 111, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("py_int_min_dist", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 141, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.interval.py_int_min_dist", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8flowstar_8interval_8py_int_min_dist(__pyx_self, __pyx_v_I, __pyx_v_J);
+  __pyx_r = __pyx_pf_8flowstar_8interval_10py_int_min_dist(__pyx_self, __pyx_v_I, __pyx_v_J);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8interval_8py_int_min_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J) {
+static PyObject *__pyx_pf_8flowstar_8interval_10py_int_min_dist(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_I, PyObject *__pyx_v_J) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("py_int_min_dist", 0);
 
-  /* "flowstar/interval.pyx":112
+  /* "flowstar/interval.pyx":142
  * 
  * def py_int_min_dist(I, J):
  *     return float(int_min_dist(make_interval(I),             # <<<<<<<<<<<<<<
@@ -3025,20 +3797,20 @@ static PyObject *__pyx_pf_8flowstar_8interval_8py_int_min_dist(CYTHON_UNUSED PyO
  */
   __Pyx_XDECREF(__pyx_r);
 
-  /* "flowstar/interval.pyx":113
+  /* "flowstar/interval.pyx":143
  * def py_int_min_dist(I, J):
  *     return float(int_min_dist(make_interval(I),
  *                               make_interval(J)))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_8flowstar_8interval_int_min_dist(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_I), __pyx_f_8flowstar_8interval_make_interval(__pyx_v_J))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 112, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_8flowstar_8interval_int_min_dist(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_I), __pyx_f_8flowstar_8interval_make_interval(__pyx_v_J))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":111
+  /* "flowstar/interval.pyx":141
  *                           make_interval(J)))
  * 
  * def py_int_min_dist(I, J):             # <<<<<<<<<<<<<<
@@ -3057,7 +3829,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_8py_int_min_dist(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":118
+/* "flowstar/interval.pyx":148
  * # Interval difference separating upper and lower
  * # Return value indicates existance of answer
  * cdef cbool int_diff(Interval & L, Interval & U, cbool & split, const Interval & a, const Interval & b) nogil:             # <<<<<<<<<<<<<<
@@ -3077,7 +3849,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   int __pyx_t_4;
   flowstar::Interval __pyx_t_5;
 
-  /* "flowstar/interval.pyx":120
+  /* "flowstar/interval.pyx":150
  * cdef cbool int_diff(Interval & L, Interval & U, cbool & split, const Interval & a, const Interval & b) nogil:
  *     cdef double al, au, bl, bu
  *     al, au = a.inf(), a.sup()             # <<<<<<<<<<<<<<
@@ -3089,7 +3861,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   __pyx_v_al = __pyx_t_1;
   __pyx_v_au = __pyx_t_2;
 
-  /* "flowstar/interval.pyx":121
+  /* "flowstar/interval.pyx":151
  *     cdef double al, au, bl, bu
  *     al, au = a.inf(), a.sup()
  *     bl, bu = b.inf(), b.sup()             # <<<<<<<<<<<<<<
@@ -3101,7 +3873,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   __pyx_v_bl = __pyx_t_2;
   __pyx_v_bu = __pyx_t_1;
 
-  /* "flowstar/interval.pyx":122
+  /* "flowstar/interval.pyx":152
  *     al, au = a.inf(), a.sup()
  *     bl, bu = b.inf(), b.sup()
  *     (&split)[0] = False             # <<<<<<<<<<<<<<
@@ -3110,7 +3882,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
   ((&__pyx_v_split)[0]) = 0;
 
-  /* "flowstar/interval.pyx":123
+  /* "flowstar/interval.pyx":153
  *     bl, bu = b.inf(), b.sup()
  *     (&split)[0] = False
  *     if al <= bl <= au <= bu:             # <<<<<<<<<<<<<<
@@ -3127,7 +3899,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   __pyx_t_4 = (__pyx_t_3 != 0);
   if (__pyx_t_4) {
 
-    /* "flowstar/interval.pyx":124
+    /* "flowstar/interval.pyx":154
  *     (&split)[0] = False
  *     if al <= bl <= au <= bu:
  *         (&L)[0] = (&U)[0] = Interval(al, bl)             # <<<<<<<<<<<<<<
@@ -3138,7 +3910,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     ((&__pyx_v_L)[0]) = __pyx_t_5;
     ((&__pyx_v_U)[0]) = __pyx_t_5;
 
-    /* "flowstar/interval.pyx":125
+    /* "flowstar/interval.pyx":155
  *     if al <= bl <= au <= bu:
  *         (&L)[0] = (&U)[0] = Interval(al, bl)
  *         return True             # <<<<<<<<<<<<<<
@@ -3148,7 +3920,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     __pyx_r = 1;
     goto __pyx_L0;
 
-    /* "flowstar/interval.pyx":123
+    /* "flowstar/interval.pyx":153
  *     bl, bu = b.inf(), b.sup()
  *     (&split)[0] = False
  *     if al <= bl <= au <= bu:             # <<<<<<<<<<<<<<
@@ -3157,7 +3929,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
   }
 
-  /* "flowstar/interval.pyx":126
+  /* "flowstar/interval.pyx":156
  *         (&L)[0] = (&U)[0] = Interval(al, bl)
  *         return True
  *     elif bl <= al <= bu <= au:             # <<<<<<<<<<<<<<
@@ -3174,7 +3946,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   __pyx_t_3 = (__pyx_t_4 != 0);
   if (__pyx_t_3) {
 
-    /* "flowstar/interval.pyx":127
+    /* "flowstar/interval.pyx":157
  *         return True
  *     elif bl <= al <= bu <= au:
  *         (&L)[0] = (&U)[0] = Interval(bu, au)             # <<<<<<<<<<<<<<
@@ -3185,7 +3957,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     ((&__pyx_v_L)[0]) = __pyx_t_5;
     ((&__pyx_v_U)[0]) = __pyx_t_5;
 
-    /* "flowstar/interval.pyx":128
+    /* "flowstar/interval.pyx":158
  *     elif bl <= al <= bu <= au:
  *         (&L)[0] = (&U)[0] = Interval(bu, au)
  *         return True             # <<<<<<<<<<<<<<
@@ -3195,7 +3967,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     __pyx_r = 1;
     goto __pyx_L0;
 
-    /* "flowstar/interval.pyx":126
+    /* "flowstar/interval.pyx":156
  *         (&L)[0] = (&U)[0] = Interval(al, bl)
  *         return True
  *     elif bl <= al <= bu <= au:             # <<<<<<<<<<<<<<
@@ -3204,7 +3976,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
   }
 
-  /* "flowstar/interval.pyx":129
+  /* "flowstar/interval.pyx":159
  *         (&L)[0] = (&U)[0] = Interval(bu, au)
  *         return True
  *     elif bl <= al <= au <= bu:             # <<<<<<<<<<<<<<
@@ -3221,7 +3993,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   __pyx_t_4 = (__pyx_t_3 != 0);
   if (__pyx_t_4) {
 
-    /* "flowstar/interval.pyx":130
+    /* "flowstar/interval.pyx":160
  *         return True
  *     elif bl <= al <= au <= bu:
  *         return False             # <<<<<<<<<<<<<<
@@ -3231,7 +4003,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     __pyx_r = 0;
     goto __pyx_L0;
 
-    /* "flowstar/interval.pyx":129
+    /* "flowstar/interval.pyx":159
  *         (&L)[0] = (&U)[0] = Interval(bu, au)
  *         return True
  *     elif bl <= al <= au <= bu:             # <<<<<<<<<<<<<<
@@ -3240,7 +4012,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
   }
 
-  /* "flowstar/interval.pyx":131
+  /* "flowstar/interval.pyx":161
  *     elif bl <= al <= au <= bu:
  *         return False
  *     elif al <= bl <= bu <= au:             # <<<<<<<<<<<<<<
@@ -3257,7 +4029,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   __pyx_t_3 = (__pyx_t_4 != 0);
   if (__pyx_t_3) {
 
-    /* "flowstar/interval.pyx":133
+    /* "flowstar/interval.pyx":163
  *     elif al <= bl <= bu <= au:
  *         # print("split on diff")
  *         (&L)[0] = Interval(al, bl)             # <<<<<<<<<<<<<<
@@ -3266,7 +4038,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
     ((&__pyx_v_L)[0]) = flowstar::Interval(__pyx_v_al, __pyx_v_bl);
 
-    /* "flowstar/interval.pyx":134
+    /* "flowstar/interval.pyx":164
  *         # print("split on diff")
  *         (&L)[0] = Interval(al, bl)
  *         (&U)[0] = Interval(bu, au)             # <<<<<<<<<<<<<<
@@ -3275,7 +4047,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
     ((&__pyx_v_U)[0]) = flowstar::Interval(__pyx_v_bu, __pyx_v_au);
 
-    /* "flowstar/interval.pyx":135
+    /* "flowstar/interval.pyx":165
  *         (&L)[0] = Interval(al, bl)
  *         (&U)[0] = Interval(bu, au)
  *         (&split)[0] = True             # <<<<<<<<<<<<<<
@@ -3284,7 +4056,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
     ((&__pyx_v_split)[0]) = 1;
 
-    /* "flowstar/interval.pyx":136
+    /* "flowstar/interval.pyx":166
  *         (&U)[0] = Interval(bu, au)
  *         (&split)[0] = True
  *         return True             # <<<<<<<<<<<<<<
@@ -3294,7 +4066,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     __pyx_r = 1;
     goto __pyx_L0;
 
-    /* "flowstar/interval.pyx":131
+    /* "flowstar/interval.pyx":161
  *     elif bl <= al <= au <= bu:
  *         return False
  *     elif al <= bl <= bu <= au:             # <<<<<<<<<<<<<<
@@ -3303,7 +4075,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
   }
 
-  /* "flowstar/interval.pyx":138
+  /* "flowstar/interval.pyx":168
  *         return True
  *     else:
  *         (&L)[0] = (&U)[0] = a             # <<<<<<<<<<<<<<
@@ -3314,7 +4086,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     ((&__pyx_v_L)[0]) = __pyx_v_a;
     ((&__pyx_v_U)[0]) = __pyx_v_a;
 
-    /* "flowstar/interval.pyx":139
+    /* "flowstar/interval.pyx":169
  *     else:
  *         (&L)[0] = (&U)[0] = a
  *         return True             # <<<<<<<<<<<<<<
@@ -3325,7 +4097,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
     goto __pyx_L0;
   }
 
-  /* "flowstar/interval.pyx":118
+  /* "flowstar/interval.pyx":148
  * # Interval difference separating upper and lower
  * # Return value indicates existance of answer
  * cdef cbool int_diff(Interval & L, Interval & U, cbool & split, const Interval & a, const Interval & b) nogil:             # <<<<<<<<<<<<<<
@@ -3338,7 +4110,7 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":142
+/* "flowstar/interval.pyx":172
  * 
  * 
  * def py_int_diff(a, b):             # <<<<<<<<<<<<<<
@@ -3347,10 +4119,10 @@ static bool __pyx_f_8flowstar_8interval_int_diff(flowstar::Interval &__pyx_v_L, 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8interval_11py_int_diff(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8flowstar_8interval_10py_int_diff[] = "\n    >>> py_int_diff((1,3), (2,4))\n    (True, False, (1.0, 2.0), ...)\n    >>> py_int_diff((1,3), (4,5))\n    (True, False, (1.0, 3.0), ...)\n    >>> py_int_diff((1,3), (0,2))\n    (True, False, (2.0, 3.0), ...)\n    >>> py_int_diff((1,3), (2,4))\n    (True, False, (1.0, 2.0), ...)\n    >>> py_int_diff((1,5), (2,4))\n    (True, True, (1.0, 2.0), (4.0, 5.0))\n    >>> py_int_diff((2,4), (1,5))\n    (False, False, ..., ...)\n    ";
-static PyMethodDef __pyx_mdef_8flowstar_8interval_11py_int_diff = {"py_int_diff", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_11py_int_diff, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8flowstar_8interval_10py_int_diff};
-static PyObject *__pyx_pw_8flowstar_8interval_11py_int_diff(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8flowstar_8interval_13py_int_diff(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8flowstar_8interval_12py_int_diff[] = "\n    >>> py_int_diff((1,3), (2,4))\n    (True, False, (1.0, 2.0), ...)\n    >>> py_int_diff((1,3), (4,5))\n    (True, False, (1.0, 3.0), ...)\n    >>> py_int_diff((1,3), (0,2))\n    (True, False, (2.0, 3.0), ...)\n    >>> py_int_diff((1,3), (2,4))\n    (True, False, (1.0, 2.0), ...)\n    >>> py_int_diff((1,5), (2,4))\n    (True, True, (1.0, 2.0), (4.0, 5.0))\n    >>> py_int_diff((2,4), (1,5))\n    (False, False, ..., ...)\n    ";
+static PyMethodDef __pyx_mdef_8flowstar_8interval_13py_int_diff = {"py_int_diff", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_13py_int_diff, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8flowstar_8interval_12py_int_diff};
+static PyObject *__pyx_pw_8flowstar_8interval_13py_int_diff(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_a = 0;
   PyObject *__pyx_v_b = 0;
   PyObject *__pyx_r = 0;
@@ -3379,11 +4151,11 @@ static PyObject *__pyx_pw_8flowstar_8interval_11py_int_diff(PyObject *__pyx_self
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("py_int_diff", 1, 2, 2, 1); __PYX_ERR(0, 142, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_int_diff", 1, 2, 2, 1); __PYX_ERR(0, 172, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_int_diff") < 0)) __PYX_ERR(0, 142, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_int_diff") < 0)) __PYX_ERR(0, 172, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3396,20 +4168,20 @@ static PyObject *__pyx_pw_8flowstar_8interval_11py_int_diff(PyObject *__pyx_self
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("py_int_diff", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 142, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("py_int_diff", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 172, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.interval.py_int_diff", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8flowstar_8interval_10py_int_diff(__pyx_self, __pyx_v_a, __pyx_v_b);
+  __pyx_r = __pyx_pf_8flowstar_8interval_12py_int_diff(__pyx_self, __pyx_v_a, __pyx_v_b);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a, PyObject *__pyx_v_b) {
+static PyObject *__pyx_pf_8flowstar_8interval_12py_int_diff(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a, PyObject *__pyx_v_b) {
   flowstar::Interval __pyx_v_L;
   flowstar::Interval __pyx_v_U;
   flowstar::Interval __pyx_v_A;
@@ -3426,7 +4198,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("py_int_diff", 0);
 
-  /* "flowstar/interval.pyx":158
+  /* "flowstar/interval.pyx":188
  *     '''
  *     cdef Interval L, U, A, B
  *     cdef cbool res, split = False             # <<<<<<<<<<<<<<
@@ -3435,7 +4207,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
  */
   __pyx_v_split = 0;
 
-  /* "flowstar/interval.pyx":160
+  /* "flowstar/interval.pyx":190
  *     cdef cbool res, split = False
  * 
  *     A = make_interval(a)             # <<<<<<<<<<<<<<
@@ -3444,7 +4216,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
  */
   __pyx_v_A = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_a);
 
-  /* "flowstar/interval.pyx":161
+  /* "flowstar/interval.pyx":191
  * 
  *     A = make_interval(a)
  *     B = make_interval(b)             # <<<<<<<<<<<<<<
@@ -3453,7 +4225,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
  */
   __pyx_v_B = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_b);
 
-  /* "flowstar/interval.pyx":163
+  /* "flowstar/interval.pyx":193
  *     B = make_interval(b)
  * 
  *     res = int_diff(L, U, split, A, B)             # <<<<<<<<<<<<<<
@@ -3462,7 +4234,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
  */
   __pyx_v_res = __pyx_f_8flowstar_8interval_int_diff(__pyx_v_L, __pyx_v_U, __pyx_v_split, __pyx_v_A, __pyx_v_B);
 
-  /* "flowstar/interval.pyx":165
+  /* "flowstar/interval.pyx":195
  *     res = int_diff(L, U, split, A, B)
  * 
  *     return (<bint?>res,             # <<<<<<<<<<<<<<
@@ -3470,31 +4242,31 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
  *             (L.inf(), L.sup()),
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_v_res != 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBool_FromLong((__pyx_v_res != 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
 
-  /* "flowstar/interval.pyx":166
+  /* "flowstar/interval.pyx":196
  * 
  *     return (<bint?>res,
  *             <bint?>split,             # <<<<<<<<<<<<<<
  *             (L.inf(), L.sup()),
  *             (U.inf(), U.sup()))
  */
-  __pyx_t_2 = __Pyx_PyBool_FromLong((__pyx_v_split != 0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBool_FromLong((__pyx_v_split != 0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "flowstar/interval.pyx":167
+  /* "flowstar/interval.pyx":197
  *     return (<bint?>res,
  *             <bint?>split,
  *             (L.inf(), L.sup()),             # <<<<<<<<<<<<<<
  *             (U.inf(), U.sup()))
  * 
  */
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_L.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_L.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_L.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_L.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
@@ -3503,18 +4275,18 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
   __pyx_t_3 = 0;
   __pyx_t_4 = 0;
 
-  /* "flowstar/interval.pyx":168
+  /* "flowstar/interval.pyx":198
  *             <bint?>split,
  *             (L.inf(), L.sup()),
  *             (U.inf(), U.sup()))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_U.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_U.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_U.sup()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_U.sup()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4);
@@ -3523,14 +4295,14 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
   __pyx_t_4 = 0;
   __pyx_t_3 = 0;
 
-  /* "flowstar/interval.pyx":165
+  /* "flowstar/interval.pyx":195
  *     res = int_diff(L, U, split, A, B)
  * 
  *     return (<bint?>res,             # <<<<<<<<<<<<<<
  *             <bint?>split,
  *             (L.inf(), L.sup()),
  */
-  __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 165, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 195, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -3548,7 +4320,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":142
+  /* "flowstar/interval.pyx":172
  * 
  * 
  * def py_int_diff(a, b):             # <<<<<<<<<<<<<<
@@ -3572,7 +4344,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_10py_int_diff(CYTHON_UNUSED PyObje
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":171
+/* "flowstar/interval.pyx":201
  * 
  * 
  * cdef cbool extdiv(Interval & L, Interval & U, cbool & split, const Interval & d, const Interval & a, const Interval & b) nogil:             # <<<<<<<<<<<<<<
@@ -3592,7 +4364,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
   int __pyx_t_3;
   int __pyx_t_4;
 
-  /* "flowstar/interval.pyx":174
+  /* "flowstar/interval.pyx":204
  *     cdef double al, au, bl, bu
  *     cdef Interval ratio
  *     al, au = a.inf(), a.sup()             # <<<<<<<<<<<<<<
@@ -3604,7 +4376,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
   __pyx_v_al = __pyx_t_1;
   __pyx_v_au = __pyx_t_2;
 
-  /* "flowstar/interval.pyx":175
+  /* "flowstar/interval.pyx":205
  *     cdef Interval ratio
  *     al, au = a.inf(), a.sup()
  *     bl, bu = b.inf(), b.sup()             # <<<<<<<<<<<<<<
@@ -3616,7 +4388,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
   __pyx_v_bl = __pyx_t_2;
   __pyx_v_bu = __pyx_t_1;
 
-  /* "flowstar/interval.pyx":176
+  /* "flowstar/interval.pyx":206
  *     al, au = a.inf(), a.sup()
  *     bl, bu = b.inf(), b.sup()
  *     if not (bl <= 0 <= bu):             # <<<<<<<<<<<<<<
@@ -3630,7 +4402,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
   __pyx_t_4 = ((!(__pyx_t_3 != 0)) != 0);
   if (__pyx_t_4) {
 
-    /* "flowstar/interval.pyx":179
+    /* "flowstar/interval.pyx":209
  *         # with gil:
  *         #     print("div a")
  *         ratio = a / b             # <<<<<<<<<<<<<<
@@ -3639,7 +4411,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
     __pyx_v_ratio = (((flowstar::Interval const )__pyx_v_a) / ((flowstar::Interval const )__pyx_v_b));
 
-    /* "flowstar/interval.pyx":180
+    /* "flowstar/interval.pyx":210
  *         #     print("div a")
  *         ratio = a / b
  *         (&split)[0]=False             # <<<<<<<<<<<<<<
@@ -3648,7 +4420,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
     ((&__pyx_v_split)[0]) = 0;
 
-    /* "flowstar/interval.pyx":181
+    /* "flowstar/interval.pyx":211
  *         ratio = a / b
  *         (&split)[0]=False
  *         (&L)[0] = d             # <<<<<<<<<<<<<<
@@ -3657,7 +4429,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
     ((&__pyx_v_L)[0]) = __pyx_v_d;
 
-    /* "flowstar/interval.pyx":182
+    /* "flowstar/interval.pyx":212
  *         (&split)[0]=False
  *         (&L)[0] = d
  *         if overlaps(ratio, L):             # <<<<<<<<<<<<<<
@@ -3667,7 +4439,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
     __pyx_t_4 = (__pyx_f_8flowstar_8interval_overlaps(__pyx_v_ratio, __pyx_v_L) != 0);
     if (__pyx_t_4) {
 
-      /* "flowstar/interval.pyx":183
+      /* "flowstar/interval.pyx":213
  *         (&L)[0] = d
  *         if overlaps(ratio, L):
  *             L.intersect_assign(ratio)             # <<<<<<<<<<<<<<
@@ -3676,7 +4448,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
       __pyx_v_L.intersect_assign(__pyx_v_ratio);
 
-      /* "flowstar/interval.pyx":184
+      /* "flowstar/interval.pyx":214
  *         if overlaps(ratio, L):
  *             L.intersect_assign(ratio)
  *             (&U)[0] = L             # <<<<<<<<<<<<<<
@@ -3685,7 +4457,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
       ((&__pyx_v_U)[0]) = __pyx_v_L;
 
-      /* "flowstar/interval.pyx":187
+      /* "flowstar/interval.pyx":217
  *             # with gil:
  *             #     print("no overlap")
  *             return True             # <<<<<<<<<<<<<<
@@ -3695,7 +4467,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "flowstar/interval.pyx":182
+      /* "flowstar/interval.pyx":212
  *         (&split)[0]=False
  *         (&L)[0] = d
  *         if overlaps(ratio, L):             # <<<<<<<<<<<<<<
@@ -3704,7 +4476,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
     }
 
-    /* "flowstar/interval.pyx":189
+    /* "flowstar/interval.pyx":219
  *             return True
  *         else:
  *             return False             # <<<<<<<<<<<<<<
@@ -3716,7 +4488,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
       goto __pyx_L0;
     }
 
-    /* "flowstar/interval.pyx":176
+    /* "flowstar/interval.pyx":206
  *     al, au = a.inf(), a.sup()
  *     bl, bu = b.inf(), b.sup()
  *     if not (bl <= 0 <= bu):             # <<<<<<<<<<<<<<
@@ -3725,7 +4497,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
   }
 
-  /* "flowstar/interval.pyx":190
+  /* "flowstar/interval.pyx":220
  *         else:
  *             return False
  *     elif al > 0:             # <<<<<<<<<<<<<<
@@ -3735,7 +4507,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
   __pyx_t_4 = ((__pyx_v_al > 0.0) != 0);
   if (__pyx_t_4) {
 
-    /* "flowstar/interval.pyx":192
+    /* "flowstar/interval.pyx":222
  *     elif al > 0:
  *         return int_diff(L, U, split, d,
  *                         Interval(d.inf() if bl == 0 else al/bl,             # <<<<<<<<<<<<<<
@@ -3753,12 +4525,12 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
         #ifdef WITH_THREAD
         __Pyx_PyGILState_Release(__pyx_gilstate_save);
         #endif
-        __PYX_ERR(0, 192, __pyx_L1_error)
+        __PYX_ERR(0, 222, __pyx_L1_error)
       }
       __pyx_t_1 = (__pyx_v_al / __pyx_v_bl);
     }
 
-    /* "flowstar/interval.pyx":193
+    /* "flowstar/interval.pyx":223
  *         return int_diff(L, U, split, d,
  *                         Interval(d.inf() if bl == 0 else al/bl,
  *                                  d.sup() if bu == 0 else al/bu))             # <<<<<<<<<<<<<<
@@ -3776,12 +4548,12 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
         #ifdef WITH_THREAD
         __Pyx_PyGILState_Release(__pyx_gilstate_save);
         #endif
-        __PYX_ERR(0, 193, __pyx_L1_error)
+        __PYX_ERR(0, 223, __pyx_L1_error)
       }
       __pyx_t_2 = (__pyx_v_al / __pyx_v_bu);
     }
 
-    /* "flowstar/interval.pyx":191
+    /* "flowstar/interval.pyx":221
  *             return False
  *     elif al > 0:
  *         return int_diff(L, U, split, d,             # <<<<<<<<<<<<<<
@@ -3791,7 +4563,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
     __pyx_r = __pyx_f_8flowstar_8interval_int_diff(__pyx_v_L, __pyx_v_U, __pyx_v_split, __pyx_v_d, flowstar::Interval(__pyx_t_1, __pyx_t_2));
     goto __pyx_L0;
 
-    /* "flowstar/interval.pyx":190
+    /* "flowstar/interval.pyx":220
  *         else:
  *             return False
  *     elif al > 0:             # <<<<<<<<<<<<<<
@@ -3800,7 +4572,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
   }
 
-  /* "flowstar/interval.pyx":194
+  /* "flowstar/interval.pyx":224
  *                         Interval(d.inf() if bl == 0 else al/bl,
  *                                  d.sup() if bu == 0 else al/bu))
  *     elif au < 0:             # <<<<<<<<<<<<<<
@@ -3810,7 +4582,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
   __pyx_t_4 = ((__pyx_v_au < 0.0) != 0);
   if (__pyx_t_4) {
 
-    /* "flowstar/interval.pyx":196
+    /* "flowstar/interval.pyx":226
  *     elif au < 0:
  *         return int_diff(L, U, split, d,
  *                         Interval(d.inf() if bu == 0 else au/bu,             # <<<<<<<<<<<<<<
@@ -3828,12 +4600,12 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
         #ifdef WITH_THREAD
         __Pyx_PyGILState_Release(__pyx_gilstate_save);
         #endif
-        __PYX_ERR(0, 196, __pyx_L1_error)
+        __PYX_ERR(0, 226, __pyx_L1_error)
       }
       __pyx_t_2 = (__pyx_v_au / __pyx_v_bu);
     }
 
-    /* "flowstar/interval.pyx":197
+    /* "flowstar/interval.pyx":227
  *         return int_diff(L, U, split, d,
  *                         Interval(d.inf() if bu == 0 else au/bu,
  *                                  d.sup() if bl == 0 else au/bl))             # <<<<<<<<<<<<<<
@@ -3851,12 +4623,12 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
         #ifdef WITH_THREAD
         __Pyx_PyGILState_Release(__pyx_gilstate_save);
         #endif
-        __PYX_ERR(0, 197, __pyx_L1_error)
+        __PYX_ERR(0, 227, __pyx_L1_error)
       }
       __pyx_t_1 = (__pyx_v_au / __pyx_v_bl);
     }
 
-    /* "flowstar/interval.pyx":195
+    /* "flowstar/interval.pyx":225
  *                                  d.sup() if bu == 0 else al/bu))
  *     elif au < 0:
  *         return int_diff(L, U, split, d,             # <<<<<<<<<<<<<<
@@ -3866,7 +4638,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
     __pyx_r = __pyx_f_8flowstar_8interval_int_diff(__pyx_v_L, __pyx_v_U, __pyx_v_split, __pyx_v_d, flowstar::Interval(__pyx_t_2, __pyx_t_1));
     goto __pyx_L0;
 
-    /* "flowstar/interval.pyx":194
+    /* "flowstar/interval.pyx":224
  *                         Interval(d.inf() if bl == 0 else al/bl,
  *                                  d.sup() if bu == 0 else al/bu))
  *     elif au < 0:             # <<<<<<<<<<<<<<
@@ -3875,7 +4647,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
   }
 
-  /* "flowstar/interval.pyx":201
+  /* "flowstar/interval.pyx":231
  *         # with gil:
  *         #     print("catchall")
  *         (&L)[0] = (&U)[0] = d             # <<<<<<<<<<<<<<
@@ -3886,7 +4658,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
     ((&__pyx_v_L)[0]) = __pyx_v_d;
     ((&__pyx_v_U)[0]) = __pyx_v_d;
 
-    /* "flowstar/interval.pyx":202
+    /* "flowstar/interval.pyx":232
  *         #     print("catchall")
  *         (&L)[0] = (&U)[0] = d
  *         (&split)[0] = False             # <<<<<<<<<<<<<<
@@ -3895,7 +4667,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
     ((&__pyx_v_split)[0]) = 0;
 
-    /* "flowstar/interval.pyx":203
+    /* "flowstar/interval.pyx":233
  *         (&L)[0] = (&U)[0] = d
  *         (&split)[0] = False
  *         return True             # <<<<<<<<<<<<<<
@@ -3906,7 +4678,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
     goto __pyx_L0;
   }
 
-  /* "flowstar/interval.pyx":171
+  /* "flowstar/interval.pyx":201
  * 
  * 
  * cdef cbool extdiv(Interval & L, Interval & U, cbool & split, const Interval & d, const Interval & a, const Interval & b) nogil:             # <<<<<<<<<<<<<<
@@ -3922,7 +4694,7 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":206
+/* "flowstar/interval.pyx":236
  * 
  * 
  * def py_extdiv(d, a, b):             # <<<<<<<<<<<<<<
@@ -3931,10 +4703,10 @@ static bool __pyx_f_8flowstar_8interval_extdiv(flowstar::Interval &__pyx_v_L, fl
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8interval_13py_extdiv(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8flowstar_8interval_12py_extdiv[] = "\n    >>> py_extdiv((0,5), (4,4), (2,2))\n    (True, False, (2.0, 2.0), ...)\n    >>> py_extdiv((-5,5), (4,4), (-2,2))\n    (True, True, (-5.0, -2.0), (2.0, 5.0))\n    >>> py_extdiv((-5,5), (4,4), (-2,0.0))\n    (True, False, (-5.0, -2.0), ...)\n    ";
-static PyMethodDef __pyx_mdef_8flowstar_8interval_13py_extdiv = {"py_extdiv", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_13py_extdiv, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8flowstar_8interval_12py_extdiv};
-static PyObject *__pyx_pw_8flowstar_8interval_13py_extdiv(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8flowstar_8interval_15py_extdiv(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_8flowstar_8interval_14py_extdiv[] = "\n    >>> py_extdiv((0,5), (4,4), (2,2))\n    (True, False, (2.0, 2.0), ...)\n    >>> py_extdiv((-5,5), (4,4), (-2,2))\n    (True, True, (-5.0, -2.0), (2.0, 5.0))\n    >>> py_extdiv((-5,5), (4,4), (-2,0.0))\n    (True, False, (-5.0, -2.0), ...)\n    ";
+static PyMethodDef __pyx_mdef_8flowstar_8interval_15py_extdiv = {"py_extdiv", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_8interval_15py_extdiv, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8flowstar_8interval_14py_extdiv};
+static PyObject *__pyx_pw_8flowstar_8interval_15py_extdiv(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_d = 0;
   PyObject *__pyx_v_a = 0;
   PyObject *__pyx_v_b = 0;
@@ -3966,17 +4738,17 @@ static PyObject *__pyx_pw_8flowstar_8interval_13py_extdiv(PyObject *__pyx_self, 
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_a)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("py_extdiv", 1, 3, 3, 1); __PYX_ERR(0, 206, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_extdiv", 1, 3, 3, 1); __PYX_ERR(0, 236, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("py_extdiv", 1, 3, 3, 2); __PYX_ERR(0, 206, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("py_extdiv", 1, 3, 3, 2); __PYX_ERR(0, 236, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_extdiv") < 0)) __PYX_ERR(0, 206, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "py_extdiv") < 0)) __PYX_ERR(0, 236, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -3991,20 +4763,20 @@ static PyObject *__pyx_pw_8flowstar_8interval_13py_extdiv(PyObject *__pyx_self, 
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("py_extdiv", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 206, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("py_extdiv", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 236, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.interval.py_extdiv", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8flowstar_8interval_12py_extdiv(__pyx_self, __pyx_v_d, __pyx_v_a, __pyx_v_b);
+  __pyx_r = __pyx_pf_8flowstar_8interval_14py_extdiv(__pyx_self, __pyx_v_d, __pyx_v_a, __pyx_v_b);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_d, PyObject *__pyx_v_a, PyObject *__pyx_v_b) {
+static PyObject *__pyx_pf_8flowstar_8interval_14py_extdiv(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_d, PyObject *__pyx_v_a, PyObject *__pyx_v_b) {
   flowstar::Interval __pyx_v_A;
   flowstar::Interval __pyx_v_B;
   flowstar::Interval __pyx_v_D;
@@ -4022,7 +4794,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("py_extdiv", 0);
 
-  /* "flowstar/interval.pyx":215
+  /* "flowstar/interval.pyx":245
  *     (True, False, (-5.0, -2.0), ...)
  *     '''
  *     cdef Interval A = make_interval(a)             # <<<<<<<<<<<<<<
@@ -4031,7 +4803,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
  */
   __pyx_v_A = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_a);
 
-  /* "flowstar/interval.pyx":216
+  /* "flowstar/interval.pyx":246
  *     '''
  *     cdef Interval A = make_interval(a)
  *     cdef Interval B = make_interval(b)             # <<<<<<<<<<<<<<
@@ -4040,7 +4812,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
  */
   __pyx_v_B = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_b);
 
-  /* "flowstar/interval.pyx":217
+  /* "flowstar/interval.pyx":247
  *     cdef Interval A = make_interval(a)
  *     cdef Interval B = make_interval(b)
  *     cdef Interval D = make_interval(d)             # <<<<<<<<<<<<<<
@@ -4049,7 +4821,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
  */
   __pyx_v_D = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_d);
 
-  /* "flowstar/interval.pyx":219
+  /* "flowstar/interval.pyx":249
  *     cdef Interval D = make_interval(d)
  *     cdef Interval L, U
  *     cdef cbool split = False             # <<<<<<<<<<<<<<
@@ -4058,7 +4830,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
  */
   __pyx_v_split = 0;
 
-  /* "flowstar/interval.pyx":221
+  /* "flowstar/interval.pyx":251
  *     cdef cbool split = False
  * 
  *     res = <bint?>extdiv(L, U, split, D, A, B)             # <<<<<<<<<<<<<<
@@ -4067,7 +4839,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
  */
   __pyx_v_res = (__pyx_f_8flowstar_8interval_extdiv(__pyx_v_L, __pyx_v_U, __pyx_v_split, __pyx_v_D, __pyx_v_A, __pyx_v_B) != 0);
 
-  /* "flowstar/interval.pyx":223
+  /* "flowstar/interval.pyx":253
  *     res = <bint?>extdiv(L, U, split, D, A, B)
  * 
  *     return (res,             # <<<<<<<<<<<<<<
@@ -4075,31 +4847,31 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
  *             (L.inf(), L.sup()),
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_res); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_res); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 253, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
 
-  /* "flowstar/interval.pyx":224
+  /* "flowstar/interval.pyx":254
  * 
  *     return (res,
  *             <bint?>split,             # <<<<<<<<<<<<<<
  *             (L.inf(), L.sup()),
  *             (U.inf(), U.sup()))
  */
-  __pyx_t_2 = __Pyx_PyBool_FromLong((__pyx_v_split != 0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 224, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBool_FromLong((__pyx_v_split != 0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "flowstar/interval.pyx":225
+  /* "flowstar/interval.pyx":255
  *     return (res,
  *             <bint?>split,
  *             (L.inf(), L.sup()),             # <<<<<<<<<<<<<<
  *             (U.inf(), U.sup()))
  * 
  */
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_L.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 225, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_L.inf()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_L.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 225, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_L.sup()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 225, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
@@ -4108,18 +4880,18 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
   __pyx_t_3 = 0;
   __pyx_t_4 = 0;
 
-  /* "flowstar/interval.pyx":226
+  /* "flowstar/interval.pyx":256
  *             <bint?>split,
  *             (L.inf(), L.sup()),
  *             (U.inf(), U.sup()))             # <<<<<<<<<<<<<<
  * 
  * def main():
  */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_U.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_U.inf()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 256, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_U.sup()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_U.sup()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 256, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 256, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4);
@@ -4128,14 +4900,14 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
   __pyx_t_4 = 0;
   __pyx_t_3 = 0;
 
-  /* "flowstar/interval.pyx":223
+  /* "flowstar/interval.pyx":253
  *     res = <bint?>extdiv(L, U, split, D, A, B)
  * 
  *     return (res,             # <<<<<<<<<<<<<<
  *             <bint?>split,
  *             (L.inf(), L.sup()),
  */
-  __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 253, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -4153,7 +4925,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/interval.pyx":206
+  /* "flowstar/interval.pyx":236
  * 
  * 
  * def py_extdiv(d, a, b):             # <<<<<<<<<<<<<<
@@ -4177,7 +4949,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
   return __pyx_r;
 }
 
-/* "flowstar/interval.pyx":228
+/* "flowstar/interval.pyx":258
  *             (U.inf(), U.sup()))
  * 
  * def main():             # <<<<<<<<<<<<<<
@@ -4186,20 +4958,20 @@ static PyObject *__pyx_pf_8flowstar_8interval_12py_extdiv(CYTHON_UNUSED PyObject
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_8interval_15main(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_8interval_15main = {"main", (PyCFunction)__pyx_pw_8flowstar_8interval_15main, METH_NOARGS, 0};
-static PyObject *__pyx_pw_8flowstar_8interval_15main(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_8flowstar_8interval_17main(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_8interval_17main = {"main", (PyCFunction)__pyx_pw_8flowstar_8interval_17main, METH_NOARGS, 0};
+static PyObject *__pyx_pw_8flowstar_8interval_17main(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("main (wrapper)", 0);
-  __pyx_r = __pyx_pf_8flowstar_8interval_14main(__pyx_self);
+  __pyx_r = __pyx_pf_8flowstar_8interval_16main(__pyx_self);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8interval_14main(CYTHON_UNUSED PyObject *__pyx_self) {
+static PyObject *__pyx_pf_8flowstar_8interval_16main(CYTHON_UNUSED PyObject *__pyx_self) {
   flowstar::Interval *__pyx_v_I;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -4207,7 +4979,7 @@ static PyObject *__pyx_pf_8flowstar_8interval_14main(CYTHON_UNUSED PyObject *__p
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("main", 0);
 
-  /* "flowstar/interval.pyx":229
+  /* "flowstar/interval.pyx":259
  * 
  * def main():
  *   I = new Interval(1,3)             # <<<<<<<<<<<<<<
@@ -4216,32 +4988,32 @@ static PyObject *__pyx_pf_8flowstar_8interval_14main(CYTHON_UNUSED PyObject *__p
  */
   __pyx_v_I = new flowstar::Interval(1.0, 3.0);
 
-  /* "flowstar/interval.pyx":231
+  /* "flowstar/interval.pyx":261
  *   I = new Interval(1,3)
  * 
  *   print(I.inf())             # <<<<<<<<<<<<<<
  *   print(I.sup())
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_I->inf()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 231, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_I->inf()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 231, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/interval.pyx":232
+  /* "flowstar/interval.pyx":262
  * 
  *   print(I.inf())
  *   print(I.sup())             # <<<<<<<<<<<<<<
  */
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_I->sup()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 232, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_I->sup()); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 262, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 232, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 262, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/interval.pyx":228
+  /* "flowstar/interval.pyx":258
  *             (U.inf(), U.sup()))
  * 
  * def main():             # <<<<<<<<<<<<<<
@@ -4262,6 +5034,110 @@ static PyObject *__pyx_pf_8flowstar_8interval_14main(CYTHON_UNUSED PyObject *__p
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
+
+static struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *__pyx_freelist_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn[8];
+static int __pyx_freecount_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn = 0;
+
+static PyObject *__pyx_tp_new_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  PyObject *o;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn)))) {
+    o = (PyObject*)__pyx_freelist_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn[--__pyx_freecount_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn];
+    memset(o, 0, sizeof(struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn));
+    (void) PyObject_INIT(o, t);
+    PyObject_GC_Track(o);
+  } else {
+    o = (*t->tp_alloc)(t, 0);
+    if (unlikely(!o)) return 0;
+  }
+  return o;
+}
+
+static void __pyx_tp_dealloc_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn(PyObject *o) {
+  struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *p = (struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *)o;
+  PyObject_GC_UnTrack(o);
+  Py_CLEAR(p->__pyx_v_f);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn)))) {
+    __pyx_freelist_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn[__pyx_freecount_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn++] = ((struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *)o);
+  } else {
+    (*Py_TYPE(o)->tp_free)(o);
+  }
+}
+
+static int __pyx_tp_traverse_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn(PyObject *o, visitproc v, void *a) {
+  int e;
+  struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *p = (struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *)o;
+  if (p->__pyx_v_f) {
+    e = (*v)(p->__pyx_v_f, a); if (e) return e;
+  }
+  return 0;
+}
+
+static int __pyx_tp_clear_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn(PyObject *o) {
+  PyObject* tmp;
+  struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *p = (struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn *)o;
+  tmp = ((PyObject*)p->__pyx_v_f);
+  p->__pyx_v_f = Py_None; Py_INCREF(Py_None);
+  Py_XDECREF(tmp);
+  return 0;
+}
+
+static PyTypeObject __pyx_type_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn = {
+  PyVarObject_HEAD_INIT(0, 0)
+  "flowstar.interval.__pyx_scope_struct__py_make_interval_fn", /*tp_name*/
+  sizeof(struct __pyx_obj_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn), /*tp_basicsize*/
+  0, /*tp_itemsize*/
+  __pyx_tp_dealloc_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn, /*tp_dealloc*/
+  0, /*tp_print*/
+  0, /*tp_getattr*/
+  0, /*tp_setattr*/
+  #if PY_MAJOR_VERSION < 3
+  0, /*tp_compare*/
+  #endif
+  #if PY_MAJOR_VERSION >= 3
+  0, /*tp_as_async*/
+  #endif
+  0, /*tp_repr*/
+  0, /*tp_as_number*/
+  0, /*tp_as_sequence*/
+  0, /*tp_as_mapping*/
+  0, /*tp_hash*/
+  0, /*tp_call*/
+  0, /*tp_str*/
+  0, /*tp_getattro*/
+  0, /*tp_setattro*/
+  0, /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
+  0, /*tp_doc*/
+  __pyx_tp_traverse_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn, /*tp_traverse*/
+  __pyx_tp_clear_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn, /*tp_clear*/
+  0, /*tp_richcompare*/
+  0, /*tp_weaklistoffset*/
+  0, /*tp_iter*/
+  0, /*tp_iternext*/
+  0, /*tp_methods*/
+  0, /*tp_members*/
+  0, /*tp_getset*/
+  0, /*tp_base*/
+  0, /*tp_dict*/
+  0, /*tp_descr_get*/
+  0, /*tp_descr_set*/
+  0, /*tp_dictoffset*/
+  0, /*tp_init*/
+  0, /*tp_alloc*/
+  __pyx_tp_new_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn, /*tp_new*/
+  0, /*tp_free*/
+  0, /*tp_is_gc*/
+  0, /*tp_bases*/
+  0, /*tp_mro*/
+  0, /*tp_cache*/
+  0, /*tp_subclasses*/
+  0, /*tp_weaklist*/
+  0, /*tp_del*/
+  0, /*tp_version_tag*/
+  #if PY_VERSION_HEX >= 0x030400a1
+  0, /*tp_finalize*/
+  #endif
+};
 
 static PyMethodDef __pyx_methods[] = {
   {"set_precision", (PyCFunction)__pyx_pw_8flowstar_8interval_1set_precision, METH_O, 0},
@@ -4318,37 +5194,55 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_I, __pyx_k_I, sizeof(__pyx_k_I), 0, 0, 1, 1},
   {&__pyx_n_s_J, __pyx_k_J, sizeof(__pyx_k_J), 0, 0, 1, 1},
   {&__pyx_n_s_L, __pyx_k_L, sizeof(__pyx_k_L), 0, 0, 1, 1},
+  {&__pyx_n_s_RIF, __pyx_k_RIF, sizeof(__pyx_k_RIF), 0, 0, 1, 1},
   {&__pyx_n_s_U, __pyx_k_U, sizeof(__pyx_k_U), 0, 0, 1, 1},
+  {&__pyx_n_s__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 0, 1, 1},
   {&__pyx_n_s_a, __pyx_k_a, sizeof(__pyx_k_a), 0, 0, 1, 1},
+  {&__pyx_kp_u_args, __pyx_k_args, sizeof(__pyx_k_args), 0, 1, 0, 0},
   {&__pyx_n_s_b, __pyx_k_b, sizeof(__pyx_k_b), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_d, __pyx_k_d, sizeof(__pyx_k_d), 0, 0, 1, 1},
+  {&__pyx_kp_u_f, __pyx_k_f, sizeof(__pyx_k_f), 0, 1, 0, 0},
+  {&__pyx_n_s_f_2, __pyx_k_f_2, sizeof(__pyx_k_f_2), 0, 0, 1, 1},
   {&__pyx_n_s_flowstar_interval, __pyx_k_flowstar_interval, sizeof(__pyx_k_flowstar_interval), 0, 0, 1, 1},
   {&__pyx_kp_s_flowstar_interval_pyx, __pyx_k_flowstar_interval_pyx, sizeof(__pyx_k_flowstar_interval_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
+  {&__pyx_n_s_g, __pyx_k_g, sizeof(__pyx_k_g), 0, 0, 1, 1},
+  {&__pyx_n_s_h, __pyx_k_h, sizeof(__pyx_k_h), 0, 0, 1, 1},
+  {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_intervalNumPrecision, __pyx_k_intervalNumPrecision, sizeof(__pyx_k_intervalNumPrecision), 0, 0, 1, 1},
   {&__pyx_n_s_lower, __pyx_k_lower, sizeof(__pyx_k_lower), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_main_2, __pyx_k_main_2, sizeof(__pyx_k_main_2), 0, 0, 1, 1},
+  {&__pyx_kp_u_make_interval_fn_with_f, __pyx_k_make_interval_fn_with_f, sizeof(__pyx_k_make_interval_fn_with_f), 0, 1, 0, 0},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_py_extdiv, __pyx_k_py_extdiv, sizeof(__pyx_k_py_extdiv), 0, 0, 1, 1},
   {&__pyx_kp_u_py_extdiv_0_5_4_4_2_2_True_Fals, __pyx_k_py_extdiv_0_5_4_4_2_2_True_Fals, sizeof(__pyx_k_py_extdiv_0_5_4_4_2_2_True_Fals), 0, 1, 0, 0},
-  {&__pyx_kp_u_py_extdiv_line_206, __pyx_k_py_extdiv_line_206, sizeof(__pyx_k_py_extdiv_line_206), 0, 1, 0, 0},
+  {&__pyx_kp_u_py_extdiv_line_236, __pyx_k_py_extdiv_line_236, sizeof(__pyx_k_py_extdiv_line_236), 0, 1, 0, 0},
   {&__pyx_n_s_py_int_diff, __pyx_k_py_int_diff, sizeof(__pyx_k_py_int_diff), 0, 0, 1, 1},
   {&__pyx_kp_u_py_int_diff_1_3_2_4_True_False, __pyx_k_py_int_diff_1_3_2_4_True_False, sizeof(__pyx_k_py_int_diff_1_3_2_4_True_False), 0, 1, 0, 0},
-  {&__pyx_kp_u_py_int_diff_line_142, __pyx_k_py_int_diff_line_142, sizeof(__pyx_k_py_int_diff_line_142), 0, 1, 0, 0},
+  {&__pyx_kp_u_py_int_diff_line_172, __pyx_k_py_int_diff_line_172, sizeof(__pyx_k_py_int_diff_line_172), 0, 1, 0, 0},
   {&__pyx_n_s_py_int_dist, __pyx_k_py_int_dist, sizeof(__pyx_k_py_int_dist), 0, 0, 1, 1},
   {&__pyx_n_s_py_int_min_dist, __pyx_k_py_int_min_dist, sizeof(__pyx_k_py_int_min_dist), 0, 0, 1, 1},
+  {&__pyx_n_s_py_make_interval_fn, __pyx_k_py_make_interval_fn, sizeof(__pyx_k_py_make_interval_fn), 0, 0, 1, 1},
+  {&__pyx_n_s_py_make_interval_fn_locals_h, __pyx_k_py_make_interval_fn_locals_h, sizeof(__pyx_k_py_make_interval_fn_locals_h), 0, 0, 1, 1},
   {&__pyx_n_s_py_overlaps, __pyx_k_py_overlaps, sizeof(__pyx_k_py_overlaps), 0, 0, 1, 1},
   {&__pyx_n_s_res, __pyx_k_res, sizeof(__pyx_k_res), 0, 0, 1, 1},
+  {&__pyx_n_s_sage_all, __pyx_k_sage_all, sizeof(__pyx_k_sage_all), 0, 0, 1, 1},
+  {&__pyx_n_s_sg, __pyx_k_sg, sizeof(__pyx_k_sg), 0, 0, 1, 1},
   {&__pyx_n_s_split, __pyx_k_split, sizeof(__pyx_k_split), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_upper, __pyx_k_upper, sizeof(__pyx_k_upper), 0, 0, 1, 1},
+  {&__pyx_n_s_x, __pyx_k_x, sizeof(__pyx_k_x), 0, 0, 1, 1},
+  {&__pyx_n_s_x_c, __pyx_k_x_c, sizeof(__pyx_k_x_c), 0, 0, 1, 1},
+  {&__pyx_n_s_xs, __pyx_k_xs, sizeof(__pyx_k_xs), 0, 0, 1, 1},
+  {&__pyx_n_s_y_c, __pyx_k_y_c, sizeof(__pyx_k_y_c), 0, 0, 1, 1},
+  {&__pyx_kp_u_y_py, __pyx_k_y_py, sizeof(__pyx_k_y_py), 0, 1, 0, 0},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 231, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 44, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -4358,77 +5252,101 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "flowstar/interval.pyx":56
+  /* "flowstar/interval.pyx":30
+ * def py_make_interval_fn(f):
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):             # <<<<<<<<<<<<<<
+ *         cdef interval_fn g = make_interval_fn(f)
+ *         cdef vector[Interval] x_c
+ */
+  __pyx_tuple__2 = PyTuple_Pack(5, __pyx_n_s_xs, __pyx_n_s_g, __pyx_n_s_x_c, __pyx_n_s_x, __pyx_n_s_y_c); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__2);
+  __Pyx_GIVEREF(__pyx_tuple__2);
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARARGS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_h, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 30, __pyx_L1_error)
+
+  /* "flowstar/interval.pyx":28
+ * 
+ * 
+ * def py_make_interval_fn(f):             # <<<<<<<<<<<<<<
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):
+ */
+  __pyx_tuple__5 = PyTuple_Pack(3, __pyx_n_s_f_2, __pyx_n_s_h, __pyx_n_s_h); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__5);
+  __Pyx_GIVEREF(__pyx_tuple__5);
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_make_interval_fn, 28, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 28, __pyx_L1_error)
+
+  /* "flowstar/interval.pyx":86
  * 
  * 
  * def py_overlaps(I, J):             # <<<<<<<<<<<<<<
  *     return overlaps(make_interval(I), make_interval(J))
  * 
  */
-  __pyx_tuple__2 = PyTuple_Pack(2, __pyx_n_s_I, __pyx_n_s_J); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__2);
-  __Pyx_GIVEREF(__pyx_tuple__2);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_overlaps, 56, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(2, __pyx_n_s_I, __pyx_n_s_J); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_overlaps, 86, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 86, __pyx_L1_error)
 
-  /* "flowstar/interval.pyx":107
+  /* "flowstar/interval.pyx":137
  *     return cmin(d1, d2)
  * 
  * def py_int_dist(I, J):             # <<<<<<<<<<<<<<
  *     return float(int_dist(make_interval(I),
  *                           make_interval(J)))
  */
-  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_n_s_I, __pyx_n_s_J); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 107, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__4);
-  __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_int_dist, 107, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 107, __pyx_L1_error)
+  __pyx_tuple__9 = PyTuple_Pack(2, __pyx_n_s_I, __pyx_n_s_J); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_int_dist, 137, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 137, __pyx_L1_error)
 
-  /* "flowstar/interval.pyx":111
+  /* "flowstar/interval.pyx":141
  *                           make_interval(J)))
  * 
  * def py_int_min_dist(I, J):             # <<<<<<<<<<<<<<
  *     return float(int_min_dist(make_interval(I),
  *                               make_interval(J)))
  */
-  __pyx_tuple__6 = PyTuple_Pack(2, __pyx_n_s_I, __pyx_n_s_J); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
-  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_int_min_dist, 111, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_tuple__11 = PyTuple_Pack(2, __pyx_n_s_I, __pyx_n_s_J); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_int_min_dist, 141, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 141, __pyx_L1_error)
 
-  /* "flowstar/interval.pyx":142
+  /* "flowstar/interval.pyx":172
  * 
  * 
  * def py_int_diff(a, b):             # <<<<<<<<<<<<<<
  *     '''
  *     >>> py_int_diff((1,3), (2,4))
  */
-  __pyx_tuple__8 = PyTuple_Pack(8, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_L, __pyx_n_s_U, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_res, __pyx_n_s_split); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 142, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_int_diff, 142, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 142, __pyx_L1_error)
+  __pyx_tuple__13 = PyTuple_Pack(8, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_L, __pyx_n_s_U, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_res, __pyx_n_s_split); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(2, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_int_diff, 172, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 172, __pyx_L1_error)
 
-  /* "flowstar/interval.pyx":206
+  /* "flowstar/interval.pyx":236
  * 
  * 
  * def py_extdiv(d, a, b):             # <<<<<<<<<<<<<<
  *     '''
  *     >>> py_extdiv((0,5), (4,4), (2,2))
  */
-  __pyx_tuple__10 = PyTuple_Pack(10, __pyx_n_s_d, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_D, __pyx_n_s_L, __pyx_n_s_U, __pyx_n_s_split, __pyx_n_s_res); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 206, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(3, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_extdiv, 206, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 206, __pyx_L1_error)
+  __pyx_tuple__15 = PyTuple_Pack(10, __pyx_n_s_d, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_A, __pyx_n_s_B, __pyx_n_s_D, __pyx_n_s_L, __pyx_n_s_U, __pyx_n_s_split, __pyx_n_s_res); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
+  __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(3, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_py_extdiv, 236, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 236, __pyx_L1_error)
 
-  /* "flowstar/interval.pyx":228
+  /* "flowstar/interval.pyx":258
  *             (U.inf(), U.sup()))
  * 
  * def main():             # <<<<<<<<<<<<<<
  *   I = new Interval(1,3)
  * 
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_n_s_I); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 228, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_main_2, 228, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 228, __pyx_L1_error)
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_n_s_I); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 258, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
+  __pyx_codeobj__18 = (PyObject*)__Pyx_PyCode_New(0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_interval_pyx, __pyx_n_s_main_2, 258, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4438,6 +5356,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
 static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(0, 1, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -4485,6 +5404,8 @@ static int __Pyx_modinit_function_export_code(void) {
   if (__Pyx_ExportFunction("int_min_dist", (void (*)(void))__pyx_f_8flowstar_8interval_int_min_dist, "double (flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("int_diff", (void (*)(void))__pyx_f_8flowstar_8interval_int_diff, "bool (flowstar::Interval &, flowstar::Interval &, bool &, flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("extdiv", (void (*)(void))__pyx_f_8flowstar_8interval_extdiv, "bool (flowstar::Interval &, flowstar::Interval &, bool &, flowstar::Interval const &, flowstar::Interval const &, flowstar::Interval const &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("make_interval_fn", (void (*)(void))__pyx_f_8flowstar_8interval_make_interval_fn, "std::function<flowstar::Interval(std::vector<flowstar::Interval> &)> (PyObject *)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("apply_interval", (void (*)(void))__pyx_f_8flowstar_8interval_apply_interval, "flowstar::Interval (void *, std::vector<flowstar::Interval>  &)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4496,8 +5417,17 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
+  if (PyType_Ready(&__pyx_type_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn) < 0) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_type_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn.tp_print = 0;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn.tp_dictoffset && __pyx_type_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn.tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_type_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
+  }
+  __pyx_ptype_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn = &__pyx_type_8flowstar_8interval___pyx_scope_struct__py_make_interval_fn;
   __Pyx_RefNannyFinishContext();
   return 0;
+  __pyx_L1_error:;
+  __Pyx_RefNannyFinishContext();
+  return -1;
 }
 
 static int __Pyx_modinit_type_import_code(void) {
@@ -4617,6 +5547,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_interval(PyObject *__pyx_pyinit_mo
 #endif
 {
   PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannyDeclarations
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   if (__pyx_m) {
@@ -4713,7 +5644,7 @@ if (!__Pyx_RefNanny) {
   (void)__Pyx_modinit_global_init_code();
   (void)__Pyx_modinit_variable_export_code();
   if (unlikely(__Pyx_modinit_function_export_code() != 0)) goto __pyx_L1_error;
-  (void)__Pyx_modinit_type_init_code();
+  if (unlikely(__Pyx_modinit_type_init_code() != 0)) goto __pyx_L1_error;
   (void)__Pyx_modinit_type_import_code();
   (void)__Pyx_modinit_variable_import_code();
   (void)__Pyx_modinit_function_import_code();
@@ -4722,95 +5653,126 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "flowstar/interval.pyx":56
+  /* "flowstar/interval.pyx":9
+ * from libcpp.vector cimport vector
+ * from libcpp cimport bool as cbool
+ * import sage.all as sg             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_s__4);
+  __Pyx_GIVEREF(__pyx_n_s__4);
+  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s__4);
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_sage_all, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_sg, __pyx_t_2) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "flowstar/interval.pyx":28
+ * 
+ * 
+ * def py_make_interval_fn(f):             # <<<<<<<<<<<<<<
+ *     """Python wrapper around make_interval_fn for testing purposes."""
+ *     def h(*xs):
+ */
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_5py_make_interval_fn, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_make_interval_fn, __pyx_t_2) < 0) __PYX_ERR(0, 28, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "flowstar/interval.pyx":86
  * 
  * 
  * def py_overlaps(I, J):             # <<<<<<<<<<<<<<
  *     return overlaps(make_interval(I), make_interval(J))
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_5py_overlaps, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_overlaps, __pyx_t_1) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_7py_overlaps, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_overlaps, __pyx_t_2) < 0) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/interval.pyx":107
+  /* "flowstar/interval.pyx":137
  *     return cmin(d1, d2)
  * 
  * def py_int_dist(I, J):             # <<<<<<<<<<<<<<
  *     return float(int_dist(make_interval(I),
  *                           make_interval(J)))
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_7py_int_dist, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_int_dist, __pyx_t_1) < 0) __PYX_ERR(0, 107, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_9py_int_dist, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_int_dist, __pyx_t_2) < 0) __PYX_ERR(0, 137, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/interval.pyx":111
+  /* "flowstar/interval.pyx":141
  *                           make_interval(J)))
  * 
  * def py_int_min_dist(I, J):             # <<<<<<<<<<<<<<
  *     return float(int_min_dist(make_interval(I),
  *                               make_interval(J)))
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_9py_int_min_dist, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_int_min_dist, __pyx_t_1) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_11py_int_min_dist, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_int_min_dist, __pyx_t_2) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/interval.pyx":142
+  /* "flowstar/interval.pyx":172
  * 
  * 
  * def py_int_diff(a, b):             # <<<<<<<<<<<<<<
  *     '''
  *     >>> py_int_diff((1,3), (2,4))
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_11py_int_diff, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 142, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_int_diff, __pyx_t_1) < 0) __PYX_ERR(0, 142, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_13py_int_diff, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_int_diff, __pyx_t_2) < 0) __PYX_ERR(0, 172, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/interval.pyx":206
+  /* "flowstar/interval.pyx":236
  * 
  * 
  * def py_extdiv(d, a, b):             # <<<<<<<<<<<<<<
  *     '''
  *     >>> py_extdiv((0,5), (4,4), (2,2))
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_13py_extdiv, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 206, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_extdiv, __pyx_t_1) < 0) __PYX_ERR(0, 206, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_15py_extdiv, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_py_extdiv, __pyx_t_2) < 0) __PYX_ERR(0, 236, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/interval.pyx":228
+  /* "flowstar/interval.pyx":258
  *             (U.inf(), U.sup()))
  * 
  * def main():             # <<<<<<<<<<<<<<
  *   I = new Interval(1,3)
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_15main, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_main_2, __pyx_t_1) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_8interval_17main, NULL, __pyx_n_s_flowstar_interval); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 258, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_main_2, __pyx_t_2) < 0) __PYX_ERR(0, 258, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "flowstar/interval.pyx":1
  * from flowstar.Interval cimport Interval             # <<<<<<<<<<<<<<
  * from flowstar.TaylorModel cimport TaylorModelVec
  * from flowstar.utils cimport cabs, cmin, cmax
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_py_int_diff_line_142, __pyx_kp_u_py_int_diff_1_3_2_4_True_False) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_1, __pyx_kp_u_py_extdiv_line_206, __pyx_kp_u_py_extdiv_0_5_4_4_2_2_True_Fals) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_2, __pyx_kp_u_py_int_diff_line_172, __pyx_kp_u_py_int_diff_1_3_2_4_True_False) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_kp_u_py_extdiv_line_236, __pyx_kp_u_py_extdiv_0_5_4_4_2_2_True_Fals) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /*--- Wrapped vars code ---*/
 
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   if (__pyx_m) {
     if (__pyx_d) {
       __Pyx_AddTraceback("init flowstar.interval", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -5165,6 +6127,805 @@ static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
     return __Pyx_GetBuiltinName(name);
 }
 
+/* KeywordStringCheck */
+static int __Pyx_CheckKeywordStrings(
+    PyObject *kwdict,
+    const char* function_name,
+    int kw_allowed)
+{
+    PyObject* key = 0;
+    Py_ssize_t pos = 0;
+#if CYTHON_COMPILING_IN_PYPY
+    if (!kw_allowed && PyDict_Next(kwdict, &pos, &key, 0))
+        goto invalid_keyword;
+    return 1;
+#else
+    while (PyDict_Next(kwdict, &pos, &key, 0)) {
+        #if PY_MAJOR_VERSION < 3
+        if (unlikely(!PyString_Check(key)))
+        #endif
+            if (unlikely(!PyUnicode_Check(key)))
+                goto invalid_keyword_type;
+    }
+    if ((!kw_allowed) && unlikely(key))
+        goto invalid_keyword;
+    return 1;
+invalid_keyword_type:
+    PyErr_Format(PyExc_TypeError,
+        "%.200s() keywords must be strings", function_name);
+    return 0;
+#endif
+invalid_keyword:
+    PyErr_Format(PyExc_TypeError,
+    #if PY_MAJOR_VERSION < 3
+        "%.200s() got an unexpected keyword argument '%.200s'",
+        function_name, PyString_AsString(key));
+    #else
+        "%s() got an unexpected keyword argument '%U'",
+        function_name, key);
+    #endif
+    return 0;
+}
+
+/* None */
+static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname) {
+    PyErr_Format(PyExc_NameError, "free variable '%s' referenced before assignment in enclosing scope", varname);
+}
+
+/* FetchCommonType */
+static PyTypeObject* __Pyx_FetchCommonType(PyTypeObject* type) {
+    PyObject* fake_module;
+    PyTypeObject* cached_type = NULL;
+    fake_module = PyImport_AddModule((char*) "_cython_" CYTHON_ABI);
+    if (!fake_module) return NULL;
+    Py_INCREF(fake_module);
+    cached_type = (PyTypeObject*) PyObject_GetAttrString(fake_module, type->tp_name);
+    if (cached_type) {
+        if (!PyType_Check((PyObject*)cached_type)) {
+            PyErr_Format(PyExc_TypeError,
+                "Shared Cython type %.200s is not a type object",
+                type->tp_name);
+            goto bad;
+        }
+        if (cached_type->tp_basicsize != type->tp_basicsize) {
+            PyErr_Format(PyExc_TypeError,
+                "Shared Cython type %.200s has the wrong size, try recompiling",
+                type->tp_name);
+            goto bad;
+        }
+    } else {
+        if (!PyErr_ExceptionMatches(PyExc_AttributeError)) goto bad;
+        PyErr_Clear();
+        if (PyType_Ready(type) < 0) goto bad;
+        if (PyObject_SetAttrString(fake_module, type->tp_name, (PyObject*) type) < 0)
+            goto bad;
+        Py_INCREF(type);
+        cached_type = type;
+    }
+done:
+    Py_DECREF(fake_module);
+    return cached_type;
+bad:
+    Py_XDECREF(cached_type);
+    cached_type = NULL;
+    goto done;
+}
+
+/* CythonFunction */
+#include <structmember.h>
+static PyObject *
+__Pyx_CyFunction_get_doc(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *closure)
+{
+    if (unlikely(op->func_doc == NULL)) {
+        if (op->func.m_ml->ml_doc) {
+#if PY_MAJOR_VERSION >= 3
+            op->func_doc = PyUnicode_FromString(op->func.m_ml->ml_doc);
+#else
+            op->func_doc = PyString_FromString(op->func.m_ml->ml_doc);
+#endif
+            if (unlikely(op->func_doc == NULL))
+                return NULL;
+        } else {
+            Py_INCREF(Py_None);
+            return Py_None;
+        }
+    }
+    Py_INCREF(op->func_doc);
+    return op->func_doc;
+}
+static int
+__Pyx_CyFunction_set_doc(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+{
+    PyObject *tmp = op->func_doc;
+    if (value == NULL) {
+        value = Py_None;
+    }
+    Py_INCREF(value);
+    op->func_doc = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_CyFunction_get_name(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+{
+    if (unlikely(op->func_name == NULL)) {
+#if PY_MAJOR_VERSION >= 3
+        op->func_name = PyUnicode_InternFromString(op->func.m_ml->ml_name);
+#else
+        op->func_name = PyString_InternFromString(op->func.m_ml->ml_name);
+#endif
+        if (unlikely(op->func_name == NULL))
+            return NULL;
+    }
+    Py_INCREF(op->func_name);
+    return op->func_name;
+}
+static int
+__Pyx_CyFunction_set_name(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+{
+    PyObject *tmp;
+#if PY_MAJOR_VERSION >= 3
+    if (unlikely(value == NULL || !PyUnicode_Check(value)))
+#else
+    if (unlikely(value == NULL || !PyString_Check(value)))
+#endif
+    {
+        PyErr_SetString(PyExc_TypeError,
+                        "__name__ must be set to a string object");
+        return -1;
+    }
+    tmp = op->func_name;
+    Py_INCREF(value);
+    op->func_name = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_CyFunction_get_qualname(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+{
+    Py_INCREF(op->func_qualname);
+    return op->func_qualname;
+}
+static int
+__Pyx_CyFunction_set_qualname(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+{
+    PyObject *tmp;
+#if PY_MAJOR_VERSION >= 3
+    if (unlikely(value == NULL || !PyUnicode_Check(value)))
+#else
+    if (unlikely(value == NULL || !PyString_Check(value)))
+#endif
+    {
+        PyErr_SetString(PyExc_TypeError,
+                        "__qualname__ must be set to a string object");
+        return -1;
+    }
+    tmp = op->func_qualname;
+    Py_INCREF(value);
+    op->func_qualname = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_CyFunction_get_self(__pyx_CyFunctionObject *m, CYTHON_UNUSED void *closure)
+{
+    PyObject *self;
+    self = m->func_closure;
+    if (self == NULL)
+        self = Py_None;
+    Py_INCREF(self);
+    return self;
+}
+static PyObject *
+__Pyx_CyFunction_get_dict(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+{
+    if (unlikely(op->func_dict == NULL)) {
+        op->func_dict = PyDict_New();
+        if (unlikely(op->func_dict == NULL))
+            return NULL;
+    }
+    Py_INCREF(op->func_dict);
+    return op->func_dict;
+}
+static int
+__Pyx_CyFunction_set_dict(__pyx_CyFunctionObject *op, PyObject *value, CYTHON_UNUSED void *context)
+{
+    PyObject *tmp;
+    if (unlikely(value == NULL)) {
+        PyErr_SetString(PyExc_TypeError,
+               "function's dictionary may not be deleted");
+        return -1;
+    }
+    if (unlikely(!PyDict_Check(value))) {
+        PyErr_SetString(PyExc_TypeError,
+               "setting function's dictionary to a non-dict");
+        return -1;
+    }
+    tmp = op->func_dict;
+    Py_INCREF(value);
+    op->func_dict = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_CyFunction_get_globals(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+{
+    Py_INCREF(op->func_globals);
+    return op->func_globals;
+}
+static PyObject *
+__Pyx_CyFunction_get_closure(CYTHON_UNUSED __pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+{
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+static PyObject *
+__Pyx_CyFunction_get_code(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context)
+{
+    PyObject* result = (op->func_code) ? op->func_code : Py_None;
+    Py_INCREF(result);
+    return result;
+}
+static int
+__Pyx_CyFunction_init_defaults(__pyx_CyFunctionObject *op) {
+    int result = 0;
+    PyObject *res = op->defaults_getter((PyObject *) op);
+    if (unlikely(!res))
+        return -1;
+    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    op->defaults_tuple = PyTuple_GET_ITEM(res, 0);
+    Py_INCREF(op->defaults_tuple);
+    op->defaults_kwdict = PyTuple_GET_ITEM(res, 1);
+    Py_INCREF(op->defaults_kwdict);
+    #else
+    op->defaults_tuple = PySequence_ITEM(res, 0);
+    if (unlikely(!op->defaults_tuple)) result = -1;
+    else {
+        op->defaults_kwdict = PySequence_ITEM(res, 1);
+        if (unlikely(!op->defaults_kwdict)) result = -1;
+    }
+    #endif
+    Py_DECREF(res);
+    return result;
+}
+static int
+__Pyx_CyFunction_set_defaults(__pyx_CyFunctionObject *op, PyObject* value, CYTHON_UNUSED void *context) {
+    PyObject* tmp;
+    if (!value) {
+        value = Py_None;
+    } else if (value != Py_None && !PyTuple_Check(value)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "__defaults__ must be set to a tuple object");
+        return -1;
+    }
+    Py_INCREF(value);
+    tmp = op->defaults_tuple;
+    op->defaults_tuple = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_CyFunction_get_defaults(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context) {
+    PyObject* result = op->defaults_tuple;
+    if (unlikely(!result)) {
+        if (op->defaults_getter) {
+            if (__Pyx_CyFunction_init_defaults(op) < 0) return NULL;
+            result = op->defaults_tuple;
+        } else {
+            result = Py_None;
+        }
+    }
+    Py_INCREF(result);
+    return result;
+}
+static int
+__Pyx_CyFunction_set_kwdefaults(__pyx_CyFunctionObject *op, PyObject* value, CYTHON_UNUSED void *context) {
+    PyObject* tmp;
+    if (!value) {
+        value = Py_None;
+    } else if (value != Py_None && !PyDict_Check(value)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "__kwdefaults__ must be set to a dict object");
+        return -1;
+    }
+    Py_INCREF(value);
+    tmp = op->defaults_kwdict;
+    op->defaults_kwdict = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_CyFunction_get_kwdefaults(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context) {
+    PyObject* result = op->defaults_kwdict;
+    if (unlikely(!result)) {
+        if (op->defaults_getter) {
+            if (__Pyx_CyFunction_init_defaults(op) < 0) return NULL;
+            result = op->defaults_kwdict;
+        } else {
+            result = Py_None;
+        }
+    }
+    Py_INCREF(result);
+    return result;
+}
+static int
+__Pyx_CyFunction_set_annotations(__pyx_CyFunctionObject *op, PyObject* value, CYTHON_UNUSED void *context) {
+    PyObject* tmp;
+    if (!value || value == Py_None) {
+        value = NULL;
+    } else if (!PyDict_Check(value)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "__annotations__ must be set to a dict object");
+        return -1;
+    }
+    Py_XINCREF(value);
+    tmp = op->func_annotations;
+    op->func_annotations = value;
+    Py_XDECREF(tmp);
+    return 0;
+}
+static PyObject *
+__Pyx_CyFunction_get_annotations(__pyx_CyFunctionObject *op, CYTHON_UNUSED void *context) {
+    PyObject* result = op->func_annotations;
+    if (unlikely(!result)) {
+        result = PyDict_New();
+        if (unlikely(!result)) return NULL;
+        op->func_annotations = result;
+    }
+    Py_INCREF(result);
+    return result;
+}
+static PyGetSetDef __pyx_CyFunction_getsets[] = {
+    {(char *) "func_doc", (getter)__Pyx_CyFunction_get_doc, (setter)__Pyx_CyFunction_set_doc, 0, 0},
+    {(char *) "__doc__",  (getter)__Pyx_CyFunction_get_doc, (setter)__Pyx_CyFunction_set_doc, 0, 0},
+    {(char *) "func_name", (getter)__Pyx_CyFunction_get_name, (setter)__Pyx_CyFunction_set_name, 0, 0},
+    {(char *) "__name__", (getter)__Pyx_CyFunction_get_name, (setter)__Pyx_CyFunction_set_name, 0, 0},
+    {(char *) "__qualname__", (getter)__Pyx_CyFunction_get_qualname, (setter)__Pyx_CyFunction_set_qualname, 0, 0},
+    {(char *) "__self__", (getter)__Pyx_CyFunction_get_self, 0, 0, 0},
+    {(char *) "func_dict", (getter)__Pyx_CyFunction_get_dict, (setter)__Pyx_CyFunction_set_dict, 0, 0},
+    {(char *) "__dict__", (getter)__Pyx_CyFunction_get_dict, (setter)__Pyx_CyFunction_set_dict, 0, 0},
+    {(char *) "func_globals", (getter)__Pyx_CyFunction_get_globals, 0, 0, 0},
+    {(char *) "__globals__", (getter)__Pyx_CyFunction_get_globals, 0, 0, 0},
+    {(char *) "func_closure", (getter)__Pyx_CyFunction_get_closure, 0, 0, 0},
+    {(char *) "__closure__", (getter)__Pyx_CyFunction_get_closure, 0, 0, 0},
+    {(char *) "func_code", (getter)__Pyx_CyFunction_get_code, 0, 0, 0},
+    {(char *) "__code__", (getter)__Pyx_CyFunction_get_code, 0, 0, 0},
+    {(char *) "func_defaults", (getter)__Pyx_CyFunction_get_defaults, (setter)__Pyx_CyFunction_set_defaults, 0, 0},
+    {(char *) "__defaults__", (getter)__Pyx_CyFunction_get_defaults, (setter)__Pyx_CyFunction_set_defaults, 0, 0},
+    {(char *) "__kwdefaults__", (getter)__Pyx_CyFunction_get_kwdefaults, (setter)__Pyx_CyFunction_set_kwdefaults, 0, 0},
+    {(char *) "__annotations__", (getter)__Pyx_CyFunction_get_annotations, (setter)__Pyx_CyFunction_set_annotations, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+static PyMemberDef __pyx_CyFunction_members[] = {
+    {(char *) "__module__", T_OBJECT, offsetof(PyCFunctionObject, m_module), PY_WRITE_RESTRICTED, 0},
+    {0, 0, 0,  0, 0}
+};
+static PyObject *
+__Pyx_CyFunction_reduce(__pyx_CyFunctionObject *m, CYTHON_UNUSED PyObject *args)
+{
+#if PY_MAJOR_VERSION >= 3
+    return PyUnicode_FromString(m->func.m_ml->ml_name);
+#else
+    return PyString_FromString(m->func.m_ml->ml_name);
+#endif
+}
+static PyMethodDef __pyx_CyFunction_methods[] = {
+    {"__reduce__", (PyCFunction)__Pyx_CyFunction_reduce, METH_VARARGS, 0},
+    {0, 0, 0, 0}
+};
+#if PY_VERSION_HEX < 0x030500A0
+#define __Pyx_CyFunction_weakreflist(cyfunc) ((cyfunc)->func_weakreflist)
+#else
+#define __Pyx_CyFunction_weakreflist(cyfunc) ((cyfunc)->func.m_weakreflist)
+#endif
+static PyObject *__Pyx_CyFunction_New(PyTypeObject *type, PyMethodDef *ml, int flags, PyObject* qualname,
+                                      PyObject *closure, PyObject *module, PyObject* globals, PyObject* code) {
+    __pyx_CyFunctionObject *op = PyObject_GC_New(__pyx_CyFunctionObject, type);
+    if (op == NULL)
+        return NULL;
+    op->flags = flags;
+    __Pyx_CyFunction_weakreflist(op) = NULL;
+    op->func.m_ml = ml;
+    op->func.m_self = (PyObject *) op;
+    Py_XINCREF(closure);
+    op->func_closure = closure;
+    Py_XINCREF(module);
+    op->func.m_module = module;
+    op->func_dict = NULL;
+    op->func_name = NULL;
+    Py_INCREF(qualname);
+    op->func_qualname = qualname;
+    op->func_doc = NULL;
+    op->func_classobj = NULL;
+    op->func_globals = globals;
+    Py_INCREF(op->func_globals);
+    Py_XINCREF(code);
+    op->func_code = code;
+    op->defaults_pyobjects = 0;
+    op->defaults = NULL;
+    op->defaults_tuple = NULL;
+    op->defaults_kwdict = NULL;
+    op->defaults_getter = NULL;
+    op->func_annotations = NULL;
+    PyObject_GC_Track(op);
+    return (PyObject *) op;
+}
+static int
+__Pyx_CyFunction_clear(__pyx_CyFunctionObject *m)
+{
+    Py_CLEAR(m->func_closure);
+    Py_CLEAR(m->func.m_module);
+    Py_CLEAR(m->func_dict);
+    Py_CLEAR(m->func_name);
+    Py_CLEAR(m->func_qualname);
+    Py_CLEAR(m->func_doc);
+    Py_CLEAR(m->func_globals);
+    Py_CLEAR(m->func_code);
+    Py_CLEAR(m->func_classobj);
+    Py_CLEAR(m->defaults_tuple);
+    Py_CLEAR(m->defaults_kwdict);
+    Py_CLEAR(m->func_annotations);
+    if (m->defaults) {
+        PyObject **pydefaults = __Pyx_CyFunction_Defaults(PyObject *, m);
+        int i;
+        for (i = 0; i < m->defaults_pyobjects; i++)
+            Py_XDECREF(pydefaults[i]);
+        PyObject_Free(m->defaults);
+        m->defaults = NULL;
+    }
+    return 0;
+}
+static void __Pyx__CyFunction_dealloc(__pyx_CyFunctionObject *m)
+{
+    if (__Pyx_CyFunction_weakreflist(m) != NULL)
+        PyObject_ClearWeakRefs((PyObject *) m);
+    __Pyx_CyFunction_clear(m);
+    PyObject_GC_Del(m);
+}
+static void __Pyx_CyFunction_dealloc(__pyx_CyFunctionObject *m)
+{
+    PyObject_GC_UnTrack(m);
+    __Pyx__CyFunction_dealloc(m);
+}
+static int __Pyx_CyFunction_traverse(__pyx_CyFunctionObject *m, visitproc visit, void *arg)
+{
+    Py_VISIT(m->func_closure);
+    Py_VISIT(m->func.m_module);
+    Py_VISIT(m->func_dict);
+    Py_VISIT(m->func_name);
+    Py_VISIT(m->func_qualname);
+    Py_VISIT(m->func_doc);
+    Py_VISIT(m->func_globals);
+    Py_VISIT(m->func_code);
+    Py_VISIT(m->func_classobj);
+    Py_VISIT(m->defaults_tuple);
+    Py_VISIT(m->defaults_kwdict);
+    if (m->defaults) {
+        PyObject **pydefaults = __Pyx_CyFunction_Defaults(PyObject *, m);
+        int i;
+        for (i = 0; i < m->defaults_pyobjects; i++)
+            Py_VISIT(pydefaults[i]);
+    }
+    return 0;
+}
+static PyObject *__Pyx_CyFunction_descr_get(PyObject *func, PyObject *obj, PyObject *type)
+{
+    __pyx_CyFunctionObject *m = (__pyx_CyFunctionObject *) func;
+    if (m->flags & __Pyx_CYFUNCTION_STATICMETHOD) {
+        Py_INCREF(func);
+        return func;
+    }
+    if (m->flags & __Pyx_CYFUNCTION_CLASSMETHOD) {
+        if (type == NULL)
+            type = (PyObject *)(Py_TYPE(obj));
+        return __Pyx_PyMethod_New(func, type, (PyObject *)(Py_TYPE(type)));
+    }
+    if (obj == Py_None)
+        obj = NULL;
+    return __Pyx_PyMethod_New(func, obj, type);
+}
+static PyObject*
+__Pyx_CyFunction_repr(__pyx_CyFunctionObject *op)
+{
+#if PY_MAJOR_VERSION >= 3
+    return PyUnicode_FromFormat("<cyfunction %U at %p>",
+                                op->func_qualname, (void *)op);
+#else
+    return PyString_FromFormat("<cyfunction %s at %p>",
+                               PyString_AsString(op->func_qualname), (void *)op);
+#endif
+}
+static PyObject * __Pyx_CyFunction_CallMethod(PyObject *func, PyObject *self, PyObject *arg, PyObject *kw) {
+    PyCFunctionObject* f = (PyCFunctionObject*)func;
+    PyCFunction meth = f->m_ml->ml_meth;
+    Py_ssize_t size;
+    switch (f->m_ml->ml_flags & (METH_VARARGS | METH_KEYWORDS | METH_NOARGS | METH_O)) {
+    case METH_VARARGS:
+        if (likely(kw == NULL || PyDict_Size(kw) == 0))
+            return (*meth)(self, arg);
+        break;
+    case METH_VARARGS | METH_KEYWORDS:
+        return (*(PyCFunctionWithKeywords)(void*)meth)(self, arg, kw);
+    case METH_NOARGS:
+        if (likely(kw == NULL || PyDict_Size(kw) == 0)) {
+            size = PyTuple_GET_SIZE(arg);
+            if (likely(size == 0))
+                return (*meth)(self, NULL);
+            PyErr_Format(PyExc_TypeError,
+                "%.200s() takes no arguments (%" CYTHON_FORMAT_SSIZE_T "d given)",
+                f->m_ml->ml_name, size);
+            return NULL;
+        }
+        break;
+    case METH_O:
+        if (likely(kw == NULL || PyDict_Size(kw) == 0)) {
+            size = PyTuple_GET_SIZE(arg);
+            if (likely(size == 1)) {
+                PyObject *result, *arg0;
+                #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+                arg0 = PyTuple_GET_ITEM(arg, 0);
+                #else
+                arg0 = PySequence_ITEM(arg, 0); if (unlikely(!arg0)) return NULL;
+                #endif
+                result = (*meth)(self, arg0);
+                #if !(CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS)
+                Py_DECREF(arg0);
+                #endif
+                return result;
+            }
+            PyErr_Format(PyExc_TypeError,
+                "%.200s() takes exactly one argument (%" CYTHON_FORMAT_SSIZE_T "d given)",
+                f->m_ml->ml_name, size);
+            return NULL;
+        }
+        break;
+    default:
+        PyErr_SetString(PyExc_SystemError, "Bad call flags in "
+                        "__Pyx_CyFunction_Call. METH_OLDARGS is no "
+                        "longer supported!");
+        return NULL;
+    }
+    PyErr_Format(PyExc_TypeError, "%.200s() takes no keyword arguments",
+                 f->m_ml->ml_name);
+    return NULL;
+}
+static CYTHON_INLINE PyObject *__Pyx_CyFunction_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    return __Pyx_CyFunction_CallMethod(func, ((PyCFunctionObject*)func)->m_self, arg, kw);
+}
+static PyObject *__Pyx_CyFunction_CallAsMethod(PyObject *func, PyObject *args, PyObject *kw) {
+    PyObject *result;
+    __pyx_CyFunctionObject *cyfunc = (__pyx_CyFunctionObject *) func;
+    if ((cyfunc->flags & __Pyx_CYFUNCTION_CCLASS) && !(cyfunc->flags & __Pyx_CYFUNCTION_STATICMETHOD)) {
+        Py_ssize_t argc;
+        PyObject *new_args;
+        PyObject *self;
+        argc = PyTuple_GET_SIZE(args);
+        new_args = PyTuple_GetSlice(args, 1, argc);
+        if (unlikely(!new_args))
+            return NULL;
+        self = PyTuple_GetItem(args, 0);
+        if (unlikely(!self)) {
+            Py_DECREF(new_args);
+            return NULL;
+        }
+        result = __Pyx_CyFunction_CallMethod(func, self, new_args, kw);
+        Py_DECREF(new_args);
+    } else {
+        result = __Pyx_CyFunction_Call(func, args, kw);
+    }
+    return result;
+}
+static PyTypeObject __pyx_CyFunctionType_type = {
+    PyVarObject_HEAD_INIT(0, 0)
+    "cython_function_or_method",
+    sizeof(__pyx_CyFunctionObject),
+    0,
+    (destructor) __Pyx_CyFunction_dealloc,
+    0,
+    0,
+    0,
+#if PY_MAJOR_VERSION < 3
+    0,
+#else
+    0,
+#endif
+    (reprfunc) __Pyx_CyFunction_repr,
+    0,
+    0,
+    0,
+    0,
+    __Pyx_CyFunction_CallAsMethod,
+    0,
+    0,
+    0,
+    0,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    0,
+    (traverseproc) __Pyx_CyFunction_traverse,
+    (inquiry) __Pyx_CyFunction_clear,
+    0,
+#if PY_VERSION_HEX < 0x030500A0
+    offsetof(__pyx_CyFunctionObject, func_weakreflist),
+#else
+    offsetof(PyCFunctionObject, m_weakreflist),
+#endif
+    0,
+    0,
+    __pyx_CyFunction_methods,
+    __pyx_CyFunction_members,
+    __pyx_CyFunction_getsets,
+    0,
+    0,
+    __Pyx_CyFunction_descr_get,
+    0,
+    offsetof(__pyx_CyFunctionObject, func_dict),
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+#if PY_VERSION_HEX >= 0x030400a1
+    0,
+#endif
+};
+static int __pyx_CyFunction_init(void) {
+    __pyx_CyFunctionType = __Pyx_FetchCommonType(&__pyx_CyFunctionType_type);
+    if (unlikely(__pyx_CyFunctionType == NULL)) {
+        return -1;
+    }
+    return 0;
+}
+static CYTHON_INLINE void *__Pyx_CyFunction_InitDefaults(PyObject *func, size_t size, int pyobjects) {
+    __pyx_CyFunctionObject *m = (__pyx_CyFunctionObject *) func;
+    m->defaults = PyObject_Malloc(size);
+    if (unlikely(!m->defaults))
+        return PyErr_NoMemory();
+    memset(m->defaults, 0, size);
+    m->defaults_pyobjects = pyobjects;
+    return m->defaults;
+}
+static CYTHON_INLINE void __Pyx_CyFunction_SetDefaultsTuple(PyObject *func, PyObject *tuple) {
+    __pyx_CyFunctionObject *m = (__pyx_CyFunctionObject *) func;
+    m->defaults_tuple = tuple;
+    Py_INCREF(tuple);
+}
+static CYTHON_INLINE void __Pyx_CyFunction_SetDefaultsKwDict(PyObject *func, PyObject *dict) {
+    __pyx_CyFunctionObject *m = (__pyx_CyFunctionObject *) func;
+    m->defaults_kwdict = dict;
+    Py_INCREF(dict);
+}
+static CYTHON_INLINE void __Pyx_CyFunction_SetAnnotationsDict(PyObject *func, PyObject *dict) {
+    __pyx_CyFunctionObject *m = (__pyx_CyFunctionObject *) func;
+    m->func_annotations = dict;
+    Py_INCREF(dict);
+}
+
+/* PyObjectCallMethO */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
+    PyObject *self, *result;
+    PyCFunction cfunc;
+    cfunc = PyCFunction_GET_FUNCTION(func);
+    self = PyCFunction_GET_SELF(func);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = cfunc(self, arg);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
+/* PyObjectCallOneArg */
+#if CYTHON_COMPILING_IN_CPYTHON
+static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+    PyObject *result;
+    PyObject *args = PyTuple_New(1);
+    if (unlikely(!args)) return NULL;
+    Py_INCREF(arg);
+    PyTuple_SET_ITEM(args, 0, arg);
+    result = __Pyx_PyObject_Call(func, args, NULL);
+    Py_DECREF(args);
+    return result;
+}
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+#if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(func)) {
+        return __Pyx_PyFunction_FastCall(func, &arg, 1);
+    }
+#endif
+    if (likely(PyCFunction_Check(func))) {
+        if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
+            return __Pyx_PyObject_CallMethO(func, arg);
+#if CYTHON_FAST_PYCCALL
+        } else if (PyCFunction_GET_FLAGS(func) & METH_FASTCALL) {
+            return __Pyx_PyCFunction_FastCall(func, &arg, 1);
+#endif
+        }
+    }
+    return __Pyx__PyObject_CallOneArg(func, arg);
+}
+#else
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+    PyObject *result;
+    PyObject *args = PyTuple_Pack(1, arg);
+    if (unlikely(!args)) return NULL;
+    result = __Pyx_PyObject_Call(func, args, NULL);
+    Py_DECREF(args);
+    return result;
+}
+#endif
+
+/* SliceTupleAndList */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE void __Pyx_crop_slice(Py_ssize_t* _start, Py_ssize_t* _stop, Py_ssize_t* _length) {
+    Py_ssize_t start = *_start, stop = *_stop, length = *_length;
+    if (start < 0) {
+        start += length;
+        if (start < 0)
+            start = 0;
+    }
+    if (stop < 0)
+        stop += length;
+    else if (stop > length)
+        stop = length;
+    *_length = stop - start;
+    *_start = start;
+    *_stop = stop;
+}
+static CYTHON_INLINE void __Pyx_copy_object_array(PyObject** CYTHON_RESTRICT src, PyObject** CYTHON_RESTRICT dest, Py_ssize_t length) {
+    PyObject *v;
+    Py_ssize_t i;
+    for (i = 0; i < length; i++) {
+        v = dest[i] = src[i];
+        Py_INCREF(v);
+    }
+}
+static CYTHON_INLINE PyObject* __Pyx_PyList_GetSlice(
+            PyObject* src, Py_ssize_t start, Py_ssize_t stop) {
+    PyObject* dest;
+    Py_ssize_t length = PyList_GET_SIZE(src);
+    __Pyx_crop_slice(&start, &stop, &length);
+    if (unlikely(length <= 0))
+        return PyList_New(0);
+    dest = PyList_New(length);
+    if (unlikely(!dest))
+        return NULL;
+    __Pyx_copy_object_array(
+        ((PyListObject*)src)->ob_item + start,
+        ((PyListObject*)dest)->ob_item,
+        length);
+    return dest;
+}
+static CYTHON_INLINE PyObject* __Pyx_PyTuple_GetSlice(
+            PyObject* src, Py_ssize_t start, Py_ssize_t stop) {
+    PyObject* dest;
+    Py_ssize_t length = PyTuple_GET_SIZE(src);
+    __Pyx_crop_slice(&start, &stop, &length);
+    if (unlikely(length <= 0))
+        return PyTuple_New(0);
+    dest = PyTuple_New(length);
+    if (unlikely(!dest))
+        return NULL;
+    __Pyx_copy_object_array(
+        ((PyTupleObject*)src)->ob_item + start,
+        ((PyTupleObject*)dest)->ob_item,
+        length);
+    return dest;
+}
+#endif
+
 /* RaiseTooManyValuesToUnpack */
 static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
     PyErr_Format(PyExc_ValueError,
@@ -5355,26 +7116,6 @@ bad:
     return -1;
 }
 
-/* PyObjectCallMethO */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
-    PyObject *self, *result;
-    PyCFunction cfunc;
-    cfunc = PyCFunction_GET_FUNCTION(func);
-    self = PyCFunction_GET_SELF(func);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = cfunc(self, arg);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
 /* PyObjectCallNoArg */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
@@ -5394,46 +7135,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
         }
     }
     return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
-}
-#endif
-
-/* PyObjectCallOneArg */
-#if CYTHON_COMPILING_IN_CPYTHON
-static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_New(1);
-    if (unlikely(!args)) return NULL;
-    Py_INCREF(arg);
-    PyTuple_SET_ITEM(args, 0, arg);
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
-}
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-#if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(func)) {
-        return __Pyx_PyFunction_FastCall(func, &arg, 1);
-    }
-#endif
-    if (likely(PyCFunction_Check(func))) {
-        if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
-            return __Pyx_PyObject_CallMethO(func, arg);
-#if CYTHON_FAST_PYCCALL
-        } else if (PyCFunction_GET_FLAGS(func) & METH_FASTCALL) {
-            return __Pyx_PyCFunction_FastCall(func, &arg, 1);
-#endif
-        }
-    }
-    return __Pyx__PyObject_CallOneArg(func, arg);
-}
-#else
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_Pack(1, arg);
-    if (unlikely(!args)) return NULL;
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
 }
 #endif
 
@@ -5577,6 +7278,111 @@ invalid_keyword:
     #endif
 bad:
     return -1;
+}
+
+/* PyObject_GenericGetAttrNoDict */
+#if CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP && PY_VERSION_HEX < 0x03070000
+static PyObject *__Pyx_RaiseGenericGetAttributeError(PyTypeObject *tp, PyObject *attr_name) {
+    PyErr_Format(PyExc_AttributeError,
+#if PY_MAJOR_VERSION >= 3
+                 "'%.50s' object has no attribute '%U'",
+                 tp->tp_name, attr_name);
+#else
+                 "'%.50s' object has no attribute '%.400s'",
+                 tp->tp_name, PyString_AS_STRING(attr_name));
+#endif
+    return NULL;
+}
+static CYTHON_INLINE PyObject* __Pyx_PyObject_GenericGetAttrNoDict(PyObject* obj, PyObject* attr_name) {
+    PyObject *descr;
+    PyTypeObject *tp = Py_TYPE(obj);
+    if (unlikely(!PyString_Check(attr_name))) {
+        return PyObject_GenericGetAttr(obj, attr_name);
+    }
+    assert(!tp->tp_dictoffset);
+    descr = _PyType_Lookup(tp, attr_name);
+    if (unlikely(!descr)) {
+        return __Pyx_RaiseGenericGetAttributeError(tp, attr_name);
+    }
+    Py_INCREF(descr);
+    #if PY_MAJOR_VERSION < 3
+    if (likely(PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_HAVE_CLASS)))
+    #endif
+    {
+        descrgetfunc f = Py_TYPE(descr)->tp_descr_get;
+        if (unlikely(f)) {
+            PyObject *res = f(descr, obj, (PyObject *)tp);
+            Py_DECREF(descr);
+            return res;
+        }
+    }
+    return descr;
+}
+#endif
+
+/* Import */
+static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level) {
+    PyObject *empty_list = 0;
+    PyObject *module = 0;
+    PyObject *global_dict = 0;
+    PyObject *empty_dict = 0;
+    PyObject *list;
+    #if PY_MAJOR_VERSION < 3
+    PyObject *py_import;
+    py_import = __Pyx_PyObject_GetAttrStr(__pyx_b, __pyx_n_s_import);
+    if (!py_import)
+        goto bad;
+    #endif
+    if (from_list)
+        list = from_list;
+    else {
+        empty_list = PyList_New(0);
+        if (!empty_list)
+            goto bad;
+        list = empty_list;
+    }
+    global_dict = PyModule_GetDict(__pyx_m);
+    if (!global_dict)
+        goto bad;
+    empty_dict = PyDict_New();
+    if (!empty_dict)
+        goto bad;
+    {
+        #if PY_MAJOR_VERSION >= 3
+        if (level == -1) {
+            if (strchr(__Pyx_MODULE_NAME, '.')) {
+                module = PyImport_ImportModuleLevelObject(
+                    name, global_dict, empty_dict, list, 1);
+                if (!module) {
+                    if (!PyErr_ExceptionMatches(PyExc_ImportError))
+                        goto bad;
+                    PyErr_Clear();
+                }
+            }
+            level = 0;
+        }
+        #endif
+        if (!module) {
+            #if PY_MAJOR_VERSION < 3
+            PyObject *py_level = PyInt_FromLong(level);
+            if (!py_level)
+                goto bad;
+            module = PyObject_CallFunctionObjArgs(py_import,
+                name, global_dict, empty_dict, list, py_level, (PyObject *)NULL);
+            Py_DECREF(py_level);
+            #else
+            module = PyImport_ImportModuleLevelObject(
+                name, global_dict, empty_dict, list, level);
+            #endif
+        }
+    }
+bad:
+    #if PY_MAJOR_VERSION < 3
+    Py_XDECREF(py_import);
+    #endif
+    Py_XDECREF(empty_list);
+    Py_XDECREF(empty_dict);
+    return module;
 }
 
 /* CLineInTraceback */

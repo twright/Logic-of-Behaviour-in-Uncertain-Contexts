@@ -9,10 +9,10 @@ OBJS = Interval.o Matrix.o Polynomial.o Monomial.o Constraints.o Geometry.o Tayl
 
 all: flowstar lib
 
-flowstar: $(OBJS) lex.yy.o modelParser.tab.o modelParser.o
+flowstar: $(OBJS) lex.fyy.o modelParser.tab.o modelParser.o
 	$(CXX) $(OFLAGS) -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
-lib: $(OBJS) lex.yy.o modelParser.tab.o
+lib: $(OBJS) lex.fyy.o modelParser.tab.o
 	ar rcs libflowstar.a $^
 
 %.o: %.cc
@@ -26,9 +26,9 @@ modelParser.tab.c: modelParser.y
 	bison -d -v modelParser.y
 	# bison --debug --verbose -d -v modelParser.y
 
-lex.yy.c: modelLexer.l modelParser.tab.c
-	flex modelLexer.l
+lex.fyy.c: modelLexer.l modelParser.tab.c
+	flex -P fyy modelLexer.l
 	# flex --debug modelLexer.l
 
 clean:
-	rm -f flowstar *.o libflowstar.a *~ modelParser.tab.c modelParser.tab.h modelParser.output lex.yy.c
+	rm -f flowstar *.o libflowstar.a *~ lex.fyy.c modelParser.tab.c modelParser.tab.h modelParser.output lex.yy.c

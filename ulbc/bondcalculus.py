@@ -1,5 +1,5 @@
 import pexpect
-from typing import Optional, Any
+from typing import Optional, Any, Union
 import sage.all as sg
 from pathlib import Path
 import tempfile
@@ -7,7 +7,7 @@ import random
 from flowstar.reachability import Reach
 from ulbc.interval_utils import fintervals
 
-__all__ = ['BondModel', 'BondwbException', 'BondProcess']
+__all__ = ['BondModel', 'BondwbException', 'BondProcess', 'System']
 
 
 BOND_DIRECTORY = "~/Documents/PhD/bondwb"
@@ -25,15 +25,21 @@ class System:
             y : tuple,
             varmap : Optional[dict] = None):
         self._R = R
-        self._x = x
-        self._y0 = y0
-        self._y = y
-        self._varmap = varmap
-        self._namemap : Optional[dict]
-        if self._varmap is not None:
-            self._namemap = {v: k for k, v in self._varmap.items()}
+        self._x = sg.vector(x)
+        self._y0 = sg.vector([sg.RIF(y00) for y00 in y0])
+        self._y = sg.vector(y)
+        if varmap is None:
+            self._varmap = {str(xi): xi for xi in x}
         else:
-            self._namemap = None
+            self._varmap = varmap
+        self._namemap : dict
+        self._namemap = {v: k for k, v in self._varmap.items()}
+        self._poly_var_ring = sg.PolynomialRing(sg.RIF,
+            ', '.join(map(str, self._varmap.values())))
+
+    @property
+    def PR(self):
+        return self._poly_var_ring
     
     @classmethod
     def embedding(Cls, subsys : 'System', sys : 'System'):
@@ -58,7 +64,7 @@ class System:
                 varmap={k: v for k, v in data['varmapsr'].items()})
         
     @property
-    def R(self) -> sg.PolynomialRing:
+    def R(self):
         return self._R
 
     @property
@@ -131,14 +137,17 @@ class System:
                 self.y,
                 self.y0,
                 duration,
+                system=self,
                 **kwargs,
             )
         else:
             # Polynomial case
+            # print("reach polynomial case")
             return Reach(
                 self.y,
                 self.y0,
                 duration,
+                system=self,
                 **kwargs,
             )
 
@@ -152,7 +161,7 @@ class BondModel:
         self._load(self._modelfile.as_posix())
 
     def _read(self):
-        self._bondwb.expect('BondWB:> ', timeout=-1)
+        self._bondwb.expect('BondWB:> ', timeout=99999)
         return self._bondwb.before
 
     def plot(self, pstr : str, a : float, b : float, nsteps: int):
@@ -208,12 +217,10 @@ class BondProcess:
 
     @property
     def as_system(self) -> System:
-        temp = tempfile.NamedTemporaryFile(
+        _, filename = tempfile.mkstemp(
             suffix='.py',
             prefix='bond-sage-script-',
-            delete=False,
         )
-        filename = temp.name
 
         self.extract(filename)
         

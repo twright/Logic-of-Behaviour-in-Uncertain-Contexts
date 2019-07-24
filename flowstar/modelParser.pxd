@@ -9,7 +9,7 @@ cdef extern from "modelParser.h" nogil:
     cdef void setContinuousProblem(ContinuousReachability &)
     cdef void saveContinuousProblem(ContinuousReachability &)
     cdef ContinuousReachability continuousProblem
-    cdef int yydebug
+    cdef int fyydebug
 
 
 cdef void setYYDebug(bint)

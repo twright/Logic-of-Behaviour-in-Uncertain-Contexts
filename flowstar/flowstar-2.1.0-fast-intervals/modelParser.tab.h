@@ -30,20 +30,28 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_MODELPARSER_TAB_H_INCLUDED
-# define YY_YY_MODELPARSER_TAB_H_INCLUDED
+#ifndef YY_FYY_MODELPARSER_TAB_H_INCLUDED
+# define YY_FYY_MODELPARSER_TAB_H_INCLUDED
 /* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
+#ifndef FYYDEBUG
+# if defined YYDEBUG
 #if YYDEBUG
-extern int yydebug;
+#   define FYYDEBUG 1
+#  else
+#   define FYYDEBUG 0
+#  endif
+# else /* ! defined YYDEBUG */
+#  define FYYDEBUG 0
+# endif /* ! defined YYDEBUG */
+#endif  /* ! defined FYYDEBUG */
+#if FYYDEBUG
+extern int fyydebug;
 #endif
 
 /* Token type.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
+#ifndef FYYTOKENTYPE
+# define FYYTOKENTYPE
+  enum fyytokentype
   {
     NUM = 258,
     IDENT = 259,
@@ -128,11 +136,11 @@ extern int yydebug;
 #endif
 
 /* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+#if ! defined FYYSTYPE && ! defined FYYSTYPE_IS_DECLARED
 
-union YYSTYPE
+union FYYSTYPE
 {
-#line 69 "modelParser.y" /* yacc.c:1910  */
+#line 74 "modelParser.y" /* yacc.c:1910  */
 
 	double dblVal;
 	int intVal;
@@ -160,17 +168,17 @@ union YYSTYPE
 	LTV_Term *p_LTV_Term;
 	ODE_String *p_ODE_String;
 
-#line 164 "modelParser.tab.h" /* yacc.c:1910  */
+#line 172 "modelParser.tab.h" /* yacc.c:1910  */
 };
 
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
+typedef union FYYSTYPE FYYSTYPE;
+# define FYYSTYPE_IS_TRIVIAL 1
+# define FYYSTYPE_IS_DECLARED 1
 #endif
 
 
-extern YYSTYPE yylval;
+extern FYYSTYPE fyylval;
 
-int yyparse (void);
+int fyyparse (void);
 
-#endif /* !YY_YY_MODELPARSER_TAB_H_INCLUDED  */
+#endif /* !YY_FYY_MODELPARSER_TAB_H_INCLUDED  */

@@ -725,6 +725,20 @@ static CYTHON_INLINE float __PYX_NAN() {
     }
     
 
+    typedef std::function<flowstar::Interval(
+        void*, std::vector<flowstar::Interval> &
+    )> partial_interval_fn_t;
+    
+    // flowstar::Interval (*partial_interval_fn)(void* obj, flowstar::Interval & x)
+
+    std::function<flowstar::Interval(std::vector<flowstar::Interval> &)>
+    partial_interval_fn(partial_interval_fn_t func, void* obj) {
+        return [func, obj] (std::vector<flowstar::Interval> & x) -> flowstar::Interval {
+            return func(obj, x);
+        };
+    }
+    
+
     std::function<flowstar::Interval(std::vector<flowstar::Interval>&)>
     poly_fn(const flowstar::Polynomial & p) {
         // flowstar::HornerForm hf;
@@ -1064,7 +1078,7 @@ typedef flowstar::Polynomial *__pyx_t_8flowstar_10Polynomial_PolynomialPtr;
 struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval;
 struct __pyx_opt_args_8flowstar_12reachability_6CReach__convert_space_domain;
 
-/* "flowstar/reachability.pxd":29
+/* "flowstar/reachability.pxd":30
  *     # cdef Interval cutoff_threshold
  * 
  *     cdef vector[Interval] eval_interval(CReach self, Interval I,             # <<<<<<<<<<<<<<
@@ -1076,7 +1090,7 @@ struct __pyx_opt_args_8flowstar_12reachability_6CReach_eval_interval {
   std::optional<std::reference_wrapper<std::vector<flowstar::Interval> > >  space_domain;
 };
 
-/* "flowstar/reachability.pxd":32
+/* "flowstar/reachability.pxd":33
  *             optional[reference_wrapper[vector[Interval]]] space_domain=*)
  *     cdef optional[vector[Interval]]\
  *             _convert_space_domain(CReach self, space_domain=*)             # <<<<<<<<<<<<<<
@@ -1124,6 +1138,7 @@ struct __pyx_obj_8flowstar_12reachability_CReach {
   struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtab;
   struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager *global_manager;
   flowstar::ContinuousReachability c_reach;
+  PyObject *system;
   int ran;
   int prepared;
   int prepared_for_plotting;
@@ -1136,7 +1151,7 @@ struct __pyx_obj_8flowstar_12reachability_CReach {
 };
 
 
-/* "flowstar/reachability.pxd":38
+/* "flowstar/reachability.pxd":39
  * 
  * 
  * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
@@ -1253,7 +1268,7 @@ struct __pyx_vtabstruct_8flowstar_12reachability_CReach {
 static struct __pyx_vtabstruct_8flowstar_12reachability_CReach *__pyx_vtabptr_8flowstar_12reachability_CReach;
 
 
-/* "flowstar/reachability.pxd":38
+/* "flowstar/reachability.pxd":39
  * 
  * 
  * cdef class FlowstarGlobalManager:             # <<<<<<<<<<<<<<
@@ -2249,7 +2264,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_4sage_plot_manual(
 static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_6sage_interval_plot(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, double __pyx_v_step, PyObject *__pyx_v_poly, PyObject *__pyx_v_kwargs); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_8__reduce_cython__(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_10__setstate_cython__(struct __pyx_obj_8flowstar_8plotting_SagePlotMixin *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube_plot(struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, double __pyx_v_step, PyObject *__pyx_v_joins); /* proto */
+static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube_plot(struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, double __pyx_v_step, PyObject *__pyx_v_joins, PyObject *__pyx_v_t); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plot(struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, double __pyx_v_step, int __pyx_v_arrows, PyObject *__pyx_v_straight, PyObject *__pyx_v_tight, PyObject *__pyx_v_boundaries, PyObject *__pyx_v_joins, PyObject *__pyx_v_kwargs); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_4__reduce_cython__(struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_6__setstate_cython__(struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
@@ -7628,8 +7643,8 @@ static PyObject *__pyx_pf_8flowstar_8plotting_13SagePlotMixin_10__setstate_cytho
 /* "flowstar/plotting.pyx":188
  * 
  * cdef class SageTubePlotMixin:
- *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):             # <<<<<<<<<<<<<<
- *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
+ *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True, str t='t'):             # <<<<<<<<<<<<<<
+ *         return self.sage_tube_plot(t, x, step, straight=True, joins=joins)
  * 
  */
 
@@ -7639,17 +7654,21 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_1sage_time_tub
   PyObject *__pyx_v_x = 0;
   double __pyx_v_step;
   PyObject *__pyx_v_joins = 0;
+  PyObject *__pyx_v_t = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("sage_time_tube_plot (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_x,&__pyx_n_s_step,&__pyx_n_s_joins,0};
-    PyObject* values[3] = {0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_x,&__pyx_n_s_step,&__pyx_n_s_joins,&__pyx_n_s_t,0};
+    PyObject* values[4] = {0,0,0,0};
     values[2] = ((PyObject *)Py_True);
+    values[3] = ((PyObject*)__pyx_n_u_t);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -7676,12 +7695,20 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_1sage_time_tub
           PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_joins);
           if (value) { values[2] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_t);
+          if (value) { values[3] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sage_time_tube_plot") < 0)) __PYX_ERR(0, 188, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -7698,17 +7725,19 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_1sage_time_tub
       __pyx_v_step = ((double)1e-1);
     }
     __pyx_v_joins = values[2];
+    __pyx_v_t = ((PyObject*)values[3]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("sage_time_tube_plot", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 188, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("sage_time_tube_plot", 0, 1, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 188, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.plotting.SageTubePlotMixin.sage_time_tube_plot", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_x), (&PyUnicode_Type), 1, "x", 1))) __PYX_ERR(0, 188, __pyx_L1_error)
-  __pyx_r = __pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube_plot(((struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_step, __pyx_v_joins);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_t), (&PyUnicode_Type), 1, "t", 1))) __PYX_ERR(0, 188, __pyx_L1_error)
+  __pyx_r = __pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube_plot(((struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *)__pyx_v_self), __pyx_v_x, __pyx_v_step, __pyx_v_joins, __pyx_v_t);
 
   /* function exit code */
   goto __pyx_L0;
@@ -7719,7 +7748,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_1sage_time_tub
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube_plot(struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, double __pyx_v_step, PyObject *__pyx_v_joins) {
+static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube_plot(struct __pyx_obj_8flowstar_8plotting_SageTubePlotMixin *__pyx_v_self, PyObject *__pyx_v_x, double __pyx_v_step, PyObject *__pyx_v_joins, PyObject *__pyx_v_t) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -7730,8 +7759,8 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
 
   /* "flowstar/plotting.pyx":189
  * cdef class SageTubePlotMixin:
- *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):
- *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)             # <<<<<<<<<<<<<<
+ *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True, str t='t'):
+ *         return self.sage_tube_plot(t, x, step, straight=True, joins=joins)             # <<<<<<<<<<<<<<
  * 
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False,
  */
@@ -7742,9 +7771,9 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_INCREF(__pyx_n_u_t);
-  __Pyx_GIVEREF(__pyx_n_u_t);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_n_u_t);
+  __Pyx_INCREF(__pyx_v_t);
+  __Pyx_GIVEREF(__pyx_v_t);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_t);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_x);
@@ -7767,8 +7796,8 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
   /* "flowstar/plotting.pyx":188
  * 
  * cdef class SageTubePlotMixin:
- *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True):             # <<<<<<<<<<<<<<
- *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
+ *     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True, str t='t'):             # <<<<<<<<<<<<<<
+ *         return self.sage_tube_plot(t, x, step, straight=True, joins=joins)
  * 
  */
 
@@ -7787,7 +7816,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_sage_time_tube
 }
 
 /* "flowstar/plotting.pyx":191
- *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
+ *         return self.sage_tube_plot(t, x, step, straight=True, joins=joins)
  * 
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False,             # <<<<<<<<<<<<<<
  *                        straight=False, tight=False, boundaries=True,
@@ -7940,7 +7969,7 @@ static PyObject *__pyx_pw_8flowstar_8plotting_17SageTubePlotMixin_3sage_tube_plo
     } else {
 
       /* "flowstar/plotting.pyx":191
- *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
+ *         return self.sage_tube_plot(t, x, step, straight=True, joins=joins)
  * 
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False,             # <<<<<<<<<<<<<<
  *                        straight=False, tight=False, boundaries=True,
@@ -10369,7 +10398,7 @@ static PyObject *__pyx_pf_8flowstar_8plotting_17SageTubePlotMixin_2sage_tube_plo
   goto __pyx_L0;
 
   /* "flowstar/plotting.pyx":191
- *         return self.sage_tube_plot('t', x, step, straight=True, joins=joins)
+ *         return self.sage_tube_plot(t, x, step, straight=True, joins=joins)
  * 
  *     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False,             # <<<<<<<<<<<<<<
  *                        straight=False, tight=False, boundaries=True,
@@ -12783,8 +12812,8 @@ static int __Pyx_modinit_type_import_code(void) {
    if (!__pyx_ptype_8flowstar_12reachability_CReach) __PYX_ERR(2, 12, __pyx_L1_error)
   __pyx_vtabptr_8flowstar_12reachability_CReach = (struct __pyx_vtabstruct_8flowstar_12reachability_CReach*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_CReach->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_CReach)) __PYX_ERR(2, 12, __pyx_L1_error)
   __pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager = __Pyx_ImportType(__pyx_t_1, "flowstar.reachability", "FlowstarGlobalManager", sizeof(struct __pyx_obj_8flowstar_12reachability_FlowstarGlobalManager), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager) __PYX_ERR(2, 38, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_12reachability_FlowstarGlobalManager = (struct __pyx_vtabstruct_8flowstar_12reachability_FlowstarGlobalManager*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(2, 38, __pyx_L1_error)
+   if (!__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager) __PYX_ERR(2, 39, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_12reachability_FlowstarGlobalManager = (struct __pyx_vtabstruct_8flowstar_12reachability_FlowstarGlobalManager*)__Pyx_GetVtable(__pyx_ptype_8flowstar_12reachability_FlowstarGlobalManager->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_12reachability_FlowstarGlobalManager)) __PYX_ERR(2, 39, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyImport_ImportModule("flowstar.poly"); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 114, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

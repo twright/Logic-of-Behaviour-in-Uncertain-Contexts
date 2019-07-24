@@ -163,11 +163,11 @@ class CleanFlowstarCommand(Command):
 
     def run(self):
         self.announce('Cleaning flowstar...')
-        try:
-            subprocess.call('make clean', cwd='flowstar/flowstar-2.1.0',
-                            shell=True)
-        except:
-            pass
+        # try:
+        subprocess.call('make clean', cwd='flowstar/flowstar-2.1.0',
+                        shell=True)
+        # except:
+            # pass
         try:
             subprocess.call('rm -f flowstar/*.so', shell=True)
         except:

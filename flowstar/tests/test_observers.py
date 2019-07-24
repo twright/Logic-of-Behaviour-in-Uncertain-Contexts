@@ -2,15 +2,21 @@ from __future__ import print_function, division
 # , absolute_import
 
 import pytest
+# reachability imports must be above sage imports
+# to avoid flowstar parser bug!
+from flowstar.reachability import Reach
 import sage.all as sage
 from sage.all import RIF
+import sage.all as sg
 
-from flowstar.observers import PolyObserver, RestrictedObserver
+from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver,
+                                py_interval_fn_from_sage)
 from ulbc.interval_utils import (finterval, int_dist,
                                  intervals_approx_eq as roots_approx_eq)
 from ulbc.logic import Atomic
 from ulbc.signal_masks import Mask
 from flowstar.tests.test_reachability import ringxy, odes, reach, initials
+from ulbc.bondcalculus import System
 import faulthandler
 
 
@@ -23,38 +29,77 @@ def mask1():
 @pytest.fixture
 def observer_masked(ringxy, reach, odes, mask1):
     _, (x, y) = ringxy
-    return PolyObserver(x, reach, False, mask=mask1)
+    return PolyObserver(x, reach, symbolic_composition=False, mask=mask1)
 
 
 @pytest.fixture
 def observer_masked_sym(ringxy, reach, odes, mask1):
     _, (x, y) = ringxy
-    return PolyObserver(x, reach, True, mask=mask1)
+    return PolyObserver(x, reach, symbolic_composition=True, mask=mask1)
 
 
 
 @pytest.fixture
 def observer(ringxy, reach, odes):
     _, (x, y) = ringxy
-    return PolyObserver(x, reach, False)
+    return PolyObserver(x, reach, symbolic_composition=False)
 
 
 @pytest.fixture
 def observer_y(ringxy, reach, odes):
     _, (x, y) = ringxy
-    return PolyObserver(y, reach, False)
+    return PolyObserver(y, reach, symbolic_composition=False)
 
 
 @pytest.fixture
 def observer_sym(ringxy, reach, odes):
     _, (x, y) = ringxy
-    return PolyObserver(x, reach, True)
+    return PolyObserver(x, reach, symbolic_composition=True)
 
 
 @pytest.fixture
 def observer_sym_y(ringxy, reach, odes):
     _, (x, y) = ringxy
-    return PolyObserver(y, reach, True)
+    return PolyObserver(y, reach, symbolic_composition=True)
+
+
+@pytest.fixture(scope='module')
+def nonpoly_system():
+    t, x = sg.SR.var('t, x')
+    return System(
+        sg.SR,
+        (t, x),
+        (sg.RIF(0), sg.RIF(1, 2)),
+        (sg.SR(1), 1/(x + 1)),
+        {'t': t, 'x': x},
+    )
+
+@pytest.fixture(scope='module')
+def nonpoly_reach(nonpoly_system):
+    r = nonpoly_system.reach(5, step=0.01)
+    assert r.successful
+    return r
+
+
+class TestSageObserver(object):
+    """Tests for interval evaluation."""
+
+    def test_t_call(self, nonpoly_reach):
+        t, x = sg.SR.var('t, x')
+        # pytest.set_trace()
+        observer = SageObserver(t, nonpoly_reach)
+        img = observer(RIF(2.5))
+        print(finterval(img))
+        assert int_dist(img, RIF(2.5)) < 1e-3
+
+
+class TestIntervalFnFromSage:
+    @staticmethod
+    def test_simple_fn():
+        x, y = sg.SR.var('x, y')
+        f = 2*x + y**2
+        h = py_interval_fn_from_sage(f, [x, y])
+        assert h(3, 2) == 10
 
 
 class TestPolyObserver(object):
@@ -245,7 +290,7 @@ class TestPolyObserverEval(object):
     def test_xy_squared_call(self, ringxy, odes, reach):  # NOQA
         _, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
-        observer = PolyObserver(poly.p, reach, False)
+        observer = PolyObserver(poly.p, reach, symbolic_composition=False)
         img = observer(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
@@ -254,7 +299,7 @@ class TestPolyObserverEval(object):
     def test_xy_squared_call_symbolic(self, ringxy, odes, reach):  # NOQA
         _, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
-        observer = PolyObserver(poly.p, reach, True)
+        observer = PolyObserver(poly.p, reach, symbolic_composition=True)
         img = observer(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
@@ -271,7 +316,7 @@ class TestPolyObserverBoolEval(object):
     def test_minus_x_call(self, ringxy, odes, reach):  # NOQA
         _, (x, y) = ringxy
         poly = Atomic(-x)
-        observer = PolyObserver(poly.p, reach, False)
+        observer = PolyObserver(poly.p, reach, symbolic_composition=False)
         res = observer.check(RIF(1, 2))
         assert res is True
 

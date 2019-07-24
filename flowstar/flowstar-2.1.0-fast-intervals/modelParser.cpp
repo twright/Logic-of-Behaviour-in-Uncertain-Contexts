@@ -7,12 +7,37 @@
 ---*/
 
 #include "modelParser.h"
+#include "Continuous.h"
+#include "Interval.h"
+#include <string.h>
 
-extern int yyparse();
+extern int fyyparse();
+
+// int main(int argc, const char *argv[]) {
+//   fyydebug = 1;
+//   // parseSetting.clear();
+//   // parseSetting.strODE = "nonpolynomial center { 1 }";
+//   // parseODE();
+
+//   printf("strExpansion = %s\n", parseResult.strExpansion.c_str());
+//   std::vector<std::string> odes;
+//   odes.push_back("1");
+  
+//   std::vector<flowstar::Flowpipe> initialFPs;
+//   std::vector<flowstar::Interval> initials;
+//   initials.push_back(flowstar::Interval(0));
+//   initialFPs.push_back(flowstar::Flowpipe(initials, flowstar::Interval(0)));
+//   flowstar::ContinuousSystem cs(odes, initialFPs);
+
+//   printf("strExpansion = %s\n", parseResult.strExpansion.c_str());
+
+//   return 0;
+// }
 
 int main(int argc, const char *argv[])
 {
-	yyparse();
+  fyydebug = 1;
+	fyyparse();
 
 	return 0;
 }
