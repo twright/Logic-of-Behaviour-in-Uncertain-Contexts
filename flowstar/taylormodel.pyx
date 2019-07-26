@@ -155,6 +155,18 @@ class FlowstarConverter(Converter):
         else:
             raise NotImplementedError
 
+    def composition(self, ex, op):
+        func_name = repr(op)
+        x, = map(self, ex.operands())
+
+        if func_name == 'abs':
+            return f'sqrt(({x})^2)'
+        elif func_name in {'sin', 'cos', 'sqrt', 'exp', 'log'}:
+            return f'{func_name}({x})'
+        else:
+            raise NotImplementedError()
+
+
     def arithmetic(self, ex, op):
         op_table = arithmetic_operators
         op_table[operator.neg] = 'neg'

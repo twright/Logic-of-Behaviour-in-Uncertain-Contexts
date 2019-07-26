@@ -709,13 +709,24 @@ static CYTHON_INLINE float __PYX_NAN() {
         return [f, g](const flowstar::Interval &t) ->
         flowstar::Interval {
             std::vector<flowstar::Interval> I = g(t);
-            I.insert(I.begin(), t);
+            /*
             std::string s;
+            t.toString(s);
+            std::cout << "t = " << s << std::endl;
+            */
+            I.insert(I.begin(), t);
+            /*
             for (unsigned int i = 0; i < I.size(); ++i) {
                 I.at(i).toString(s);
                 std::cout << "I[" << i << "] = " << s << std::endl;
             }
-            return f(I);
+            */
+            flowstar::Interval res = f(I);
+            /*
+            res.toString(s);
+            std::cout << "f(I) = " << s << std::endl;
+            */
+            return res;
         };
     }
     
@@ -786,12 +797,13 @@ static CYTHON_INLINE float __PYX_NAN() {
         return [&tmv, &domain](const flowstar::Interval &t) ->
         std::vector<flowstar::Interval> {
             std::vector<flowstar::Interval> I;
-            std::vector<flowstar::Interval> J;
 
             domain[0] = t;
+            /*
             std::string s;
             t.toString(s);
             std::cout << "t = " << s << std::endl;
+            */
             tmv.intEval(I, domain);
 
             return I;
@@ -806,18 +818,41 @@ static CYTHON_INLINE float __PYX_NAN() {
         return [&fp, &domain](const flowstar::Interval &t) -> std::vector<
         flowstar::Interval> {
             std::vector<flowstar::Interval> evalPre, evalPost;
-            std::string s;
 
             domain[0] = t;
             fp.tmv.intEval(evalPre, domain);
-            // evalPre.at(0).toString(s);
-            // std::cout <<"pre  = " << s << std::endl;
-            // evalPre.insert(evalPre.begin(), t);
+            // Insert time variable
+            evalPre.insert(evalPre.begin(), t);
             fp.tmvPre.intEval(evalPost, evalPre);
-            // evalPost.at(0).toString(s);
-            // std::cout <<"post = " << s << std::endl;
-
             return evalPost;
+
+            /*
+            std::string s, s1, s2;
+            fp.domain.at(0).toString(s);
+            t.toString(s1);
+            domain.at(0).toString(s2);
+            std::cout << "t0   = " << s  << std::endl
+                      << "t    = " << s1 << std::endl
+                      << "t'   = " << s2 << std::endl;
+            // fp.domain.at(0).toString(s);
+
+            evalPre.at(0).toString(s);
+            // evalPre.at(0) = t;
+            std::cout << "pre  = " << s << ", size = " << evalPre.size() << std::endl;
+            for (auto [it, i] = std::tuple{evalPre.begin(), 0}; it != evalPre.end(); ++it, ++i) {
+                // *it = flowstar::Interval(-1, 1);
+                it->toString(s);
+                std::cout << "evalPre[" << i << "] = " << s << std::endl;
+            }
+
+            fp.intEval(res, flowstar::Interval(1e-4)); // domain)
+            for (auto i = 0; i < res.size(); ++i) {
+                res.at(i).toString(s);
+                std::cout << "inner[" << i << "] = " << s << std::endl;
+                evalPost.at(i).toString(s);
+                std::cout << "outer[" << i << "] = " << s << std::endl;
+            }
+            */
         };
     }
     
@@ -1092,7 +1127,7 @@ struct __pyx_opt_args_8flowstar_4poly_compose {
   int verbosity;
 };
 
-/* "flowstar/poly.pxd":120
+/* "flowstar/poly.pxd":144
  * 
  *     @staticmethod
  *     cdef Poly from_polynomial(Polynomial & P, vars, explicit_time=?)             # <<<<<<<<<<<<<<
@@ -1102,7 +1137,7 @@ struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial {
   PyObject *explicit_time;
 };
 
-/* "flowstar/poly.pxd":114
+/* "flowstar/poly.pxd":138
  *                                       vector[Interval] & domain)
  * 
  * cdef class Poly:             # <<<<<<<<<<<<<<
@@ -1716,11 +1751,11 @@ static int __Pyx_modinit_type_import_code(void) {
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_t_1 = PyImport_ImportModule("flowstar.poly"); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 114, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("flowstar.poly"); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 138, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_8flowstar_4poly_Poly = __Pyx_ImportType(__pyx_t_1, "flowstar.poly", "Poly", sizeof(struct __pyx_obj_8flowstar_4poly_Poly), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_8flowstar_4poly_Poly) __PYX_ERR(1, 114, __pyx_L1_error)
-  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(1, 114, __pyx_L1_error)
+   if (!__pyx_ptype_8flowstar_4poly_Poly) __PYX_ERR(1, 138, __pyx_L1_error)
+  __pyx_vtabptr_8flowstar_4poly_Poly = (struct __pyx_vtabstruct_8flowstar_4poly_Poly*)__Pyx_GetVtable(__pyx_ptype_8flowstar_4poly_Poly->tp_dict); if (unlikely(!__pyx_vtabptr_8flowstar_4poly_Poly)) __PYX_ERR(1, 138, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;

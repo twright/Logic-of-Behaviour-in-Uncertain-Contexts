@@ -709,13 +709,24 @@ static CYTHON_INLINE float __PYX_NAN() {
         return [f, g](const flowstar::Interval &t) ->
         flowstar::Interval {
             std::vector<flowstar::Interval> I = g(t);
-            I.insert(I.begin(), t);
+            /*
             std::string s;
+            t.toString(s);
+            std::cout << "t = " << s << std::endl;
+            */
+            I.insert(I.begin(), t);
+            /*
             for (unsigned int i = 0; i < I.size(); ++i) {
                 I.at(i).toString(s);
                 std::cout << "I[" << i << "] = " << s << std::endl;
             }
-            return f(I);
+            */
+            flowstar::Interval res = f(I);
+            /*
+            res.toString(s);
+            std::cout << "f(I) = " << s << std::endl;
+            */
+            return res;
         };
     }
     
@@ -786,12 +797,13 @@ static CYTHON_INLINE float __PYX_NAN() {
         return [&tmv, &domain](const flowstar::Interval &t) ->
         std::vector<flowstar::Interval> {
             std::vector<flowstar::Interval> I;
-            std::vector<flowstar::Interval> J;
 
             domain[0] = t;
+            /*
             std::string s;
             t.toString(s);
             std::cout << "t = " << s << std::endl;
+            */
             tmv.intEval(I, domain);
 
             return I;
@@ -806,18 +818,41 @@ static CYTHON_INLINE float __PYX_NAN() {
         return [&fp, &domain](const flowstar::Interval &t) -> std::vector<
         flowstar::Interval> {
             std::vector<flowstar::Interval> evalPre, evalPost;
-            std::string s;
 
             domain[0] = t;
             fp.tmv.intEval(evalPre, domain);
-            // evalPre.at(0).toString(s);
-            // std::cout <<"pre  = " << s << std::endl;
-            // evalPre.insert(evalPre.begin(), t);
+            // Insert time variable
+            evalPre.insert(evalPre.begin(), t);
             fp.tmvPre.intEval(evalPost, evalPre);
-            // evalPost.at(0).toString(s);
-            // std::cout <<"post = " << s << std::endl;
-
             return evalPost;
+
+            /*
+            std::string s, s1, s2;
+            fp.domain.at(0).toString(s);
+            t.toString(s1);
+            domain.at(0).toString(s2);
+            std::cout << "t0   = " << s  << std::endl
+                      << "t    = " << s1 << std::endl
+                      << "t'   = " << s2 << std::endl;
+            // fp.domain.at(0).toString(s);
+
+            evalPre.at(0).toString(s);
+            // evalPre.at(0) = t;
+            std::cout << "pre  = " << s << ", size = " << evalPre.size() << std::endl;
+            for (auto [it, i] = std::tuple{evalPre.begin(), 0}; it != evalPre.end(); ++it, ++i) {
+                // *it = flowstar::Interval(-1, 1);
+                it->toString(s);
+                std::cout << "evalPre[" << i << "] = " << s << std::endl;
+            }
+
+            fp.intEval(res, flowstar::Interval(1e-4)); // domain)
+            for (auto i = 0; i < res.size(); ++i) {
+                res.at(i).toString(s);
+                std::cout << "inner[" << i << "] = " << s << std::endl;
+                evalPost.at(i).toString(s);
+                std::cout << "outer[" << i << "] = " << s << std::endl;
+            }
+            */
         };
     }
     
@@ -1099,7 +1134,7 @@ struct __pyx_opt_args_8flowstar_4poly_compose {
   int verbosity;
 };
 
-/* "flowstar/poly.pxd":120
+/* "flowstar/poly.pxd":144
  * 
  *     @staticmethod
  *     cdef Poly from_polynomial(Polynomial & P, vars, explicit_time=?)             # <<<<<<<<<<<<<<
@@ -1109,7 +1144,7 @@ struct __pyx_opt_args_8flowstar_4poly_4Poly_from_polynomial {
   PyObject *explicit_time;
 };
 
-/* "flowstar/poly.pxd":114
+/* "flowstar/poly.pxd":138
  *                                       vector[Interval] & domain)
  * 
  * cdef class Poly:             # <<<<<<<<<<<<<<
@@ -8785,7 +8820,7 @@ static PyObject *__pyx_pf_8flowstar_4poly_4Poly_12__repr__(struct __pyx_obj_8flo
   return __pyx_r;
 }
 
-/* "flowstar/poly.pxd":116
+/* "flowstar/poly.pxd":140
  * cdef class Poly:
  *     cdef Polynomial c_poly
  *     cdef readonly dict vars             # <<<<<<<<<<<<<<
@@ -8822,7 +8857,7 @@ static PyObject *__pyx_pf_8flowstar_4poly_4Poly_4vars___get__(struct __pyx_obj_8
   return __pyx_r;
 }
 
-/* "flowstar/poly.pxd":117
+/* "flowstar/poly.pxd":141
  *     cdef Polynomial c_poly
  *     cdef readonly dict vars
  *     cdef readonly bint explicit_time             # <<<<<<<<<<<<<<
@@ -8849,7 +8884,7 @@ static PyObject *__pyx_pf_8flowstar_4poly_4Poly_13explicit_time___get__(struct _
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_self->explicit_time); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 117, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_self->explicit_time); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 141, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;

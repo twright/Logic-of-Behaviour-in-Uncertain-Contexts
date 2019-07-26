@@ -286,7 +286,8 @@ class Atomic(Logic):
             if system is not None:
                 reach = system.reach(args[1]
                                      if len(args) > 1
-                                     else kwargs['duration'])
+                                     else kwargs['duration'],
+                                     **kwargs)
             else:
                 raise ValueError("No system!")
         sig = self.signal(reach, odes, **kwargs)

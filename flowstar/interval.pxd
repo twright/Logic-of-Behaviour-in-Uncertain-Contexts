@@ -50,13 +50,24 @@ cdef extern from * nogil:
         return [f, g](const flowstar::Interval &t) ->
         flowstar::Interval {
             std::vector<flowstar::Interval> I = g(t);
-            I.insert(I.begin(), t);
+            /*
             std::string s;
+            t.toString(s);
+            std::cout << "t = " << s << std::endl;
+            */
+            I.insert(I.begin(), t);
+            /*
             for (unsigned int i = 0; i < I.size(); ++i) {
                 I.at(i).toString(s);
                 std::cout << "I[" << i << "] = " << s << std::endl;
             }
-            return f(I);
+            */
+            flowstar::Interval res = f(I);
+            /*
+            res.toString(s);
+            std::cout << "f(I) = " << s << std::endl;
+            */
+            return res;
         };
     }
     """

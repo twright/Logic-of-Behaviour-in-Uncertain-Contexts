@@ -713,13 +713,24 @@ static CYTHON_INLINE float __PYX_NAN() {
         return [f, g](const flowstar::Interval &t) ->
         flowstar::Interval {
             std::vector<flowstar::Interval> I = g(t);
-            I.insert(I.begin(), t);
+            /*
             std::string s;
+            t.toString(s);
+            std::cout << "t = " << s << std::endl;
+            */
+            I.insert(I.begin(), t);
+            /*
             for (unsigned int i = 0; i < I.size(); ++i) {
                 I.at(i).toString(s);
                 std::cout << "I[" << i << "] = " << s << std::endl;
             }
-            return f(I);
+            */
+            flowstar::Interval res = f(I);
+            /*
+            res.toString(s);
+            std::cout << "f(I) = " << s << std::endl;
+            */
+            return res;
         };
     }
     
@@ -1019,7 +1030,7 @@ struct __pyx_obj_8flowstar_11taylormodel_TaylorModelContext {
 };
 
 
-/* "flowstar/taylormodel.pyx":242
+/* "flowstar/taylormodel.pyx":254
  * 
  *     @staticmethod
  *     def to_varmap(vs):             # <<<<<<<<<<<<<<
@@ -1032,7 +1043,7 @@ struct __pyx_obj_8flowstar_11taylormodel___pyx_scope_struct__to_varmap {
 };
 
 
-/* "flowstar/taylormodel.pyx":245
+/* "flowstar/taylormodel.pyx":257
  *         if isinstance(vs, list):
  *             assert len(vs) > 0
  *             assert all(isinstance(v, str) for v in vs)             # <<<<<<<<<<<<<<
@@ -1047,7 +1058,7 @@ struct __pyx_obj_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr {
 
 
 
-/* "flowstar/taylormodel.pyx":191
+/* "flowstar/taylormodel.pyx":203
  * 
  * 
  * cdef class TaylorModel:             # <<<<<<<<<<<<<<
@@ -1363,29 +1374,55 @@ static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int eq
 /* UnicodeEquals.proto */
 static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
 
+/* RaiseTooManyValuesToUnpack.proto */
+static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
+
+/* RaiseNeedMoreValuesToUnpack.proto */
+static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
+
+/* IterFinish.proto */
+static CYTHON_INLINE int __Pyx_IterFinish(void);
+
+/* UnpackItemEndCheck.proto */
+static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected);
+
+/* PyObjectFormatSimple.proto */
+#if CYTHON_COMPILING_IN_PYPY
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        PyObject_Format(s, f))
+#elif PY_MAJOR_VERSION < 3
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        likely(PyString_CheckExact(s)) ? PyUnicode_FromEncodedObject(s, NULL, "strict") :\
+        PyObject_Format(s, f))
+#elif CYTHON_USE_TYPE_SLOTS
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        likely(PyLong_CheckExact(s)) ? PyLong_Type.tp_str(s) :\
+        likely(PyFloat_CheckExact(s)) ? PyFloat_Type.tp_str(s) :\
+        PyObject_Format(s, f))
+#else
+    #define __Pyx_PyObject_FormatSimple(s, f) (\
+        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
+        PyObject_Format(s, f))
+#endif
+
+/* JoinPyUnicode.proto */
+static PyObject* __Pyx_PyUnicode_Join(PyObject* value_tuple, Py_ssize_t value_count, Py_ssize_t result_ulength,
+                                      Py_UCS4 max_char);
+
 /* PyIntCompare.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, long intval, long inplace);
 
 /* None.proto */
 static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname);
 
-/* IterFinish.proto */
-static CYTHON_INLINE int __Pyx_IterFinish(void);
-
 /* PyObjectGetMethod.proto */
 static int __Pyx_PyObject_GetMethod(PyObject *obj, PyObject *name, PyObject **method);
 
 /* PyObjectCallMethod0.proto */
 static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name);
-
-/* RaiseNeedMoreValuesToUnpack.proto */
-static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
-
-/* RaiseTooManyValuesToUnpack.proto */
-static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
-
-/* UnpackItemEndCheck.proto */
-static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected);
 
 /* RaiseNoneIterError.proto */
 static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void);
@@ -1833,9 +1870,11 @@ static PyObject *__pyx_builtin_staticmethod;
 static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_print;
 static PyObject *__pyx_builtin_NotImplementedError;
+static PyObject *__pyx_builtin_map;
 static PyObject *__pyx_builtin_sorted;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_enumerate;
+static const char __pyx_k_2[] = ")^2)";
 static const char __pyx_k_i[] = "i";
 static const char __pyx_k_v[] = "v";
 static const char __pyx_k_x[] = "x";
@@ -1845,10 +1884,10 @@ static const char __pyx_k_RR[] = "RR";
 static const char __pyx_k__3[] = "*";
 static const char __pyx_k__4[] = "+";
 static const char __pyx_k__5[] = "[{}, {}]";
-static const char __pyx_k__6[] = " + ";
-static const char __pyx_k__7[] = "/";
-static const char __pyx_k__8[] = "({})/({})";
-static const char __pyx_k__9[] = "-({})";
+static const char __pyx_k__6[] = "(";
+static const char __pyx_k__7[] = ")";
+static const char __pyx_k__8[] = " + ";
+static const char __pyx_k__9[] = "/";
 static const char __pyx_k_ex[] = "ex";
 static const char __pyx_k_op[] = "op";
 static const char __pyx_k_sg[] = "sg";
@@ -1858,16 +1897,24 @@ static const char __pyx_k_x1[] = "x1";
 static const char __pyx_k_0_0[] = "[{0}, {0}]";
 static const char __pyx_k_1_1[] = "[1, 1]/({})";
 static const char __pyx_k_RIF[] = "RIF";
-static const char __pyx_k__10[] = "^";
-static const char __pyx_k__11[] = "({})^{}";
-static const char __pyx_k__14[] = "{} + {}";
+static const char __pyx_k__10[] = "({})/({})";
+static const char __pyx_k__11[] = "-({})";
+static const char __pyx_k__12[] = "^";
+static const char __pyx_k__13[] = "({})^{}";
+static const char __pyx_k__16[] = "{} + {}";
+static const char __pyx_k_abs[] = "abs";
 static const char __pyx_k_all[] = "__all__";
+static const char __pyx_k_cos[] = "cos";
 static const char __pyx_k_doc[] = "__doc__";
+static const char __pyx_k_exp[] = "exp";
 static const char __pyx_k_key[] = "key";
+static const char __pyx_k_log[] = "log";
+static const char __pyx_k_map[] = "map";
 static const char __pyx_k_mul[] = "mul";
 static const char __pyx_k_neg[] = "neg";
 static const char __pyx_k_obj[] = "obj";
 static const char __pyx_k_one[] = "one";
+static const char __pyx_k_sin[] = "sin";
 static const char __pyx_k_args[] = "args";
 static const char __pyx_k_expn[] = "expn";
 static const char __pyx_k_init[] = "__init__";
@@ -1877,6 +1924,7 @@ static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_sage[] = "sage";
 static const char __pyx_k_self[] = "self";
 static const char __pyx_k_send[] = "send";
+static const char __pyx_k_sqrt[] = "sqrt((";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_zero[] = "zero";
 static const char __pyx_k_close[] = "close";
@@ -1894,6 +1942,7 @@ static const char __pyx_k_module[] = "__module__";
 static const char __pyx_k_name_2[] = "name";
 static const char __pyx_k_reduce[] = "reduce";
 static const char __pyx_k_sorted[] = "sorted";
+static const char __pyx_k_sqrt_2[] = "sqrt";
 static const char __pyx_k_symbol[] = "symbol";
 static const char __pyx_k_varmap[] = "varmap";
 static const char __pyx_k_context[] = "context";
@@ -1917,6 +1966,7 @@ static const char __pyx_k_TypeError[] = "TypeError";
 static const char __pyx_k_endpoints[] = "endpoints";
 static const char __pyx_k_enumerate[] = "enumerate";
 static const char __pyx_k_ex_op_neg[] = "ex = {}, op = {}, neg = {}";
+static const char __pyx_k_func_name[] = "func_name";
 static const char __pyx_k_functools[] = "functools";
 static const char __pyx_k_itertools[] = "itertools";
 static const char __pyx_k_metaclass[] = "__metaclass__";
@@ -1930,6 +1980,7 @@ static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_OrderedDict[] = "OrderedDict";
 static const char __pyx_k_TaylorModel[] = "TaylorModel";
 static const char __pyx_k_collections[] = "collections";
+static const char __pyx_k_composition[] = "composition";
 static const char __pyx_k_coefficients[] = "coefficients";
 static const char __pyx_k_staticmethod[] = "staticmethod";
 static const char __pyx_k_use_fake_div[] = "use_fake_div";
@@ -1958,6 +2009,7 @@ static const char __pyx_k_TaylorModelExpander_symbol[] = "TaylorModelExpander.sy
 static const char __pyx_k_vs_should_be_a_valid_varmap[] = "vs should be a valid varmap!";
 static const char __pyx_k_FlowstarConverter_arithmetic[] = "FlowstarConverter.arithmetic";
 static const char __pyx_k_TaylorModelExpander_pyobject[] = "TaylorModelExpander.pyobject";
+static const char __pyx_k_FlowstarConverter_composition[] = "FlowstarConverter.composition";
 static const char __pyx_k_TaylorModelExpander_arithmetic[] = "TaylorModelExpander.arithmetic";
 static const char __pyx_k_Expands_an_arbitrary_expression[] = "Expands an arbitrary expression (in sage's SR) into a TaylorModel for \n    use with flow*.\n    \n    Works by walking sage's expression tree and expanding individual operations\n    http://sporadic.stanford.edu/reference/calculus/sage/symbolic/expression_conversions.html.\n\n    Only supports polynomials, rational functions, and the most common\n    elementary functions.\n    ";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
@@ -1966,6 +2018,7 @@ static const char __pyx_k_self_cutoff_threshold_self_domai[] = "self.cutoff_thre
 static const char __pyx_k_Expands_an_arbitrary_expression_2[] = "Expands an arbitrary expression (in sage's SR) into a flowstar string expression.\n    \n    Works by walking sage's expression tree and expanding individual operations\n    http://sporadic.stanford.edu/reference/calculus/sage/symbolic/expression_conversions.html.\n\n    Only supports polynomials, rational functions, and the most common\n    elementary functions.\n    ";
 static PyObject *__pyx_kp_u_0_0;
 static PyObject *__pyx_kp_u_1_1;
+static PyObject *__pyx_kp_u_2;
 static PyObject *__pyx_n_s_Converter;
 static PyObject *__pyx_kp_s_Expands_an_arbitrary_expression;
 static PyObject *__pyx_kp_s_Expands_an_arbitrary_expression_2;
@@ -1974,6 +2027,7 @@ static PyObject *__pyx_n_s_FlowstarConverter;
 static PyObject *__pyx_n_u_FlowstarConverter;
 static PyObject *__pyx_n_s_FlowstarConverter___init;
 static PyObject *__pyx_n_s_FlowstarConverter_arithmetic;
+static PyObject *__pyx_n_s_FlowstarConverter_composition;
 static PyObject *__pyx_n_s_FlowstarConverter_pyobject;
 static PyObject *__pyx_n_s_FlowstarConverter_symbol;
 static PyObject *__pyx_kp_u_Need_to_implement_this;
@@ -1996,7 +2050,9 @@ static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_kp_u__10;
 static PyObject *__pyx_kp_u__11;
-static PyObject *__pyx_kp_u__14;
+static PyObject *__pyx_kp_u__12;
+static PyObject *__pyx_kp_u__13;
+static PyObject *__pyx_kp_u__16;
 static PyObject *__pyx_n_s__3;
 static PyObject *__pyx_kp_u__3;
 static PyObject *__pyx_kp_u__4;
@@ -2005,6 +2061,7 @@ static PyObject *__pyx_kp_u__6;
 static PyObject *__pyx_kp_u__7;
 static PyObject *__pyx_kp_u__8;
 static PyObject *__pyx_kp_u__9;
+static PyObject *__pyx_n_u_abs;
 static PyObject *__pyx_n_s_all;
 static PyObject *__pyx_n_s_args;
 static PyObject *__pyx_n_s_arithmetic;
@@ -2013,7 +2070,9 @@ static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_close;
 static PyObject *__pyx_n_s_coefficients;
 static PyObject *__pyx_n_s_collections;
+static PyObject *__pyx_n_s_composition;
 static PyObject *__pyx_n_s_context;
+static PyObject *__pyx_n_u_cos;
 static PyObject *__pyx_n_s_cutoff_threshold;
 static PyObject *__pyx_n_s_doc;
 static PyObject *__pyx_n_s_domain;
@@ -2022,12 +2081,14 @@ static PyObject *__pyx_n_s_endpoints;
 static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_ex;
 static PyObject *__pyx_kp_u_ex_op_neg;
+static PyObject *__pyx_n_u_exp;
 static PyObject *__pyx_n_s_expn;
 static PyObject *__pyx_n_s_flowstar_taylormodel;
 static PyObject *__pyx_kp_s_flowstar_taylormodel_pyx;
 static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_from_constant;
 static PyObject *__pyx_n_s_from_var;
+static PyObject *__pyx_n_s_func_name;
 static PyObject *__pyx_n_s_functools;
 static PyObject *__pyx_n_s_genexpr;
 static PyObject *__pyx_n_s_getstate;
@@ -2041,7 +2102,9 @@ static PyObject *__pyx_n_s_key;
 static PyObject *__pyx_n_s_keys;
 static PyObject *__pyx_n_s_local_t;
 static PyObject *__pyx_n_u_local_t;
+static PyObject *__pyx_n_u_log;
 static PyObject *__pyx_n_s_main;
+static PyObject *__pyx_n_s_map;
 static PyObject *__pyx_n_s_metaclass;
 static PyObject *__pyx_n_s_module;
 static PyObject *__pyx_n_s_mul;
@@ -2080,7 +2143,10 @@ static PyObject *__pyx_n_s_send;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_sg;
+static PyObject *__pyx_n_u_sin;
 static PyObject *__pyx_n_s_sorted;
+static PyObject *__pyx_kp_u_sqrt;
+static PyObject *__pyx_n_u_sqrt_2;
 static PyObject *__pyx_n_s_staticmethod;
 static PyObject *__pyx_n_s_symbol;
 static PyObject *__pyx_n_s_test;
@@ -2111,7 +2177,8 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_19TaylorModelExpander_6arithme
 static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_varmap); /* proto */
 static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_2symbol(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self, PyObject *__pyx_v_ex); /* proto */
 static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_4pyobject(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_ex, PyObject *__pyx_v_obj); /* proto */
-static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmetic(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_ex, PyObject *__pyx_v_op); /* proto */
+static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6composition(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_ex, PyObject *__pyx_v_op); /* proto */
+static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_8arithmetic(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_ex, PyObject *__pyx_v_op); /* proto */
 static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_v_self, PyObject *__pyx_v_remainder, PyObject *__pyx_v_varmap, PyObject *__pyx_v_args); /* proto */
 static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9var_names___get__(struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9to_varmap_genexpr(PyObject *__pyx_self); /* proto */
@@ -2135,12 +2202,11 @@ static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_neg_1;
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
-static PyObject *__pyx_tuple__12;
-static PyObject *__pyx_tuple__13;
+static PyObject *__pyx_tuple__14;
 static PyObject *__pyx_tuple__15;
-static PyObject *__pyx_tuple__16;
 static PyObject *__pyx_tuple__17;
 static PyObject *__pyx_tuple__18;
+static PyObject *__pyx_tuple__19;
 static PyObject *__pyx_tuple__20;
 static PyObject *__pyx_tuple__22;
 static PyObject *__pyx_tuple__24;
@@ -2151,7 +2217,8 @@ static PyObject *__pyx_tuple__32;
 static PyObject *__pyx_tuple__34;
 static PyObject *__pyx_tuple__36;
 static PyObject *__pyx_tuple__38;
-static PyObject *__pyx_codeobj__19;
+static PyObject *__pyx_tuple__40;
+static PyObject *__pyx_tuple__42;
 static PyObject *__pyx_codeobj__21;
 static PyObject *__pyx_codeobj__23;
 static PyObject *__pyx_codeobj__25;
@@ -2162,6 +2229,8 @@ static PyObject *__pyx_codeobj__33;
 static PyObject *__pyx_codeobj__35;
 static PyObject *__pyx_codeobj__37;
 static PyObject *__pyx_codeobj__39;
+static PyObject *__pyx_codeobj__41;
+static PyObject *__pyx_codeobj__43;
 /* Late includes */
 
 /* "flowstar/taylormodel.pyx":41
@@ -4499,7 +4568,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_4pyobject(
  *         else:
  *             raise NotImplementedError             # <<<<<<<<<<<<<<
  * 
- *     def arithmetic(self, ex, op):
+ *     def composition(self, ex, op):
  */
   /*else*/ {
     __Pyx_Raise(__pyx_builtin_NotImplementedError, 0, 0, 0);
@@ -4532,15 +4601,381 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_4pyobject(
 /* "flowstar/taylormodel.pyx":158
  *             raise NotImplementedError
  * 
+ *     def composition(self, ex, op):             # <<<<<<<<<<<<<<
+ *         func_name = repr(op)
+ *         x, = map(self, ex.operands())
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7composition(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_7composition = {"composition", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7composition, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7composition(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_self = 0;
+  PyObject *__pyx_v_ex = 0;
+  PyObject *__pyx_v_op = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("composition (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_self,&__pyx_n_s_ex,&__pyx_n_s_op,0};
+    PyObject* values[3] = {0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_self)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ex)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("composition", 1, 3, 3, 1); __PYX_ERR(0, 158, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_op)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("composition", 1, 3, 3, 2); __PYX_ERR(0, 158, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "composition") < 0)) __PYX_ERR(0, 158, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+    }
+    __pyx_v_self = values[0];
+    __pyx_v_ex = values[1];
+    __pyx_v_op = values[2];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("composition", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 158, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("flowstar.taylormodel.FlowstarConverter.composition", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6composition(__pyx_self, __pyx_v_self, __pyx_v_ex, __pyx_v_op);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6composition(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_ex, PyObject *__pyx_v_op) {
+  PyObject *__pyx_v_func_name = NULL;
+  PyObject *__pyx_v_x = NULL;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *(*__pyx_t_4)(PyObject *);
+  int __pyx_t_5;
+  Py_ssize_t __pyx_t_6;
+  Py_UCS4 __pyx_t_7;
+  int __pyx_t_8;
+  __Pyx_RefNannySetupContext("composition", 0);
+
+  /* "flowstar/taylormodel.pyx":159
+ * 
+ *     def composition(self, ex, op):
+ *         func_name = repr(op)             # <<<<<<<<<<<<<<
+ *         x, = map(self, ex.operands())
+ * 
+ */
+  __pyx_t_1 = PyObject_Repr(__pyx_v_op); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_func_name = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "flowstar/taylormodel.pyx":160
+ *     def composition(self, ex, op):
+ *         func_name = repr(op)
+ *         x, = map(self, ex.operands())             # <<<<<<<<<<<<<<
+ * 
+ *         if func_name == 'abs':
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_ex, __pyx_n_s_operands); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_INCREF(__pyx_v_self);
+  __Pyx_GIVEREF(__pyx_v_self);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_self);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
+    PyObject* sequence = __pyx_t_1;
+    Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
+    if (unlikely(size != 1)) {
+      if (size > 1) __Pyx_RaiseTooManyValuesError(1);
+      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
+      __PYX_ERR(0, 160, __pyx_L1_error)
+    }
+    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    if (likely(PyTuple_CheckExact(sequence))) {
+      __pyx_t_2 = PyTuple_GET_ITEM(sequence, 0); 
+    } else {
+      __pyx_t_2 = PyList_GET_ITEM(sequence, 0); 
+    }
+    __Pyx_INCREF(__pyx_t_2);
+    #else
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    #endif
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  } else {
+    Py_ssize_t index = -1;
+    __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 160, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_4 = Py_TYPE(__pyx_t_3)->tp_iternext;
+    index = 0; __pyx_t_2 = __pyx_t_4(__pyx_t_3); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
+    __Pyx_GOTREF(__pyx_t_2);
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_4(__pyx_t_3), 1) < 0) __PYX_ERR(0, 160, __pyx_L1_error)
+    __pyx_t_4 = NULL;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    goto __pyx_L4_unpacking_done;
+    __pyx_L3_unpacking_failed:;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_4 = NULL;
+    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
+    __PYX_ERR(0, 160, __pyx_L1_error)
+    __pyx_L4_unpacking_done:;
+  }
+  __pyx_v_x = __pyx_t_2;
+  __pyx_t_2 = 0;
+
+  /* "flowstar/taylormodel.pyx":162
+ *         x, = map(self, ex.operands())
+ * 
+ *         if func_name == 'abs':             # <<<<<<<<<<<<<<
+ *             return f'sqrt(({x})^2)'
+ *         elif func_name in {'sin', 'cos', 'sqrt', 'exp', 'log'}:
+ */
+  __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_func_name, __pyx_n_u_abs, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 162, __pyx_L1_error)
+  if (__pyx_t_5) {
+
+    /* "flowstar/taylormodel.pyx":163
+ * 
+ *         if func_name == 'abs':
+ *             return f'sqrt(({x})^2)'             # <<<<<<<<<<<<<<
+ *         elif func_name in {'sin', 'cos', 'sqrt', 'exp', 'log'}:
+ *             return f'{func_name}({x})'
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_6 = 0;
+    __pyx_t_7 = 127;
+    __Pyx_INCREF(__pyx_kp_u_sqrt);
+    __pyx_t_6 += 6;
+    __Pyx_GIVEREF(__pyx_kp_u_sqrt);
+    PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_u_sqrt);
+    __pyx_t_2 = __Pyx_PyObject_FormatSimple(__pyx_v_x, __pyx_empty_unicode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_7 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) > __pyx_t_7) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) : __pyx_t_7;
+    __pyx_t_6 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
+    __Pyx_GIVEREF(__pyx_t_2);
+    PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
+    __pyx_t_2 = 0;
+    __Pyx_INCREF(__pyx_kp_u_2);
+    __pyx_t_6 += 4;
+    __Pyx_GIVEREF(__pyx_kp_u_2);
+    PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_kp_u_2);
+    __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_1, 3, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 163, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_r = __pyx_t_2;
+    __pyx_t_2 = 0;
+    goto __pyx_L0;
+
+    /* "flowstar/taylormodel.pyx":162
+ *         x, = map(self, ex.operands())
+ * 
+ *         if func_name == 'abs':             # <<<<<<<<<<<<<<
+ *             return f'sqrt(({x})^2)'
+ *         elif func_name in {'sin', 'cos', 'sqrt', 'exp', 'log'}:
+ */
+  }
+
+  /* "flowstar/taylormodel.pyx":164
+ *         if func_name == 'abs':
+ *             return f'sqrt(({x})^2)'
+ *         elif func_name in {'sin', 'cos', 'sqrt', 'exp', 'log'}:             # <<<<<<<<<<<<<<
+ *             return f'{func_name}({x})'
+ *         else:
+ */
+  __Pyx_INCREF(__pyx_v_func_name);
+  __pyx_t_2 = __pyx_v_func_name;
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_t_2, __pyx_n_u_sin, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (!__pyx_t_8) {
+  } else {
+    __pyx_t_5 = __pyx_t_8;
+    goto __pyx_L6_bool_binop_done;
+  }
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_t_2, __pyx_n_u_cos, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (!__pyx_t_8) {
+  } else {
+    __pyx_t_5 = __pyx_t_8;
+    goto __pyx_L6_bool_binop_done;
+  }
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_t_2, __pyx_n_u_sqrt_2, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (!__pyx_t_8) {
+  } else {
+    __pyx_t_5 = __pyx_t_8;
+    goto __pyx_L6_bool_binop_done;
+  }
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_t_2, __pyx_n_u_exp, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (!__pyx_t_8) {
+  } else {
+    __pyx_t_5 = __pyx_t_8;
+    goto __pyx_L6_bool_binop_done;
+  }
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_t_2, __pyx_n_u_log, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 164, __pyx_L1_error)
+  __pyx_t_5 = __pyx_t_8;
+  __pyx_L6_bool_binop_done:;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_8 = (__pyx_t_5 != 0);
+  if (likely(__pyx_t_8)) {
+
+    /* "flowstar/taylormodel.pyx":165
+ *             return f'sqrt(({x})^2)'
+ *         elif func_name in {'sin', 'cos', 'sqrt', 'exp', 'log'}:
+ *             return f'{func_name}({x})'             # <<<<<<<<<<<<<<
+ *         else:
+ *             raise NotImplementedError()
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __pyx_t_2 = PyTuple_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_6 = 0;
+    __pyx_t_7 = 127;
+    __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_func_name, __pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_7 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_1) > __pyx_t_7) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_1) : __pyx_t_7;
+    __pyx_t_6 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_1);
+    __Pyx_GIVEREF(__pyx_t_1);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
+    __pyx_t_1 = 0;
+    __Pyx_INCREF(__pyx_kp_u__6);
+    __pyx_t_6 += 1;
+    __Pyx_GIVEREF(__pyx_kp_u__6);
+    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_kp_u__6);
+    __pyx_t_1 = __Pyx_PyObject_FormatSimple(__pyx_v_x, __pyx_empty_unicode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_7 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_1) > __pyx_t_7) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_1) : __pyx_t_7;
+    __pyx_t_6 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_1);
+    __Pyx_GIVEREF(__pyx_t_1);
+    PyTuple_SET_ITEM(__pyx_t_2, 2, __pyx_t_1);
+    __pyx_t_1 = 0;
+    __Pyx_INCREF(__pyx_kp_u__7);
+    __pyx_t_6 += 1;
+    __Pyx_GIVEREF(__pyx_kp_u__7);
+    PyTuple_SET_ITEM(__pyx_t_2, 3, __pyx_kp_u__7);
+    __pyx_t_1 = __Pyx_PyUnicode_Join(__pyx_t_2, 4, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_r = __pyx_t_1;
+    __pyx_t_1 = 0;
+    goto __pyx_L0;
+
+    /* "flowstar/taylormodel.pyx":164
+ *         if func_name == 'abs':
+ *             return f'sqrt(({x})^2)'
+ *         elif func_name in {'sin', 'cos', 'sqrt', 'exp', 'log'}:             # <<<<<<<<<<<<<<
+ *             return f'{func_name}({x})'
+ *         else:
+ */
+  }
+
+  /* "flowstar/taylormodel.pyx":167
+ *             return f'{func_name}({x})'
+ *         else:
+ *             raise NotImplementedError()             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  /*else*/ {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_builtin_NotImplementedError); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_Raise(__pyx_t_1, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __PYX_ERR(0, 167, __pyx_L1_error)
+  }
+
+  /* "flowstar/taylormodel.pyx":158
+ *             raise NotImplementedError
+ * 
+ *     def composition(self, ex, op):             # <<<<<<<<<<<<<<
+ *         func_name = repr(op)
+ *         x, = map(self, ex.operands())
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_AddTraceback("flowstar.taylormodel.FlowstarConverter.composition", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_func_name);
+  __Pyx_XDECREF(__pyx_v_x);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "flowstar/taylormodel.pyx":170
+ * 
+ * 
  *     def arithmetic(self, ex, op):             # <<<<<<<<<<<<<<
  *         op_table = arithmetic_operators
  *         op_table[operator.neg] = 'neg'
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7arithmetic(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_7arithmetic = {"arithmetic", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7arithmetic, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7arithmetic(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_9arithmetic(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_9arithmetic = {"arithmetic", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_9arithmetic, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_9arithmetic(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
   PyObject *__pyx_v_ex = 0;
   PyObject *__pyx_v_op = 0;
@@ -4572,17 +5007,17 @@ static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7arithmeti
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ex)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("arithmetic", 1, 3, 3, 1); __PYX_ERR(0, 158, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("arithmetic", 1, 3, 3, 1); __PYX_ERR(0, 170, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_op)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("arithmetic", 1, 3, 3, 2); __PYX_ERR(0, 158, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("arithmetic", 1, 3, 3, 2); __PYX_ERR(0, 170, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "arithmetic") < 0)) __PYX_ERR(0, 158, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "arithmetic") < 0)) __PYX_ERR(0, 170, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -4597,20 +5032,20 @@ static PyObject *__pyx_pw_8flowstar_11taylormodel_17FlowstarConverter_7arithmeti
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("arithmetic", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 158, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("arithmetic", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 170, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.taylormodel.FlowstarConverter.arithmetic", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmetic(__pyx_self, __pyx_v_self, __pyx_v_ex, __pyx_v_op);
+  __pyx_r = __pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_8arithmetic(__pyx_self, __pyx_v_self, __pyx_v_ex, __pyx_v_op);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmetic(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_ex, PyObject *__pyx_v_op) {
+static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_8arithmetic(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_ex, PyObject *__pyx_v_op) {
   PyObject *__pyx_v_op_table = NULL;
   PyObject *__pyx_v_op_symb = NULL;
   PyObject *__pyx_v_operands = NULL;
@@ -4629,46 +5064,46 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
   int __pyx_t_9;
   __Pyx_RefNannySetupContext("arithmetic", 0);
 
-  /* "flowstar/taylormodel.pyx":159
+  /* "flowstar/taylormodel.pyx":171
  * 
  *     def arithmetic(self, ex, op):
  *         op_table = arithmetic_operators             # <<<<<<<<<<<<<<
  *         op_table[operator.neg] = 'neg'
  *         op_symb = op_table[op]
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_arithmetic_operators); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_arithmetic_operators); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_op_table = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":160
+  /* "flowstar/taylormodel.pyx":172
  *     def arithmetic(self, ex, op):
  *         op_table = arithmetic_operators
  *         op_table[operator.neg] = 'neg'             # <<<<<<<<<<<<<<
  *         op_symb = op_table[op]
  *         operands = [self(operand) for operand in ex.operands()]
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_operator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_operator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_neg); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_neg); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (unlikely(PyObject_SetItem(__pyx_v_op_table, __pyx_t_2, __pyx_n_u_neg) < 0)) __PYX_ERR(0, 160, __pyx_L1_error)
+  if (unlikely(PyObject_SetItem(__pyx_v_op_table, __pyx_t_2, __pyx_n_u_neg) < 0)) __PYX_ERR(0, 172, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "flowstar/taylormodel.pyx":161
+  /* "flowstar/taylormodel.pyx":173
  *         op_table = arithmetic_operators
  *         op_table[operator.neg] = 'neg'
  *         op_symb = op_table[op]             # <<<<<<<<<<<<<<
  *         operands = [self(operand) for operand in ex.operands()]
  *         # print("ex = {}, op = {}, op_symb = {}, operands = {}".format(
  */
-  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_op_table, __pyx_v_op); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_op_table, __pyx_v_op); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_op_symb = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "flowstar/taylormodel.pyx":162
+  /* "flowstar/taylormodel.pyx":174
  *         op_table[operator.neg] = 'neg'
  *         op_symb = op_table[op]
  *         operands = [self(operand) for operand in ex.operands()]             # <<<<<<<<<<<<<<
@@ -4676,9 +5111,9 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  *         #     repr(ex), repr(op), repr(op_symb), repr(operands)))
  */
   { /* enter inner scope */
-    __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 162, __pyx_L5_error)
+    __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 174, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_ex, __pyx_n_s_operands); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 162, __pyx_L5_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_ex, __pyx_n_s_operands); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_4 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -4692,16 +5127,16 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
     }
     __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L5_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 174, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
       __pyx_t_3 = __pyx_t_1; __Pyx_INCREF(__pyx_t_3); __pyx_t_5 = 0;
       __pyx_t_6 = NULL;
     } else {
-      __pyx_t_5 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 162, __pyx_L5_error)
+      __pyx_t_5 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 174, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_6 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 162, __pyx_L5_error)
+      __pyx_t_6 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 174, __pyx_L5_error)
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     for (;;) {
@@ -4709,17 +5144,17 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
         if (likely(PyList_CheckExact(__pyx_t_3))) {
           if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 162, __pyx_L5_error)
+          __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 174, __pyx_L5_error)
           #else
-          __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L5_error)
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 174, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_1);
           #endif
         } else {
           if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 162, __pyx_L5_error)
+          __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_5); __Pyx_INCREF(__pyx_t_1); __pyx_t_5++; if (unlikely(0 < 0)) __PYX_ERR(0, 174, __pyx_L5_error)
           #else
-          __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L5_error)
+          __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 174, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_1);
           #endif
         }
@@ -4729,7 +5164,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 162, __pyx_L5_error)
+            else __PYX_ERR(0, 174, __pyx_L5_error)
           }
           break;
         }
@@ -4750,10 +5185,10 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
       }
       __pyx_t_1 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_7, __pyx_8genexpr1__pyx_v_operand) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_8genexpr1__pyx_v_operand);
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L5_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 174, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_1))) __PYX_ERR(0, 162, __pyx_L5_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_1))) __PYX_ERR(0, 174, __pyx_L5_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -4767,17 +5202,17 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
   __pyx_v_operands = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "flowstar/taylormodel.pyx":166
+  /* "flowstar/taylormodel.pyx":178
  *         #     repr(ex), repr(op), repr(op_symb), repr(operands)))
  * 
  *         if op_symb == "*":             # <<<<<<<<<<<<<<
  *             return '*'.join(operands)
  *         elif op_symb == "+":
  */
-  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__3, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__3, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 178, __pyx_L1_error)
   if (__pyx_t_8) {
 
-    /* "flowstar/taylormodel.pyx":167
+    /* "flowstar/taylormodel.pyx":179
  * 
  *         if op_symb == "*":
  *             return '*'.join(operands)             # <<<<<<<<<<<<<<
@@ -4785,13 +5220,13 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  *             return ' + '.join(operands)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyUnicode_Join(__pyx_kp_u__3, __pyx_v_operands); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __pyx_t_2 = PyUnicode_Join(__pyx_kp_u__3, __pyx_v_operands); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "flowstar/taylormodel.pyx":166
+    /* "flowstar/taylormodel.pyx":178
  *         #     repr(ex), repr(op), repr(op_symb), repr(operands)))
  * 
  *         if op_symb == "*":             # <<<<<<<<<<<<<<
@@ -4800,17 +5235,17 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
   }
 
-  /* "flowstar/taylormodel.pyx":168
+  /* "flowstar/taylormodel.pyx":180
  *         if op_symb == "*":
  *             return '*'.join(operands)
  *         elif op_symb == "+":             # <<<<<<<<<<<<<<
  *             return ' + '.join(operands)
  *         elif op_symb == "/":
  */
-  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__4, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__4, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 180, __pyx_L1_error)
   if (__pyx_t_8) {
 
-    /* "flowstar/taylormodel.pyx":169
+    /* "flowstar/taylormodel.pyx":181
  *             return '*'.join(operands)
  *         elif op_symb == "+":
  *             return ' + '.join(operands)             # <<<<<<<<<<<<<<
@@ -4818,13 +5253,13 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  *             assert len(operands) == 2
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyUnicode_Join(__pyx_kp_u__6, __pyx_v_operands); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 169, __pyx_L1_error)
+    __pyx_t_2 = PyUnicode_Join(__pyx_kp_u__8, __pyx_v_operands); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "flowstar/taylormodel.pyx":168
+    /* "flowstar/taylormodel.pyx":180
  *         if op_symb == "*":
  *             return '*'.join(operands)
  *         elif op_symb == "+":             # <<<<<<<<<<<<<<
@@ -4833,17 +5268,17 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
   }
 
-  /* "flowstar/taylormodel.pyx":170
+  /* "flowstar/taylormodel.pyx":182
  *         elif op_symb == "+":
  *             return ' + '.join(operands)
  *         elif op_symb == "/":             # <<<<<<<<<<<<<<
  *             assert len(operands) == 2
  *             return '({})/({})'.format(*operands)
  */
-  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__7, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__9, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 182, __pyx_L1_error)
   if (__pyx_t_8) {
 
-    /* "flowstar/taylormodel.pyx":171
+    /* "flowstar/taylormodel.pyx":183
  *             return ' + '.join(operands)
  *         elif op_symb == "/":
  *             assert len(operands) == 2             # <<<<<<<<<<<<<<
@@ -4852,15 +5287,15 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      __pyx_t_5 = PyList_GET_SIZE(__pyx_v_operands); if (unlikely(__pyx_t_5 == ((Py_ssize_t)-1))) __PYX_ERR(0, 171, __pyx_L1_error)
+      __pyx_t_5 = PyList_GET_SIZE(__pyx_v_operands); if (unlikely(__pyx_t_5 == ((Py_ssize_t)-1))) __PYX_ERR(0, 183, __pyx_L1_error)
       if (unlikely(!((__pyx_t_5 == 2) != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 171, __pyx_L1_error)
+        __PYX_ERR(0, 183, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":172
+    /* "flowstar/taylormodel.pyx":184
  *         elif op_symb == "/":
  *             assert len(operands) == 2
  *             return '({})/({})'.format(*operands)             # <<<<<<<<<<<<<<
@@ -4868,11 +5303,11 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  *             assert len(operands) == 1
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__8, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__10, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PySequence_Tuple(__pyx_v_operands); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_3 = PySequence_Tuple(__pyx_v_operands); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 184, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 184, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -4880,7 +5315,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "flowstar/taylormodel.pyx":170
+    /* "flowstar/taylormodel.pyx":182
  *         elif op_symb == "+":
  *             return ' + '.join(operands)
  *         elif op_symb == "/":             # <<<<<<<<<<<<<<
@@ -4889,17 +5324,17 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
   }
 
-  /* "flowstar/taylormodel.pyx":173
+  /* "flowstar/taylormodel.pyx":185
  *             assert len(operands) == 2
  *             return '({})/({})'.format(*operands)
  *         elif op_symb == "neg":             # <<<<<<<<<<<<<<
  *             assert len(operands) == 1
  *             return '-({})'.format(operands[0])
  */
-  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_n_u_neg, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_n_u_neg, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 185, __pyx_L1_error)
   if (__pyx_t_8) {
 
-    /* "flowstar/taylormodel.pyx":174
+    /* "flowstar/taylormodel.pyx":186
  *             return '({})/({})'.format(*operands)
  *         elif op_symb == "neg":
  *             assert len(operands) == 1             # <<<<<<<<<<<<<<
@@ -4908,15 +5343,15 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      __pyx_t_5 = PyList_GET_SIZE(__pyx_v_operands); if (unlikely(__pyx_t_5 == ((Py_ssize_t)-1))) __PYX_ERR(0, 174, __pyx_L1_error)
+      __pyx_t_5 = PyList_GET_SIZE(__pyx_v_operands); if (unlikely(__pyx_t_5 == ((Py_ssize_t)-1))) __PYX_ERR(0, 186, __pyx_L1_error)
       if (unlikely(!((__pyx_t_5 == 1) != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 174, __pyx_L1_error)
+        __PYX_ERR(0, 186, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":175
+    /* "flowstar/taylormodel.pyx":187
  *         elif op_symb == "neg":
  *             assert len(operands) == 1
  *             return '-({})'.format(operands[0])             # <<<<<<<<<<<<<<
@@ -4924,9 +5359,9 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  *             assert len(operands) == 2
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__9, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__11, __pyx_n_s_format); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 187, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_operands, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_operands, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 187, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_4 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -4941,14 +5376,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
     __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 175, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 187, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "flowstar/taylormodel.pyx":173
+    /* "flowstar/taylormodel.pyx":185
  *             assert len(operands) == 2
  *             return '({})/({})'.format(*operands)
  *         elif op_symb == "neg":             # <<<<<<<<<<<<<<
@@ -4957,17 +5392,17 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
   }
 
-  /* "flowstar/taylormodel.pyx":176
+  /* "flowstar/taylormodel.pyx":188
  *             assert len(operands) == 1
  *             return '-({})'.format(operands[0])
  *         elif op_symb == "^":             # <<<<<<<<<<<<<<
  *             assert len(operands) == 2
  *             expn = ex.operands()[1]
  */
-  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__10, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 176, __pyx_L1_error)
+  __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_op_symb, __pyx_kp_u__12, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 188, __pyx_L1_error)
   if (likely(__pyx_t_8)) {
 
-    /* "flowstar/taylormodel.pyx":177
+    /* "flowstar/taylormodel.pyx":189
  *             return '-({})'.format(operands[0])
  *         elif op_symb == "^":
  *             assert len(operands) == 2             # <<<<<<<<<<<<<<
@@ -4976,22 +5411,22 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      __pyx_t_5 = PyList_GET_SIZE(__pyx_v_operands); if (unlikely(__pyx_t_5 == ((Py_ssize_t)-1))) __PYX_ERR(0, 177, __pyx_L1_error)
+      __pyx_t_5 = PyList_GET_SIZE(__pyx_v_operands); if (unlikely(__pyx_t_5 == ((Py_ssize_t)-1))) __PYX_ERR(0, 189, __pyx_L1_error)
       if (unlikely(!((__pyx_t_5 == 2) != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 177, __pyx_L1_error)
+        __PYX_ERR(0, 189, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":178
+    /* "flowstar/taylormodel.pyx":190
  *         elif op_symb == "^":
  *             assert len(operands) == 2
  *             expn = ex.operands()[1]             # <<<<<<<<<<<<<<
  *             # assert isinstance(expn, )
  *             if expn == -1:
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_ex, __pyx_n_s_operands); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_ex, __pyx_n_s_operands); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 190, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_2 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -5005,29 +5440,29 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
     }
     __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 178, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 190, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_1, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_1, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 190, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_expn = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "flowstar/taylormodel.pyx":180
+    /* "flowstar/taylormodel.pyx":192
  *             expn = ex.operands()[1]
  *             # assert isinstance(expn, )
  *             if expn == -1:             # <<<<<<<<<<<<<<
  *                 # Flowstar seems to cope much better with a fraction than a negative
  *                 # power
  */
-    __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_v_expn, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 180, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_v_expn, __pyx_int_neg_1, -1L, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 192, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 180, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 192, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (__pyx_t_8) {
 
-      /* "flowstar/taylormodel.pyx":183
+      /* "flowstar/taylormodel.pyx":195
  *                 # Flowstar seems to cope much better with a fraction than a negative
  *                 # power
  *                 return "[1, 1]/({})".format(operands[0])             # <<<<<<<<<<<<<<
@@ -5035,9 +5470,9 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  *                 # We had better hope that the exponent is some king of number
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u_1_1, __pyx_n_s_format); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 183, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u_1_1, __pyx_n_s_format); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_operands, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 183, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_operands, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __pyx_t_4 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -5052,14 +5487,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
       __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_4, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2);
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 183, __pyx_L1_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 195, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __pyx_r = __pyx_t_3;
       __pyx_t_3 = 0;
       goto __pyx_L0;
 
-      /* "flowstar/taylormodel.pyx":180
+      /* "flowstar/taylormodel.pyx":192
  *             expn = ex.operands()[1]
  *             # assert isinstance(expn, )
  *             if expn == -1:             # <<<<<<<<<<<<<<
@@ -5068,7 +5503,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
     }
 
-    /* "flowstar/taylormodel.pyx":186
+    /* "flowstar/taylormodel.pyx":198
  *             else:
  *                 # We had better hope that the exponent is some king of number
  *                 return '({})^{}'.format(operands[0], expn)             # <<<<<<<<<<<<<<
@@ -5077,9 +5512,9 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
     /*else*/ {
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__11, __pyx_n_s_format); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__13, __pyx_n_s_format); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 198, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_operands, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 186, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_operands, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __pyx_t_4 = NULL;
       __pyx_t_9 = 0;
@@ -5096,7 +5531,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_1)) {
         PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_2, __pyx_v_expn};
-        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 186, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 198, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5105,14 +5540,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
         PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_2, __pyx_v_expn};
-        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 186, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 198, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       } else
       #endif
       {
-        __pyx_t_7 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 186, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 198, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         if (__pyx_t_4) {
           __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -5123,7 +5558,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
         __Pyx_GIVEREF(__pyx_v_expn);
         PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_9, __pyx_v_expn);
         __pyx_t_2 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 186, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 198, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
@@ -5133,7 +5568,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
       goto __pyx_L0;
     }
 
-    /* "flowstar/taylormodel.pyx":176
+    /* "flowstar/taylormodel.pyx":188
  *             assert len(operands) == 1
  *             return '-({})'.format(operands[0])
  *         elif op_symb == "^":             # <<<<<<<<<<<<<<
@@ -5142,7 +5577,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
   }
 
-  /* "flowstar/taylormodel.pyx":188
+  /* "flowstar/taylormodel.pyx":200
  *                 return '({})^{}'.format(operands[0], expn)
  *         else:
  *             raise NotImplementedError             # <<<<<<<<<<<<<<
@@ -5151,11 +5586,11 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
  */
   /*else*/ {
     __Pyx_Raise(__pyx_builtin_NotImplementedError, 0, 0, 0);
-    __PYX_ERR(0, 188, __pyx_L1_error)
+    __PYX_ERR(0, 200, __pyx_L1_error)
   }
 
-  /* "flowstar/taylormodel.pyx":158
- *             raise NotImplementedError
+  /* "flowstar/taylormodel.pyx":170
+ * 
  * 
  *     def arithmetic(self, ex, op):             # <<<<<<<<<<<<<<
  *         op_table = arithmetic_operators
@@ -5182,7 +5617,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_17FlowstarConverter_6arithmeti
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":205
+/* "flowstar/taylormodel.pyx":217
  *     #     return sage.RIF(res.inf(), res.sup())
  * 
  *     def __cinit__(TaylorModel self, *args, remainder=None, varmap=None):             # <<<<<<<<<<<<<<
@@ -5230,7 +5665,7 @@ static int __pyx_pw_8flowstar_11taylormodel_11TaylorModel_1__cinit__(PyObject *_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, 0, "__cinit__") < 0)) __PYX_ERR(0, 205, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, 0, "__cinit__") < 0)) __PYX_ERR(0, 217, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) < 0) {
       goto __pyx_L5_argtuple_error;
@@ -5241,7 +5676,7 @@ static int __pyx_pw_8flowstar_11taylormodel_11TaylorModel_1__cinit__(PyObject *_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 0, 0, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 205, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 0, 0, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 217, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_args); __pyx_v_args = 0;
   __Pyx_AddTraceback("flowstar.taylormodel.TaylorModel.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -5276,7 +5711,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
   __Pyx_INCREF(__pyx_v_remainder);
   __Pyx_INCREF(__pyx_v_varmap);
 
-  /* "flowstar/taylormodel.pyx":207
+  /* "flowstar/taylormodel.pyx":219
  *     def __cinit__(TaylorModel self, *args, remainder=None, varmap=None):
  *         cdef vector[Interval] coeffs
  *         cdef Interval zero = Interval()             # <<<<<<<<<<<<<<
@@ -5285,26 +5720,26 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
   __pyx_v_zero = flowstar::Interval();
 
-  /* "flowstar/taylormodel.pyx":209
+  /* "flowstar/taylormodel.pyx":221
  *         cdef Interval zero = Interval()
  * 
  *         if len(args) == 0:             # <<<<<<<<<<<<<<
  *             expr = [0]*len(varmap)
  *         if len(args) > 0:
  */
-  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 221, __pyx_L1_error)
   __pyx_t_2 = ((__pyx_t_1 == 0) != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/taylormodel.pyx":210
+    /* "flowstar/taylormodel.pyx":222
  * 
  *         if len(args) == 0:
  *             expr = [0]*len(varmap)             # <<<<<<<<<<<<<<
  *         if len(args) > 0:
  *             expr = args[0]
  */
-    __pyx_t_1 = PyObject_Length(__pyx_v_varmap); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 210, __pyx_L1_error)
-    __pyx_t_3 = PyList_New(1 * ((__pyx_t_1<0) ? 0:__pyx_t_1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+    __pyx_t_1 = PyObject_Length(__pyx_v_varmap); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 222, __pyx_L1_error)
+    __pyx_t_3 = PyList_New(1 * ((__pyx_t_1<0) ? 0:__pyx_t_1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     { Py_ssize_t __pyx_temp;
       for (__pyx_temp=0; __pyx_temp < __pyx_t_1; __pyx_temp++) {
@@ -5316,7 +5751,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
     __pyx_v_expr = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "flowstar/taylormodel.pyx":209
+    /* "flowstar/taylormodel.pyx":221
  *         cdef Interval zero = Interval()
  * 
  *         if len(args) == 0:             # <<<<<<<<<<<<<<
@@ -5325,30 +5760,30 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
   }
 
-  /* "flowstar/taylormodel.pyx":211
+  /* "flowstar/taylormodel.pyx":223
  *         if len(args) == 0:
  *             expr = [0]*len(varmap)
  *         if len(args) > 0:             # <<<<<<<<<<<<<<
  *             expr = args[0]
  *         if len(args) > 1:
  */
-  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 223, __pyx_L1_error)
   __pyx_t_2 = ((__pyx_t_1 > 0) != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/taylormodel.pyx":212
+    /* "flowstar/taylormodel.pyx":224
  *             expr = [0]*len(varmap)
  *         if len(args) > 0:
  *             expr = args[0]             # <<<<<<<<<<<<<<
  *         if len(args) > 1:
  *             assert remainder is None
  */
-    __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 224, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_XDECREF_SET(__pyx_v_expr, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/taylormodel.pyx":211
+    /* "flowstar/taylormodel.pyx":223
  *         if len(args) == 0:
  *             expr = [0]*len(varmap)
  *         if len(args) > 0:             # <<<<<<<<<<<<<<
@@ -5357,18 +5792,18 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
   }
 
-  /* "flowstar/taylormodel.pyx":213
+  /* "flowstar/taylormodel.pyx":225
  *         if len(args) > 0:
  *             expr = args[0]
  *         if len(args) > 1:             # <<<<<<<<<<<<<<
  *             assert remainder is None
  *             remainder = args[1]
  */
-  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 225, __pyx_L1_error)
   __pyx_t_2 = ((__pyx_t_1 > 1) != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/taylormodel.pyx":214
+    /* "flowstar/taylormodel.pyx":226
  *             expr = args[0]
  *         if len(args) > 1:
  *             assert remainder is None             # <<<<<<<<<<<<<<
@@ -5380,24 +5815,24 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
       __pyx_t_2 = (__pyx_v_remainder == Py_None);
       if (unlikely(!(__pyx_t_2 != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 214, __pyx_L1_error)
+        __PYX_ERR(0, 226, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":215
+    /* "flowstar/taylormodel.pyx":227
  *         if len(args) > 1:
  *             assert remainder is None
  *             remainder = args[1]             # <<<<<<<<<<<<<<
  *         if len(args) > 2:
  *             assert varmap is None
  */
-    __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 227, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF_SET(__pyx_v_remainder, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/taylormodel.pyx":213
+    /* "flowstar/taylormodel.pyx":225
  *         if len(args) > 0:
  *             expr = args[0]
  *         if len(args) > 1:             # <<<<<<<<<<<<<<
@@ -5406,18 +5841,18 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
   }
 
-  /* "flowstar/taylormodel.pyx":216
+  /* "flowstar/taylormodel.pyx":228
  *             assert remainder is None
  *             remainder = args[1]
  *         if len(args) > 2:             # <<<<<<<<<<<<<<
  *             assert varmap is None
  *             varmap = args[2]
  */
-  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 216, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_GET_SIZE(__pyx_v_args); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 228, __pyx_L1_error)
   __pyx_t_2 = ((__pyx_t_1 > 2) != 0);
   if (__pyx_t_2) {
 
-    /* "flowstar/taylormodel.pyx":217
+    /* "flowstar/taylormodel.pyx":229
  *             remainder = args[1]
  *         if len(args) > 2:
  *             assert varmap is None             # <<<<<<<<<<<<<<
@@ -5429,24 +5864,24 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
       __pyx_t_2 = (__pyx_v_varmap == Py_None);
       if (unlikely(!(__pyx_t_2 != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 217, __pyx_L1_error)
+        __PYX_ERR(0, 229, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":218
+    /* "flowstar/taylormodel.pyx":230
  *         if len(args) > 2:
  *             assert varmap is None
  *             varmap = args[2]             # <<<<<<<<<<<<<<
  * 
  *         if remainder is None:
  */
-    __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 218, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 230, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF_SET(__pyx_v_varmap, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/taylormodel.pyx":216
+    /* "flowstar/taylormodel.pyx":228
  *             assert remainder is None
  *             remainder = args[1]
  *         if len(args) > 2:             # <<<<<<<<<<<<<<
@@ -5455,7 +5890,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
   }
 
-  /* "flowstar/taylormodel.pyx":220
+  /* "flowstar/taylormodel.pyx":232
  *             varmap = args[2]
  * 
  *         if remainder is None:             # <<<<<<<<<<<<<<
@@ -5466,16 +5901,16 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
   __pyx_t_4 = (__pyx_t_2 != 0);
   if (__pyx_t_4) {
 
-    /* "flowstar/taylormodel.pyx":221
+    /* "flowstar/taylormodel.pyx":233
  * 
  *         if remainder is None:
  *             remainder = sg.RIF(0)             # <<<<<<<<<<<<<<
  *         cdef Interval c_remainder = make_interval(remainder)
  *         self.varmap = TaylorModel.to_varmap(varmap)
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_sg); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 221, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_sg); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 233, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_RIF); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 221, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_RIF); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 233, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -5490,13 +5925,13 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
     }
     __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_5, __pyx_int_0) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_int_0);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 221, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 233, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF_SET(__pyx_v_remainder, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "flowstar/taylormodel.pyx":220
+    /* "flowstar/taylormodel.pyx":232
  *             varmap = args[2]
  * 
  *         if remainder is None:             # <<<<<<<<<<<<<<
@@ -5505,7 +5940,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
   }
 
-  /* "flowstar/taylormodel.pyx":222
+  /* "flowstar/taylormodel.pyx":234
  *         if remainder is None:
  *             remainder = sg.RIF(0)
  *         cdef Interval c_remainder = make_interval(remainder)             # <<<<<<<<<<<<<<
@@ -5514,14 +5949,14 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
   __pyx_v_c_remainder = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_remainder);
 
-  /* "flowstar/taylormodel.pyx":223
+  /* "flowstar/taylormodel.pyx":235
  *             remainder = sg.RIF(0)
  *         cdef Interval c_remainder = make_interval(remainder)
  *         self.varmap = TaylorModel.to_varmap(varmap)             # <<<<<<<<<<<<<<
  * 
  *         if isinstance(expr, list):
  */
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_5 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_6))) {
@@ -5535,68 +5970,68 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
   }
   __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_5, __pyx_v_varmap) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_v_varmap);
   __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 223, __pyx_L1_error)
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (!(likely(PyDict_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "dict", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 223, __pyx_L1_error)
+  if (!(likely(PyDict_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "dict", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_3);
   __Pyx_GOTREF(__pyx_v_self->varmap);
   __Pyx_DECREF(__pyx_v_self->varmap);
   __pyx_v_self->varmap = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "flowstar/taylormodel.pyx":225
+  /* "flowstar/taylormodel.pyx":237
  *         self.varmap = TaylorModel.to_varmap(varmap)
  * 
  *         if isinstance(expr, list):             # <<<<<<<<<<<<<<
  *             # if we have a missing, implicit time variable
  *             if len(expr) + 1 == len(self.varmap):
  */
-  if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 225, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 237, __pyx_L1_error) }
   __pyx_t_4 = PyList_Check(__pyx_v_expr); 
   __pyx_t_2 = (__pyx_t_4 != 0);
   if (likely(__pyx_t_2)) {
 
-    /* "flowstar/taylormodel.pyx":227
+    /* "flowstar/taylormodel.pyx":239
  *         if isinstance(expr, list):
  *             # if we have a missing, implicit time variable
  *             if len(expr) + 1 == len(self.varmap):             # <<<<<<<<<<<<<<
  *                 expr = [0] + expr
  *             assert(len(expr) == len(self.varmap))
  */
-    if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 227, __pyx_L1_error) }
-    __pyx_t_1 = PyObject_Length(__pyx_v_expr); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 227, __pyx_L1_error)
+    if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 239, __pyx_L1_error) }
+    __pyx_t_1 = PyObject_Length(__pyx_v_expr); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 239, __pyx_L1_error)
     __pyx_t_3 = __pyx_v_self->varmap;
     __Pyx_INCREF(__pyx_t_3);
     if (unlikely(__pyx_t_3 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-      __PYX_ERR(0, 227, __pyx_L1_error)
+      __PYX_ERR(0, 239, __pyx_L1_error)
     }
-    __pyx_t_7 = PyDict_Size(__pyx_t_3); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_7 = PyDict_Size(__pyx_t_3); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 239, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_2 = (((__pyx_t_1 + 1) == __pyx_t_7) != 0);
     if (__pyx_t_2) {
 
-      /* "flowstar/taylormodel.pyx":228
+      /* "flowstar/taylormodel.pyx":240
  *             # if we have a missing, implicit time variable
  *             if len(expr) + 1 == len(self.varmap):
  *                 expr = [0] + expr             # <<<<<<<<<<<<<<
  *             assert(len(expr) == len(self.varmap))
  *             for coeff in expr:
  */
-      __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 228, __pyx_L1_error)
+      __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 240, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_INCREF(__pyx_int_0);
       __Pyx_GIVEREF(__pyx_int_0);
       PyList_SET_ITEM(__pyx_t_3, 0, __pyx_int_0);
-      if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 228, __pyx_L1_error) }
-      __pyx_t_6 = PyNumber_Add(__pyx_t_3, __pyx_v_expr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 228, __pyx_L1_error)
+      if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 240, __pyx_L1_error) }
+      __pyx_t_6 = PyNumber_Add(__pyx_t_3, __pyx_v_expr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 240, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_XDECREF_SET(__pyx_v_expr, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "flowstar/taylormodel.pyx":227
+      /* "flowstar/taylormodel.pyx":239
  *         if isinstance(expr, list):
  *             # if we have a missing, implicit time variable
  *             if len(expr) + 1 == len(self.varmap):             # <<<<<<<<<<<<<<
@@ -5605,7 +6040,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
     }
 
-    /* "flowstar/taylormodel.pyx":229
+    /* "flowstar/taylormodel.pyx":241
  *             if len(expr) + 1 == len(self.varmap):
  *                 expr = [0] + expr
  *             assert(len(expr) == len(self.varmap))             # <<<<<<<<<<<<<<
@@ -5614,55 +6049,55 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 229, __pyx_L1_error) }
-      __pyx_t_7 = PyObject_Length(__pyx_v_expr); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 229, __pyx_L1_error)
+      if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 241, __pyx_L1_error) }
+      __pyx_t_7 = PyObject_Length(__pyx_v_expr); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 241, __pyx_L1_error)
       __pyx_t_6 = __pyx_v_self->varmap;
       __Pyx_INCREF(__pyx_t_6);
       if (unlikely(__pyx_t_6 == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-        __PYX_ERR(0, 229, __pyx_L1_error)
+        __PYX_ERR(0, 241, __pyx_L1_error)
       }
-      __pyx_t_1 = PyDict_Size(__pyx_t_6); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 229, __pyx_L1_error)
+      __pyx_t_1 = PyDict_Size(__pyx_t_6); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 241, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       if (unlikely(!((__pyx_t_7 == __pyx_t_1) != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 229, __pyx_L1_error)
+        __PYX_ERR(0, 241, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":230
+    /* "flowstar/taylormodel.pyx":242
  *                 expr = [0] + expr
  *             assert(len(expr) == len(self.varmap))
  *             for coeff in expr:             # <<<<<<<<<<<<<<
  *                 coeffs.push_back(make_interval(coeff))
  *             self.c_tm = CTaylorModel(coeffs, c_remainder)
  */
-    if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 230, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_expr)) { __Pyx_RaiseUnboundLocalError("expr"); __PYX_ERR(0, 242, __pyx_L1_error) }
     if (likely(PyList_CheckExact(__pyx_v_expr)) || PyTuple_CheckExact(__pyx_v_expr)) {
       __pyx_t_6 = __pyx_v_expr; __Pyx_INCREF(__pyx_t_6); __pyx_t_1 = 0;
       __pyx_t_8 = NULL;
     } else {
-      __pyx_t_1 = -1; __pyx_t_6 = PyObject_GetIter(__pyx_v_expr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 230, __pyx_L1_error)
+      __pyx_t_1 = -1; __pyx_t_6 = PyObject_GetIter(__pyx_v_expr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 242, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_8 = Py_TYPE(__pyx_t_6)->tp_iternext; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 230, __pyx_L1_error)
+      __pyx_t_8 = Py_TYPE(__pyx_t_6)->tp_iternext; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 242, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_8)) {
         if (likely(PyList_CheckExact(__pyx_t_6))) {
           if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_6)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_6, __pyx_t_1); __Pyx_INCREF(__pyx_t_3); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 230, __pyx_L1_error)
+          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_6, __pyx_t_1); __Pyx_INCREF(__pyx_t_3); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 242, __pyx_L1_error)
           #else
-          __pyx_t_3 = PySequence_ITEM(__pyx_t_6, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 230, __pyx_L1_error)
+          __pyx_t_3 = PySequence_ITEM(__pyx_t_6, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           #endif
         } else {
           if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_6)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_6, __pyx_t_1); __Pyx_INCREF(__pyx_t_3); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 230, __pyx_L1_error)
+          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_6, __pyx_t_1); __Pyx_INCREF(__pyx_t_3); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 242, __pyx_L1_error)
           #else
-          __pyx_t_3 = PySequence_ITEM(__pyx_t_6, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 230, __pyx_L1_error)
+          __pyx_t_3 = PySequence_ITEM(__pyx_t_6, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           #endif
         }
@@ -5672,7 +6107,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 230, __pyx_L1_error)
+            else __PYX_ERR(0, 242, __pyx_L1_error)
           }
           break;
         }
@@ -5681,7 +6116,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
       __Pyx_XDECREF_SET(__pyx_v_coeff, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "flowstar/taylormodel.pyx":231
+      /* "flowstar/taylormodel.pyx":243
  *             assert(len(expr) == len(self.varmap))
  *             for coeff in expr:
  *                 coeffs.push_back(make_interval(coeff))             # <<<<<<<<<<<<<<
@@ -5692,10 +6127,10 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
         __pyx_v_coeffs.push_back(__pyx_f_8flowstar_8interval_make_interval(__pyx_v_coeff));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 231, __pyx_L1_error)
+        __PYX_ERR(0, 243, __pyx_L1_error)
       }
 
-      /* "flowstar/taylormodel.pyx":230
+      /* "flowstar/taylormodel.pyx":242
  *                 expr = [0] + expr
  *             assert(len(expr) == len(self.varmap))
  *             for coeff in expr:             # <<<<<<<<<<<<<<
@@ -5705,7 +6140,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "flowstar/taylormodel.pyx":232
+    /* "flowstar/taylormodel.pyx":244
  *             for coeff in expr:
  *                 coeffs.push_back(make_interval(coeff))
  *             self.c_tm = CTaylorModel(coeffs, c_remainder)             # <<<<<<<<<<<<<<
@@ -5714,7 +6149,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  */
     __pyx_v_self->c_tm = flowstar::TaylorModel(__pyx_v_coeffs, __pyx_v_c_remainder);
 
-    /* "flowstar/taylormodel.pyx":225
+    /* "flowstar/taylormodel.pyx":237
  *         self.varmap = TaylorModel.to_varmap(varmap)
  * 
  *         if isinstance(expr, list):             # <<<<<<<<<<<<<<
@@ -5724,7 +6159,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
     goto __pyx_L8;
   }
 
-  /* "flowstar/taylormodel.pyx":234
+  /* "flowstar/taylormodel.pyx":246
  *             self.c_tm = CTaylorModel(coeffs, c_remainder)
  *         else:
  *             raise NotImplementedError("Need to implement this!")             # <<<<<<<<<<<<<<
@@ -5732,15 +6167,15 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
  *     @property
  */
   /*else*/ {
-    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_NotImplementedError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 234, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_NotImplementedError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_Raise(__pyx_t_6, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __PYX_ERR(0, 234, __pyx_L1_error)
+    __PYX_ERR(0, 246, __pyx_L1_error)
   }
   __pyx_L8:;
 
-  /* "flowstar/taylormodel.pyx":205
+  /* "flowstar/taylormodel.pyx":217
  *     #     return sage.RIF(res.inf(), res.sup())
  * 
  *     def __cinit__(TaylorModel self, *args, remainder=None, varmap=None):             # <<<<<<<<<<<<<<
@@ -5766,7 +6201,7 @@ static int __pyx_pf_8flowstar_11taylormodel_11TaylorModel___cinit__(struct __pyx
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":237
+/* "flowstar/taylormodel.pyx":249
  * 
  *     @property
  *     def var_names(self):             # <<<<<<<<<<<<<<
@@ -5801,7 +6236,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9var_names___get
   int __pyx_t_8;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "flowstar/taylormodel.pyx":238
+  /* "flowstar/taylormodel.pyx":250
  *     @property
  *     def var_names(self):
  *         return [k for k in self.varmap.keys()             # <<<<<<<<<<<<<<
@@ -5810,14 +6245,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9var_names___get
  */
   __Pyx_XDECREF(__pyx_r);
   { /* enter inner scope */
-    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 238, __pyx_L5_error)
+    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 250, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_3 = 0;
     if (unlikely(__pyx_v_self->varmap == Py_None)) {
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-      __PYX_ERR(0, 238, __pyx_L5_error)
+      __PYX_ERR(0, 250, __pyx_L5_error)
     }
-    __pyx_t_6 = __Pyx_dict_iterator(__pyx_v_self->varmap, 1, __pyx_n_s_keys, (&__pyx_t_4), (&__pyx_t_5)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 238, __pyx_L5_error)
+    __pyx_t_6 = __Pyx_dict_iterator(__pyx_v_self->varmap, 1, __pyx_n_s_keys, (&__pyx_t_4), (&__pyx_t_5)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 250, __pyx_L5_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_2);
     __pyx_t_2 = __pyx_t_6;
@@ -5825,31 +6260,31 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9var_names___get
     while (1) {
       __pyx_t_7 = __Pyx_dict_iter_next(__pyx_t_2, __pyx_t_4, &__pyx_t_3, &__pyx_t_6, NULL, NULL, __pyx_t_5);
       if (unlikely(__pyx_t_7 == 0)) break;
-      if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 238, __pyx_L5_error)
+      if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 250, __pyx_L5_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_XDECREF_SET(__pyx_8genexpr2__pyx_v_k, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "flowstar/taylormodel.pyx":239
+      /* "flowstar/taylormodel.pyx":251
  *     def var_names(self):
  *         return [k for k in self.varmap.keys()
  *                   if k != 'local_t']             # <<<<<<<<<<<<<<
  * 
  *     @staticmethod
  */
-      __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_8genexpr2__pyx_v_k, __pyx_n_u_local_t, Py_NE)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 239, __pyx_L5_error)
+      __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_8genexpr2__pyx_v_k, __pyx_n_u_local_t, Py_NE)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 251, __pyx_L5_error)
       if (__pyx_t_8) {
 
-        /* "flowstar/taylormodel.pyx":238
+        /* "flowstar/taylormodel.pyx":250
  *     @property
  *     def var_names(self):
  *         return [k for k in self.varmap.keys()             # <<<<<<<<<<<<<<
  *                   if k != 'local_t']
  * 
  */
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_8genexpr2__pyx_v_k))) __PYX_ERR(0, 238, __pyx_L5_error)
+        if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_8genexpr2__pyx_v_k))) __PYX_ERR(0, 250, __pyx_L5_error)
 
-        /* "flowstar/taylormodel.pyx":239
+        /* "flowstar/taylormodel.pyx":251
  *     def var_names(self):
  *         return [k for k in self.varmap.keys()
  *                   if k != 'local_t']             # <<<<<<<<<<<<<<
@@ -5870,7 +6305,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9var_names___get
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/taylormodel.pyx":237
+  /* "flowstar/taylormodel.pyx":249
  * 
  *     @property
  *     def var_names(self):             # <<<<<<<<<<<<<<
@@ -5892,7 +6327,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9var_names___get
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":242
+/* "flowstar/taylormodel.pyx":254
  * 
  *     @staticmethod
  *     def to_varmap(vs):             # <<<<<<<<<<<<<<
@@ -5927,7 +6362,7 @@ static PyObject *__pyx_pw_8flowstar_11taylormodel_11TaylorModel_3to_varmap(CYTHO
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "to_varmap") < 0)) __PYX_ERR(0, 242, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "to_varmap") < 0)) __PYX_ERR(0, 254, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 1) {
       goto __pyx_L5_argtuple_error;
@@ -5938,7 +6373,7 @@ static PyObject *__pyx_pw_8flowstar_11taylormodel_11TaylorModel_3to_varmap(CYTHO
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("to_varmap", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 242, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("to_varmap", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 254, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.taylormodel.TaylorModel.to_varmap", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5952,7 +6387,7 @@ static PyObject *__pyx_pw_8flowstar_11taylormodel_11TaylorModel_3to_varmap(CYTHO
 }
 static PyObject *__pyx_gb_8flowstar_11taylormodel_11TaylorModel_9to_varmap_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "flowstar/taylormodel.pyx":245
+/* "flowstar/taylormodel.pyx":257
  *         if isinstance(vs, list):
  *             assert len(vs) > 0
  *             assert all(isinstance(v, str) for v in vs)             # <<<<<<<<<<<<<<
@@ -5969,7 +6404,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9to_varmap_genex
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 245, __pyx_L1_error)
+    __PYX_ERR(0, 257, __pyx_L1_error)
   } else {
     __Pyx_GOTREF(__pyx_cur_scope);
   }
@@ -5977,7 +6412,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_9to_varmap_genex
   __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_8flowstar_11taylormodel_11TaylorModel_9to_varmap_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_to_varmap_locals_genexpr, __pyx_n_s_flowstar_taylormodel); if (unlikely(!gen)) __PYX_ERR(0, 245, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_8flowstar_11taylormodel_11TaylorModel_9to_varmap_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_to_varmap_locals_genexpr, __pyx_n_s_flowstar_taylormodel); if (unlikely(!gen)) __PYX_ERR(0, 257, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -6012,32 +6447,32 @@ static PyObject *__pyx_gb_8flowstar_11taylormodel_11TaylorModel_9to_varmap_2gene
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 245, __pyx_L1_error)
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_vs)) { __Pyx_RaiseClosureNameError("vs"); __PYX_ERR(0, 245, __pyx_L1_error) }
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 257, __pyx_L1_error)
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_vs)) { __Pyx_RaiseClosureNameError("vs"); __PYX_ERR(0, 257, __pyx_L1_error) }
   if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_vs)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_vs)) {
     __pyx_t_1 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_vs; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
     __pyx_t_3 = NULL;
   } else {
-    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_vs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_vs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 257, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 245, __pyx_L1_error)
+    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 257, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_3)) {
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 245, __pyx_L1_error)
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 257, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 245, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 257, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       } else {
         if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 245, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 257, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 245, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 257, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       }
@@ -6047,7 +6482,7 @@ static PyObject *__pyx_gb_8flowstar_11taylormodel_11TaylorModel_9to_varmap_2gene
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 245, __pyx_L1_error)
+          else __PYX_ERR(0, 257, __pyx_L1_error)
         }
         break;
       }
@@ -6094,7 +6529,7 @@ static PyObject *__pyx_gb_8flowstar_11taylormodel_11TaylorModel_9to_varmap_2gene
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":242
+/* "flowstar/taylormodel.pyx":254
  * 
  *     @staticmethod
  *     def to_varmap(vs):             # <<<<<<<<<<<<<<
@@ -6124,7 +6559,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_8flowstar_11taylormodel___pyx_scope_struct__to_varmap *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 242, __pyx_L1_error)
+    __PYX_ERR(0, 254, __pyx_L1_error)
   } else {
     __Pyx_GOTREF(__pyx_cur_scope);
   }
@@ -6132,7 +6567,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
   __Pyx_INCREF(__pyx_cur_scope->__pyx_v_vs);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_vs);
 
-  /* "flowstar/taylormodel.pyx":243
+  /* "flowstar/taylormodel.pyx":255
  *     @staticmethod
  *     def to_varmap(vs):
  *         if isinstance(vs, list):             # <<<<<<<<<<<<<<
@@ -6146,7 +6581,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "flowstar/taylormodel.pyx":244
+    /* "flowstar/taylormodel.pyx":256
  *     def to_varmap(vs):
  *         if isinstance(vs, list):
  *             assert len(vs) > 0             # <<<<<<<<<<<<<<
@@ -6157,16 +6592,16 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
     if (unlikely(!Py_OptimizeFlag)) {
       __pyx_t_1 = __pyx_cur_scope->__pyx_v_vs;
       __Pyx_INCREF(__pyx_t_1);
-      __pyx_t_4 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 244, __pyx_L1_error)
+      __pyx_t_4 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 256, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       if (unlikely(!((__pyx_t_4 > 0) != 0))) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 244, __pyx_L1_error)
+        __PYX_ERR(0, 256, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":245
+    /* "flowstar/taylormodel.pyx":257
  *         if isinstance(vs, list):
  *             assert len(vs) > 0
  *             assert all(isinstance(v, str) for v in vs)             # <<<<<<<<<<<<<<
@@ -6175,38 +6610,38 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      __pyx_t_1 = __pyx_pf_8flowstar_11taylormodel_11TaylorModel_9to_varmap_genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)
+      __pyx_t_1 = __pyx_pf_8flowstar_11taylormodel_11TaylorModel_9to_varmap_genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 257, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_5 = __Pyx_Generator_Next(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 245, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_Generator_Next(__pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 257, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 245, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 257, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       if (unlikely(!__pyx_t_3)) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 245, __pyx_L1_error)
+        __PYX_ERR(0, 257, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "flowstar/taylormodel.pyx":247
+    /* "flowstar/taylormodel.pyx":259
  *             assert all(isinstance(v, str) for v in vs)
  *             # Add time variable, if not supplied
  *             vs = vs if 'local_t' in vs else ['local_t'] + vs             # <<<<<<<<<<<<<<
  *             return dict([(v, i) for i, v in enumerate(vs)])
  *         elif isinstance(vs, dict):
  */
-    __pyx_t_3 = (__Pyx_PySequence_ContainsTF(__pyx_n_u_local_t, __pyx_cur_scope->__pyx_v_vs, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 247, __pyx_L1_error)
+    __pyx_t_3 = (__Pyx_PySequence_ContainsTF(__pyx_n_u_local_t, __pyx_cur_scope->__pyx_v_vs, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 259, __pyx_L1_error)
     if ((__pyx_t_3 != 0)) {
       __Pyx_INCREF(__pyx_cur_scope->__pyx_v_vs);
       __pyx_t_5 = __pyx_cur_scope->__pyx_v_vs;
     } else {
-      __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
+      __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 259, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_INCREF(__pyx_n_u_local_t);
       __Pyx_GIVEREF(__pyx_n_u_local_t);
       PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_local_t);
-      __pyx_t_6 = PyNumber_Add(__pyx_t_1, __pyx_cur_scope->__pyx_v_vs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 247, __pyx_L1_error)
+      __pyx_t_6 = PyNumber_Add(__pyx_t_1, __pyx_cur_scope->__pyx_v_vs); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 259, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __pyx_t_5 = __pyx_t_6;
@@ -6217,7 +6652,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
     __Pyx_GIVEREF(__pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "flowstar/taylormodel.pyx":248
+    /* "flowstar/taylormodel.pyx":260
  *             # Add time variable, if not supplied
  *             vs = vs if 'local_t' in vs else ['local_t'] + vs
  *             return dict([(v, i) for i, v in enumerate(vs)])             # <<<<<<<<<<<<<<
@@ -6226,7 +6661,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
  */
     __Pyx_XDECREF(__pyx_r);
     { /* enter inner scope */
-      __pyx_t_5 = PyList_New(0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 248, __pyx_L6_error)
+      __pyx_t_5 = PyList_New(0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 260, __pyx_L6_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_INCREF(__pyx_int_0);
       __pyx_t_6 = __pyx_int_0;
@@ -6234,26 +6669,26 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
         __pyx_t_1 = __pyx_cur_scope->__pyx_v_vs; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
         __pyx_t_7 = NULL;
       } else {
-        __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_v_vs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 248, __pyx_L6_error)
+        __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_v_vs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 260, __pyx_L6_error)
         __Pyx_GOTREF(__pyx_t_1);
-        __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 248, __pyx_L6_error)
+        __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 260, __pyx_L6_error)
       }
       for (;;) {
         if (likely(!__pyx_t_7)) {
           if (likely(PyList_CheckExact(__pyx_t_1))) {
             if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
             #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-            __pyx_t_8 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 248, __pyx_L6_error)
+            __pyx_t_8 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 260, __pyx_L6_error)
             #else
-            __pyx_t_8 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 248, __pyx_L6_error)
+            __pyx_t_8 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L6_error)
             __Pyx_GOTREF(__pyx_t_8);
             #endif
           } else {
             if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
             #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-            __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 248, __pyx_L6_error)
+            __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_8); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 260, __pyx_L6_error)
             #else
-            __pyx_t_8 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 248, __pyx_L6_error)
+            __pyx_t_8 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L6_error)
             __Pyx_GOTREF(__pyx_t_8);
             #endif
           }
@@ -6263,7 +6698,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
             PyObject* exc_type = PyErr_Occurred();
             if (exc_type) {
               if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-              else __PYX_ERR(0, 248, __pyx_L6_error)
+              else __PYX_ERR(0, 260, __pyx_L6_error)
             }
             break;
           }
@@ -6273,12 +6708,12 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
         __pyx_t_8 = 0;
         __Pyx_INCREF(__pyx_t_6);
         __Pyx_XDECREF_SET(__pyx_8genexpr4__pyx_v_i, __pyx_t_6);
-        __pyx_t_8 = __Pyx_PyInt_AddObjC(__pyx_t_6, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 248, __pyx_L6_error)
+        __pyx_t_8 = __Pyx_PyInt_AddObjC(__pyx_t_6, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L6_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_DECREF(__pyx_t_6);
         __pyx_t_6 = __pyx_t_8;
         __pyx_t_8 = 0;
-        __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 248, __pyx_L6_error)
+        __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L6_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_INCREF(__pyx_8genexpr4__pyx_v_v);
         __Pyx_GIVEREF(__pyx_8genexpr4__pyx_v_v);
@@ -6286,7 +6721,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
         __Pyx_INCREF(__pyx_8genexpr4__pyx_v_i);
         __Pyx_GIVEREF(__pyx_8genexpr4__pyx_v_i);
         PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_8genexpr4__pyx_v_i);
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_5, (PyObject*)__pyx_t_8))) __PYX_ERR(0, 248, __pyx_L6_error)
+        if (unlikely(__Pyx_ListComp_Append(__pyx_t_5, (PyObject*)__pyx_t_8))) __PYX_ERR(0, 260, __pyx_L6_error)
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       }
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6300,14 +6735,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
       goto __pyx_L1_error;
       __pyx_L9_exit_scope:;
     } /* exit inner scope */
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyDict_Type)), __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyDict_Type)), __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 260, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_6;
     __pyx_t_6 = 0;
     goto __pyx_L0;
 
-    /* "flowstar/taylormodel.pyx":243
+    /* "flowstar/taylormodel.pyx":255
  *     @staticmethod
  *     def to_varmap(vs):
  *         if isinstance(vs, list):             # <<<<<<<<<<<<<<
@@ -6316,7 +6751,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
  */
   }
 
-  /* "flowstar/taylormodel.pyx":249
+  /* "flowstar/taylormodel.pyx":261
  *             vs = vs if 'local_t' in vs else ['local_t'] + vs
  *             return dict([(v, i) for i, v in enumerate(vs)])
  *         elif isinstance(vs, dict):             # <<<<<<<<<<<<<<
@@ -6330,32 +6765,32 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
   __pyx_t_2 = (__pyx_t_3 != 0);
   if (likely(__pyx_t_2)) {
 
-    /* "flowstar/taylormodel.pyx":252
+    /* "flowstar/taylormodel.pyx":264
  *             # As of python 3.6+, dicts remember insertion order
  *             # We resort the dict by keys, just incase
  *             items = (vs if   'local_t' in vs             # <<<<<<<<<<<<<<
  *                         else dict(local_t=0, **vs.items())).items()
  *             return dict(sorted(items, key=operator.itemgetter(1)))
  */
-    __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_n_u_local_t, __pyx_cur_scope->__pyx_v_vs, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 252, __pyx_L1_error)
+    __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_n_u_local_t, __pyx_cur_scope->__pyx_v_vs, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 264, __pyx_L1_error)
     if ((__pyx_t_2 != 0)) {
       __Pyx_INCREF(__pyx_cur_scope->__pyx_v_vs);
       __pyx_t_5 = __pyx_cur_scope->__pyx_v_vs;
     } else {
 
-      /* "flowstar/taylormodel.pyx":253
+      /* "flowstar/taylormodel.pyx":265
  *             # We resort the dict by keys, just incase
  *             items = (vs if   'local_t' in vs
  *                         else dict(local_t=0, **vs.items())).items()             # <<<<<<<<<<<<<<
  *             return dict(sorted(items, key=operator.itemgetter(1)))
  *         else:
  */
-      __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 253, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 265, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_local_t, __pyx_int_0) < 0) __PYX_ERR(0, 253, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_local_t, __pyx_int_0) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
       __pyx_t_1 = __pyx_t_8;
       __pyx_t_8 = 0;
-      __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_cur_scope->__pyx_v_vs, __pyx_n_s_items); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 253, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_cur_scope->__pyx_v_vs, __pyx_n_s_items); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 265, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       __pyx_t_10 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_9))) {
@@ -6369,22 +6804,22 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
       }
       __pyx_t_8 = (__pyx_t_10) ? __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_10) : __Pyx_PyObject_CallNoArg(__pyx_t_9);
       __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 253, __pyx_L1_error)
+      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 265, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       if (unlikely(__pyx_t_8 == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "argument after ** must be a mapping, not NoneType");
-        __PYX_ERR(0, 253, __pyx_L1_error)
+        __PYX_ERR(0, 265, __pyx_L1_error)
       }
-      if (__Pyx_MergeKeywords(__pyx_t_1, __pyx_t_8) < 0) __PYX_ERR(0, 253, __pyx_L1_error)
+      if (__Pyx_MergeKeywords(__pyx_t_1, __pyx_t_8) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_8 = __Pyx_PyObject_Call(((PyObject *)(&PyDict_Type)), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 253, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(((PyObject *)(&PyDict_Type)), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 265, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __pyx_t_5 = __pyx_t_8;
       __pyx_t_8 = 0;
     }
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_items); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 253, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_items); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -6399,13 +6834,13 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
     }
     __pyx_t_6 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 253, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __pyx_v_items = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "flowstar/taylormodel.pyx":254
+    /* "flowstar/taylormodel.pyx":266
  *             items = (vs if   'local_t' in vs
  *                         else dict(local_t=0, **vs.items())).items()
  *             return dict(sorted(items, key=operator.itemgetter(1)))             # <<<<<<<<<<<<<<
@@ -6413,16 +6848,16 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
  *             raise ValueError("vs should be a valid varmap!")
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_INCREF(__pyx_v_items);
     __Pyx_GIVEREF(__pyx_v_items);
     PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_v_items);
-    __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_operator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_operator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_itemgetter); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_itemgetter); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_1 = NULL;
@@ -6437,23 +6872,23 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
     }
     __pyx_t_5 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_9, __pyx_t_1, __pyx_int_1) : __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_int_1);
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 254, __pyx_L1_error)
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_key, __pyx_t_5) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_key, __pyx_t_5) < 0) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_sorted, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_sorted, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyDict_Type)), __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyDict_Type)), __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_8;
     __pyx_t_8 = 0;
     goto __pyx_L0;
 
-    /* "flowstar/taylormodel.pyx":249
+    /* "flowstar/taylormodel.pyx":261
  *             vs = vs if 'local_t' in vs else ['local_t'] + vs
  *             return dict([(v, i) for i, v in enumerate(vs)])
  *         elif isinstance(vs, dict):             # <<<<<<<<<<<<<<
@@ -6462,7 +6897,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
  */
   }
 
-  /* "flowstar/taylormodel.pyx":256
+  /* "flowstar/taylormodel.pyx":268
  *             return dict(sorted(items, key=operator.itemgetter(1)))
  *         else:
  *             raise ValueError("vs should be a valid varmap!")             # <<<<<<<<<<<<<<
@@ -6470,14 +6905,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
  *     @staticmethod
  */
   /*else*/ {
-    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 256, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 268, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_Raise(__pyx_t_8, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __PYX_ERR(0, 256, __pyx_L1_error)
+    __PYX_ERR(0, 268, __pyx_L1_error)
   }
 
-  /* "flowstar/taylormodel.pyx":242
+  /* "flowstar/taylormodel.pyx":254
  * 
  *     @staticmethod
  *     def to_varmap(vs):             # <<<<<<<<<<<<<<
@@ -6505,7 +6940,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_2to_varmap(PyObj
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":259
+/* "flowstar/taylormodel.pyx":271
  * 
  *     @staticmethod
  *     cdef TaylorModel from_taylor_model(CTaylorModel & tm, varmap):             # <<<<<<<<<<<<<<
@@ -6523,14 +6958,14 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_f_8flowstar_1
   __Pyx_RefNannySetupContext("from_taylor_model", 0);
   __Pyx_INCREF(__pyx_v_varmap);
 
-  /* "flowstar/taylormodel.pyx":260
+  /* "flowstar/taylormodel.pyx":272
  *     @staticmethod
  *     cdef TaylorModel from_taylor_model(CTaylorModel & tm, varmap):
  *         varmap = TaylorModel.to_varmap(varmap)             # <<<<<<<<<<<<<<
  *         cdef TaylorModel res = TaylorModel(varmap=varmap)
  *         res.c_tm = tm
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 260, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 272, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -6544,29 +6979,29 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_f_8flowstar_1
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_varmap) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_varmap);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 260, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 272, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF_SET(__pyx_v_varmap, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":261
+  /* "flowstar/taylormodel.pyx":273
  *     cdef TaylorModel from_taylor_model(CTaylorModel & tm, varmap):
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef TaylorModel res = TaylorModel(varmap=varmap)             # <<<<<<<<<<<<<<
  *         res.c_tm = tm
  *         return res
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 261, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_varmap, __pyx_v_varmap) < 0) __PYX_ERR(0, 261, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 261, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_varmap, __pyx_v_varmap) < 0) __PYX_ERR(0, 273, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_res = ((struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "flowstar/taylormodel.pyx":262
+  /* "flowstar/taylormodel.pyx":274
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef TaylorModel res = TaylorModel(varmap=varmap)
  *         res.c_tm = tm             # <<<<<<<<<<<<<<
@@ -6575,7 +7010,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_f_8flowstar_1
  */
   __pyx_v_res->c_tm = __pyx_v_tm;
 
-  /* "flowstar/taylormodel.pyx":263
+  /* "flowstar/taylormodel.pyx":275
  *         cdef TaylorModel res = TaylorModel(varmap=varmap)
  *         res.c_tm = tm
  *         return res             # <<<<<<<<<<<<<<
@@ -6587,7 +7022,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_f_8flowstar_1
   __pyx_r = __pyx_v_res;
   goto __pyx_L0;
 
-  /* "flowstar/taylormodel.pyx":259
+  /* "flowstar/taylormodel.pyx":271
  * 
  *     @staticmethod
  *     cdef TaylorModel from_taylor_model(CTaylorModel & tm, varmap):             # <<<<<<<<<<<<<<
@@ -6610,7 +7045,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_f_8flowstar_1
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":266
+/* "flowstar/taylormodel.pyx":278
  * 
  *     @staticmethod
  *     def from_var(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
@@ -6654,7 +7089,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pw_8flowstar_
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_varmap)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("from_var", 0, 2, 3, 1); __PYX_ERR(0, 266, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("from_var", 0, 2, 3, 1); __PYX_ERR(0, 278, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -6664,7 +7099,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pw_8flowstar_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "from_var") < 0)) __PYX_ERR(0, 266, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "from_var") < 0)) __PYX_ERR(0, 278, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -6682,7 +7117,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pw_8flowstar_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("from_var", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 266, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("from_var", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 278, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.taylormodel.TaylorModel.from_var", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6714,14 +7149,14 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   __Pyx_RefNannySetupContext("from_var", 0);
   __Pyx_INCREF(__pyx_v_varmap);
 
-  /* "flowstar/taylormodel.pyx":267
+  /* "flowstar/taylormodel.pyx":279
  *     @staticmethod
  *     def from_var(x, varmap, remainder=None) -> TaylorModel:
  *         varmap = TaylorModel.to_varmap(varmap)             # <<<<<<<<<<<<<<
  *         cdef vector[Interval] coefficients
  *         cdef Interval one = Interval(1.0)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 267, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 279, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -6735,13 +7170,13 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_varmap) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_varmap);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 267, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 279, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF_SET(__pyx_v_varmap, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":269
+  /* "flowstar/taylormodel.pyx":281
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef vector[Interval] coefficients
  *         cdef Interval one = Interval(1.0)             # <<<<<<<<<<<<<<
@@ -6750,7 +7185,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
   __pyx_v_one = flowstar::Interval(1.0);
 
-  /* "flowstar/taylormodel.pyx":270
+  /* "flowstar/taylormodel.pyx":282
  *         cdef vector[Interval] coefficients
  *         cdef Interval one = Interval(1.0)
  *         cdef Interval zero = Interval(0.0)             # <<<<<<<<<<<<<<
@@ -6759,20 +7194,20 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
   __pyx_v_zero = flowstar::Interval(0.0);
 
-  /* "flowstar/taylormodel.pyx":271
+  /* "flowstar/taylormodel.pyx":283
  *         cdef Interval one = Interval(1.0)
  *         cdef Interval zero = Interval(0.0)
  *         vname : str = x             # <<<<<<<<<<<<<<
  * 
  *         for name in varmap:
  */
-  if (!(likely(PyUnicode_CheckExact(__pyx_v_x))||((__pyx_v_x) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_v_x)->tp_name), 0))) __PYX_ERR(0, 271, __pyx_L1_error)
+  if (!(likely(PyUnicode_CheckExact(__pyx_v_x))||((__pyx_v_x) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_v_x)->tp_name), 0))) __PYX_ERR(0, 283, __pyx_L1_error)
   __pyx_t_1 = __pyx_v_x;
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_vname = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":273
+  /* "flowstar/taylormodel.pyx":285
  *         vname : str = x
  * 
  *         for name in varmap:             # <<<<<<<<<<<<<<
@@ -6783,26 +7218,26 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
     __pyx_t_1 = __pyx_v_varmap; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
   } else {
-    __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_varmap); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
+    __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_varmap); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 285, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 273, __pyx_L1_error)
+    __pyx_t_5 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 285, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_5)) {
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_2); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 273, __pyx_L1_error)
+        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_2); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 285, __pyx_L1_error)
         #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 273, __pyx_L1_error)
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 285, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         #endif
       } else {
         if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_2); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 273, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_2); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 285, __pyx_L1_error)
         #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 273, __pyx_L1_error)
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 285, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         #endif
       }
@@ -6812,7 +7247,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 273, __pyx_L1_error)
+          else __PYX_ERR(0, 285, __pyx_L1_error)
         }
         break;
       }
@@ -6821,17 +7256,17 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
     __Pyx_XDECREF_SET(__pyx_v_name, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "flowstar/taylormodel.pyx":274
+    /* "flowstar/taylormodel.pyx":286
  * 
  *         for name in varmap:
  *             if name == vname:             # <<<<<<<<<<<<<<
  *                 coefficients.push_back(one)
  *             else:
  */
-    __pyx_t_6 = (__Pyx_PyUnicode_Equals(__pyx_v_name, __pyx_v_vname, Py_EQ)); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 274, __pyx_L1_error)
+    __pyx_t_6 = (__Pyx_PyUnicode_Equals(__pyx_v_name, __pyx_v_vname, Py_EQ)); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 286, __pyx_L1_error)
     if (__pyx_t_6) {
 
-      /* "flowstar/taylormodel.pyx":275
+      /* "flowstar/taylormodel.pyx":287
  *         for name in varmap:
  *             if name == vname:
  *                 coefficients.push_back(one)             # <<<<<<<<<<<<<<
@@ -6842,10 +7277,10 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
         __pyx_v_coefficients.push_back(__pyx_v_one);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 275, __pyx_L1_error)
+        __PYX_ERR(0, 287, __pyx_L1_error)
       }
 
-      /* "flowstar/taylormodel.pyx":274
+      /* "flowstar/taylormodel.pyx":286
  * 
  *         for name in varmap:
  *             if name == vname:             # <<<<<<<<<<<<<<
@@ -6855,7 +7290,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
       goto __pyx_L5;
     }
 
-    /* "flowstar/taylormodel.pyx":277
+    /* "flowstar/taylormodel.pyx":289
  *                 coefficients.push_back(one)
  *             else:
  *                 coefficients.push_back(zero)             # <<<<<<<<<<<<<<
@@ -6867,12 +7302,12 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
         __pyx_v_coefficients.push_back(__pyx_v_zero);
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        __PYX_ERR(0, 277, __pyx_L1_error)
+        __PYX_ERR(0, 289, __pyx_L1_error)
       }
     }
     __pyx_L5:;
 
-    /* "flowstar/taylormodel.pyx":273
+    /* "flowstar/taylormodel.pyx":285
  *         vname : str = x
  * 
  *         for name in varmap:             # <<<<<<<<<<<<<<
@@ -6882,7 +7317,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":279
+  /* "flowstar/taylormodel.pyx":291
  *                 coefficients.push_back(zero)
  * 
  *         cdef CTaylorModel tm = CTaylorModel(coefficients)             # <<<<<<<<<<<<<<
@@ -6891,7 +7326,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
   __pyx_v_tm = flowstar::TaylorModel(__pyx_v_coefficients);
 
-  /* "flowstar/taylormodel.pyx":280
+  /* "flowstar/taylormodel.pyx":292
  * 
  *         cdef CTaylorModel tm = CTaylorModel(coefficients)
  *         if remainder is not None:             # <<<<<<<<<<<<<<
@@ -6902,7 +7337,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   __pyx_t_7 = (__pyx_t_6 != 0);
   if (__pyx_t_7) {
 
-    /* "flowstar/taylormodel.pyx":281
+    /* "flowstar/taylormodel.pyx":293
  *         cdef CTaylorModel tm = CTaylorModel(coefficients)
  *         if remainder is not None:
  *             tm.remainder = make_interval(remainder)             # <<<<<<<<<<<<<<
@@ -6911,7 +7346,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
     __pyx_v_tm.remainder = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_remainder);
 
-    /* "flowstar/taylormodel.pyx":280
+    /* "flowstar/taylormodel.pyx":292
  * 
  *         cdef CTaylorModel tm = CTaylorModel(coefficients)
  *         if remainder is not None:             # <<<<<<<<<<<<<<
@@ -6920,7 +7355,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
   }
 
-  /* "flowstar/taylormodel.pyx":283
+  /* "flowstar/taylormodel.pyx":295
  *             tm.remainder = make_interval(remainder)
  * 
  *         return TaylorModel.from_taylor_model(tm, varmap)             # <<<<<<<<<<<<<<
@@ -6928,13 +7363,13 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  *     @staticmethod
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __pyx_t_1 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_v_varmap)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 283, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_v_varmap)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = ((struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *)__pyx_t_1);
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/taylormodel.pyx":266
+  /* "flowstar/taylormodel.pyx":278
  * 
  *     @staticmethod
  *     def from_var(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
@@ -6958,7 +7393,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":286
+/* "flowstar/taylormodel.pyx":298
  * 
  *     @staticmethod
  *     def from_constant(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
@@ -7002,7 +7437,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pw_8flowstar_
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_varmap)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("from_constant", 0, 2, 3, 1); __PYX_ERR(0, 286, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("from_constant", 0, 2, 3, 1); __PYX_ERR(0, 298, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -7012,7 +7447,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pw_8flowstar_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "from_constant") < 0)) __PYX_ERR(0, 286, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "from_constant") < 0)) __PYX_ERR(0, 298, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -7030,7 +7465,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pw_8flowstar_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("from_constant", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 286, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("from_constant", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 298, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("flowstar.taylormodel.TaylorModel.from_constant", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -7057,14 +7492,14 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   __Pyx_RefNannySetupContext("from_constant", 0);
   __Pyx_INCREF(__pyx_v_varmap);
 
-  /* "flowstar/taylormodel.pyx":287
+  /* "flowstar/taylormodel.pyx":299
  *     @staticmethod
  *     def from_constant(x, varmap, remainder=None) -> TaylorModel:
  *         varmap = TaylorModel.to_varmap(varmap)             # <<<<<<<<<<<<<<
  *         cdef Interval x1 = make_interval(x)
  *         cdef CTaylorModel tm = CTaylorModel(x1, len(varmap))
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 287, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel), __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 299, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -7078,13 +7513,13 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_varmap) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_varmap);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 287, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 299, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF_SET(__pyx_v_varmap, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":288
+  /* "flowstar/taylormodel.pyx":300
  *     def from_constant(x, varmap, remainder=None) -> TaylorModel:
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef Interval x1 = make_interval(x)             # <<<<<<<<<<<<<<
@@ -7093,17 +7528,17 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
   __pyx_v_x1 = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_x);
 
-  /* "flowstar/taylormodel.pyx":289
+  /* "flowstar/taylormodel.pyx":301
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef Interval x1 = make_interval(x)
  *         cdef CTaylorModel tm = CTaylorModel(x1, len(varmap))             # <<<<<<<<<<<<<<
  *         if remainder is not None:
  *             tm.remainder = make_interval(remainder)
  */
-  __pyx_t_4 = PyObject_Length(__pyx_v_varmap); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 289, __pyx_L1_error)
+  __pyx_t_4 = PyObject_Length(__pyx_v_varmap); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 301, __pyx_L1_error)
   __pyx_v_tm = flowstar::TaylorModel(__pyx_v_x1, __pyx_t_4);
 
-  /* "flowstar/taylormodel.pyx":290
+  /* "flowstar/taylormodel.pyx":302
  *         cdef Interval x1 = make_interval(x)
  *         cdef CTaylorModel tm = CTaylorModel(x1, len(varmap))
  *         if remainder is not None:             # <<<<<<<<<<<<<<
@@ -7114,7 +7549,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   __pyx_t_6 = (__pyx_t_5 != 0);
   if (__pyx_t_6) {
 
-    /* "flowstar/taylormodel.pyx":291
+    /* "flowstar/taylormodel.pyx":303
  *         cdef CTaylorModel tm = CTaylorModel(x1, len(varmap))
  *         if remainder is not None:
  *             tm.remainder = make_interval(remainder)             # <<<<<<<<<<<<<<
@@ -7123,7 +7558,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
     __pyx_v_tm.remainder = __pyx_f_8flowstar_8interval_make_interval(__pyx_v_remainder);
 
-    /* "flowstar/taylormodel.pyx":290
+    /* "flowstar/taylormodel.pyx":302
  *         cdef Interval x1 = make_interval(x)
  *         cdef CTaylorModel tm = CTaylorModel(x1, len(varmap))
  *         if remainder is not None:             # <<<<<<<<<<<<<<
@@ -7132,7 +7567,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  */
   }
 
-  /* "flowstar/taylormodel.pyx":293
+  /* "flowstar/taylormodel.pyx":305
  *             tm.remainder = make_interval(remainder)
  * 
  *         return TaylorModel.from_taylor_model(tm, varmap)             # <<<<<<<<<<<<<<
@@ -7140,13 +7575,13 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
  *     def __repr__(self):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __pyx_t_1 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_v_varmap)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 293, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_v_varmap)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 305, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = ((struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *)__pyx_t_1);
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/taylormodel.pyx":286
+  /* "flowstar/taylormodel.pyx":298
  * 
  *     @staticmethod
  *     def from_constant(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
@@ -7168,7 +7603,7 @@ static struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *__pyx_pf_8flowstar_
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":295
+/* "flowstar/taylormodel.pyx":307
  *         return TaylorModel.from_taylor_model(tm, varmap)
  * 
  *     def __repr__(self):             # <<<<<<<<<<<<<<
@@ -7209,7 +7644,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   PyObject *__pyx_t_11 = NULL;
   __Pyx_RefNannySetupContext("__repr__", 0);
 
-  /* "flowstar/taylormodel.pyx":299
+  /* "flowstar/taylormodel.pyx":311
  *         # for (name, _) in sorted(self.vars.iteritems(), key=(lambda x: x[1])):
  *         #     print("name =", name)
  *         for var_name in self.varmap.keys():             # <<<<<<<<<<<<<<
@@ -7219,9 +7654,9 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   __pyx_t_2 = 0;
   if (unlikely(__pyx_v_self->varmap == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "keys");
-    __PYX_ERR(0, 299, __pyx_L1_error)
+    __PYX_ERR(0, 311, __pyx_L1_error)
   }
-  __pyx_t_5 = __Pyx_dict_iterator(__pyx_v_self->varmap, 1, __pyx_n_s_keys, (&__pyx_t_3), (&__pyx_t_4)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 299, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_dict_iterator(__pyx_v_self->varmap, 1, __pyx_n_s_keys, (&__pyx_t_3), (&__pyx_t_4)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_1);
   __pyx_t_1 = __pyx_t_5;
@@ -7229,19 +7664,19 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   while (1) {
     __pyx_t_6 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_3, &__pyx_t_2, &__pyx_t_5, NULL, NULL, __pyx_t_4);
     if (unlikely(__pyx_t_6 == 0)) break;
-    if (unlikely(__pyx_t_6 == -1)) __PYX_ERR(0, 299, __pyx_L1_error)
+    if (unlikely(__pyx_t_6 == -1)) __PYX_ERR(0, 311, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_XDECREF_SET(__pyx_v_var_name, __pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "flowstar/taylormodel.pyx":300
+    /* "flowstar/taylormodel.pyx":312
  *         #     print("name =", name)
  *         for var_name in self.varmap.keys():
  *             var_names.push_back(<string>var_name.encode('utf-8'))             # <<<<<<<<<<<<<<
  * 
  *         cdef string poly_str
  */
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_var_name, __pyx_n_s_encode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 300, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_var_name, __pyx_n_s_encode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 312, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_8 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
@@ -7255,21 +7690,21 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
     }
     __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_7, __pyx_t_8, __pyx_kp_u_utf_8) : __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_kp_u_utf_8);
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 300, __pyx_L1_error)
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 312, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_9 = __pyx_convert_string_from_py_std__in_string(__pyx_t_5); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 300, __pyx_L1_error)
+    __pyx_t_9 = __pyx_convert_string_from_py_std__in_string(__pyx_t_5); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 312, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     try {
       __pyx_v_var_names.push_back(((std::string)__pyx_t_9));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 300, __pyx_L1_error)
+      __PYX_ERR(0, 312, __pyx_L1_error)
     }
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":304
+  /* "flowstar/taylormodel.pyx":316
  *         cdef string poly_str
  *         cdef string interval_str
  *         self.c_tm.expansion.toString(poly_str, var_names)             # <<<<<<<<<<<<<<
@@ -7278,7 +7713,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
  */
   __pyx_v_self->c_tm.expansion.toString(__pyx_v_poly_str, __pyx_v_var_names);
 
-  /* "flowstar/taylormodel.pyx":305
+  /* "flowstar/taylormodel.pyx":317
  *         cdef string interval_str
  *         self.c_tm.expansion.toString(poly_str, var_names)
  *         self.c_tm.remainder.toString(interval_str)             # <<<<<<<<<<<<<<
@@ -7287,7 +7722,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
  */
   __pyx_v_self->c_tm.remainder.toString(__pyx_v_interval_str);
 
-  /* "flowstar/taylormodel.pyx":307
+  /* "flowstar/taylormodel.pyx":319
  *         self.c_tm.remainder.toString(interval_str)
  * 
  *         return "{} + {}".format(poly_str.decode('utf-8'),             # <<<<<<<<<<<<<<
@@ -7295,19 +7730,19 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__14, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 307, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_kp_u__16, __pyx_n_s_format); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_7 = __Pyx_decode_cpp_string(__pyx_v_poly_str, 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 307, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_decode_cpp_string(__pyx_v_poly_str, 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
 
-  /* "flowstar/taylormodel.pyx":308
+  /* "flowstar/taylormodel.pyx":320
  * 
  *         return "{} + {}".format(poly_str.decode('utf-8'),
  *                                 interval_str.decode('utf-8'))             # <<<<<<<<<<<<<<
  * 
  *     # cdef TaylorModel mul(TaylorModel self, TaylorModel other,
  */
-  __pyx_t_8 = __Pyx_decode_cpp_string(__pyx_v_interval_str, 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 308, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_decode_cpp_string(__pyx_v_interval_str, 0, PY_SSIZE_T_MAX, NULL, NULL, PyUnicode_DecodeUTF8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __pyx_t_10 = NULL;
   __pyx_t_4 = 0;
@@ -7324,7 +7759,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_5)) {
     PyObject *__pyx_temp[3] = {__pyx_t_10, __pyx_t_7, __pyx_t_8};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 307, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 319, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7334,7 +7769,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
     PyObject *__pyx_temp[3] = {__pyx_t_10, __pyx_t_7, __pyx_t_8};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 307, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_4, 2+__pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 319, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7342,7 +7777,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   } else
   #endif
   {
-    __pyx_t_11 = PyTuple_New(2+__pyx_t_4); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 307, __pyx_L1_error)
+    __pyx_t_11 = PyTuple_New(2+__pyx_t_4); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 319, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_11);
     if (__pyx_t_10) {
       __Pyx_GIVEREF(__pyx_t_10); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_10); __pyx_t_10 = NULL;
@@ -7353,7 +7788,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
     PyTuple_SET_ITEM(__pyx_t_11, 1+__pyx_t_4, __pyx_t_8);
     __pyx_t_7 = 0;
     __pyx_t_8 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 307, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 319, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   }
@@ -7362,7 +7797,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/taylormodel.pyx":295
+  /* "flowstar/taylormodel.pyx":307
  *         return TaylorModel.from_taylor_model(tm, varmap)
  * 
  *     def __repr__(self):             # <<<<<<<<<<<<<<
@@ -7387,7 +7822,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_8__repr__(struct
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":324
+/* "flowstar/taylormodel.pyx":336
  *     #                      Interval & cutoff_threshold):
  * 
  *     def __add__(TaylorModel self, TaylorModel other):             # <<<<<<<<<<<<<<
@@ -7401,8 +7836,8 @@ static PyObject *__pyx_pw_8flowstar_11taylormodel_11TaylorModel_11__add__(PyObje
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__add__ (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_11taylormodel_TaylorModel, 1, "self", 0))) __PYX_ERR(0, 324, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_other), __pyx_ptype_8flowstar_11taylormodel_TaylorModel, 1, "other", 0))) __PYX_ERR(0, 324, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_8flowstar_11taylormodel_TaylorModel, 1, "self", 0))) __PYX_ERR(0, 336, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_other), __pyx_ptype_8flowstar_11taylormodel_TaylorModel, 1, "other", 0))) __PYX_ERR(0, 336, __pyx_L1_error)
   __pyx_r = __pyx_pf_8flowstar_11taylormodel_11TaylorModel_10__add__(((struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *)__pyx_v_self), ((struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *)__pyx_v_other));
 
   /* function exit code */
@@ -7422,7 +7857,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_10__add__(struct
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__add__", 0);
 
-  /* "flowstar/taylormodel.pyx":326
+  /* "flowstar/taylormodel.pyx":338
  *     def __add__(TaylorModel self, TaylorModel other):
  *         cdef CTaylorModel tm
  *         self.c_tm.add(tm, other.c_tm)             # <<<<<<<<<<<<<<
@@ -7431,7 +7866,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_10__add__(struct
  */
   __pyx_v_self->c_tm.add(__pyx_v_tm, __pyx_v_other->c_tm);
 
-  /* "flowstar/taylormodel.pyx":327
+  /* "flowstar/taylormodel.pyx":339
  *         cdef CTaylorModel tm
  *         self.c_tm.add(tm, other.c_tm)
  *         return TaylorModel.from_taylor_model(tm, self.varmap)             # <<<<<<<<<<<<<<
@@ -7441,14 +7876,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_10__add__(struct
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __pyx_v_self->varmap;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_t_1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 327, __pyx_L1_error)
+  __pyx_t_2 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_t_1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/taylormodel.pyx":324
+  /* "flowstar/taylormodel.pyx":336
  *     #                      Interval & cutoff_threshold):
  * 
  *     def __add__(TaylorModel self, TaylorModel other):             # <<<<<<<<<<<<<<
@@ -7468,7 +7903,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_10__add__(struct
   return __pyx_r;
 }
 
-/* "flowstar/taylormodel.pyx":329
+/* "flowstar/taylormodel.pyx":341
  *         return TaylorModel.from_taylor_model(tm, self.varmap)
  * 
  *     def __neg__(TaylorModel self):             # <<<<<<<<<<<<<<
@@ -7499,7 +7934,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_12__neg__(struct
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__neg__", 0);
 
-  /* "flowstar/taylormodel.pyx":330
+  /* "flowstar/taylormodel.pyx":342
  * 
  *     def __neg__(TaylorModel self):
  *         cdef CTaylorModel tm = self.c_tm             # <<<<<<<<<<<<<<
@@ -7509,7 +7944,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_12__neg__(struct
   __pyx_t_1 = __pyx_v_self->c_tm;
   __pyx_v_tm = __pyx_t_1;
 
-  /* "flowstar/taylormodel.pyx":331
+  /* "flowstar/taylormodel.pyx":343
  *     def __neg__(TaylorModel self):
  *         cdef CTaylorModel tm = self.c_tm
  *         cdef Interval negone = make_interval(-1)             # <<<<<<<<<<<<<<
@@ -7518,7 +7953,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_12__neg__(struct
  */
   __pyx_v_negone = __pyx_f_8flowstar_8interval_make_interval(__pyx_int_neg_1);
 
-  /* "flowstar/taylormodel.pyx":332
+  /* "flowstar/taylormodel.pyx":344
  *         cdef CTaylorModel tm = self.c_tm
  *         cdef Interval negone = make_interval(-1)
  *         tm.mul_assign(negone)             # <<<<<<<<<<<<<<
@@ -7527,7 +7962,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_12__neg__(struct
  */
   __pyx_v_tm.mul_assign(__pyx_v_negone);
 
-  /* "flowstar/taylormodel.pyx":333
+  /* "flowstar/taylormodel.pyx":345
  *         cdef Interval negone = make_interval(-1)
  *         tm.mul_assign(negone)
  *         return TaylorModel.from_taylor_model(tm, self.varmap)             # <<<<<<<<<<<<<<
@@ -7537,14 +7972,14 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_12__neg__(struct
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = __pyx_v_self->varmap;
   __Pyx_INCREF(__pyx_t_2);
-  __pyx_t_3 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_t_2)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 333, __pyx_L1_error)
+  __pyx_t_3 = ((PyObject *)__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model(__pyx_v_tm, __pyx_t_2)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 345, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "flowstar/taylormodel.pyx":329
+  /* "flowstar/taylormodel.pyx":341
  *         return TaylorModel.from_taylor_model(tm, self.varmap)
  * 
  *     def __neg__(TaylorModel self):             # <<<<<<<<<<<<<<
@@ -7676,7 +8111,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_14__reduce_cytho
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -7729,7 +8164,7 @@ static PyObject *__pyx_pf_8flowstar_11taylormodel_11TaylorModel_16__setstate_cyt
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8595,6 +9030,7 @@ static struct PyModuleDef __pyx_moduledef = {
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_0_0, __pyx_k_0_0, sizeof(__pyx_k_0_0), 0, 1, 0, 0},
   {&__pyx_kp_u_1_1, __pyx_k_1_1, sizeof(__pyx_k_1_1), 0, 1, 0, 0},
+  {&__pyx_kp_u_2, __pyx_k_2, sizeof(__pyx_k_2), 0, 1, 0, 0},
   {&__pyx_n_s_Converter, __pyx_k_Converter, sizeof(__pyx_k_Converter), 0, 0, 1, 1},
   {&__pyx_kp_s_Expands_an_arbitrary_expression, __pyx_k_Expands_an_arbitrary_expression, sizeof(__pyx_k_Expands_an_arbitrary_expression), 0, 0, 1, 0},
   {&__pyx_kp_s_Expands_an_arbitrary_expression_2, __pyx_k_Expands_an_arbitrary_expression_2, sizeof(__pyx_k_Expands_an_arbitrary_expression_2), 0, 0, 1, 0},
@@ -8603,6 +9039,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_u_FlowstarConverter, __pyx_k_FlowstarConverter, sizeof(__pyx_k_FlowstarConverter), 0, 1, 0, 1},
   {&__pyx_n_s_FlowstarConverter___init, __pyx_k_FlowstarConverter___init, sizeof(__pyx_k_FlowstarConverter___init), 0, 0, 1, 1},
   {&__pyx_n_s_FlowstarConverter_arithmetic, __pyx_k_FlowstarConverter_arithmetic, sizeof(__pyx_k_FlowstarConverter_arithmetic), 0, 0, 1, 1},
+  {&__pyx_n_s_FlowstarConverter_composition, __pyx_k_FlowstarConverter_composition, sizeof(__pyx_k_FlowstarConverter_composition), 0, 0, 1, 1},
   {&__pyx_n_s_FlowstarConverter_pyobject, __pyx_k_FlowstarConverter_pyobject, sizeof(__pyx_k_FlowstarConverter_pyobject), 0, 0, 1, 1},
   {&__pyx_n_s_FlowstarConverter_symbol, __pyx_k_FlowstarConverter_symbol, sizeof(__pyx_k_FlowstarConverter_symbol), 0, 0, 1, 1},
   {&__pyx_kp_u_Need_to_implement_this, __pyx_k_Need_to_implement_this, sizeof(__pyx_k_Need_to_implement_this), 0, 1, 0, 0},
@@ -8625,7 +9062,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_kp_u__10, __pyx_k__10, sizeof(__pyx_k__10), 0, 1, 0, 0},
   {&__pyx_kp_u__11, __pyx_k__11, sizeof(__pyx_k__11), 0, 1, 0, 0},
-  {&__pyx_kp_u__14, __pyx_k__14, sizeof(__pyx_k__14), 0, 1, 0, 0},
+  {&__pyx_kp_u__12, __pyx_k__12, sizeof(__pyx_k__12), 0, 1, 0, 0},
+  {&__pyx_kp_u__13, __pyx_k__13, sizeof(__pyx_k__13), 0, 1, 0, 0},
+  {&__pyx_kp_u__16, __pyx_k__16, sizeof(__pyx_k__16), 0, 1, 0, 0},
   {&__pyx_n_s__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 0, 1, 1},
   {&__pyx_kp_u__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 1, 0, 0},
   {&__pyx_kp_u__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 1, 0, 0},
@@ -8634,6 +9073,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u__7, __pyx_k__7, sizeof(__pyx_k__7), 0, 1, 0, 0},
   {&__pyx_kp_u__8, __pyx_k__8, sizeof(__pyx_k__8), 0, 1, 0, 0},
   {&__pyx_kp_u__9, __pyx_k__9, sizeof(__pyx_k__9), 0, 1, 0, 0},
+  {&__pyx_n_u_abs, __pyx_k_abs, sizeof(__pyx_k_abs), 0, 1, 0, 1},
   {&__pyx_n_s_all, __pyx_k_all, sizeof(__pyx_k_all), 0, 0, 1, 1},
   {&__pyx_n_s_args, __pyx_k_args, sizeof(__pyx_k_args), 0, 0, 1, 1},
   {&__pyx_n_s_arithmetic, __pyx_k_arithmetic, sizeof(__pyx_k_arithmetic), 0, 0, 1, 1},
@@ -8642,7 +9082,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_close, __pyx_k_close, sizeof(__pyx_k_close), 0, 0, 1, 1},
   {&__pyx_n_s_coefficients, __pyx_k_coefficients, sizeof(__pyx_k_coefficients), 0, 0, 1, 1},
   {&__pyx_n_s_collections, __pyx_k_collections, sizeof(__pyx_k_collections), 0, 0, 1, 1},
+  {&__pyx_n_s_composition, __pyx_k_composition, sizeof(__pyx_k_composition), 0, 0, 1, 1},
   {&__pyx_n_s_context, __pyx_k_context, sizeof(__pyx_k_context), 0, 0, 1, 1},
+  {&__pyx_n_u_cos, __pyx_k_cos, sizeof(__pyx_k_cos), 0, 1, 0, 1},
   {&__pyx_n_s_cutoff_threshold, __pyx_k_cutoff_threshold, sizeof(__pyx_k_cutoff_threshold), 0, 0, 1, 1},
   {&__pyx_n_s_doc, __pyx_k_doc, sizeof(__pyx_k_doc), 0, 0, 1, 1},
   {&__pyx_n_s_domain, __pyx_k_domain, sizeof(__pyx_k_domain), 0, 0, 1, 1},
@@ -8651,12 +9093,14 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
   {&__pyx_n_s_ex, __pyx_k_ex, sizeof(__pyx_k_ex), 0, 0, 1, 1},
   {&__pyx_kp_u_ex_op_neg, __pyx_k_ex_op_neg, sizeof(__pyx_k_ex_op_neg), 0, 1, 0, 0},
+  {&__pyx_n_u_exp, __pyx_k_exp, sizeof(__pyx_k_exp), 0, 1, 0, 1},
   {&__pyx_n_s_expn, __pyx_k_expn, sizeof(__pyx_k_expn), 0, 0, 1, 1},
   {&__pyx_n_s_flowstar_taylormodel, __pyx_k_flowstar_taylormodel, sizeof(__pyx_k_flowstar_taylormodel), 0, 0, 1, 1},
   {&__pyx_kp_s_flowstar_taylormodel_pyx, __pyx_k_flowstar_taylormodel_pyx, sizeof(__pyx_k_flowstar_taylormodel_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
   {&__pyx_n_s_from_constant, __pyx_k_from_constant, sizeof(__pyx_k_from_constant), 0, 0, 1, 1},
   {&__pyx_n_s_from_var, __pyx_k_from_var, sizeof(__pyx_k_from_var), 0, 0, 1, 1},
+  {&__pyx_n_s_func_name, __pyx_k_func_name, sizeof(__pyx_k_func_name), 0, 0, 1, 1},
   {&__pyx_n_s_functools, __pyx_k_functools, sizeof(__pyx_k_functools), 0, 0, 1, 1},
   {&__pyx_n_s_genexpr, __pyx_k_genexpr, sizeof(__pyx_k_genexpr), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
@@ -8670,7 +9114,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_keys, __pyx_k_keys, sizeof(__pyx_k_keys), 0, 0, 1, 1},
   {&__pyx_n_s_local_t, __pyx_k_local_t, sizeof(__pyx_k_local_t), 0, 0, 1, 1},
   {&__pyx_n_u_local_t, __pyx_k_local_t, sizeof(__pyx_k_local_t), 0, 1, 0, 1},
+  {&__pyx_n_u_log, __pyx_k_log, sizeof(__pyx_k_log), 0, 1, 0, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
+  {&__pyx_n_s_map, __pyx_k_map, sizeof(__pyx_k_map), 0, 0, 1, 1},
   {&__pyx_n_s_metaclass, __pyx_k_metaclass, sizeof(__pyx_k_metaclass), 0, 0, 1, 1},
   {&__pyx_n_s_module, __pyx_k_module, sizeof(__pyx_k_module), 0, 0, 1, 1},
   {&__pyx_n_s_mul, __pyx_k_mul, sizeof(__pyx_k_mul), 0, 0, 1, 1},
@@ -8709,7 +9155,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_sg, __pyx_k_sg, sizeof(__pyx_k_sg), 0, 0, 1, 1},
+  {&__pyx_n_u_sin, __pyx_k_sin, sizeof(__pyx_k_sin), 0, 1, 0, 1},
   {&__pyx_n_s_sorted, __pyx_k_sorted, sizeof(__pyx_k_sorted), 0, 0, 1, 1},
+  {&__pyx_kp_u_sqrt, __pyx_k_sqrt, sizeof(__pyx_k_sqrt), 0, 1, 0, 0},
+  {&__pyx_n_u_sqrt_2, __pyx_k_sqrt_2, sizeof(__pyx_k_sqrt_2), 0, 1, 0, 1},
   {&__pyx_n_s_staticmethod, __pyx_k_staticmethod, sizeof(__pyx_k_staticmethod), 0, 0, 1, 1},
   {&__pyx_n_s_symbol, __pyx_k_symbol, sizeof(__pyx_k_symbol), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
@@ -8731,13 +9180,14 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_staticmethod = __Pyx_GetBuiltinName(__pyx_n_s_staticmethod); if (!__pyx_builtin_staticmethod) __PYX_ERR(0, 241, __pyx_L1_error)
+  __pyx_builtin_staticmethod = __Pyx_GetBuiltinName(__pyx_n_s_staticmethod); if (!__pyx_builtin_staticmethod) __PYX_ERR(0, 253, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 101, __pyx_L1_error)
   __pyx_builtin_NotImplementedError = __Pyx_GetBuiltinName(__pyx_n_s_NotImplementedError); if (!__pyx_builtin_NotImplementedError) __PYX_ERR(0, 107, __pyx_L1_error)
-  __pyx_builtin_sorted = __Pyx_GetBuiltinName(__pyx_n_s_sorted); if (!__pyx_builtin_sorted) __PYX_ERR(0, 254, __pyx_L1_error)
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 256, __pyx_L1_error)
-  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 248, __pyx_L1_error)
+  __pyx_builtin_map = __Pyx_GetBuiltinName(__pyx_n_s_map); if (!__pyx_builtin_map) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_builtin_sorted = __Pyx_GetBuiltinName(__pyx_n_s_sorted); if (!__pyx_builtin_sorted) __PYX_ERR(0, 266, __pyx_L1_error)
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 260, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -8766,27 +9216,27 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "flowstar/taylormodel.pyx":234
+  /* "flowstar/taylormodel.pyx":246
  *             self.c_tm = CTaylorModel(coeffs, c_remainder)
  *         else:
  *             raise NotImplementedError("Need to implement this!")             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_u_Need_to_implement_this); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 234, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_u_Need_to_implement_this); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__14);
+  __Pyx_GIVEREF(__pyx_tuple__14);
 
-  /* "flowstar/taylormodel.pyx":256
+  /* "flowstar/taylormodel.pyx":268
  *             return dict(sorted(items, key=operator.itemgetter(1)))
  *         else:
  *             raise ValueError("vs should be a valid varmap!")             # <<<<<<<<<<<<<<
  * 
  *     @staticmethod
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_u_vs_should_be_a_valid_varmap); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 256, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_u_vs_should_be_a_valid_varmap); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__15);
+  __Pyx_GIVEREF(__pyx_tuple__15);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -8794,18 +9244,18 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(1, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__15);
-  __Pyx_GIVEREF(__pyx_tuple__15);
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__16);
-  __Pyx_GIVEREF(__pyx_tuple__16);
+  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__18);
+  __Pyx_GIVEREF(__pyx_tuple__18);
 
   /* "flowstar/taylormodel.pyx":26
  * from sage.symbolic.expression_conversions import ExpressionTreeWalker, Converter
@@ -8814,9 +9264,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *            'TaylorModelContext')
  * 
  */
-  __pyx_tuple__17 = PyTuple_Pack(4, __pyx_n_u_TaylorModelExpander, __pyx_n_u_TaylorModel, __pyx_n_u_FlowstarConverter, __pyx_n_u_TaylorModelContext); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 26, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__17);
-  __Pyx_GIVEREF(__pyx_tuple__17);
+  __pyx_tuple__19 = PyTuple_Pack(4, __pyx_n_u_TaylorModelExpander, __pyx_n_u_TaylorModel, __pyx_n_u_FlowstarConverter, __pyx_n_u_TaylorModelContext); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__19);
+  __Pyx_GIVEREF(__pyx_tuple__19);
 
   /* "flowstar/taylormodel.pyx":86
  *     """
@@ -8825,10 +9275,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         Converter.__init__(self, use_fake_div=True)
  *         # TaylorModelExpanderMixin.__init__(self, domain, order, cutoff_threshold)
  */
-  __pyx_tuple__18 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_varmap, __pyx_n_s_context); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 86, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__18);
-  __Pyx_GIVEREF(__pyx_tuple__18);
-  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_init, 86, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_tuple__20 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_varmap, __pyx_n_s_context); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__20);
+  __Pyx_GIVEREF(__pyx_tuple__20);
+  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_init, 86, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(0, 86, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":97
  *     #     return super().__call__(sg.SR(ex))
@@ -8837,10 +9287,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return TaylorModel.from_var(str(ex), self.varmap)
  * 
  */
-  __pyx_tuple__20 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_ex); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 97, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__20);
-  __Pyx_GIVEREF(__pyx_tuple__20);
-  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_symbol, 97, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_tuple__22 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_ex); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__22);
+  __Pyx_GIVEREF(__pyx_tuple__22);
+  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_symbol, 97, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 97, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":100
  *         return TaylorModel.from_var(str(ex), self.varmap)
@@ -8849,10 +9299,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         print("pyobject(ex={}, obj={}, type={})".format(
  *             repr(ex), repr(obj), repr(type(obj)),
  */
-  __pyx_tuple__22 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_obj); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 100, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__22);
-  __Pyx_GIVEREF(__pyx_tuple__22);
-  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_pyobject, 100, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 100, __pyx_L1_error)
+  __pyx_tuple__24 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_obj); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(0, 100, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__24);
+  __Pyx_GIVEREF(__pyx_tuple__24);
+  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_pyobject, 100, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 100, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":109
  *             raise NotImplementedError
@@ -8861,10 +9311,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         print("ex = {}, op = {}, neg = {}".format(repr(ex), repr(op), operator.neg))
  *         op_table = arithmetic_operators
  */
-  __pyx_tuple__24 = PyTuple_Pack(7, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_op, __pyx_n_s_op_table, __pyx_n_s_op_symb, __pyx_n_s_operands, __pyx_n_s_operand); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(0, 109, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__24);
-  __Pyx_GIVEREF(__pyx_tuple__24);
-  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(3, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_arithmetic, 109, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_tuple__26 = PyTuple_Pack(7, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_op, __pyx_n_s_op_table, __pyx_n_s_op_symb, __pyx_n_s_operands, __pyx_n_s_operand); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__26);
+  __Pyx_GIVEREF(__pyx_tuple__26);
+  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(3, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_arithmetic, 109, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 109, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":137
  *     """
@@ -8873,10 +9323,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         Converter.__init__(self, use_fake_div=True)
  *         self.varmap = TaylorModel.to_varmap(varmap)
  */
-  __pyx_tuple__26 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_varmap); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 137, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__26);
-  __Pyx_GIVEREF(__pyx_tuple__26);
-  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_init, 137, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_tuple__28 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_varmap); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__28);
+  __Pyx_GIVEREF(__pyx_tuple__28);
+  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_init, 137, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 137, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":144
  *     #     return super().__call__(sg.SR(ex))
@@ -8885,10 +9335,10 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return str(ex)
  * 
  */
-  __pyx_tuple__28 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_ex); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 144, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__28);
-  __Pyx_GIVEREF(__pyx_tuple__28);
-  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_symbol, 144, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 144, __pyx_L1_error)
+  __pyx_tuple__30 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_ex); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 144, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__30);
+  __Pyx_GIVEREF(__pyx_tuple__30);
+  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_symbol, 144, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 144, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":147
  *         return str(ex)
@@ -8897,58 +9347,70 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         # print("pyobject(ex={}, obj={}, type={})".format(
  *         #     repr(ex), repr(obj), repr(type(obj)),
  */
-  __pyx_tuple__30 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_obj); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 147, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__30);
-  __Pyx_GIVEREF(__pyx_tuple__30);
-  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_pyobject, 147, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_tuple__32 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_obj); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__32);
+  __Pyx_GIVEREF(__pyx_tuple__32);
+  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_pyobject, 147, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 147, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":158
  *             raise NotImplementedError
+ * 
+ *     def composition(self, ex, op):             # <<<<<<<<<<<<<<
+ *         func_name = repr(op)
+ *         x, = map(self, ex.operands())
+ */
+  __pyx_tuple__34 = PyTuple_Pack(5, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_op, __pyx_n_s_func_name, __pyx_n_s_x); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__34);
+  __Pyx_GIVEREF(__pyx_tuple__34);
+  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_composition, 158, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 158, __pyx_L1_error)
+
+  /* "flowstar/taylormodel.pyx":170
+ * 
  * 
  *     def arithmetic(self, ex, op):             # <<<<<<<<<<<<<<
  *         op_table = arithmetic_operators
  *         op_table[operator.neg] = 'neg'
  */
-  __pyx_tuple__32 = PyTuple_Pack(8, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_op, __pyx_n_s_op_table, __pyx_n_s_op_symb, __pyx_n_s_operands, __pyx_n_s_expn, __pyx_n_s_operand); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(0, 158, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__32);
-  __Pyx_GIVEREF(__pyx_tuple__32);
-  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(3, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_arithmetic, 158, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_tuple__36 = PyTuple_Pack(8, __pyx_n_s_self, __pyx_n_s_ex, __pyx_n_s_op, __pyx_n_s_op_table, __pyx_n_s_op_symb, __pyx_n_s_operands, __pyx_n_s_expn, __pyx_n_s_operand); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__36);
+  __Pyx_GIVEREF(__pyx_tuple__36);
+  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(3, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_arithmetic, 170, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 170, __pyx_L1_error)
 
-  /* "flowstar/taylormodel.pyx":242
+  /* "flowstar/taylormodel.pyx":254
  * 
  *     @staticmethod
  *     def to_varmap(vs):             # <<<<<<<<<<<<<<
  *         if isinstance(vs, list):
  *             assert len(vs) > 0
  */
-  __pyx_tuple__34 = PyTuple_Pack(6, __pyx_n_s_vs, __pyx_n_s_items, __pyx_n_s_genexpr, __pyx_n_s_genexpr, __pyx_n_s_i, __pyx_n_s_v); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 242, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__34);
-  __Pyx_GIVEREF(__pyx_tuple__34);
-  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(1, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_to_varmap, 242, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_tuple__38 = PyTuple_Pack(6, __pyx_n_s_vs, __pyx_n_s_items, __pyx_n_s_genexpr, __pyx_n_s_genexpr, __pyx_n_s_i, __pyx_n_s_v); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 254, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__38);
+  __Pyx_GIVEREF(__pyx_tuple__38);
+  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(1, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_to_varmap, 254, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 254, __pyx_L1_error)
 
-  /* "flowstar/taylormodel.pyx":266
+  /* "flowstar/taylormodel.pyx":278
  * 
  *     @staticmethod
  *     def from_var(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef vector[Interval] coefficients
  */
-  __pyx_tuple__36 = PyTuple_Pack(9, __pyx_n_s_x, __pyx_n_s_varmap, __pyx_n_s_remainder, __pyx_n_s_coefficients, __pyx_n_s_one, __pyx_n_s_zero, __pyx_n_s_vname, __pyx_n_s_name_2, __pyx_n_s_tm); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 266, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__36);
-  __Pyx_GIVEREF(__pyx_tuple__36);
-  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(3, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_from_var, 266, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 266, __pyx_L1_error)
+  __pyx_tuple__40 = PyTuple_Pack(9, __pyx_n_s_x, __pyx_n_s_varmap, __pyx_n_s_remainder, __pyx_n_s_coefficients, __pyx_n_s_one, __pyx_n_s_zero, __pyx_n_s_vname, __pyx_n_s_name_2, __pyx_n_s_tm); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(0, 278, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__40);
+  __Pyx_GIVEREF(__pyx_tuple__40);
+  __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(3, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_from_var, 278, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(0, 278, __pyx_L1_error)
 
-  /* "flowstar/taylormodel.pyx":286
+  /* "flowstar/taylormodel.pyx":298
  * 
  *     @staticmethod
  *     def from_constant(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef Interval x1 = make_interval(x)
  */
-  __pyx_tuple__38 = PyTuple_Pack(5, __pyx_n_s_x, __pyx_n_s_varmap, __pyx_n_s_remainder, __pyx_n_s_x1, __pyx_n_s_tm); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 286, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__38);
-  __Pyx_GIVEREF(__pyx_tuple__38);
-  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_from_constant, 286, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 286, __pyx_L1_error)
+  __pyx_tuple__42 = PyTuple_Pack(5, __pyx_n_s_x, __pyx_n_s_varmap, __pyx_n_s_remainder, __pyx_n_s_x1, __pyx_n_s_tm); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(0, 298, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__42);
+  __Pyx_GIVEREF(__pyx_tuple__42);
+  __pyx_codeobj__43 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_flowstar_taylormodel_pyx, __pyx_n_s_from_constant, 298, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 298, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -9005,14 +9467,14 @@ static int __Pyx_modinit_type_init_code(void) {
   /*--- Type init code ---*/
   __pyx_vtabptr_8flowstar_11taylormodel_TaylorModel = &__pyx_vtable_8flowstar_11taylormodel_TaylorModel;
   __pyx_vtable_8flowstar_11taylormodel_TaylorModel.from_taylor_model = (struct __pyx_obj_8flowstar_11taylormodel_TaylorModel *(*)(flowstar::TaylorModel &, PyObject *))__pyx_f_8flowstar_11taylormodel_11TaylorModel_from_taylor_model;
-  if (PyType_Ready(&__pyx_type_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 191, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 203, __pyx_L1_error)
   __pyx_type_8flowstar_11taylormodel_TaylorModel.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_11taylormodel_TaylorModel.tp_dictoffset && __pyx_type_8flowstar_11taylormodel_TaylorModel.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_11taylormodel_TaylorModel.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (__Pyx_SetVtable(__pyx_type_8flowstar_11taylormodel_TaylorModel.tp_dict, __pyx_vtabptr_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 191, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_TaylorModel, (PyObject *)&__pyx_type_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 191, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 191, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_8flowstar_11taylormodel_TaylorModel.tp_dict, __pyx_vtabptr_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 203, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_TaylorModel, (PyObject *)&__pyx_type_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 203, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_11taylormodel_TaylorModel) < 0) __PYX_ERR(0, 203, __pyx_L1_error)
   __pyx_ptype_8flowstar_11taylormodel_TaylorModel = &__pyx_type_8flowstar_11taylormodel_TaylorModel;
   if (PyType_Ready(&__pyx_type_8flowstar_11taylormodel_TaylorModelContext) < 0) __PYX_ERR(0, 33, __pyx_L1_error)
   __pyx_type_8flowstar_11taylormodel_TaylorModelContext.tp_print = 0;
@@ -9022,13 +9484,13 @@ static int __Pyx_modinit_type_init_code(void) {
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s_TaylorModelContext, (PyObject *)&__pyx_type_8flowstar_11taylormodel_TaylorModelContext) < 0) __PYX_ERR(0, 33, __pyx_L1_error)
   if (__Pyx_setup_reduce((PyObject*)&__pyx_type_8flowstar_11taylormodel_TaylorModelContext) < 0) __PYX_ERR(0, 33, __pyx_L1_error)
   __pyx_ptype_8flowstar_11taylormodel_TaylorModelContext = &__pyx_type_8flowstar_11taylormodel_TaylorModelContext;
-  if (PyType_Ready(&__pyx_type_8flowstar_11taylormodel___pyx_scope_struct__to_varmap) < 0) __PYX_ERR(0, 242, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_8flowstar_11taylormodel___pyx_scope_struct__to_varmap) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
   __pyx_type_8flowstar_11taylormodel___pyx_scope_struct__to_varmap.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_11taylormodel___pyx_scope_struct__to_varmap.tp_dictoffset && __pyx_type_8flowstar_11taylormodel___pyx_scope_struct__to_varmap.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_11taylormodel___pyx_scope_struct__to_varmap.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
   }
   __pyx_ptype_8flowstar_11taylormodel___pyx_scope_struct__to_varmap = &__pyx_type_8flowstar_11taylormodel___pyx_scope_struct__to_varmap;
-  if (PyType_Ready(&__pyx_type_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 245, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 257, __pyx_L1_error)
   __pyx_type_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr.tp_dictoffset && __pyx_type_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_8flowstar_11taylormodel___pyx_scope_struct_1_genexpr.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
@@ -9445,7 +9907,7 @@ if (!__Pyx_RefNanny) {
  *            'TaylorModelContext')
  * 
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_all, __pyx_tuple__17) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_all, __pyx_tuple__19) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
 
   /* "flowstar/taylormodel.pyx":75
  * 
@@ -9473,7 +9935,7 @@ if (!__Pyx_RefNanny) {
  *         Converter.__init__(self, use_fake_div=True)
  *         # TaylorModelExpanderMixin.__init__(self, domain, order, cutoff_threshold)
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_1__init__, 0, __pyx_n_s_TaylorModelExpander___init, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__19)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_1__init__, 0, __pyx_n_s_TaylorModelExpander___init, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__21)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_init, __pyx_t_4) < 0) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9485,7 +9947,7 @@ if (!__Pyx_RefNanny) {
  *         return TaylorModel.from_var(str(ex), self.varmap)
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_3symbol, 0, __pyx_n_s_TaylorModelExpander_symbol, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__21)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_3symbol, 0, __pyx_n_s_TaylorModelExpander_symbol, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__23)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_symbol, __pyx_t_4) < 0) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9497,7 +9959,7 @@ if (!__Pyx_RefNanny) {
  *         print("pyobject(ex={}, obj={}, type={})".format(
  *             repr(ex), repr(obj), repr(type(obj)),
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_5pyobject, 0, __pyx_n_s_TaylorModelExpander_pyobject, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__23)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_5pyobject, 0, __pyx_n_s_TaylorModelExpander_pyobject, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__25)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_pyobject, __pyx_t_4) < 0) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9509,7 +9971,7 @@ if (!__Pyx_RefNanny) {
  *         print("ex = {}, op = {}, neg = {}".format(repr(ex), repr(op), operator.neg))
  *         op_table = arithmetic_operators
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_7arithmetic, 0, __pyx_n_s_TaylorModelExpander_arithmetic, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__25)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_19TaylorModelExpander_7arithmetic, 0, __pyx_n_s_TaylorModelExpander_arithmetic, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__27)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_arithmetic, __pyx_t_4) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9555,7 +10017,7 @@ if (!__Pyx_RefNanny) {
  *         Converter.__init__(self, use_fake_div=True)
  *         self.varmap = TaylorModel.to_varmap(varmap)
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_1__init__, 0, __pyx_n_s_FlowstarConverter___init, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__27)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_1__init__, 0, __pyx_n_s_FlowstarConverter___init, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 137, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_init, __pyx_t_4) < 0) __PYX_ERR(0, 137, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9567,7 +10029,7 @@ if (!__Pyx_RefNanny) {
  *         return str(ex)
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_3symbol, 0, __pyx_n_s_FlowstarConverter_symbol, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 144, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_3symbol, 0, __pyx_n_s_FlowstarConverter_symbol, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_symbol, __pyx_t_4) < 0) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9579,7 +10041,7 @@ if (!__Pyx_RefNanny) {
  *         # print("pyobject(ex={}, obj={}, type={})".format(
  *         #     repr(ex), repr(obj), repr(type(obj)),
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_5pyobject, 0, __pyx_n_s_FlowstarConverter_pyobject, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_5pyobject, 0, __pyx_n_s_FlowstarConverter_pyobject, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__33)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_pyobject, __pyx_t_4) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9587,13 +10049,25 @@ if (!__Pyx_RefNanny) {
   /* "flowstar/taylormodel.pyx":158
  *             raise NotImplementedError
  * 
+ *     def composition(self, ex, op):             # <<<<<<<<<<<<<<
+ *         func_name = repr(op)
+ *         x, = map(self, ex.operands())
+ */
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_7composition, 0, __pyx_n_s_FlowstarConverter_composition, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__35)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_composition, __pyx_t_4) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+  /* "flowstar/taylormodel.pyx":170
+ * 
+ * 
  *     def arithmetic(self, ex, op):             # <<<<<<<<<<<<<<
  *         op_table = arithmetic_operators
  *         op_table[operator.neg] = 'neg'
  */
-  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_7arithmetic, 0, __pyx_n_s_FlowstarConverter_arithmetic, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__33)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_17FlowstarConverter_9arithmetic, 0, __pyx_n_s_FlowstarConverter_arithmetic, NULL, __pyx_n_s_flowstar_taylormodel, __pyx_d, ((PyObject *)__pyx_codeobj__37)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_arithmetic, __pyx_t_4) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_arithmetic, __pyx_t_4) < 0) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /* "flowstar/taylormodel.pyx":127
@@ -9611,90 +10085,90 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "flowstar/taylormodel.pyx":242
+  /* "flowstar/taylormodel.pyx":254
  * 
  *     @staticmethod
  *     def to_varmap(vs):             # <<<<<<<<<<<<<<
  *         if isinstance(vs, list):
  *             assert len(vs) > 0
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_11TaylorModel_3to_varmap, NULL, __pyx_n_s_flowstar_taylormodel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_11TaylorModel_3to_varmap, NULL, __pyx_n_s_flowstar_taylormodel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_to_varmap, __pyx_t_1) < 0) __PYX_ERR(0, 242, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_to_varmap, __pyx_t_1) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_11taylormodel_TaylorModel);
 
-  /* "flowstar/taylormodel.pyx":241
+  /* "flowstar/taylormodel.pyx":253
  *                   if k != 'local_t']
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def to_varmap(vs):
  *         if isinstance(vs, list):
  */
-  __Pyx_GetNameInClass(__pyx_t_1, (PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel, __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __Pyx_GetNameInClass(__pyx_t_1, (PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel, __pyx_n_s_to_varmap); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 241, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 253, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_to_varmap, __pyx_t_2) < 0) __PYX_ERR(0, 242, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_to_varmap, __pyx_t_2) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_11taylormodel_TaylorModel);
 
-  /* "flowstar/taylormodel.pyx":266
+  /* "flowstar/taylormodel.pyx":278
  * 
  *     @staticmethod
  *     def from_var(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef vector[Interval] coefficients
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_11TaylorModel_5from_var, NULL, __pyx_n_s_flowstar_taylormodel); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 266, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_11TaylorModel_5from_var, NULL, __pyx_n_s_flowstar_taylormodel); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_var, __pyx_t_2) < 0) __PYX_ERR(0, 266, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_var, __pyx_t_2) < 0) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_11taylormodel_TaylorModel);
 
-  /* "flowstar/taylormodel.pyx":265
+  /* "flowstar/taylormodel.pyx":277
  *         return res
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def from_var(x, varmap, remainder=None) -> TaylorModel:
  *         varmap = TaylorModel.to_varmap(varmap)
  */
-  __Pyx_GetNameInClass(__pyx_t_2, (PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel, __pyx_n_s_from_var); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 266, __pyx_L1_error)
+  __Pyx_GetNameInClass(__pyx_t_2, (PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel, __pyx_n_s_from_var); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 277, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_var, __pyx_t_1) < 0) __PYX_ERR(0, 266, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_var, __pyx_t_1) < 0) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_11taylormodel_TaylorModel);
 
-  /* "flowstar/taylormodel.pyx":286
+  /* "flowstar/taylormodel.pyx":298
  * 
  *     @staticmethod
  *     def from_constant(x, varmap, remainder=None) -> TaylorModel:             # <<<<<<<<<<<<<<
  *         varmap = TaylorModel.to_varmap(varmap)
  *         cdef Interval x1 = make_interval(x)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_11TaylorModel_7from_constant, NULL, __pyx_n_s_flowstar_taylormodel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 286, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8flowstar_11taylormodel_11TaylorModel_7from_constant, NULL, __pyx_n_s_flowstar_taylormodel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 298, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_constant, __pyx_t_1) < 0) __PYX_ERR(0, 286, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_constant, __pyx_t_1) < 0) __PYX_ERR(0, 298, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_11taylormodel_TaylorModel);
 
-  /* "flowstar/taylormodel.pyx":285
+  /* "flowstar/taylormodel.pyx":297
  *         return TaylorModel.from_taylor_model(tm, varmap)
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def from_constant(x, varmap, remainder=None) -> TaylorModel:
  *         varmap = TaylorModel.to_varmap(varmap)
  */
-  __Pyx_GetNameInClass(__pyx_t_1, (PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel, __pyx_n_s_from_constant); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 286, __pyx_L1_error)
+  __Pyx_GetNameInClass(__pyx_t_1, (PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel, __pyx_n_s_from_constant); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 298, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 285, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 297, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_constant, __pyx_t_2) < 0) __PYX_ERR(0, 286, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_8flowstar_11taylormodel_TaylorModel->tp_dict, __pyx_n_s_from_constant, __pyx_t_2) < 0) __PYX_ERR(0, 298, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_8flowstar_11taylormodel_TaylorModel);
 
@@ -10748,6 +11222,128 @@ return_ne:
 #endif
 }
 
+/* RaiseTooManyValuesToUnpack */
+static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
+    PyErr_Format(PyExc_ValueError,
+                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
+}
+
+/* RaiseNeedMoreValuesToUnpack */
+static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
+    PyErr_Format(PyExc_ValueError,
+                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
+                 index, (index == 1) ? "" : "s");
+}
+
+/* IterFinish */
+static CYTHON_INLINE int __Pyx_IterFinish(void) {
+#if CYTHON_FAST_THREAD_STATE
+    PyThreadState *tstate = __Pyx_PyThreadState_Current;
+    PyObject* exc_type = tstate->curexc_type;
+    if (unlikely(exc_type)) {
+        if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) {
+            PyObject *exc_value, *exc_tb;
+            exc_value = tstate->curexc_value;
+            exc_tb = tstate->curexc_traceback;
+            tstate->curexc_type = 0;
+            tstate->curexc_value = 0;
+            tstate->curexc_traceback = 0;
+            Py_DECREF(exc_type);
+            Py_XDECREF(exc_value);
+            Py_XDECREF(exc_tb);
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+    return 0;
+#else
+    if (unlikely(PyErr_Occurred())) {
+        if (likely(PyErr_ExceptionMatches(PyExc_StopIteration))) {
+            PyErr_Clear();
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+    return 0;
+#endif
+}
+
+/* UnpackItemEndCheck */
+static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected) {
+    if (unlikely(retval)) {
+        Py_DECREF(retval);
+        __Pyx_RaiseTooManyValuesError(expected);
+        return -1;
+    } else {
+        return __Pyx_IterFinish();
+    }
+    return 0;
+}
+
+/* JoinPyUnicode */
+static PyObject* __Pyx_PyUnicode_Join(PyObject* value_tuple, Py_ssize_t value_count, Py_ssize_t result_ulength,
+                                      CYTHON_UNUSED Py_UCS4 max_char) {
+#if CYTHON_USE_UNICODE_INTERNALS && CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    PyObject *result_uval;
+    int result_ukind;
+    Py_ssize_t i, char_pos;
+    void *result_udata;
+#if CYTHON_PEP393_ENABLED
+    result_uval = PyUnicode_New(result_ulength, max_char);
+    if (unlikely(!result_uval)) return NULL;
+    result_ukind = (max_char <= 255) ? PyUnicode_1BYTE_KIND : (max_char <= 65535) ? PyUnicode_2BYTE_KIND : PyUnicode_4BYTE_KIND;
+    result_udata = PyUnicode_DATA(result_uval);
+#else
+    result_uval = PyUnicode_FromUnicode(NULL, result_ulength);
+    if (unlikely(!result_uval)) return NULL;
+    result_ukind = sizeof(Py_UNICODE);
+    result_udata = PyUnicode_AS_UNICODE(result_uval);
+#endif
+    char_pos = 0;
+    for (i=0; i < value_count; i++) {
+        int ukind;
+        Py_ssize_t ulength;
+        void *udata;
+        PyObject *uval = PyTuple_GET_ITEM(value_tuple, i);
+        if (unlikely(__Pyx_PyUnicode_READY(uval)))
+            goto bad;
+        ulength = __Pyx_PyUnicode_GET_LENGTH(uval);
+        if (unlikely(!ulength))
+            continue;
+        if (unlikely(char_pos + ulength < 0))
+            goto overflow;
+        ukind = __Pyx_PyUnicode_KIND(uval);
+        udata = __Pyx_PyUnicode_DATA(uval);
+        if (!CYTHON_PEP393_ENABLED || ukind == result_ukind) {
+            memcpy((char *)result_udata + char_pos * result_ukind, udata, (size_t) (ulength * result_ukind));
+        } else {
+            #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030300F0 || defined(_PyUnicode_FastCopyCharacters)
+            _PyUnicode_FastCopyCharacters(result_uval, char_pos, uval, 0, ulength);
+            #else
+            Py_ssize_t j;
+            for (j=0; j < ulength; j++) {
+                Py_UCS4 uchar = __Pyx_PyUnicode_READ(ukind, udata, j);
+                __Pyx_PyUnicode_WRITE(result_ukind, result_udata, char_pos+j, uchar);
+            }
+            #endif
+        }
+        char_pos += ulength;
+    }
+    return result_uval;
+overflow:
+    PyErr_SetString(PyExc_OverflowError, "join() result is too long for a Python string");
+bad:
+    Py_DECREF(result_uval);
+    return NULL;
+#else
+    result_ulength++;
+    value_count++;
+    return PyUnicode_Join(__pyx_empty_unicode, value_tuple);
+#endif
+}
+
 /* PyIntCompare */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED long intval, CYTHON_UNUSED long inplace) {
     if (op1 == op2) {
@@ -10818,41 +11414,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_EqObjC(PyObject *op1, PyObject *op2, 
 /* None */
 static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname) {
     PyErr_Format(PyExc_UnboundLocalError, "local variable '%s' referenced before assignment", varname);
-}
-
-/* IterFinish */
-static CYTHON_INLINE int __Pyx_IterFinish(void) {
-#if CYTHON_FAST_THREAD_STATE
-    PyThreadState *tstate = __Pyx_PyThreadState_Current;
-    PyObject* exc_type = tstate->curexc_type;
-    if (unlikely(exc_type)) {
-        if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) {
-            PyObject *exc_value, *exc_tb;
-            exc_value = tstate->curexc_value;
-            exc_tb = tstate->curexc_traceback;
-            tstate->curexc_type = 0;
-            tstate->curexc_value = 0;
-            tstate->curexc_traceback = 0;
-            Py_DECREF(exc_type);
-            Py_XDECREF(exc_value);
-            Py_XDECREF(exc_tb);
-            return 0;
-        } else {
-            return -1;
-        }
-    }
-    return 0;
-#else
-    if (unlikely(PyErr_Occurred())) {
-        if (likely(PyErr_ExceptionMatches(PyExc_StopIteration))) {
-            PyErr_Clear();
-            return 0;
-        } else {
-            return -1;
-        }
-    }
-    return 0;
-#endif
 }
 
 /* PyObjectGetMethod */
@@ -10965,31 +11526,6 @@ static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name
     Py_DECREF(method);
 bad:
     return result;
-}
-
-/* RaiseNeedMoreValuesToUnpack */
-static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
-    PyErr_Format(PyExc_ValueError,
-                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
-                 index, (index == 1) ? "" : "s");
-}
-
-/* RaiseTooManyValuesToUnpack */
-static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
-    PyErr_Format(PyExc_ValueError,
-                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
-}
-
-/* UnpackItemEndCheck */
-static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected) {
-    if (unlikely(retval)) {
-        Py_DECREF(retval);
-        __Pyx_RaiseTooManyValuesError(expected);
-        return -1;
-    } else {
-        return __Pyx_IterFinish();
-    }
-    return 0;
 }
 
 /* RaiseNoneIterError */

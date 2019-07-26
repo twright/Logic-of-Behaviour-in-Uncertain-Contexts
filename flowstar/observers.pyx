@@ -228,6 +228,8 @@ cdef class FunctionObserver:
                     and not deref(fp_compo).has_value()):
                 self._unpreconditioned_pre_retrieve_f(f_fn, deref(fp),
                                                       loop_domain)
+                if verbosity >= 4:
+                    print("doing tentative_unpreconditioning")
                 # Evaluate f over the whole domain
                 f_domain = f_fn.call(t0)
 
@@ -586,8 +588,9 @@ cdef class FunctionObserver:
                 or fp_compo       == fp_compo_end
                 # or domain         == domain_end
                 # We no longer assume we are iterating over the composed
-                # flowpipres or the domains,  since we might not be calling
-                # prepare
+                # flowpipes or the domains,  since we might not be calling
+                # prepare -- this is due to the tentative_unpreconditioning
+                # optimization
                 or cached_bool    == cached_bool_end
                 or poly_f_fn      == poly_f_fn_end
                 or poly_fprime_fn == poly_fprime_fn_end):
@@ -597,6 +600,10 @@ cdef class FunctionObserver:
             (&loop_domain)[0] = (&global_domain.value()
                                  if global_domain.has_value()
                                  else &deref(fp).domain)
+
+            # print("unmodified loop domain:")
+            # for j in range(0, deref(loop_domain).size()):
+                # print(f"loop_domain[{j}] = {interval.as_str(loop_domain.at(j))}")
 
             # Absolute time domain for current interval
             (&t0)[0] = loop_domain[0][0] = deref(fp).domain[0]
@@ -645,14 +652,14 @@ cdef class FunctionObserver:
             interval_time_fn & f_fn,
             Flowpipe & fp,
             vector[Interval] * loop_domain):
-        """Do the bare minimum work to get f.
-
-        In practice, this means retrieve a cached symbolically composed
-        f (and, as a bonus, fprime) if one exists, otherwise, perform
-        functional composition.
+        """Do the bare minimum work to get f, without recomposing the
+        the preconditioned taylor model.
         """
         # Functional composition for polynomial
         # print("functionally precomposing f")
+        # cdef vector[Interval] dom = fp.domain
+        # for i in range(0, dom.size()):
+        #     dom[0] = make_interval((-1, 1))
         (&f_fn)[0] = interval.compose_interval_fn(
             self.f_interval_fn,
             fp_interval_fn(fp, deref(loop_domain)),
@@ -802,9 +809,9 @@ cdef class SageObserver(FunctionObserver):
         if symbolic_composition:
             warn("symbolic_composition not supported for SageObserver")
 
-        print("SageObserver({}, {}, symbolic_composition={}, "
+        print("SageObserver({}, {}, {}, symbolic_composition={}, "
               "tentative_unpreconditioning={}, mask={})".format(
-            f, reach, symbolic_composition, tentative_unpreconditioning,
+            f, reach, fprime, symbolic_composition, tentative_unpreconditioning,
             mask,
         ))
 
@@ -862,9 +869,9 @@ cdef class PolyObserver(FunctionObserver):
                  object mask=None):
         from ulbc.signal_masks import Mask
 
-        print("PolyObserver({}, {}, symbolic_composition={}, "
+        print("PolyObserver({}, {}, {} symbolic_composition={}, "
               "tentative_unpreconditioning={}, mask={})".format(
-            f, reach, symbolic_composition, tentative_unpreconditioning,
+            f, reach, fprime, symbolic_composition, tentative_unpreconditioning,
             mask,
         ))
 

@@ -7053,6 +7053,8 @@ NUM
 
 %%
 
+
+
 int yyerror(const char * what)
 {
 	fprintf(stderr, "Error line %d: %s\n", lineNum, what);

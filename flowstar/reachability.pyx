@@ -111,8 +111,8 @@ cdef class CReach:
         cdef vector[string] ode_strs
         self.var_ring = sage.PolynomialRing(sage.RIF, ', '.join([str(v) for v in vars]))
 
-        if symbolic_composition == False:
-            warn("Manual composition being used on a non-polynomial systems.")
+        # if symbolic_composition == False:
+        #     warn("Manual composition being used on a non-polynomial systems.")
 
         with self.global_manager:
             C = &continuousProblem

@@ -142,7 +142,7 @@ class System:
             )
         else:
             # Polynomial case
-            # print("reach polynomial case")
+            print("reach polynomial case")
             return Reach(
                 self.y,
                 self.y0,
