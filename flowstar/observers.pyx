@@ -772,13 +772,22 @@ cdef class FunctionObserver:
 
 
 cdef object interval_fn_from_sage(interval_fn & res, f, vars):
+    # Create a sage fast_callable object to allow for efficient 
+    # repeated evaluation of the sage expression
+    ff = fast_callable(f, vars=vars, domain=sage.RIF)
+    # Evaluate f directly using sage in Python -- should be
+    # equivalent and slower, but will give better error messages
+    # if something goes wrong.
+    # TODO: this version actually does not work at the moment
+    # ff = lambda *xs: f(**{str(k): v for k, v in zip(vars, xs)})
+    # Wrap the python function as a C++ function using flow*'s
+    # interval type.
+    (&res)[0] = make_interval_fn(ff)
     # We must return the fast callable object ff since otherwise
     # Python might garbage collect it whilst it is still in use
     # with C++ code.
     # The caller should keep it around as long as they wish to
     # use the interval fn
-    ff = fast_callable(f, vars=vars, domain=sage.RIF)
-    (&res)[0] = make_interval_fn(ff)
     return ff
 
 

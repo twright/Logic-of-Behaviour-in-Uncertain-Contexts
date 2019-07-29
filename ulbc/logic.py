@@ -292,7 +292,11 @@ class Atomic(Logic):
                 raise ValueError("No system!")
         sig = self.signal(reach, odes, **kwargs)
 
-        sage_plot = self.sage_plot(reach)
+        sage_plot = self.sage_plot(
+            reach,
+            symbolic_composition=kwargs.get('symbolic_composition', False),
+            tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
+        )
         axes_range = sage_plot.get_axes_range()
         sig_plot = sig.plot(y_range=(axes_range['ymin'], axes_range['ymax']))
         return sig_plot + sage_plot 

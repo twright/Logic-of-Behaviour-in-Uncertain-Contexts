@@ -8,6 +8,7 @@ from sage.all import RIF, QQ
 from ulbc import Atomic, Signal, G, F, U, And, Or
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
+from ulbc.bondcalculus import System
 
 
 @pytest.fixture(scope='module')
@@ -70,14 +71,28 @@ def odes_whelks(ringxy):
     f = RIF(2)
     return [b*x*(RIF(1)-x) - c*x*(k-x)*y, -e*y*(RIF(1)+y)+f*x*(k-x)*y]
 
+@pytest.fixture(scope='module')
+def plant_clock():
+    return System.load_from_script("models/plantclockmodel.py")
 
-def test_atomic(atomic_x, odes, initials):
-    expected = Signal(RIF(0, 5),
-                      [(RIF(0.00000000000000000, 0.23975290341611911), True),
-                       (RIF(0.60634820757971108, 3.3820262152396059), False),
-                       (RIF(3.7398418173331680, 5.0000000000000000), True)])
-    assert atomic_x.signal_for_system(odes, initials, 5).approx_eq(expected,
-                                                                   0.1)
+
+class TestAtomic:
+    @staticmethod
+    def test_dpdt(plant_clock):
+        p = plant_clock.v('Protein(dEL,iEL;)')
+        q = plant_clock.v('MRNA(tEL,dMEL,dEL,iEL;)')
+        P = Atomic(abs(p) - 1.5)
+        assert (P.dpdt(plant_clock.y, plant_clock.x)
+                == p*(-0.380000000000000*p + q)/abs(p))
+
+    @staticmethod
+    def test_signal_for_system_x(atomic_x, odes, initials):
+        expected = Signal(RIF(0, 5),
+                        [(RIF(0.00000000000000000, 0.23975290341611911), True),
+                        (RIF(0.60634820757971108, 3.3820262152396059), False),
+                        (RIF(3.7398418173331680, 5.0000000000000000), True)])
+        assert atomic_x.signal_for_system(odes, initials, 5).approx_eq(expected,
+                                                                    0.1)
 
 
 def test_context_trivial(ringxy, atomic_x, odes):
