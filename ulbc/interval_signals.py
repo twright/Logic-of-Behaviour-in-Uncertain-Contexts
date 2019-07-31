@@ -45,13 +45,17 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
                               domain)
 
 
-def signal_from_observer(observer, domain, verbosity=0):  # , theta=0.01,
+def signal_from_observer(observer, domain, verbosity=0, global_root_detection=False):  # , theta=0.01,
     # abs_inf=0.0001):
     mask = observer.mask
     if not observer.reach.successful:
         return Signal(domain, [], mask=mask)
+    if global_root_detection:
+        roots = observer.roots_global(domain)
+    else:
+        roots = observer.roots(verbosity=verbosity)
     return signal_given_bool_roots((lambda x: observer.check(x)),
-                                   observer.roots(verbosity=verbosity),
+                                   roots,
                                    domain,
                                    mask=mask)
 

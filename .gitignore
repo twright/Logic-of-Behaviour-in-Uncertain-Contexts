@@ -1,3 +1,6 @@
+flowstar/*.cpp
+flowstar/*.c
+flowstar/*.h
 **/.ipynb_checkpoints/*
 .tags
 .tags_swap

@@ -6,6 +6,7 @@ from cython.operator cimport preincrement as inc
 from libcpp.vector cimport vector
 from libcpp.list cimport list as clist
 from libcpp cimport bool as cbool
+from libcpp.cast cimport const_cast
 from warnings import warn
 
 import sage.all as sage
@@ -19,7 +20,7 @@ from flowstar.TaylorModel cimport TaylorModel
 from flowstar.Continuous cimport Flowpipe
 cimport flowstar.interval as interval
 from flowstar.interval cimport (make_interval, interval_time_fn, interval_fn,
-                                partial_interval_fn,
+                                partial_interval_fn, partial_interval_time_fn,
                                 make_interval_fn)
 from ulbc.interval_utils import fintervals
 from flowstar.tribool cimport tribool, unknown
@@ -144,6 +145,25 @@ cdef class FunctionObserver:
         if self.mask is not None:
             for I in self.mask.pos:
                 self.masked_regions.push_back(make_interval(I))
+
+    def roots_global(f, t, double epsilon=1e-6):
+        """Perform root detection using global evaluation"""
+        # Create an observer for fprime
+        fprime = f.with_f(f.fprime)
+
+        # Convert interval to flow*
+        cdef Interval t_c = make_interval(t) 
+        
+        # Create function wrappers for observers
+        cdef interval_time_fn f_fn = interval_time_fn_from_observer(f)
+        cdef interval_time_fn fprime_fn = interval_time_fn_from_observer(fprime)
+
+        # Detect roots
+        cdef vector[Interval] roots
+        root_detection.detect_roots(roots, f_fn, fprime_fn, t_c, epsilon)
+        
+        # Return roots
+        return [sage.RIF(r.inf(), r.sup()) for r in roots]
 
     def roots(FunctionObserver self, space_domain=None,
               epsilon=0.00001, verbosity=0):
@@ -284,7 +304,7 @@ cdef class FunctionObserver:
 
         return roots
 
-    cdef Interval eval_interval(FunctionObserver self, Interval & x,
+    cdef Interval eval_interval(FunctionObserver self, const Interval & x,
                                 int verbosity=0):
         cdef:
             clist[Flowpipe].iterator fp = \
@@ -771,6 +791,39 @@ cdef class FunctionObserver:
         return optional[vector[Interval]]()
 
 
+cdef Interval apply_observer(void* observer, const Interval & x):
+    cdef Interval x_non_const = x
+    return (<FunctionObserver?>observer).eval_interval(x_non_const)
+
+
+cdef interval_time_fn interval_time_fn_from_observer(FunctionObserver  observer):
+    """Turn a whole observer into an interval_time_fn which performs interval
+    evaluation on an interval."""
+    return partial_interval_time_fn(&apply_observer, <void*>observer)
+
+
+
+
+# cdef object interval_time_fn_from_observer(interval_fn & res, f, vars):
+#     # Create a sage fast_callable object to allow for efficient 
+#     # repeated evaluation of the sage expression
+#     ff = fast_callable(f, vars=vars, domain=sage.RIF)
+#     # Evaluate f directly using sage in Python -- should be
+#     # equivalent and slower, but will give better error messages
+#     # if something goes wrong.
+#     # TODO: this version actually does not work at the moment
+#     # ff = lambda *xs: f(**{str(k): v for k, v in zip(vars, xs)})
+#     # Wrap the python function as a C++ function using flow*'s
+#     # interval type.
+#     (&res)[0] = make_interval_fn(ff)
+#     # We must return the fast callable object ff since otherwise
+#     # Python might garbage collect it whilst it is still in use
+#     # with C++ code.
+#     # The caller should keep it around as long as they wish to
+#     # use the interval fn
+#     return ff
+
+
 cdef object interval_fn_from_sage(interval_fn & res, f, vars):
     # Create a sage fast_callable object to allow for efficient 
     # repeated evaluation of the sage expression
@@ -853,8 +906,21 @@ cdef class SageObserver(FunctionObserver):
             mask=mask,
         )
         observer.bools = self.bools
-        observer.poly_f_fns = self.poly_f_fns
-        observer.poly_fprime_fns = self.poly_fprime_fns
+        # observer.poly_f_fns = self.poly_f_fns
+        # observer.poly_fprime_fns = self.poly_fprime_fns
+
+        return observer
+
+    def with_f(self, f):
+        observer = SageObserver(
+            f,
+            self.reach,
+            # fprime=self.fprime,
+            symbolic_composition=self.symbolic_composition,
+            tentative_unpreconditioning=self.tentative_unpreconditioning,
+            mask=self.mask,
+        )
+        # observer.bools = self.bools
 
         return observer
 
@@ -927,6 +993,18 @@ cdef class PolyObserver(FunctionObserver):
         observer.bools = self.bools
         observer.poly_f_fns = self.poly_f_fns
         observer.poly_fprime_fns = self.poly_fprime_fns
+
+        return observer
+
+    def with_f(self, f):
+        observer = PolyObserver(
+            f,
+            self.reach,
+            symbolic_composition=self.symbolic_composition,
+            tentative_unpreconditioning=self.tentative_unpreconditioning,
+            mask=self.mask,
+        )
+        # observer.bools = self.bools
 
         return observer
 

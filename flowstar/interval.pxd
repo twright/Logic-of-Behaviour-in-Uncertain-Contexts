@@ -59,7 +59,7 @@ cdef extern from * nogil:
             /*
             for (unsigned int i = 0; i < I.size(); ++i) {
                 I.at(i).toString(s);
-                std::cout << "I[" << i << "] = " << s << std::endl;
+                // std::cout << "I[" << i << "] = " << s << std::endl;
             }
             */
             flowstar::Interval res = f(I);
@@ -79,6 +79,10 @@ cdef extern from *:
     typedef std::function<flowstar::Interval(
         void*, std::vector<flowstar::Interval> &
     )> partial_interval_fn_t;
+
+    typedef std::function<flowstar::Interval(
+        void*, const flowstar::Interval &
+    )> partial_interval_time_fn_t;
     
     // flowstar::Interval (*partial_interval_fn)(void* obj, flowstar::Interval & x)
 
@@ -88,6 +92,15 @@ cdef extern from *:
             return func(obj, x);
         };
     }
+
+    std::function<flowstar::Interval(const flowstar::Interval &)>
+    partial_interval_time_fn(partial_interval_time_fn_t func, void* obj) {
+        return [func, obj] (const flowstar::Interval & x) -> flowstar::Interval {
+            return func(obj, x);
+        };
+    }
     """ 
     interval_fn partial_interval_fn(void* func, void* obj)
     ctypedef Interval (*partial_interval_fn_t)(void* obj, vector[Interval] &)
+    interval_time_fn partial_interval_time_fn(void* func, void* obj)
+    ctypedef Interval (*partial_interval_time_fn_t)(void* obj, const Interval &)

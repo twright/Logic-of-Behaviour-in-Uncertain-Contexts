@@ -74,7 +74,8 @@ cdef class SagePlotMixin:
         else:
             poly = Poly(self.var_ring(poly))
 
-        poly_observer = PolyObserver(poly, self, self.symbolic_composition)
+        poly_observer = PolyObserver(poly, self,
+                                     symbolic_composition=self.symbolic_composition)
 
         if duration is None:
             duration = (0, float((<CReach?>self).c_reach.time))

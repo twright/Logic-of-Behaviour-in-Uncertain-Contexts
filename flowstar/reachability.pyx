@@ -479,16 +479,15 @@ cdef class CReach:
             composed_domain = space_domain.value().get()
             composed_domain.insert(composed_domain.begin(), deref(domain)[0])
 
-        print("in eval")
-        print("fp.size =", self.c_reach.flowpipes.size())
-        print("fp_compo.size =", self.flowpipes_compo.size())
-        print("flowpipesCompo.size =", self.c_reach.flowpipesCompo.size())
-        print("domains.size =", self.c_reach.domains.size())
+        # print("in eval")
+        # print("fp.size =", self.c_reach.flowpipes.size())
+        # print("fp_compo.size =", self.flowpipes_compo.size())
+        # print("flowpipesCompo.size =", self.c_reach.flowpipesCompo.size())
+        # print("domains.size =", self.c_reach.domains.size())
 
         while (    domain   != domain_end
                and fp       != fp_end
                and fp_compo != fp_compo_end):
-            # print("in loop")
             T = deref(domain)[0]
             loop_domain = (&composed_domain
                            if space_domain.has_value()
@@ -500,15 +499,12 @@ cdef class CReach:
                 domain_copy = deref(loop_domain)
                 domain_copy[0] = T.intersect(I) # No bounds checking!
                 domain_copy[0].add_assign(-t)
-                print("{} overlaps {}".format(interval.as_str(I),
-                                              interval.as_str(T)))
+                # print("{} overlaps {}".format(interval.as_str(I),
+                #                               interval.as_str(T)))
 
                 # In the normal case we directly evaluate the intervals for
                 # each component of the system
                 # print("doing plain intEval with varIDs")
-                print("doing normal eval")
-                print("fp_compo->has_value() =",
-                      deref(fp_compo).has_value())
                 if not deref(fp_compo).has_value():
                     self.compose_flowpipe(deref(fp), deref(fp_compo))
                     assert deref(fp_compo).has_value()

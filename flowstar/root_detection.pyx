@@ -14,7 +14,7 @@ def py_detect_roots(Poly f, Poly fprime, t, double epsilon=1e-6, int verbosity=1
     cdef Interval R = F.call(Interval(0.0))
     cdef Interval Rprime = Fprime.call(Interval(0.0))
 
-    print("F(0)  = [{}..{}]".format(R.inf(), R.sup()))
+    print(" F(0) = [{}..{}]".format(R.inf(), R.sup()))
     print("F'(0) = [{}..{}]".format(Rprime.inf(), Rprime.sup()))
 
     detect_roots(roots, F, Fprime, T, epsilon, verbosity)

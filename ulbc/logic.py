@@ -4,6 +4,7 @@ from __future__ import (division,
 
 import itertools
 import operator
+from typing import *
 import time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
@@ -85,8 +86,8 @@ class Logic(object):
         if not reach.successful:
             raise FlowstarFailedException(
                 "Did not run successfully!\n"
-                "status = {}\nnum_flowpipes".format(reach.result,
-                                                    reach.num_flowpipes))
+                "status = {}\nnum_flowpipes = {}".format(reach.result,
+                                                         reach.num_flowpipes))
         # Report time of each stage of computation
         t1 = time.time()
         print("Computed {} flowpipes in {} sec".format(
@@ -389,7 +390,7 @@ class Atomic(Logic):
 
         return observer
 
-    def signal(self, reach, odes, space_domain=None, mask=None, **kwargs):
+    def signal(self, reach, odes, space_domain=None, mask=None, global_root_detection=False, **kwargs):
         observer = self.observer(
             reach, space_domain, mask,
             kwargs.get('symbolic_composition', False),
@@ -402,6 +403,7 @@ class Atomic(Logic):
             observer,
             RIF(0, reach.time - 1e-3),
             verbosity=kwargs.get('verbosity', 0),
+            global_root_detection=global_root_detection,
         )
 
     def signal_fn(self, odes, r, space_domain, mask=None, **kwargs):
