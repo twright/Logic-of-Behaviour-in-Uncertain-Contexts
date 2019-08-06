@@ -84,6 +84,7 @@ def nonpoly_reach(nonpoly_system):
 class TestSageObserver(object):
     """Tests for interval evaluation."""
 
+    @pytest.mark.slow
     def test_t_call(self, nonpoly_reach):
         t, x = sg.SR.var('t, x')
         # pytest.set_trace()
@@ -174,12 +175,14 @@ class TestRestrictedObserverMask(object):
 
 
 class TestPolyObserverRoots(object):
+    # @pytest.mark.slow
     def test_unrestricted(self, observer):
         observer.reach.prepare()
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
+    # @pytest.mark.slow
     def test_unrestricted_symbolic_composition(self, observer_sym):
         assert roots_approx_eq(observer_sym.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
@@ -288,18 +291,19 @@ class TestPolyObserverEval(object):
                         RIF(-0.79464978559099065, 3.9296122373432128)) < 1e-3
 
     def test_xy_squared_call(self, ringxy, odes, reach):  # NOQA
-        _, (x, y) = ringxy
+        PR, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
-        observer = PolyObserver(poly.p, reach, symbolic_composition=False)
+        observer = PolyObserver(PR(poly.p), reach, symbolic_composition=False)
         img = observer(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
                         RIF(6.7527704962289236, 25.081577547495158)) < 1e-3
 
+    @pytest.mark.slow
     def test_xy_squared_call_symbolic(self, ringxy, odes, reach):  # NOQA
-        _, (x, y) = ringxy
+        PR, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
-        observer = PolyObserver(poly.p, reach, symbolic_composition=True)
+        observer = PolyObserver(PR(poly.p), reach, symbolic_composition=True)
         img = observer(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
@@ -314,9 +318,9 @@ class TestPolyObserverBoolEval(object):
         assert res is False
 
     def test_minus_x_call(self, ringxy, odes, reach):  # NOQA
-        _, (x, y) = ringxy
+        PR, (x, y) = ringxy
         poly = Atomic(-x)
-        observer = PolyObserver(poly.p, reach, symbolic_composition=False)
+        observer = PolyObserver(PR(poly.p), reach, symbolic_composition=False)
         res = observer.check(RIF(1, 2))
         assert res is True
 

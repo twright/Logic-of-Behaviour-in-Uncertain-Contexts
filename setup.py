@@ -178,25 +178,30 @@ class TestCommand(Command):
     user_options = [
         ('verbose-test', 'v', 'Verbose?'),
         ('all', 'a', 'Run all tests?'),
+        ('most', 'm', 'Run most tests (including slower ones)?'),
     ]
 
     def initialize_options(self):
         self.verbose_test = False
         self.all = False
+        self.most = False
 
     def finalize_options(self):
         self.verbose_test = bool(self.verbose_test)
         self.all = bool(self.all)
+        self.most = bool(self.most)
 
     def run(self):
         self.run_command('build_ext')
         # self.run_command('pytest')
         self.announce('Testing...')
-        cmd = ['./python3', '-m', 'pytest', '--disable-pytest-warnings']  # , '--doctest-cython']
+        cmd = ['/usr/bin/env', 'python3', '-m', 'pytest', '--disable-pytest-warnings']  # , '--doctest-cython']
         if self.verbose_test:
             cmd.append('-v')
         if self.all:
-            cmd.append('-m "slow"')
+            cmd.append('-m "slow or not slow"')
+        elif self.most:
+            cmd.append('-m "not very_slow and (slow or not slow)"')
         subprocess.call(cmd)
 
 

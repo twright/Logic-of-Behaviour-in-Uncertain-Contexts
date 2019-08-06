@@ -25,9 +25,12 @@ class System:
             y : tuple,
             varmap : Optional[dict] = None):
         self._R = R
-        self._x = sg.vector(x)
+        if R == sg.SR:
+            self._x = sg.vector(self.R.var(str(xi)) for xi in x)
+        else:
+            self._x = sg.vector(map(self.R, x))
         self._y0 = sg.vector([sg.RIF(y00) for y00 in y0])
-        self._y = sg.vector(y)
+        self._y = sg.vector(map(self.R, y))
         if varmap is None:
             self._varmap = {str(xi): xi for xi in x}
         else:

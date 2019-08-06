@@ -5,32 +5,11 @@ import sage.all as sage
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc import Atomic, Signal, G, F, U, And, Or
+from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body)
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
 from ulbc.bondcalculus import System
-
-
-@pytest.fixture(scope='module')
-def ringxy():
-    return sage.PolynomialRing(sage.RIF, 'x, y').objgens()
-
-
-@pytest.fixture(scope='module')
-def ringxyQQ():
-    return sage.PolynomialRing(sage.QQ, 'x, y').objgens()
-
-
-@pytest.fixture(scope='module')
-def odes(ringxy):
-    _, (x, y) = ringxy
-    return [-y, x]
-
-
-@pytest.fixture(scope='module')
-def odesQQ(ringxyQQ):
-    _, (x, y) = ringxyQQ
-    return [-y, x]
+from ulbc.symbolic import var
 
 
 @pytest.fixture(scope='module')
@@ -51,32 +30,8 @@ def atomic_q(ringxy):
     return Atomic(3 - y)
 
 
-@pytest.fixture(scope='module')
-def initials():
-    return [RIF(1, 2), RIF(3, 4)]
-
-
-@pytest.fixture(scope='module')
-def initials2():
-    return [RIF(4, 5), RIF(1, 2)]
-
-
-@pytest.fixture(scope='module')
-def odes_whelks(ringxy):
-    _, (x, y) = ringxy
-    k = RIF(0.8)
-    b = RIF(0.6)
-    c = RIF(0.3)
-    e = RIF(0.05)
-    f = RIF(2)
-    return [b*x*(RIF(1)-x) - c*x*(k-x)*y, -e*y*(RIF(1)+y)+f*x*(k-x)*y]
-
-@pytest.fixture(scope='module')
-def plant_clock():
-    return System.load_from_script("models/plantclockmodel.py")
-
-
 class TestAtomic:
+    @pytest.mark.slow
     @staticmethod
     def test_dpdt(plant_clock):
         p = plant_clock.v('Protein(dEL,iEL;)')
@@ -86,6 +41,15 @@ class TestAtomic:
                 == p*(-0.380000000000000*p + q)/abs(p))
 
     @staticmethod
+    def test_polynomial_dpdt(ringxy, odes):
+        R, (x, y) = ringxy
+        at = Atomic(2*x + 3*y)
+        # print(f"expr = {expr}")
+        assert R(at.dpdt(odes, (x, y))) == 3*x - 2*y
+        # assert bool(rel)
+
+    @pytest.mark.slow
+    @staticmethod
     def test_signal_for_system_x(atomic_x, odes, initials):
         expected = Signal(RIF(0, 5),
                         [(RIF(0.00000000000000000, 0.23975290341611911), True),
@@ -94,36 +58,82 @@ class TestAtomic:
         assert atomic_x.signal_for_system(odes, initials, 5).approx_eq(expected,
                                                                     0.1)
 
+    @staticmethod
+    def test_relation():
+        at = Atomic(var("x") + 2 > var("y"))
+        assert at.p == var("x") + 2 - var("y")
+        assert str(at) == "x + 2 > y"
 
-def test_context_trivial(ringxy, atomic_x, odes):
-    _, (x, y) = ringxy
-    prop = {x: RIF(-0.5, 0.5), y: RIF(-0.5, 0.5)} >> Atomic(x)
-    res1 = prop.signal_for_system(odes, [RIF(1.5), RIF(3.5)], 5,
-                               epsilon_ctx=0.1)
-    res2 = atomic_x.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 5)
-    assert res1.approx_eq(res2, 0.5)
+    @staticmethod
+    @pytest.mark.parametrize(
+        "k, res",
+        [(1.5, None), (0.5, True), (2.5, False)],
+    )
+    def test_signal_for_system_zero(ringxy, odes, initials, k, res):
+        _, (x, y) = ringxy
+        assert Atomic(x - k).signal_for_system(odes, initials, 0)(0) is res
 
 
-@pytest.mark.slow
-def test_context_with_jump(ringxy, odes):
-    _, (x, y) = ringxy
-    prop = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
-    res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
-                                 epsilon_ctx=0.1)
-    expected = Signal(
-        RIF(0.00000000000000000, 6.2831853071795872),
-        [(RIF(0.29457118627404310, 2.8475214673157501), False),
-         (RIF(3.4366638398638365, 5.9896141209055438), True)])
-    assert res.approx_eq(expected, 0.1)
+
+class TestVarContextBody:
+    @staticmethod
+    def test_var_context_body_str(ringxy):
+        R, (x, y) = ringxy
+        assert (str(VarContextBody({x: RIF(1,2), y: RIF(3,4)}))
+            == "{x: [1 .. 2], y: [3 .. 4]}")
+
+    @staticmethod
+    def test_var_context_body_jump(ringxy):
+        R, (x, y) = ringxy
+        assert (str(VarContextBody({x: RIF(1,2), y: RIF(3,4)}))
+            == "{x: [1 .. 2], y: [3 .. 4]}")
+
+
+class TestBondProcessContextBody:
+    @staticmethod
+    def test_bond_process_context_body_str(ringxy):
+        R, (x, y) = ringxy
+        assert (str(BondProcessContextBody("[0.5, 2.5] E"))
+            == "[0.5, 2.5] E")
+
+
+class TestC:
+    @pytest.mark.slow
+    @staticmethod
+    def test_context_trivial(ringxy, atomic_x, odes):
+        _, (x, y) = ringxy
+        prop = {x: RIF(-0.5, 0.5), y: RIF(-0.5, 0.5)} >> Atomic(x)
+        res1 = prop.signal_for_system(odes, [RIF(1.5), RIF(3.5)], 5,
+                                epsilon_ctx=0.1)
+        res2 = atomic_x.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 5)
+        assert res1.approx_eq(res2, 0.5)
+
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_context_with_jump(ringxy, odes):
+        _, (x, y) = ringxy
+        prop = {y: RIF(1, 5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
+        res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
+                                    epsilon_ctx=0.1)
+        expected = Signal(
+            RIF(0.0000000000000000, 6.2831853071795872),
+            [(RIF(0.0000000000000000 , 0.19638079084936209), True),
+             (RIF(0.29457118627404310, 3.1420926535897933 ), False),
+             (RIF(3.6330446307131989 , 6.2831853071795872 ), True)],
+        )
+        assert res.approx_eq(expected, 0.1)
 
 
 class TestMasks(object):
+    @pytest.mark.slow
     def test_standard_mask(self, atomic_p, odes, initials2):
         mask = Mask(RIF(0, 2*sage.pi), [RIF(0, 2*sage.pi)])
         sig = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
                                          use_masks=True)
         assert sig.mask.approx_eq(mask)
 
+    @pytest.mark.slow
     def test_no_mask(self, atomic_p, odes, initials2):
         sig = atomic_p.signal_for_system(odes, initials2, 2*sage.pi)
         assert sig.mask is None
@@ -148,6 +158,7 @@ class TestMasks(object):
         print("sig =", sig)
         assert sig(0) is False
 
+    @pytest.mark.slow
     def test_and_unary_point(self, atomic_p, odes, initials2):
         siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
                                           use_masks=True)
@@ -157,6 +168,7 @@ class TestMasks(object):
         assert sigb.mask is not None
         assert sigb.mask.approx_eq(siga.mask)
 
+    @pytest.mark.slow
     def test_and_binary_point(self, atomic_p, atomic_q, odes, initials2):
         siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
                                           use_masks=True)
@@ -172,6 +184,7 @@ class TestMasks(object):
         print(siga & sigb)
         assert sigc.approx_eq(siga & sigb)
 
+    @pytest.mark.slow
     def test_or_unary_point(self, atomic_p, odes, initials2):
         siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
                                           use_masks=True)
@@ -181,6 +194,7 @@ class TestMasks(object):
         assert sigb.mask is not None
         assert sigb.mask.approx_eq(siga.mask)
 
+    @pytest.mark.slow
     def test_or_binary_point(self, atomic_p, atomic_q, odes, initials2):
         siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
                                           use_masks=True)
@@ -196,7 +210,7 @@ class TestMasks(object):
         print(siga | sigb)
         assert sigc.approx_eq(siga | sigb)
 
-    # @pytest.mark.slow
+    @pytest.mark.slow
     def test_masked_context_with_jump(self, ringxy, odes):
         _, (x, y) = ringxy
         prop = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
@@ -243,6 +257,7 @@ class TestU(object):
                   F(RIF(1, 2), Q & S)).atomic_propositions
                 == [P, Q, S])
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("pstr", ["x - 1", "y - 2", "x**2 + y**2 - 3"])
     def test_signal_F_equiv(self, pstr, ringxy, odes):
         R, (x, y) = ringxy
@@ -274,6 +289,7 @@ class TestU(object):
             odes_whelks, initials, 5)
         assert sigU.approx_eq(sigF)
 
+    @pytest.mark.slow
     @pytest.mark.xfail
     def test_signal(self, ringxy, odes):
         R, (x, y) = ringxy
@@ -288,6 +304,7 @@ class TestU(object):
         assert res.approx_eq(expected, 0.1)
 
     @pytest.mark.xfail
+    @pytest.mark.slow
     def test_signal_rational(self, ringxyQQ, odesQQ):
         R, (x, y) = ringxyQQ
         P = Atomic(x - 3)
@@ -302,6 +319,7 @@ class TestU(object):
         assert res.approx_eq(expected, 0.1)
 
     @pytest.mark.xfail
+    @pytest.mark.slow
     def test_numerical_signal(self, ringxyQQ, odesQQ):
         R, (x, y) = ringxyQQ
         P = Atomic(x - 3)
@@ -327,6 +345,7 @@ class TestD(object):
 
 
 class TestLogicContextSignal(object):
+    @pytest.mark.slow
     def test_context_signal_for_signal_child(self, ringxy, odes):
         R, (x, y) = ringxy
 
@@ -344,6 +363,7 @@ class TestLogicContextSignal(object):
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.1)
 
+    @pytest.mark.slow
     def test_context_and_signal(self, ringxy, odes):
         R, (x, y) = ringxy
 
@@ -353,6 +373,7 @@ class TestLogicContextSignal(object):
         sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials, 5)
         assert ctx.signal.approx_eq(sig, 0.01)
 
+    @pytest.mark.slow
     def test_context_refined_and_signal(self, ringxy, odes):
         R, (x, y) = ringxy
 
@@ -372,6 +393,7 @@ class TestLogicContextSignal(object):
         assert refined_sig.approx_eq(plain_sig, 0.3)
         assert refined_sig.approx_eq(expected, 0.01)
 
+    @pytest.mark.slow
     def test_context_signal_and_signal(self, ringxy, odes):
         R, (x, y) = ringxy
 
@@ -381,6 +403,7 @@ class TestLogicContextSignal(object):
         sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials, 5)
         assert ctx.signal.approx_eq(sig, 0.01)
 
+    @pytest.mark.very_slow
     @pytest.mark.slow
     def test_context_context_signals(self, ringxy, odes_whelks):
         R, (x, y) = ringxy
@@ -404,6 +427,7 @@ class TestLogicContextSignal(object):
                                                **kwargs)
         assert ctx_sig.signal.approx_eq(sig, 0.001)
 
+    @pytest.mark.very_slow
     @pytest.mark.slow
     def test_differential_context_context_signals(self, ringxy, odes_whelks):
         R, (x, y) = ringxy

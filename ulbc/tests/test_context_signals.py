@@ -1,6 +1,8 @@
 # import pytest
 # import sage.all as sage
 from sage.all import RIF
+import pytest
+import sage.all as sg
 
 from ulbc.interval_signals import Signal
 from ulbc.context_signals import (ContextSignal,
@@ -13,6 +15,7 @@ from flowstar.observers import PolyObserver
 from flowstar.tests.test_reachability import ringxy, odes  # NOQA
 from ulbc.logic import Atomic
 from ulbc.interval_utils import finterval, int_dist, int_sorted
+from ulbc.bondcalculus import System
 # from flowstar.interval import int_dist
 
 
@@ -133,6 +136,7 @@ class TestContextSignal(object):
     #                " ContextSignal([1 .. 2], {'x': 2, 'y': [6 .. 7]},"
     #                " None, None)]")
 
+    @pytest.mark.slow
     def test_signal_gen(self, ringxy):  # NOQA
         R, (x, y) = ringxy
         odes = [-y, x]
@@ -149,12 +153,18 @@ class TestContextSignal(object):
              (RIF(0.60634820757971108, 3.38202621523960590), False),
              (RIF(3.73984181733316800, 5.00000000000000000), True)],
         )
-        reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, symbolic_composition=False)
+        # Should work in SR and convert only when we create the
+        # observer
+        system = System(sg.SR, (x, y), initials, odes)
+        reach = system.reach(5, step=(0.001, 0.1), order=10)
+        observer = PolyObserver(R(atomic.p), reach,
+            fprime=R(atomic.dpdt(odes, (x, y))),
+            symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         assert ctx.signal.approx_eq(expected, 0.1)
 
+    @pytest.mark.slow
     def test_signal_gen_restricted_context(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
@@ -171,7 +181,7 @@ class TestContextSignal(object):
              (RIF(3.54895843840935880, 4.99900000000000060), True)],
         )
         # reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p,
+        observer = PolyObserver(R(atomic.p),
                                 Reach(odes, initials, 5, (0.001, 0.1),
                                       order=10),
                                 symbolic_composition=False)
@@ -180,6 +190,7 @@ class TestContextSignal(object):
         print(ctx.signal)
         assert ctx.signal.approx_eq(expected, 0.1)
 
+    @pytest.mark.slow
     def test_signal_restricted_via_children(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
@@ -196,7 +207,7 @@ class TestContextSignal(object):
              (RIF(3.66473142161714090, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, symbolic_composition=False)
+        observer = PolyObserver(R(atomic.p), reach, symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         child_context_sig = ctx.children[3]
@@ -205,6 +216,7 @@ class TestContextSignal(object):
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.1)
 
+    @pytest.mark.slow
     def test_signal_further_restricted_via_children(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
@@ -221,7 +233,7 @@ class TestContextSignal(object):
              (RIF(3.58023176070767980, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach,
+        observer = PolyObserver(R(atomic.p), reach,
             symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
@@ -236,6 +248,7 @@ class TestContextSignal(object):
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.01)
 
+    @pytest.mark.slow
     def test_trivial_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
@@ -246,12 +259,13 @@ class TestContextSignal(object):
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach,
+        observer = PolyObserver(R(atomic.p), reach,
             symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         assert ctx.refined_signal(0).approx_eq(ctx.signal, 0.01)
 
+    @pytest.mark.slow
     def test_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
@@ -268,13 +282,14 @@ class TestContextSignal(object):
              (RIF(3.73207557917046400, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach,
+        observer = PolyObserver(R(atomic.p), reach,
             symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         print(ctx.refined_signal(1))
         assert ctx.refined_signal(1).approx_eq(expected, 0.01)
 
+    @pytest.mark.slow
     def test_further_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
@@ -291,7 +306,7 @@ class TestContextSignal(object):
              (RIF(3.73078272148854980, 4.99900000000000060), True)],
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(atomic.p, reach, symbolic_composition=False)
+        observer = PolyObserver(R(atomic.p), reach, symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         for c in ctx.children:
