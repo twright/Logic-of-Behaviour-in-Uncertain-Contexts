@@ -143,7 +143,7 @@ class TestContextSignal(object):
         atomic = Atomic(x)
 
         def signal_fn(r, _, mask=None):
-            return Atomic(x).signal(r, odes)
+            return Atomic(x).signal(r)
 
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
@@ -170,7 +170,7 @@ class TestContextSignal(object):
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain, mask=None):
-            return atomic.signal(r, odes, space_domain=space_domain)
+            return atomic.signal(r, space_domain=space_domain)
 
         space_domain = [RIF(1, 1.5), RIF(3.5, 3.75)]
         initials = [RIF(1, 2), RIF(3, 4)]
@@ -196,7 +196,7 @@ class TestContextSignal(object):
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain, mask=None):
-            return atomic.signal(r, odes, space_domain=space_domain)
+            return atomic.signal(r, space_domain=space_domain)
 
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
@@ -222,7 +222,7 @@ class TestContextSignal(object):
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain, mask=None):
-            return Atomic(x).signal(r, odes, space_domain=space_domain)
+            return Atomic(x).signal(r, space_domain=space_domain)
 
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
@@ -254,7 +254,7 @@ class TestContextSignal(object):
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain, mask=None):
-            return atomic.signal(r, odes, space_domain=space_domain)
+            return atomic.signal(r, space_domain=space_domain)
 
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
@@ -271,7 +271,7 @@ class TestContextSignal(object):
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain, mask=None):
-            return atomic.signal(r, odes, space_domain=space_domain)
+            return atomic.signal(r, space_domain=space_domain)
 
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
@@ -295,7 +295,7 @@ class TestContextSignal(object):
         atomic = Atomic(x)
 
         def signal_fn(r, space_domain, mask=None):
-            return atomic.signal(r, odes, space_domain=space_domain)
+            return atomic.signal(r, space_domain=space_domain)
 
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]

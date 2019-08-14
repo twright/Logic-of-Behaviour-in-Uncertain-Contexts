@@ -11,6 +11,7 @@ from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 from distutils.extension import Extension
 from distutils.cmd import Command
+from typing import *
 # from distutils.core import setup
 # from setuptools import find_packages
 
@@ -153,7 +154,7 @@ class ChooseFlowstarCommand(Command):
 
 
 class CleanFlowstarCommand(Command):
-    user_options = []
+    user_options: List[Tuple[str, str, str]] = []
 
     def initialize_options(self):
         pass
@@ -179,19 +180,26 @@ class TestCommand(Command):
         ('verbose-test', 'v', 'Verbose?'),
         ('all', 'a', 'Run all tests?'),
         ('most', 'm', 'Run most tests (including slower ones)?'),
+        ('failed', 'f', 'Run only tests which failed last time.'),
+        ('fail-fast', 'x', 'Stop after the first test fails.'),
     ]
 
     def initialize_options(self):
         self.verbose_test = False
         self.all = False
         self.most = False
+        self.failed = False
+        self.fail_fast = False
 
     def finalize_options(self):
         self.verbose_test = bool(self.verbose_test)
         self.all = bool(self.all)
         self.most = bool(self.most)
+        self.failed = bool(self.failed)
+        self.fail_fast = bool(self.fail_fast)
 
     def run(self):
+        # self.announce("anouncing", 1)
         self.run_command('build_ext')
         # self.run_command('pytest')
         self.announce('Testing...')
@@ -199,14 +207,26 @@ class TestCommand(Command):
         if self.verbose_test:
             cmd.append('-v')
         if self.all:
-            cmd.append('-m "slow or not slow"')
+            self.announce("running all tests")
+            # cmd.append('-m "slow or not slow or very_slow or not very_slow"')
+            cmd.extend(['-m', 'very_slow or not very_slow'])
         elif self.most:
-            cmd.append('-m "not very_slow and (slow or not slow)"')
+            self.announce("running *most* tests")
+            cmd.extend(['-m', 'not very_slow'])
+        else:
+            self.announce("warning: excluding slow tests")
+            cmd.extend(['-m', 'not slow and not very_slow'])
+        if self.failed:
+            cmd.extend(["--lf", "--lfnf=all"])
+        if self.fail_fast:
+            cmd.append("-x")
+
+        print(f"cmd = {repr(cmd)}")
         subprocess.call(cmd)
 
 
 class BuildFlowstarCommand(Command):
-    user_options = []
+    user_options: List[Tuple[str, str, str]] = []
 
     def initialize_options(self):
         pass

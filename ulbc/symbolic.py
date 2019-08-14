@@ -46,16 +46,30 @@ class VariableManager:
         self._name_template = name_template
         self._saved_varmanagers = []
 
-    def var(self, name):
+    @overload
+    def var(self, name: str) -> sg.SR: ...
+
+    @overload
+    def var(self, *names: str) -> List[sg.SR]: ...
+
+    def var(self, *names):
+        if len(names) != 1:
+            return [self.var(name) for name in names]
+        else:
+            name = names[0]
+
         try:
             var = self.varmap[name]
             return var
         except KeyError:
-            var = sg.SR.symbol(
-                name if is_sage_identifier(name) else f"v{self._var_index}",
-                domain='real')
+            if is_sage_identifier(name):
+                vname = name
+            else:
+                vname = f"v{self._var_index}"
+                self._var_index += 1
+
+            var = sg.SR.symbol(vname, domain='real')
             self.varmap[name] = var
-            self._var_index += 1
             return var
 
     def varname(self, v) -> str:
@@ -64,6 +78,9 @@ class VariableManager:
     def clear(self):
         self.varmap = bidict()
         self._var_index = 0
+
+    def __contains__(self, key):
+        return key in self.varmap
 
     def __enter__(self):
         global varmanager
@@ -78,12 +95,17 @@ class VariableManager:
 
 varmanager = VariableManager('v')
 
+@overload
+def var(name: str) -> sg.SR: ...
 
-def var(name):
+@overload
+def var(*names: str) -> List[sg.SR]: ...
+
+def var(*names):
     """Declare a variable using sage and our variable manager."""
     global varmanager
 
-    return varmanager.var(name)
+    return varmanager.var(*names)
 
 
 def varname(v) -> str:

@@ -6,8 +6,11 @@ import tempfile
 import random
 from flowstar.reachability import Reach
 from ulbc.interval_utils import fintervals
+from ulbc.symbolic import *
+from typing import *
 
-__all__ = ['BondModel', 'BondwbException', 'BondProcess', 'System']
+__all__ = ['BondModel', 'BondwbException', 'BondProcess', 'System',
+           'BondSystem']
 
 
 BOND_DIRECTORY = "~/Documents/PhD/bondwb"
@@ -40,9 +43,21 @@ class System:
         self._poly_var_ring = sg.PolynomialRing(sg.RIF,
             ', '.join(map(str, self._varmap.values())))
 
+    def with_y0(self, y0):
+        return System(self._R, self.x, y0, self.y, self.varmap)
+
     @property
     def PR(self):
         return self._poly_var_ring
+
+    def embed(self, expr):
+        """Embed an expression from the global variable manager
+        within the variables of the system."""
+        return self.R(sg.SR(expr).substitute({
+            var(n): v
+            for n, v in self.varmap.items()
+            if  n in varmanager 
+        }))
     
     @classmethod
     def embedding(Cls, subsys : 'System', sys : 'System'):
@@ -145,13 +160,64 @@ class System:
             )
         else:
             # Polynomial case
-            print("reach polynomial case")
+            # print("reach polynomial case")
             return Reach(
                 self.y,
                 self.y0,
                 duration,
                 system=self,
                 **kwargs,
+            )
+
+
+class BondSystem(System):
+    model: 'BondModel'
+    affinity_network: str
+
+    def __init__(self,
+            R,
+            x: tuple,
+            y0: tuple,
+            y: tuple,
+            affinity_network: str,
+            model: Optional['BondModel'] = None,
+            varmap: Optional[dict] = None):
+        super().__init__(R, x, y0, y, varmap=varmap)
+        self.model = model
+        self.affinity_network = affinity_network
+
+    def with_y0(self, y0):
+        return BondSystem(self._R, self.x, y0, self.y, 
+            self.affinity_network,
+            model=self.model, varmap=self.varmap)
+
+    def process_from_state(self, state: List[Any]):
+        assert self.model is not None
+        assert self.varmap is not None
+        return self.model.process(
+            {k: v for (k, n), v in zip(self.varmap.items(), state)},
+            self.affinity_network,
+        )
+
+    @classmethod 
+    def load_from_script(Cls, filename: str,
+            model: Optional['BondModel'] = None):
+        data : dict = {}
+
+        exec(Path(filename).read_text(), data)
+
+        if data['y'] is not None:
+            return BondSystem(
+                data['R'], data['x'], data['y0'], data['y'],
+                data['affinity_network'],
+                model=model, varmap=data['varmap'],
+            )
+        else:
+            return BondSystem(
+                sg.SR, data['xsr'], data['y0'], data['ysr'],
+                data['affinity_network'],
+                model=model,
+                varmap={k: v for k, v in data['varmapsr'].items()},
             )
 
 
@@ -166,6 +232,31 @@ class BondModel:
     def _read(self):
         self._bondwb.expect('BondWB:> ', timeout=99999)
         return self._bondwb.before
+
+    @overload
+    def process(self, x: str) -> 'BondProcess': ...
+    @overload
+    def process(self, x: str, affinity_network: str) -> 'BondProcess': ...
+    @overload
+    def process(self, x: Dict[str, Any], affinity_network: str) -> 'BondProcess': ...
+    # @overload
+    # def process(self, x: List[Any], affinity_network: str) -> 'BondProcess': ...
+    def process(self, p, n=None):
+        if isinstance(p, str) and n is None:
+            return BondProcess(p, self)
+        if isinstance(p, str):
+            return BondProcess(f"{p} || {n}", self)
+        if isinstance(p, dict):
+            return BondProcess(
+                " || ".join([f"[{v}] {k}" for k, v in p.items()] + [n]),
+                self,
+            )
+        # if isinstance(p, list):
+        #     return BondProcess(" || ".join(
+        #             [f"[{v}] {k}" for k, v in zip(self.varmap.keys(), p)]
+        #         + [n]), self)
+        
+        raise TypeError("Incorrectly typed process expression.")
 
     def plot(self, pstr : str, a : float, b : float, nsteps: int):
         self._run('plot', '"{}"'.format(pstr), a, b, nsteps)
@@ -191,13 +282,20 @@ class BondModel:
 
 
 class BondProcess:
+    _expr: str
+    _model: BondModel
+
     def __init__(self, expr : str, model : BondModel):
         self._expr = expr
         self._model = model
 
     @property
-    def expr(self):
+    def expr(self) -> str:
         return self._expr
+
+    @property
+    def model(self) -> BondModel:
+        return self._model
 
     def __repr__(self):
         return 'BondProcess({}, {})'.format(
@@ -205,7 +303,7 @@ class BondProcess:
             repr(self._model),
         )
 
-    def compose(self, pstr: str):
+    def compose(self, pstr: str) -> 'BondProcess':
         return BondProcess('({}) || ({})'.format(self.expr, pstr),
                            self._model)
 
@@ -227,5 +325,5 @@ class BondProcess:
 
         self.extract(filename)
         
-        return System.load_from_script(filename)
+        return BondSystem.load_from_script(filename, self.model)
 

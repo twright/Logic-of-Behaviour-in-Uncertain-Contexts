@@ -25,14 +25,13 @@ from ulbc.context_signals import (ContextSignal,
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer, masked_ctx)
 from ulbc.interval_utils import finterval
-from ulbc.signal_masks import (Mask, mask_zero, context_mask_zero,
-                               true_context_mask)
+from ulbc.signal_masks import *
+from ulbc.context_masks import *
 from ulbc.matricies import *
 from ulbc.bondcalculus import System
 
 
-class Logic(object):
-    __metaclass__ = ABCMeta
+class Logic(metaclass=ABCMeta):
 
     @overload
     def _handle_args_signal_for_system(self, odes: List[Any], initials: List[Any], duration: float, **kwargs) -> Tuple[System, float, dict]: ...
@@ -103,7 +102,7 @@ class Logic(object):
             reach.num_flowpipes, t1 - t0))
         reach.prepare()
         t2 = time.time()
-        res = self.signal(reach, system.y, mask=mask, **kwargs
+        res = self.signal(reach, mask=mask, **kwargs
                           ).to_domain(RIF(0, duration))
         t3 = time.time()
         print("Monitored signal {} sec".format(t3 - t2))
@@ -120,7 +119,10 @@ class Logic(object):
     def context_signal_for_system(self, *args,
                                   use_masks=False, mask=None,
                                   **kwargs):
+        use_masks |= mask is not None
         system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
+
+        assert 'mask' not in kwargs
 
         full_duration = duration + 1e-3
 
@@ -145,8 +147,6 @@ class Logic(object):
 
         t2 = time.time()
         res = self.context_signal(reach,
-                                  list(system.y),
-                                  list(system.y0),
                                   mask=mask,
                                   **kwargs)
         t3 = time.time()
@@ -187,14 +187,6 @@ class Logic(object):
                                      self.duration + duration) \
             .to_domain(RIF(0, duration))
 
-    @property
-    def R(self):
-        return self._R
-
-    @property
-    def vars(self):
-        return self._vars
-
     def __and__(self, other):
         return And([self, other])
 
@@ -217,11 +209,11 @@ class Logic(object):
             return "({})".format(self)
 
     @abstractmethod
-    def signal(self, R, odes, **kwargs):
+    def signal(self, reach: Reach, **kwargs):
         pass
 
     @abstractmethod
-    def context_signal(self, R, odes, initials, mask=None, **kwargs):
+    def context_signal(self, reach: Reach, mask=None, **kwargs):
         pass
 
     @abstractmethod
@@ -351,26 +343,29 @@ class Atomic(Logic):
 
     def observer(self, reach, space_domain=None, mask=None, symbolic_composition=False,
                  tentative_unpreconditioning=False):
-        if reach.system is not None: 
-            fprime = self.dpdt(reach.system.y, reach.system.x)
+        # Convert atomic proposition to a suitable ring and variable
+        # namespace
+        if reach.system is not None:
+            p = reach.system.embed(self.p)
+            pprime = reach.system.embed(self.dpdt(reach.system.y, reach.system.x))
         else:
-            fprime=None
+            p = sage.SR(self.p)
+            pprime = None
+
         if isinstance(reach, (PolyObserver, SageObserver)):
             observer = reach.with_mask(mask)
-        elif (is_polynomial(self.p, reach.system.x)
-              and is_polynomial(fprime, reach.system.x)):
+        elif (is_polynomial(p, reach.system.x) and is_polynomial(pprime, reach.system.x)):
             observer = PolyObserver(
-                reach.system.PR(self.p),
+                reach.system.PR(p),
                 reach,
-                reach.system.PR(fprime),
+                reach.system.PR(pprime),
                 symbolic_composition,
                 tentative_unpreconditioning,
                 mask=mask,
             )
-        elif (is_polynomial(self.p, reach.system.x)
-              and symbolic_composition):
+        elif (is_polynomial(p, reach.system.x) and symbolic_composition):
             observer = PolyObserver(
-                reach.system.PR(self.p),
+                reach.system.PR(p),
                 reach,
                 None,
                 symbolic_composition,
@@ -387,9 +382,9 @@ class Atomic(Logic):
                 warn("symbolic_composition not supported for non-polynomial properties")
                 symbolic_composition = False
             observer = SageObserver(
-                sage.SR(self.p),
+                p,
                 reach,
-                sage.SR(fprime),
+                pprime,
                 symbolic_composition, # False
                 tentative_unpreconditioning,
                 mask=mask,
@@ -402,7 +397,7 @@ class Atomic(Logic):
 
         return observer
 
-    def signal(self, reach, odes, space_domain=None, mask=None, global_root_detection=False, **kwargs):
+    def signal(self, reach: Reach, space_domain=None, mask=None, global_root_detection=False, **kwargs):
         observer = self.observer(
             reach,
             space_domain=space_domain,
@@ -420,16 +415,16 @@ class Atomic(Logic):
             global_root_detection=global_root_detection,
         )
 
-    def signal_fn(self, odes, r, space_domain, mask=None, **kwargs):
+    def signal_fn(self, reach: Reach, space_domain, mask=None, **kwargs):
         return self.signal(
-            r,
-            odes,
+            reach,
             space_domain=space_domain,
             mask=mask,
             **kwargs,
-        ).to_domain(RIF(0, RIF(0, r.time - 1e-3)))
+        ).to_domain(RIF(0, RIF(0, reach.time - 1e-3)))
 
-    def context_signal(self, reach, odes, initials, mask=None, **kwargs):
+    def context_signal(self, reach: Reach, mask: Optional[Mask] = None,         
+            **kwargs):
         domain = RIF(0, reach.time - 1e-3)
         observer = self.observer(
             reach,
@@ -439,8 +434,8 @@ class Atomic(Logic):
         )
 
         # Turn initials for a vector into a list
-        return ContextSignal(domain, list(initials),
-                             partial(self.signal_fn, odes, **kwargs),
+        return ContextSignal(domain, list(reach.system.y0),
+                             partial(self.signal_fn, **kwargs),
                              observer=observer,
                              ctx_mask=mask)
 
@@ -522,23 +517,23 @@ class And(Logic):
     def duration(self):
         return max(t.duration for t in self.terms)
 
-    def signal(self, reach, odes, mask=None, **kwargs):
+    def signal(self, reach: Reach, mask=None, **kwargs):
         sig = true_signal(RIF(0, reach.time), mask)
         for t in self.terms:
             sig_mask = sig.to_mask_and() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.pos):
                 return sig
-            sig &= t.signal(reach, odes, mask=sig_mask, **kwargs)
+            sig &= t.signal(reach, mask=sig_mask, **kwargs)
         return sig
 
-    def context_signal(self, reach, odes, initials, mask=None, **kwargs):
-        sig = true_context_signal(RIF(0, reach.time), list(initials),
+    def context_signal(self, reach: Reach, mask: Optional[Mask] = None, **kwargs):
+        sig = true_context_signal(RIF(0, reach.time), list(reach.system.y0),
                                   ctx_mask=mask)
         for t in self.terms:
             sig_mask = sig.to_mask_and() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.mask.pos):
                 return sig
-            sig &= t.context_signal(reach, odes, initials,
+            sig &= t.context_signal(reach,
                                     ctx_mask=sig_mask, **kwargs)
         return sig
 
@@ -613,24 +608,23 @@ class Or(Logic):
     def __str__(self):
         return ' | '.join(t.bstr(self.priority) for t in self.terms)
 
-    def signal(self, reach, odes, mask=None, **kwargs):
+    def signal(self, reach : Reach, mask=None, **kwargs):
         sig = false_signal(RIF(0, reach.time), mask)
         for t in self.terms:
             sig_mask = sig.to_mask_or() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.pos):
                 return sig
-            sig |= t.signal(reach, odes, mask=sig_mask, **kwargs)
+            sig |= t.signal(reach, mask=sig_mask, **kwargs)
         return sig
 
-    def context_signal(self, reach, odes, initials, mask=None, **kwargs):
-        sig = false_context_signal(RIF(0, reach.time), initials,
+    def context_signal(self, reach: Reach, mask=None, **kwargs):
+        sig = false_context_signal(RIF(0, reach.time), list(reach.system.y0),
                                    ctx_mask=mask)
         for t in self.terms:
             sig_mask = sig.to_mask_or() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.mask.pos):
                 return sig
-            sig |= t.context_signal(reach, odes, initials,
-                                    ctx_mask=sig_mask, **kwargs)
+            sig |= t.context_signal(reach, ctx_mask=sig_mask, **kwargs)
         return sig
 
     @property
@@ -681,13 +675,13 @@ class Neg(Logic):
     def __str__(self):
         return "~{}".format(self.p.bstr(self.priority))
 
-    def signal(self, reach, odes, **kwargs):
-        return ~self.p.signal(reach, odes, **kwargs)
+    def signal(self, reach: Reach, **kwargs):
+        return ~self.p.signal(reach, **kwargs)
 
-    def context_signal(self, reach, odes, initials, **kwargs):
+    def context_signal(self, reach: Reach, **kwargs):
         # Care is needed here since negation should change the semantics of a
         # context tree from and to or and vice versa
-        return ~self.p.context_signal(reach, odes, initials, **kwargs)
+        return ~self.p.context_signal(reach, **kwargs)
 
     @property
     def atomic_propositions(self):
@@ -715,28 +709,26 @@ class ContextBody:
         # pass
 
     @abstractmethod
-    def apply_jump(self, state):
+    def apply_jump(self, system : System, state : List[sage.RIF]) -> System:
+        """Takes an initial system in a given state to a new initial system."""
         raise NotImplementedError
 
 
 class VarContextBody(ContextBody):
     """A context body based on intervals of given variables."""
 
-    def __init__(self, body, R=None):
+    def __init__(self, body):
         self._body = body
-        if R is not None:
-            self._R = R
-        else:
-            self._R = next(iter(body.keys())).parent()
 
     def __str__(self) -> str:
         return '{{{}}}'.format(', '.join(
             '{}: {}'.format(k, finterval(x))
             for k, x in reversed(sorted(self._body.items()))))
     
-    def apply_jump(self, state):
-        return [z + self._body.get(k, 0.0)
-                for k, z in zip(self._R.gens(), state)]
+    def apply_jump(self, system : System) -> System:
+        sys_body = {system.embed(k): v for k, v in self._body.items()}
+        return system.with_y0([z + sys_body.get(k, 0.0)
+                               for k, z in zip(system.x, system.y0)])
 
 
 class BondProcessContextBody(ContextBody):
@@ -756,13 +748,13 @@ def to_context_body(x) -> ContextBody:
     if isinstance(x, dict):
         return VarContextBody(x)
     elif isinstance(x, str):
-        return BondProcessContextBody(x)
+        raise NotImplementedError()
+        # return BondProcessContextBody(x)
     else:
         raise ValueError('Incorrect context body')
 
 
-class Context(Logic):
-    __metaclass__ = ABCMeta
+class Context(Logic, metaclass=ABCMeta):
     priority = 40
 
     def __init__(self, ctx, phi):
@@ -770,46 +762,46 @@ class Context(Logic):
         self._phi = phi
 
     @property
-    def phi(self):
+    def phi(self) -> Logic:
         return self._phi
 
-    def ctx_str(self):
+    def ctx_str(self) -> str:
         return str(self.ctx)
 
     @property
-    def duration(self):
+    def duration(self) -> float:
         # The duration should be zero, since we need no more info
         # from the system itself but should consult the composed
         # system
         return 0
 
     @property
-    def ctx(self):
+    def ctx(self) -> ContextBody:
         return self._ctx
 
     def numerical_signal(self, f, events, duration):
         raise NotImplementedError()
 
     @property
-    def atomic_propositions(self):
+    def atomic_propositions(self) -> List[Logic]:
         # We consider a context to be atomic since we cannot monitor
         # after it
         return [self]
 
-    def phi_fn(self, kwargs, odes, xs, use_masks=False):
-        sig = self.phi.signal_for_system(odes, xs, 1e-3, use_masks=use_masks,
+    def phi_fn(self, kwargs: dict, system: System, use_masks=False):
+        sig = self.phi.signal_for_system(system, 1e-3, use_masks=use_masks,
                                          **kwargs)
         if kwargs.get('verbosity', 0) >= 3:
             print('sig    =', sig)
             print('sig(0) =', sig(0))
         return sig(0)
 
-    def context_signal_phi_fn(self, kwargs, odes, xs, use_masks=False,
-                              refine=0):
+    def context_signal_phi_fn(self, kwargs: dict, system: System,
+            use_masks=False, refine=0):
         # TODO: mask clearly needs defining!
         # mask=mask
         # TODO context signal ontop of context signals is not currently sound
-        ctx_sig = self.phi.context_signal_for_system(odes, xs, 1e-3,
+        ctx_sig = self.phi.context_signal_for_system(system, 1e-3,
                                                      use_masks=use_masks,
                                                      **kwargs)
         sig = ctx_sig.refined_signal(refine)
@@ -818,17 +810,23 @@ class Context(Logic):
             print('sig(0) =', sig(0))
         return sig(0)
 
-    def context_jump(self, state):
+    def context_jump(self, system: System) -> System:
         """
-        >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+        >>> from ulbc.symbolic import *
+        >>> system = System(
+        ...     sage.SR,    
+        ...     [var("x"),  var("y")],
+        ...     [1, 2],
+        ...     [var("-y"), var("x")],
+        ... )
         >>> [y.str(style='brackets') for y in
-        ...     ({x: RIF(0.1,0.5)} >> Atomic(x)
-        ...      ).context_jump([RIF(3,4), RIF(4,5)])
+        ...     ({var("x"): RIF(0.1,0.5)} >> Atomic(var("x"))
+        ...      ).context_jump(system.with_y0([RIF(3,4), RIF(4,5)])).y0
         ... ]  # doctest: +NORMALIZE_WHITESPACE
         ['[3.0999999999999996 .. 4.5000000000000000]',
          '[4.0000000000000000 .. 5.0000000000000000]']
         """
-        return self.ctx.apply_jump(state)
+        return self.ctx.apply_jump(system)
 
 
 class C(Context):
@@ -865,27 +863,30 @@ class C(Context):
         # Put extra brackets for readability even if not necessary
         return '{} >> {}'.format(self.ctx_str(), self.phi.bstr(8))
 
-    def signal(self, reach, odes, mask=None, **kwargs):
-        print("In C.signal")
-        kwargs2 = dict(kwargs)
-        try:
-            del kwargs2['mask']
-        except:
-            pass
-        print(kwargs2)
+    def signal(self, reach: Reach, mask=None, **kwargs):
+        # print("In C.signal")
+        # kwargs2 = dict(kwargs)
+        # try:
+            # del kwargs2['mask']
+        # except:
+            # pass
+        # print(kwargs2)
+        assert reach.system is not None
         return masked_ctx(
-            odes=odes,
+            system=reach.system,
             domain=RIF(0, reach.time),
             C=self.context_jump,
             D=identity,
-            phi=partial(self.phi_fn, kwargs2, use_masks=mask is not None),
+            phi=partial(self.phi_fn, kwargs, use_masks=mask is not None),
             f=reach,
             epsilon=kwargs.get('epsilon_ctx', 0.5),
             verbosity=kwargs.get('verbosity', 0),
             mask=mask,
         )
 
-    def context_signal(self, reach, odes, initials, refine=0, **kwargs):
+    def context_signal(self, reach: System, refine=0, **kwargs):
+        assert reach.system is not None
+
         def signal_fn(_, space_domain, mask=None):
             # should we refer to the parent reach object or the child
             # observer?
@@ -895,7 +896,7 @@ class C(Context):
             except:
                 pass
             return masked_ctx(
-                odes=odes,
+                system=reach.system,
                 domain=RIF(0, reach.time),
                 C=self.context_jump,
                 D=identity,
@@ -907,7 +908,8 @@ class C(Context):
                 verbosity=kwargs.get('verbosity', 0)
             )
 
-        return ContextSignal(RIF(0, reach.time), list(initials), signal_fn)
+        return ContextSignal(RIF(0, reach.time), list(reach.system.y0),
+                             signal_fn)
 
 
 class D(Context):
@@ -944,9 +946,9 @@ class D(Context):
         # Put extra brackets for readability even if not necessary
         return '{} % {}'.format(self.ctx_str(), self.phi.bstr(8))
 
-    def signal(self, reach, odes, mask=None, **kwargs):
+    def signal(self, reach: Reach, mask=None, **kwargs):
         return masked_ctx(
-            odes=odes,
+            system=reach.system,
             domain=RIF(0, reach.time),
             C=identity,
             D=self.context_jump,
@@ -958,13 +960,14 @@ class D(Context):
             mask=mask,
         )
 
-    def context_signal(self, reach, odes, initials, refine=0, **kwargs):
+    def context_signal(self, reach: Reach, refine=0, **kwargs):
+        assert reach.system is not None
         # This does not actually subdivide the differential context,
         # but only the initial context, and each component of the inital set
         # for the system once the differential context is composed.
         def signal_fn(_, space_domain, mask=None):
             return ctx(
-                odes=odes,
+                system=reach.system,
                 domain=RIF(0, reach.time),
                 C=identity,
                 D=self.context_jump,
@@ -977,7 +980,7 @@ class D(Context):
             )
 
         return ContextSignal(RIF(0, reach.time),
-                             list(initials),
+                             list(reach.system.y0),
                              signal_fn)
 
 
@@ -1017,16 +1020,15 @@ class G(Logic):
     def __str__(self):
         return 'G({}, {})'.format(finterval(self.interval), str(self.phi))
 
-    def signal(self, reach, odes, mask=None, **kwargs):
+    def signal(self, reach: Reach, mask=None, **kwargs):
         print("In G.signal")
         if mask is not None:
             mask = mask.P(self.interval)
-        return self.phi.signal(reach, odes, mask=mask, **kwargs).G(
+        return self.phi.signal(reach, mask=mask, **kwargs).G(
             self.interval)
 
-    def context_signal(self, reach, odes, initials, **kwargs):
-        return self.phi.context_signal(reach, odes, initials,
-                                       **kwargs).G(self.interval)
+    def context_signal(self, reach: Reach, **kwargs):
+        return self.phi.context_signal(reach, **kwargs).G(self.interval)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).G(self.interval)
@@ -1071,17 +1073,17 @@ class F(Logic):
     def __str__(self):
         return 'F({}, {})'.format(finterval(self.interval), str(self.phi))
 
-    def signal(self, reach, odes, mask=None, **kwargs):
+    def signal(self, reach: Reach, mask=None, **kwargs):
         if mask is not None:
             mask = mask.P(self.interval)
-        return self.phi.signal(reach, odes, mask=mask, **kwargs).F(
+        return self.phi.signal(reach, mask=mask, **kwargs).F(
             self.interval)
 
-    def context_signal(self, reach, odes, initials, mask=None, **kwargs):
+    def context_signal(self, reach: Reach, mask=None, **kwargs):
         if mask is not None:
             mask = mask.P(self.interval)
-        return self.phi.context_signal(reach, odes, initials, mask=mask,
-                                       **kwargs).F(self.interval)
+        return self.phi.context_signal(reach, mask=mask, **kwargs).F(
+            self.interval)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).F(self.interval)
@@ -1130,20 +1132,20 @@ class U(Logic):
             str(self.psi)
         )
 
-    def signal(self, reach, odes, mask=None, **kwargs):
+    def signal(self, reach: Reach, mask=None, **kwargs):
         J = self.interval
 
         # Monitor phi
         phi_mask = (mask | mask.P(J)
                     if mask is not None
                     else None)
-        sig_phi = self.phi.signal(reach, odes, mask=phi_mask, **kwargs)
+        sig_phi = self.phi.signal(reach, mask=phi_mask, **kwargs)
 
         # Monitor psi
         psi_mask = (sig_phi.to_mask_until(J) & mask.P(J)
                     if mask is not None
                     else None)
-        sig_psi = self.psi.signal(reach, odes, mask=psi_mask, **kwargs)
+        sig_psi = self.psi.signal(reach, mask=psi_mask, **kwargs)
 
         # Compute overall answer
         return reduce(operator.or_,
@@ -1151,10 +1153,10 @@ class U(Logic):
                        for sig_phi_j in sig_phi.decomposition),
                       false_signal(RIF(0, reach.time), mask))
 
-    def context_signal(self, reach, odes, initials, **kwargs):
-        return self.phi.context_signal(reach, odes, initials, **kwargs).U(
+    def context_signal(self, reach: Reach, **kwargs):
+        return self.phi.context_signal(reach, **kwargs).U(
             self.interval,
-            self.psi.context_signal(reach, odes, initials, **kwargs))
+            self.psi.context_signal(reach, **kwargs))
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).U(
@@ -1204,20 +1206,20 @@ class R(Logic):
             str(self.psi)
         )
 
-    def signal(self, reach, odes, mask=None, **kwargs):
+    def signal(self, reach: Reach, mask=None, **kwargs):
         J = self.interval
 
         # Monitor phi
         phi_mask = (mask | mask.P(J)
                     if mask is not None
                     else None)
-        sig_neg_phi = ~self.phi.signal(reach, odes, mask=phi_mask, **kwargs)
+        sig_neg_phi = ~self.phi.signal(reach, mask=phi_mask, **kwargs)
 
         # Monitor psi
         psi_mask = (sig_neg_phi.to_mask_until(J) & mask.P(J)
                     if mask is not None
                     else None)
-        sig_psi = self.psi.signal(reach, odes, mask=psi_mask, **kwargs)
+        sig_psi = self.psi.signal(reach, mask=psi_mask, **kwargs)
 
         # Compute overall answer
         return reduce(operator.and_,
@@ -1228,10 +1230,10 @@ class R(Logic):
         # return ~(~self.phi.signal(reach, odes, **kwargs)).U(
         #     self.interval, ~self.psi.signal(reach, odes, **kwargs))
 
-    def context_signal(self, reach, odes, initials, **kwargs):
-        return ~(~self.phi.context_signal(reach, odes, initials, **kwargs)).U(
+    def context_signal(self, reach: Reach, **kwargs):
+        return ~(~self.phi.context_signal(reach, **kwargs)).U(
             self.interval,
-            ~self.psi.context_signal(reach, odes, initials, **kwargs))
+            ~self.psi.context_signal(reach, **kwargs))
 
     def numerical_signal(self, f, events, duration):
         return ~(~self.phi.numerical_signal(f, events, duration)).U(

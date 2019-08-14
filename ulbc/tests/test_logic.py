@@ -31,8 +31,8 @@ def atomic_q(ringxy):
 
 
 class TestAtomic:
-    @pytest.mark.slow
     @staticmethod
+    @pytest.mark.slow
     def test_dpdt(plant_clock):
         p = plant_clock.v('Protein(dEL,iEL;)')
         q = plant_clock.v('MRNA(tEL,dMEL,dEL,iEL;)')
@@ -41,15 +41,28 @@ class TestAtomic:
                 == p*(-0.380000000000000*p + q)/abs(p))
 
     @staticmethod
-    def test_polynomial_dpdt(ringxy, odes):
+    @pytest.mark.slow
+    @pytest.mark.very_slow
+    def test_plant_clock_signal_vars(plant_clock):
+        p = var('Protein(dEL,iEL;)')
+        at = Atomic(p - 1.5)
+        sig = at.signal_for_system(plant_clock, 10)
+        expected = Signal(
+            RIF(0, 10), 
+            [(RIF(0.0000000000000000, 9.9356312458003143), False),
+             (RIF(9.9356312458004811, 10.000000000000000), True )],
+        )
+        assert sig.approx_eq(expected)
+
+    def test_polynomial_dpdt(self, ringxy, odes):
         R, (x, y) = ringxy
         at = Atomic(2*x + 3*y)
         # print(f"expr = {expr}")
         assert R(at.dpdt(odes, (x, y))) == 3*x - 2*y
         # assert bool(rel)
 
-    @pytest.mark.slow
     @staticmethod
+    @pytest.mark.slow
     def test_signal_for_system_x(atomic_x, odes, initials):
         expected = Signal(RIF(0, 5),
                         [(RIF(0.00000000000000000, 0.23975290341611911), True),
@@ -98,8 +111,8 @@ class TestBondProcessContextBody:
 
 
 class TestC:
-    @pytest.mark.slow
     @staticmethod
+    @pytest.mark.slow
     def test_context_trivial(ringxy, atomic_x, odes):
         _, (x, y) = ringxy
         prop = {x: RIF(-0.5, 0.5), y: RIF(-0.5, 0.5)} >> Atomic(x)
@@ -108,6 +121,15 @@ class TestC:
         res2 = atomic_x.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 5)
         assert res1.approx_eq(res2, 0.5)
 
+    @staticmethod
+    @pytest.mark.slow
+    def test_context_trivial_vars(odes):
+        x, y = var("x", "y")
+        prop = {x: RIF(-0.5, 0.5), y: RIF(-0.5, 0.5)} >> Atomic(x)
+        res1 = prop.signal_for_system(odes, [RIF(1.5), RIF(3.5)], 5,
+                                epsilon_ctx=0.1)
+        res2 = Atomic("x").signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 5)
+        assert res1.approx_eq(res2, 0.5)
 
     @staticmethod
     @pytest.mark.slow
@@ -123,6 +145,46 @@ class TestC:
              (RIF(3.6330446307131989 , 6.2831853071795872 ), True)],
         )
         assert res.approx_eq(expected, 0.1)
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_context_with_jump_vars(odes):
+        system = System(
+            sage.SR,
+            [var("x"), var("y")],
+            [RIF(1, 2), RIF(3, 4)],
+            odes,
+        )
+        prop = ({var("y"): RIF(1, 5)}
+                >> G(RIF(sage.pi/8), Atomic(var("x") + 0.5)))
+        res = prop.signal_for_system(system,  2*sage.pi, epsilon_ctx=0.1)
+        expected = Signal(
+            RIF(0.0000000000000000, 6.2831853071795872),
+            [(RIF(0.0000000000000000 , 0.19638079084936209), True),
+             (RIF(0.29457118627404310, 3.1420926535897933 ), False),
+             (RIF(3.6330446307131989 , 6.2831853071795872 ), True)],
+        )
+        assert res.approx_eq(expected, 0.1)
+
+    @staticmethod 
+    @pytest.mark.slow
+    @pytest.mark.parametrize("enzyme", ["Pi2"], indirect=True)
+    def test_immediate_affinity_network_context(enzyme, enzyme_full):
+        at = Atomic(var("S") > 0.5)
+        prop = "{ e || s at rate MA(1); }" >> at
+        sig1 = prop.signal_for_system(enzyme['system'])
+        sig2 = at.signal_for_system(enzyme_full['system'])
+        assert sig1.approx_eq(sig2)
+
+    @staticmethod 
+    @pytest.mark.slow
+    @pytest.mark.parametrize("enzyme", ["Pi3"], indirect=True)
+    def test_immediate_process_context(enzyme, enzyme_full):
+        at = Atomic(var("S") > 0.5)
+        prop = "[0.5] E" >> at
+        sig1 = prop.signal_for_system(enzyme['system'])
+        sig2 = at.signal_for_system(enzyme_full['system'])
+        assert sig1.approx_eq(sig2)
 
 
 class TestMasks(object):

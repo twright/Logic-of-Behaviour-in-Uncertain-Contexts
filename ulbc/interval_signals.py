@@ -13,6 +13,7 @@ from sage.all import RIF, region_plot
 from ulbc.interval_root_isolation import isolate_roots
 from flowstar.reachability import FlowstarFailedException
 from ulbc.interval_utils import inner_inverse_minkowski, int_dist
+from ulbc.bondcalculus import System
 
 
 __all__ = ('to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
@@ -629,15 +630,15 @@ def to_signal_piecewise(f, fprime, time, step):
     return sig
 
 
-def masked_ctx(odes, domain, *args, **kwargs):
+def masked_ctx(system: System, domain: RIF, *args, **kwargs):
     mask = kwargs.pop('mask', None)
     print("mask =", mask)
 
     if mask is None:
-        return ctx(odes, domain, *args, **kwargs)
+        return ctx(system, domain, *args, **kwargs)
 
     sig_segs = (
-        ctx(odes, seg, *args, **kwargs)
+        ctx(system, seg, *args, **kwargs)
             for seg in mask.pos
     )
 
@@ -646,12 +647,12 @@ def masked_ctx(odes, domain, *args, **kwargs):
     return reduce(Signal.union, sig_segs, Signal(domain, [])).with_mask(mask)
 
 
-def ctx(odes, domain, C, D, phi, f, epsilon=0.1, verbosity=0):
+def ctx(system: System, domain: RIF, C, D, phi, f, epsilon=0.1, verbosity=0):
     # odes The odes defining the system
     # I is the time interval
     # C(x) places state x in context
     # D(y) places vector field x' = y in context
-    # phi :: odes, initial_set -> {True, False, None}
+    # phi :: system -> {True, False, None}
     # f(t) assumed to be the trace,
     # Note: states are now presumed to be n-dimensional
     d = domain.absolute_diameter()
@@ -659,11 +660,11 @@ def ctx(odes, domain, C, D, phi, f, epsilon=0.1, verbosity=0):
     failed = False
 
     fI = [RIF(x) for x in f(domain)]
-    h = C(fI)
-    Dodes = D(odes)
+    h = D(C(system.with_y0(fI)))
+    # Dodes = D(system)
 
     try:
-        res = phi(Dodes, h)
+        res = phi(h)
     except FlowstarFailedException:
         failed = True
         res = None
@@ -672,10 +673,10 @@ def ctx(odes, domain, C, D, phi, f, epsilon=0.1, verbosity=0):
 
     if verbosity >= 2:
         print('I  =', domain.str(style='brackets'))
-        print('fI =', [x.str(style='brackets') for x in fI])
-        print('C || f(I) =', [x.str(style='brackets') for x in C(fI)])
-        print('     odes =', odes)
-        print('D || odes =', Dodes)
+        print('fI =', [x.str(style='brackets') for x in fI.y0])
+        print('C || f(I) =', [x.str(style='brackets') for x in h.y0])
+        print('     odes =', system.y0)
+        print('D || odes =', system.y)
         print('phi(D || odes, C || f(I)) =', res)
 
     if (failed or res is None) and d > epsilon:
@@ -686,7 +687,7 @@ def ctx(odes, domain, C, D, phi, f, epsilon=0.1, verbosity=0):
                 J.str(style='brackets'),
                 K.str(style='brackets'),
             ))
-        return Signal.union(ctx(odes, J, C, D, phi, f, epsilon),
-                            ctx(odes, K, C, D, phi, f, epsilon))
+        return Signal.union(ctx(system, J, C, D, phi, f, epsilon),
+                            ctx(system, K, C, D, phi, f, epsilon))
     else:
         return Signal(domain, [] if res is None else [(domain, res)])

@@ -84,7 +84,7 @@ cdef class CReach:
         precondition=0,
         order=2,
         orders=None,
-        verbose=True,
+        verbose=False,
         # Must be NONPOLY_TAYLOR
         # integrationScheme=2,
         cutoff_threshold=1e-7,
@@ -274,7 +274,7 @@ cdef class CReach:
         precondition=0,
         order=2,
         orders=None,
-        verbose=True,
+        verbose=False,
         integrationScheme=2,
         cutoff_threshold=1e-7,
         estimation=1e-3,
@@ -293,8 +293,6 @@ cdef class CReach:
         self.prepared_for_plotting = False
         self.result = 0
         self.symbolic_composition = symbolic_composition
-
-        print("run =", run)
 
         # Create global variable manager
         # self.global_manager = FlowstarGlobalManager()

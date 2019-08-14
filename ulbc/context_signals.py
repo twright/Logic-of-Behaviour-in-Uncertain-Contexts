@@ -11,7 +11,9 @@ from sage.all import RIF
 from flowstar.observers import RestrictedObserver, PolyObserver
 from ulbc.interval_signals import (true_signal, false_signal, BaseSignal,
                                    Signal)
+from ulbc.signal_masks import Mask
 from ulbc.interval_utils import finterval, fintervals as space_domain_str
+from typing import *
 
 __all__ = ('true_context_signal', 'false_context_signal', 'ContextSignal')
 
@@ -210,9 +212,12 @@ class ContextSignal(SignalTree):
     # _context
     # _reach
 
-    def __init__(self, domain, space_domain, signal_fn,
+    def __init__(self, domain, space_domain,
+                 signal_fn: Union[Signal,
+                                  Callable[[Any, List[RIF], Mask], Signal],
+                                  None],
                  children=None, observer=None, ctx_mask=None):
-        from ulbc.signal_masks import ContextMask
+        from ulbc.context_masks import ContextMask
 
         assert observer is None or isinstance(observer, PolyObserver)
         assert ctx_mask is None or isinstance(ctx_mask, ContextMask),\
@@ -223,7 +228,7 @@ class ContextSignal(SignalTree):
         elif signal_fn is not None:
             # assert observer is not None
             mask = ctx_mask.mask if ctx_mask is not None else None
-            signal = signal_fn(observer, space_domain, mask=mask)
+            signal = signal_fn(observer, space_domain, mask)
         else:
             signal = None
 
