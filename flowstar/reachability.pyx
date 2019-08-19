@@ -298,7 +298,8 @@ cdef class CReach:
         # self.global_manager = FlowstarGlobalManager()
 
         # --- Creating the continuous system ---
-        assert len(odes) == len(initials)
+        assert len(odes) == len(initials),\
+            f"initials = {initials}\nnot compatible with\nodes = {odes}"
         assert len(odes) > 0
 
         if vars is None:

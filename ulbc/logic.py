@@ -335,11 +335,13 @@ class Atomic(Logic):
             else:
                 return Signal(RIF(0, 0), [], mask=mask)
         else:
-            return super(Atomic, self).signal_for_system(system,
-                                                         duration,
-                                                         use_masks=use_masks,
-                                                         mask=mask,
-                                                         **kwargs)
+            return super(Atomic, self).signal_for_system(
+                system,
+                duration,
+                use_masks=use_masks,
+                mask=mask,
+                **kwargs,
+            )
 
     def observer(self, reach, space_domain=None, mask=None, symbolic_composition=False,
                  tentative_unpreconditioning=False):
@@ -709,7 +711,7 @@ class ContextBody:
         # pass
 
     @abstractmethod
-    def apply_jump(self, system : System, state : List[sage.RIF]) -> System:
+    def apply_jump(self, system : System) -> System:
         """Takes an initial system in a given state to a new initial system."""
         raise NotImplementedError
 
@@ -725,7 +727,7 @@ class VarContextBody(ContextBody):
             '{}: {}'.format(k, finterval(x))
             for k, x in reversed(sorted(self._body.items()))))
     
-    def apply_jump(self, system : System) -> System:
+    def apply_jump(self, system: System) -> System:
         sys_body = {system.embed(k): v for k, v in self._body.items()}
         return system.with_y0([z + sys_body.get(k, 0.0)
                                for k, z in zip(system.x, system.y0)])
@@ -738,6 +740,14 @@ class BondProcessContextBody(ContextBody):
     def __str__(self) -> str:
         return self._body
 
+    def apply_jump(self, system: bc.BondSystem):
+        assert isinstance(system, bc.BondSystem)
+
+        proc: BondProcess = system.as_process
+
+        composed = proc.compose(self._body).as_system
+        print(f"composed = {composed}")
+        return composed
 
 @overload
 def to_context_body(x : str) -> BondProcessContextBody: ...
@@ -748,8 +758,7 @@ def to_context_body(x) -> ContextBody:
     if isinstance(x, dict):
         return VarContextBody(x)
     elif isinstance(x, str):
-        raise NotImplementedError()
-        # return BondProcessContextBody(x)
+        return BondProcessContextBody(x)
     else:
         raise ValueError('Incorrect context body')
 

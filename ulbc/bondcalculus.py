@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import random
 from flowstar.reachability import Reach
-from ulbc.interval_utils import fintervals
+from ulbc.interval_utils import fintervals, finterval
 from ulbc.symbolic import *
 from typing import *
 
@@ -44,6 +44,7 @@ class System:
             ', '.join(map(str, self._varmap.values())))
 
     def with_y0(self, y0):
+        assert len(y0) == len(self.x)
         return System(self._R, self.x, y0, self.y, self.varmap)
 
     @property
@@ -56,7 +57,6 @@ class System:
         return self.R(sg.SR(expr).substitute({
             var(n): v
             for n, v in self.varmap.items()
-            if  n in varmanager 
         }))
     
     @classmethod
@@ -187,17 +187,22 @@ class BondSystem(System):
         self.affinity_network = affinity_network
 
     def with_y0(self, y0):
+        assert len(y0) == len(self.x)
         return BondSystem(self._R, self.x, y0, self.y, 
             self.affinity_network,
             model=self.model, varmap=self.varmap)
 
-    def process_from_state(self, state: List[Any]):
+    def process_from_state(self, state: List[Any]) -> 'BondProcess':
         assert self.model is not None
         assert self.varmap is not None
         return self.model.process(
             {k: v for (k, n), v in zip(self.varmap.items(), state)},
             self.affinity_network,
         )
+
+    @property
+    def as_process(self) -> 'BondProcess':
+        return self.process_from_state(self.y0)
 
     @classmethod 
     def load_from_script(Cls, filename: str,
@@ -233,6 +238,14 @@ class BondModel:
         self._bondwb.expect('BondWB:> ', timeout=99999)
         return self._bondwb.before
 
+    @staticmethod
+    def _finterval_or_float(x : Union[float, sg.RIF]) -> str:
+        if isinstance(x, float):
+            return f"[{x}]"
+        else:
+            s = finterval(x)
+            return s if "[" in s else f"[{s}]"
+
     @overload
     def process(self, x: str) -> 'BondProcess': ...
     @overload
@@ -248,7 +261,8 @@ class BondModel:
             return BondProcess(f"{p} || {n}", self)
         if isinstance(p, dict):
             return BondProcess(
-                " || ".join([f"[{v}] {k}" for k, v in p.items()] + [n]),
+                " || ".join([f"{self._finterval_or_float(v)} {k}"
+                             for k, v in p.items()] + [n]),
                 self,
             )
         # if isinstance(p, list):
@@ -262,8 +276,15 @@ class BondModel:
         self._run('plot', '"{}"'.format(pstr), a, b, nsteps)
 
     def extract(self, pstr : str, filename : str):
-        self._run('savesage', '"{}"'.format(pstr),
+        res: str = self._run('savesage', '"{}"'.format(pstr),
             '"{}"'.format(Path(filename).as_posix()))
+        # print(f"res = {res}")
+        index_start = res.find(b"parse error")
+        if index_start != -1:
+            raise BondwbException(f"Parse error: {res[index_start + 13:-8].decode('utf-8')}")
+        index_start = res.find(b"Error in process")
+        if index_start != -1:
+            raise BondwbException(res[index_start:-8].decode('utf-8'))
 
     def _run(self, cmd : str, *args):
         full_cmd = cmd + ' ' + ' '.join(map(str, args))

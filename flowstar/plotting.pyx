@@ -71,6 +71,11 @@ cdef class SagePlotMixin:
         # the field's generators
         if isinstance(poly, str):
             poly = Poly({str(g): g for g in self.var_ring.gens()}[poly])
+        elif self.system is not None:
+            if isinstance(poly, str):
+                poly = Poly(self.system.v(poly))
+            else:
+                poly = Poly(self.system.embed(sage.SR(poly)))
         else:
             poly = Poly(self.var_ring(poly))
 

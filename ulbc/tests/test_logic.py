@@ -104,11 +104,27 @@ class TestVarContextBody:
 
 class TestBondProcessContextBody:
     @staticmethod
-    def test_bond_process_context_body_str(ringxy):
-        R, (x, y) = ringxy
+    def test_bond_process_context_body_str():
         assert (str(BondProcessContextBody("[0.5, 2.5] E"))
             == "[0.5, 2.5] E")
 
+    # TODO: find a less numerically fragile way to test this
+    @staticmethod
+    @pytest.mark.slow
+    @pytest.mark.parametrize(
+        "enzyme, context, expected",
+        [("Pi1", "[0.0] S",
+          "[1] S || [0] P || [0.099999999999999977 .. 0.10000000000000004] E || [0] new 0 in p@0->P | x@0->E || { e || s at rate MA(1.0); r|x at rate MA([9.999999999999998e-2 .. 0.1]); p|x at rate MA(0.5); }"),
+         ("Pi2", "{ e || s at rate MA(1); }",
+          "[1] S || [0] P || [0.099999999999999977 .. 0.10000000000000004] E || [0] new 0 in p@0->P | x@0->E || { r|x at rate MA([9.999999999999998e-2 .. 0.1]); p|x at rate MA(0.5); e || s at rate MA(1.0); }"),
+         ("Pi3", "[0.1] E", 
+          "[1] S || [0] P || [0.099999999999999991 .. 0.10000000000000001] E || [0] new 0 in p@0->P | x@0->E || { e || s at rate MA(1.0); r|x at rate MA([9.999999999999998e-2 .. 0.1]); p|x at rate MA(0.5); }")],
+        indirect=["enzyme"],
+    )
+    def test_bond_process_context_jump(enzyme, context, expected):
+        proc = BondProcessContextBody(context)
+        assert (proc.apply_jump(enzyme['system']).as_process.expr
+            == expected)
 
 class TestC:
     @staticmethod
@@ -168,23 +184,23 @@ class TestC:
 
     @staticmethod 
     @pytest.mark.slow
-    @pytest.mark.parametrize("enzyme", ["Pi2"], indirect=True)
-    def test_immediate_affinity_network_context(enzyme, enzyme_full):
-        at = Atomic(var("S") > 0.5)
-        prop = "{ e || s at rate MA(1); }" >> at
-        sig1 = prop.signal_for_system(enzyme['system'])
-        sig2 = at.signal_for_system(enzyme_full['system'])
-        assert sig1.approx_eq(sig2)
-
-    @staticmethod 
-    @pytest.mark.slow
-    @pytest.mark.parametrize("enzyme", ["Pi3"], indirect=True)
-    def test_immediate_process_context(enzyme, enzyme_full):
-        at = Atomic(var("S") > 0.5)
-        prop = "[0.5] E" >> at
-        sig1 = prop.signal_for_system(enzyme['system'])
-        sig2 = at.signal_for_system(enzyme_full['system'])
-        assert sig1.approx_eq(sig2)
+    @pytest.mark.parametrize(
+        "enzyme, context",
+        [("Pi1", "[0.0] S"),
+         ("Pi2", "{ e || s at rate MA(1); }"),
+         ("Pi3", "[0.5] E")],
+        indirect=["enzyme"],
+    )
+    def test_immediate_bondcalculus_context(enzyme, context, enzyme_full):
+        at = Atomic(var("S") > 0.7)
+        prop = context >> at
+        print(f"system = {repr(enzyme['system'])}")
+        sig1 = prop.signal_for_system(enzyme['system'], 10)
+        sig2 = at.signal_for_system(enzyme_full['system'], 10)
+        print(f"sig1 = {sig1}\nsig2 = {sig2}")
+        # The signals might not be that similar due to different computation
+        # method for contexts
+        assert sig1.approx_eq(sig2, 0.3)
 
 
 class TestMasks(object):

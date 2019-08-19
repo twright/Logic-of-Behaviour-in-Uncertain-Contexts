@@ -89,10 +89,10 @@ class TestEnzyme:
         'enzyme, y, y0',
         [("Pi1",
          "(-x0*x2, 0.50000000000000000?*x3, -x0*x2 + 0.50000000000000000?*x3, x0*x2 - 0.50000000000000000?*x3)",
-         "(1, 0, 0.10000000000000001?, 0)"),
+         "(1, 0, 0.10000000000000000?, 0)"),
          ("Pi2",
           "(0, 0)",
-          "(1, 0.10000000000000001?)"),
+          "(1, 0.10000000000000000?)"),
          ("Pi3",
           "(0)",
           "(1)")],
@@ -104,14 +104,30 @@ class TestEnzyme:
 
     @staticmethod
     @pytest.mark.slow
+    @pytest.mark.parametrize(
+        'enzyme, expr',
+        [("Pi1",
+         "[1] S || [0] P || [0.099999999999999991 .. 0.10000000000000001] E || [0] new 0 in p@0->P | x@0->E || { e || s at rate MA(1.0); r|x at rate MA([9.999999999999999e-2 .. 0.1]); p|x at rate MA(0.5); }"),
+         ("Pi2",
+          "[1] S || [0.099999999999999991 .. 0.10000000000000001] E || { r|x at rate MA([9.999999999999999e-2 .. 0.1]); p|x at rate MA(0.5); }"),
+         ("Pi3",
+          "[1] S || { e || s at rate MA(1.0); r|x at rate MA([9.999999999999999e-2 .. 0.1]); p|x at rate MA(0.5); }")],
+        indirect=["enzyme"],
+    )
+    def test_as_process(enzyme, expr):
+        proc: BondProcess = enzyme['system'].as_process
+        assert proc.expr == expr
+
+    @staticmethod
+    @pytest.mark.slow
     @pytest.mark.parametrize('enzyme', ["Pi2"], indirect=True)
     def test_affinity_network_composition(enzyme):
         assert (enzyme['system'].affinity_network ==
-            '{ r|x at rate MA([0.100000 .. 0.100000]);'
-             ' p|x at rate MA([0.500000 .. 0.500000]) }')
+            '{ r|x at rate MA([9.999999999999999e-2 .. 0.1]);'
+             ' p|x at rate MA(0.5); }')
         composed = enzyme['process'].compose("{e || s at rate MA(1.0);}")
         assert composed.expr == "(Pi2) || ({e || s at rate MA(1.0);})"
         system = composed.as_system
-        assert system.affinity_network == '{ r|x at rate MA([0.100000 .. 0.100000]); p|x at rate MA([0.500000 .. 0.500000]); e || s at rate MA([1.000000 .. 1.000000]) }'
+        assert system.affinity_network == '{ r|x at rate MA([9.999999999999999e-2 .. 0.1]); p|x at rate MA(0.5); e || s at rate MA(1.0); }'
         assert str(system.y) == "(-x0*x2, 0.50000000000000000?*x3, -x0*x2 + 0.50000000000000000?*x3, x0*x2 - 0.50000000000000000?*x3)"
 
