@@ -8,6 +8,7 @@ from flowstar.reachability import Reach
 from ulbc.interval_utils import fintervals, finterval
 from ulbc.symbolic import *
 from typing import *
+from bidict import bidict
 
 __all__ = ['BondModel', 'BondwbException', 'BondProcess', 'System',
            'BondSystem']
@@ -38,8 +39,7 @@ class System:
             self._varmap = {str(xi): xi for xi in x}
         else:
             self._varmap = varmap
-        self._namemap : dict
-        self._namemap = {v: k for k, v in self._varmap.items()}
+        self._varmap = bidict(self._varmap)
         self._poly_var_ring = sg.PolynomialRing(sg.RIF,
             ', '.join(map(str, self._varmap.values())))
 
@@ -59,14 +59,12 @@ class System:
             for n, v in self.varmap.items()
         }))
     
-    @classmethod
-    def embedding(Cls, subsys : 'System', sys : 'System'):
-        def emb(expr):
-            sys.R(sg.SR(expr).substitute(**{
-                v: sys.v(n)
-                for v, n in subsys.varmap.items()
-            }))
-        return emb
+    # @classmethod
+    # def embed_subsystem(Cls, subsys : 'System', sys : 'System', expr):
+    #     return sys.R(sg.SR(expr).substitute(**{
+    #             v: sys.v(n)
+    #             for n, v in subsys.varmap.items()
+    #         }))
 
     @classmethod 
     def load_from_script(Cls, filename : str):
@@ -114,10 +112,7 @@ class System:
     
     def varname(self, var) -> str:
         """Lookup the name of a given variable."""
-        if self._namemap is not None:
-            return self._namemap[var]
-        else:
-            return str(var)
+        return str(self.varmap.inv[var])
 
     def __repr__(self):
         return "System(R, {}, {}, {}".format(
@@ -196,7 +191,7 @@ class BondSystem(System):
         assert self.model is not None
         assert self.varmap is not None
         return self.model.process(
-            {k: v for (k, n), v in zip(self.varmap.items(), state)},
+            {k: sg.RIF(v) for (k, n), v in zip(self.varmap.items(), state)},
             self.affinity_network,
         )
 

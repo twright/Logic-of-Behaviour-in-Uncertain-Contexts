@@ -5,10 +5,10 @@ import sage.all as sage
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body)
+from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem, C)
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
-from ulbc.bondcalculus import System
+from ulbc.bondcalculus import System, BondSystem
 from ulbc.symbolic import var
 
 
@@ -100,6 +100,12 @@ class TestVarContextBody:
         R, (x, y) = ringxy
         assert (str(VarContextBody({x: RIF(1,2), y: RIF(3,4)}))
             == "{x: [1 .. 2], y: [3 .. 4]}")
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_child_system(enzyme):
+        ctx = VarContextBody({var("S"): RIF(1, 2)})
+        assert ctx.child_system(enzyme) == enzyme
 
 
 class TestBondProcessContextBody:
@@ -201,6 +207,23 @@ class TestC:
         # The signals might not be that similar due to different computation
         # method for contexts
         assert sig1.approx_eq(sig2, 0.3)
+
+    @staticmethod
+    @pytest.mark.slow
+    @pytest.mark.parametrize(
+        "enzyme, context, dim",
+        [("Pi1", "[1.0] S", 4),
+         ("Pi2", "[0.0] E", 2),
+         ("Pi2", "{ e || s at rate MA(1); }", 4),
+         ("Pi3", "[0.5] S", 1),
+         ("Pi3", "[0.5] E", 4)],
+        indirect=["enzyme"],
+    )
+    def test_child_system(enzyme, context, dim):
+        ctx = BondProcessContextBody(context)
+        sys = ctx.child_system(enzyme['system'])
+        assert isinstance(sys, BondSystem)
+        assert len(sys.y0) == dim
 
 
 class TestMasks(object):
@@ -528,3 +551,114 @@ class TestLogicContextSignal(object):
                    ).context_signal_for_system(odes_whelks, initials, 10,
                                                **kwargs)
         assert ctx_sig.signal.approx_eq(sig, 0.001)
+
+
+class TestWithSystem:
+    @staticmethod
+    @pytest.mark.slow
+    def test_atomic(enzyme_full):
+        prop = Atomic(var("S") > 1.5)
+        prop_with_sys = prop.with_system(enzyme_full)
+        assert isinstance(prop_with_sys, LogicWithSystem)
+        assert prop_with_sys.phi == prop
+        assert prop_with_sys.system == enzyme_full
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_complex(enzyme_full):
+        atS = Atomic(var("S") > 1.5)
+        atE = Atomic(var("E") > 0.1)
+        atP = Atomic(var("P") > 0.1)
+        prop = G(RIF(1,3), atS) & "[0.1, 0.2] S" >> F(RIF(2,4), atE | atP)
+        prop_with_sys = prop.with_system(enzyme_full['system'])
+        assert isinstance(prop_with_sys, LogicWithSystem)
+        assert isinstance(prop_with_sys.phi, And)
+        assert isinstance(prop_with_sys.phi.terms[0], G)
+        assert prop_with_sys.phi.terms[0].phi == atS
+        assert isinstance(prop_with_sys.phi.terms[1], C)
+        assert isinstance(prop_with_sys.phi.terms[1].phi,
+            LogicWithSystem)
+        assert isinstance(prop_with_sys.phi.terms[1].phi.phi,
+            F)
+        assert isinstance(prop_with_sys.phi.terms[1].phi.phi.phi,
+            Or)
+        assert prop_with_sys.phi.terms[1].phi.phi.phi.terms[0] == atE
+        assert prop_with_sys.phi.terms[1].phi.phi.phi.terms[1] == atP
+        # assert prop_with_sys.phi == prop
+        # assert prop_with_sys.system == enzyme_full
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_var_context(enzyme_full):
+        atS = Atomic(var("S") > 1.5)
+        prop = {var("E"): RIF('[0.1 .. 0.2]')} >> atS
+        prop_with_sys = prop.with_system(enzyme_full['system'])
+        assert isinstance(prop_with_sys, LogicWithSystem)
+        assert prop_with_sys.system == enzyme_full['system']
+        assert isinstance(prop_with_sys.phi, C)
+        assert isinstance(prop_with_sys.phi.phi, LogicWithSystem)
+        assert prop_with_sys.phi.phi.system == enzyme_full['system']
+        assert prop_with_sys.phi.phi.phi == atS
+
+    @staticmethod
+    @pytest.mark.slow
+    # @pytest.mark.parametrize(
+    #     'enzyme, ctx'
+    #     ('Pi2', ),
+    #     ('Pi3', ),
+    #     indirect=['enzyme'],
+    # )
+    def test_vardict_context_composed_system(enzyme):
+        atS = Atomic(var("S") > 1.5)
+        prop = {var("S"): RIF("[0.1 .. 0.2]")} >> atS
+        prop_with_sys = prop.with_system(enzyme['system'])
+        assert prop_with_sys.system == enzyme['system']
+        assert prop_with_sys.phi.phi.system == enzyme['system']
+        assert prop_with_sys.phi.phi.phi == atS
+
+    @staticmethod
+    @pytest.mark.slow
+    @pytest.mark.parametrize(
+        'enzyme, ctx, dim',
+        [pytest.param("Pi1", "[1.0] S", 4,
+            marks=[pytest.mark.very_slow]),
+         ("Pi2", "[0.0] E", 2),
+         ("Pi2", "{ e || s at rate MA(1); }", 4),
+         pytest.param("Pi3", "[0.5] S", 1,
+            marks=[pytest.mark.very_slow]),
+         ("Pi3", "[0.5] E", 4)],
+        indirect=['enzyme'],
+    )
+    def test_context_composed_system(enzyme, ctx, dim):
+        atS = Atomic(var("S") > 1.5)
+        prop = ctx >> F(RIF(0, 1), atS)
+        prop_with_sys = prop.with_system(enzyme['system'])
+        assert isinstance(prop_with_sys, LogicWithSystem)
+        assert prop_with_sys.system.x == enzyme['system'].x
+        assert prop_with_sys.system.y == enzyme['system'].y
+        assert isinstance(prop_with_sys.phi, C)
+        assert isinstance(prop_with_sys.phi.phi, LogicWithSystem)
+        assert isinstance(prop_with_sys.phi.phi.phi, F)
+        assert prop_with_sys.phi.phi.phi.phi == atS 
+        assert len(prop_with_sys.phi.phi.system.y0) == dim 
+        sig1 = prop.signal_for_system(enzyme['system'], 10,
+            precompose_systems=True)
+        sig2 = prop.signal_for_system(enzyme['system'], 10,
+            precompose_systems=False)
+        sig3 = prop_with_sys.signal(10)
+        assert sig1.approx_eq(sig2) and sig2.approx_eq(sig3)
+
+
+class TestLogicWithSystem:
+    @staticmethod
+    @pytest.mark.slow
+    def test_reach(ringxy, atomic_x, odes, initials):
+        R, x = ringxy
+        expected = Signal(RIF(0, 5),
+                         [(RIF(0.00000000000000000, 0.23975290341611911), True),
+                         (RIF(0.60634820757971108, 3.3820262152396059), False),
+                         (RIF(3.7398418173331680, 5.0000000000000000), True)])
+        system = System(R, x, initials, odes)
+        assert atomic_x.with_system(system).signal(5).approx_eq(expected, 0.1)
+        assert atomic_x.with_system(system).signal(None,
+            5).approx_eq(expected, 0.1)

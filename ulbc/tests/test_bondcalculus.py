@@ -9,7 +9,7 @@ from ulbc.bondcalculus import *
 class TestPlantClock:
     @staticmethod
     @pytest.mark.slow
-    # @pytest.mark.very_slow
+    @pytest.mark.very_slow
     def test_affinity_network(plant_clock, plant_clock_network):
         assert (plant_clock.affinity_network
             == plant_clock_network)
@@ -54,17 +54,17 @@ class TestPlantClock:
                   "[0] Protein(dP97,iP97;) || "
                   "[0] Gene(cEL,tEL,dMEL,dEL,iEL;) || "
                   "[0] Protein(dP51,iP51;) || "
-                  "[2.3] Protein(dEL,iEL;) || "
+                  "[2.5000000000000000 .. 2.5000000000000000] Protein(dEL,iEL;) || "
                   "[0] Protein(dCL,iCL;) || "
                   "[0] Gene(cP97,tP97,dMP97,dP97,iP97;) || "
                   "[0] Clock || "
-                  "[1.5] MRNA(tEL,dMEL,dEL,iEL;) || "
+                  "[1.5000000000000000 .. 1.5000000000000000] MRNA(tEL,dMEL,dEL,iEL;) || "
                   "[0] MRNA(tCL,dMCL,dCL,iCL;) || "
                   "[0] MRNA(tP97,dMP97,dP97,iP97;) || "
                   "[0] Gene(cP51,tP51,dMP51,dP51,iP51;) || "
                   "[0] Time || "
                   "[0] MRNA(tP51,dMP51,dP51,iP51;)")
-        state = [0, 0, 0, 0, 2.3, 0, 0, 0, 1.5, 0, 0, 0, 0, 0]
+        state = [0, 0, 0, 0, 2.5, 0, 0, 0, 1.5, 0, 0, 0, 0, 0]
         p = plant_clock.process_from_state(state)
         assert isinstance(p, BondProcess)
         assert p.model is not None

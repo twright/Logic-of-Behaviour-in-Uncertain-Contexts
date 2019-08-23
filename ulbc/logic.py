@@ -32,7 +32,6 @@ from ulbc.bondcalculus import System
 
 
 class Logic(metaclass=ABCMeta):
-
     @overload
     def _handle_args_signal_for_system(self, odes: List[Any], initials: List[Any], duration: float, **kwargs) -> Tuple[System, float, dict]: ...
     @overload
@@ -66,16 +65,25 @@ class Logic(metaclass=ABCMeta):
     def signal_for_system(self, system : System, duration : float,
         use_masks : bool, mask : Optional[Mask], **kwargs) -> Signal: ...
 
-    def signal_for_system(self, *args, use_masks=False,
-                          mask=None, **kwargs):
+    def signal_for_system(self, *args, precompose_systems=True, **kwargs):
         """
         Generate a signal for a temporal logic formula.
         """
+        system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
+
+        if precompose_systems:
+            t0 = time.time()
+            composed = self.with_system(system)
+            t1 = time.time()
+            print(f"Precomposed systems in {t1 - t0} sec")
+            return composed.signal(duration, **kwargs)
+        else:
+            return self._signal_for_system(system, duration,
+                precompose_systems=False, **kwargs)
+
+    def _signal_for_system(self, system, duration, use_masks=False, mask=None, **kwargs):
         use_masks |= mask is not None
         t0 = time.time()
-
-        # argument handling
-        system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
         
         reach = system.reach(
             # Run for a little extra time to make sure endpoint of
@@ -105,7 +113,7 @@ class Logic(metaclass=ABCMeta):
         res = self.signal(reach, mask=mask, **kwargs
                           ).to_domain(RIF(0, duration))
         t3 = time.time()
-        print("Monitored signal {} sec".format(t3 - t2))
+        print("Monitored signal in {} sec".format(t3 - t2))
         return res
 
     @overload
@@ -220,9 +228,58 @@ class Logic(metaclass=ABCMeta):
     def numerical_signal(self, f, events, duration):
         pass
 
+    def with_system(self, system: System) -> 'LogicWithSystem':
+        return LogicWithSystem(self._with_system(system), system)
+
+    @abstractmethod 
+    def _with_system(self, system: System) -> 'Logic':
+        pass
+
     @abstractproperty
     def atomic_propositions(self):
         pass
+
+
+class LogicWithSystem:
+    """A wrapper of logic which knows which system it is to be applied to."""
+    phi: Logic
+    system: System 
+
+    def __init__(self, phi: Logic, system: System):
+        self.phi = phi
+        self.system = system
+
+    # def signal():
+    #     return self.phi.signal_for_system()
+    def with_y0(self, state: List[Any]) -> 'LogicWithSystem':
+        return LogicWithSystem(self.phi, self.system.with_y0(state))
+
+    def with_system(self, system: System):
+        return LogicWithSystem(self.phi, system)
+
+    def __repr__(self):
+        return f"LogicWithSystem({repr(self.phi)}, repr({self.system}))"
+
+    @overload
+    def signal(self, reach: Reach, duration: float, **kwargs): ...
+
+    @overload
+    def signal(self, duration: float, **kwargs): ...
+
+    def signal(self, *args, **kwargs):
+        if len(args) == 1:
+            duration, = args
+
+        elif len(args) == 2:
+            _, duration = args
+        else:
+            raise TypeError("Wrong number of arguments!")
+
+        kwargs['precompose_systems'] = False
+        return self.phi.signal_for_system(self.system, duration, **kwargs)
+
+    def signal_for_system(self, system: System, duration: float, **kwargs):
+        return self.with_system(system).signal(duration, **kwargs)
 
 
 def is_polynomial(f, vars):
@@ -467,6 +524,9 @@ class Atomic(Logic):
             a = b
 
         return Signal(RIF(0, duration), intervals)
+    
+    def _with_system(self, system: System) -> Logic:
+        return self
 
 
 class And(Logic):
@@ -555,6 +615,9 @@ class And(Logic):
                        for t in self.terms),
                       true_signal(RIF(0, duration)))
 
+    def _with_system(self, system: System) -> Logic:
+        return And(t._with_system(system) for t in self.terms)
+
 
 class Or(Logic):
     """
@@ -639,6 +702,9 @@ class Or(Logic):
                        for t in self.terms),
                       false_signal(RIF(0, duration)))
 
+    def _with_system(self, system: System) -> Logic:
+        return Or(t._with_system(system) for t in self.terms)
+
 
 class Neg(Logic):
     """
@@ -668,6 +734,10 @@ class Neg(Logic):
         return self._p
 
     @property
+    def phi(self):
+        return self._p
+
+    @property
     def duration(self):
         return self.p.duration
 
@@ -692,28 +762,22 @@ class Neg(Logic):
     def numerical_signal(self, f, events, duration):
         return ~self.p.numerical_signal(f, events, duration)
 
-
-def identity(x):
-    return x
-
-
-# class ContextType(Enum):
-#     BONDPROCESS = 1
-#     VARDICT = 2
+    def _with_system(self, system: System) -> LogicWithSystem:
+        return ~self.p._with_system(system)
 
 
 class ContextBody:
     """The actual body of a context expression."""
     __metaclass__ = ABCMeta
 
-    # @abstractproperty
-    # def body(self) -> Any():
-        # pass
+    @abstractmethod
+    def apply_jump(self, system: System, child_system: Optional[System]) -> System:
+        """Takes an initial system in a given state to a new initial system."""
 
     @abstractmethod
-    def apply_jump(self, system : System) -> System:
-        """Takes an initial system in a given state to a new initial system."""
-        raise NotImplementedError
+    def child_system(self, system: System) -> System:
+        """The system of the child under this context, given
+        zero current state."""
 
 
 class VarContextBody(ContextBody):
@@ -727,10 +791,14 @@ class VarContextBody(ContextBody):
             '{}: {}'.format(k, finterval(x))
             for k, x in reversed(sorted(self._body.items()))))
     
-    def apply_jump(self, system: System) -> System:
+    def apply_jump(self, system: System, child_system: Optional[System] = None) -> System:
         sys_body = {system.embed(k): v for k, v in self._body.items()}
         return system.with_y0([z + sys_body.get(k, 0.0)
                                for k, z in zip(system.x, system.y0)])
+
+    def child_system(self, system: System) -> System:
+        # Assume we do nothing about the child system
+        return system
 
 
 class BondProcessContextBody(ContextBody):
@@ -740,14 +808,46 @@ class BondProcessContextBody(ContextBody):
     def __str__(self) -> str:
         return self._body
 
-    def apply_jump(self, system: bc.BondSystem):
-        assert isinstance(system, bc.BondSystem)
+    def apply_jump(self, system: bc.BondSystem, child_system: Optional[bc.BondSystem] = None):
+        if child_system is None:
+            # Directly compose the system to get the child
+            assert isinstance(system, bc.BondSystem)
 
-        proc: BondProcess = system.as_process
+            proc: BondProcess = system.as_process
 
-        composed = proc.compose(self._body).as_system
-        print(f"composed = {composed}")
-        return composed
+            return proc.compose(self._body).as_system
+        else:
+            # Assume we have already carried out the composition
+            # (resulting in child_system) and just add the vectors
+            # (after embedding)
+            y0dict: dict = {child_system.v(system.varname(x)): y0
+                            for x, y0 in zip(system.x, system.y0)}
+            y0child = sage.vector([
+                y0dict.get(x, RIF(0)) for x in child_system.x
+            ])
+            return child_system.with_y0(child_system.y0 + y0child)
+
+# , child_system: Optional[System] = None
+        # print(f"composed = {composed}")
+        # return composed
+
+    def child_system(self, system: bc.BondSystem) -> System:
+        assert isinstance(system, System),\
+               f"system = {system} wrong type!"
+        # Construct a child system after composition, assuming initial
+        # concentration zero of every species.
+        # This method is meant to be used in _with_system, to construct
+        # a composed system for each child of a context, ahead of time
+        # A slight hack: we use 1 for each initial concentration and
+        # subsequently subtract 1, to make sure they are included in the 
+        # support.
+        base_system: System = system.with_y0([RIF(1) for _ in system.y0])
+        proc: BondProcess = base_system.as_process
+        composed: bc.BondSystem = proc.compose(self._body).as_system
+        originalvars = {composed.v(system.varname(x)) for x in system.x}
+        y0shift = sage.vector([RIF(-1 if x in originalvars else 0)
+                               for x in composed.x])
+        return composed.with_y0(composed.y0 + y0shift)
 
 @overload
 def to_context_body(x : str) -> BondProcessContextBody: ...
@@ -759,6 +859,8 @@ def to_context_body(x) -> ContextBody:
         return VarContextBody(x)
     elif isinstance(x, str):
         return BondProcessContextBody(x)
+    elif isinstance(x, ContextBody):
+        return x
     else:
         raise ValueError('Incorrect context body')
 
@@ -835,7 +937,18 @@ class Context(Logic, metaclass=ABCMeta):
         ['[3.0999999999999996 .. 4.5000000000000000]',
          '[4.0000000000000000 .. 5.0000000000000000]']
         """
-        return self.ctx.apply_jump(system)
+        return self.ctx.apply_jump(system,
+            child_system=getattr(self.phi, 'system', None))
+
+    def _with_system(self, system: System) -> Logic:
+        return self.__class__(
+            self.ctx,
+            self.phi.with_system(self.ctx.child_system(system)),
+        )
+
+
+def identity(x):
+    return x
 
 
 class C(Context):
@@ -1045,6 +1158,9 @@ class G(Logic):
     @property
     def atomic_propositions(self):
         return self.phi.atomic_propositions
+
+    def _with_system(self, system: System) -> LogicWithSystem:
+        return G(self.interval, self.phi._with_system(system))
 Globally = G
 
 
@@ -1100,6 +1216,9 @@ class F(Logic):
     @property
     def atomic_propositions(self):
         return self.phi.atomic_propositions
+
+    def _with_system(self, system: System) -> Logic:
+        return F(self.interval, self.phi._with_system(system))
 Finally = F
 
 
@@ -1174,6 +1293,13 @@ class U(Logic):
     @property
     def atomic_propositions(self):
         return self.phi.atomic_propositions + self.psi.atomic_propositions
+
+    def _with_system(self, system: System) -> LogicWithSystem:
+        return U(
+            self.phi._with_system(system),
+            self.interval,
+            self.psi._with_system(system),
+        )
 Until = U
 
 
@@ -1251,4 +1377,14 @@ class R(Logic):
     @property
     def atomic_propositions(self):
         return self.phi.atomic_propositions + self.psi.atomic_propositions
+
+    def _with_system(self, system: System) -> LogicWithSystem:
+        return LogicWithSystem(
+            R(
+                self.phi._with_system(system),
+                self.interval,
+                self.psi._with_system(system),
+            ),
+            system,
+        )
 Release = R
