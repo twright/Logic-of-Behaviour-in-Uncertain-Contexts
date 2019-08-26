@@ -36,7 +36,7 @@ extern int fyyparse();
 
 int main(int argc, const char *argv[])
 {
-  fyydebug = 1;
+  // fyydebug = 1;
 	fyyparse();
 
 	return 0;

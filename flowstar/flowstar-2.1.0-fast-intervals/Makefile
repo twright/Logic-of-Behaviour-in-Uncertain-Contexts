@@ -23,7 +23,7 @@ lib: $(OBJS) lex.fyy.o modelParser.tab.o
 	$(CXX) $(OFLAGS) -c $(CFLAGS) -o $@ $<
 
 modelParser.tab.c: modelParser.y
-	bison -d -v modelParser.y
+	bison -d modelParser.y
 	# bison --debug --verbose -d -v modelParser.y
 
 lex.fyy.c: modelLexer.l modelParser.tab.c

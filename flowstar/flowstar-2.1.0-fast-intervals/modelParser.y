@@ -14,7 +14,7 @@
 
 
 	#include "modelParser.h"
-	#define FYYDEBUG 1
+	#define FYYDEBUG 0
 
 	extern void setContinuousProblem(flowstar::ContinuousReachability &);
 	extern void saveContinuousProblem(flowstar::ContinuousReachability &);
