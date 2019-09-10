@@ -20,6 +20,8 @@ cdef extern from "Continuous.h" namespace "flowstar" nogil:
         Flowpipe(const TaylorModelVec & tmvPre_input,
                  const TaylorModelVec & tmv_input,
                  const vector[Interval] & domain_input)
+        Flowpipe(const TaylorModelVec & tmv_input,
+                 const vector[Interval] & domain_input)
         Flowpipe(const vector[Interval] & box, const Interval & I)
 
         void intEval(vector[Interval] & result,

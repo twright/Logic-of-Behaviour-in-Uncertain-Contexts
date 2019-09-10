@@ -31,4 +31,4 @@ lex.fyy.c: modelLexer.l modelParser.tab.c
 	# flex --debug modelLexer.l
 
 clean:
-	rm -f flowstar *.o libflowstar.a *~ lex.fyy.c modelParser.tab.c modelParser.tab.h modelParser.output lex.yy.c
+	rm -f flowstar *.o libflowstar.a *~ lex.fyy.c modelParser.tab.c modelParser.output lex.yy.c

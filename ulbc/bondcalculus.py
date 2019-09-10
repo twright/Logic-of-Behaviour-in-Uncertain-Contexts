@@ -27,13 +27,23 @@ class System:
             x : tuple,
             y0 : tuple,
             y : tuple,
-            varmap : Optional[dict] = None):
+            varmap : Optional[dict] = None,
+            y0_ctx : Optional[tuple] = None):
         self._R = R
         if R == sg.SR:
             self._x = sg.vector(self.R.var(str(xi)) for xi in x)
         else:
             self._x = sg.vector(map(self.R, x))
+        # try:
+        # self._y0 = sg.vector([(sg.RIF(y00a), sg.RIF(y00b))
+            # for y00a, y00b in y0])
+        # except TypeError:
         self._y0 = sg.vector([sg.RIF(y00) for y00 in y0])
+        if y0_ctx is not None:
+            self._y0_ctx = sg.vector([None if y00 is None else sg.RIF(y00)
+                for y00 in y0_ctx])
+        else:
+            self._y0_ctx = None
         self._y = sg.vector(map(self.R, y))
         if varmap is None:
             self._varmap = {str(xi): xi for xi in x}
@@ -43,9 +53,12 @@ class System:
         self._poly_var_ring = sg.PolynomialRing(sg.RIF,
             ', '.join(map(str, self._varmap.values())))
 
-    def with_y0(self, y0):
+    def with_y0(self, y0, y0_ctx=None):
         assert len(y0) == len(self.x)
-        return System(self._R, self.x, y0, self.y, self.varmap)
+        assert y0_ctx is None or len(y0_ctx) == len(self.x)
+        return System(self._R, self.x, y0, self.y,
+            varmap=self.varmap,
+            y0_ctx=y0_ctx)
 
     @property
     def PR(self):
@@ -143,12 +156,24 @@ class System:
         )
 
     def reach(self, duration, **kwargs) -> Reach:
+        if self._y0_ctx is None:
+            # Single, unified initial set
+            y0 = self.y0
+        else:
+            # Fixed initial set with variable context
+            y0 = list(zip(self._y0_ctx, self.y0))
+
+        try:
+            print(f"calling reach with y0 = {[(a.str(style='brackets'), b.str(style='brackets')) for a, b in y0]}")
+        except TypeError:
+            print(f"calling reach with y0 = {[a.str(style='brackets') for a in y0]}")
+
         if self.R == sg.SR:
             # Non-Polynomial case
             return Reach(
                 self.x,
                 self.y,
-                self.y0,
+                y0,
                 duration,
                 system=self,
                 **kwargs,
@@ -158,7 +183,7 @@ class System:
             # print("reach polynomial case")
             return Reach(
                 self.y,
-                self.y0,
+                y0,
                 duration,
                 system=self,
                 **kwargs,

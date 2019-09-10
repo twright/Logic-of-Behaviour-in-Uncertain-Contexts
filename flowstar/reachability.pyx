@@ -74,6 +74,103 @@ cdef class CReach:
         print('str_odes =', repr(str_odes))
         self._init_non_polynomial_str_args(str_vars, str_odes, *args, **kwargs)
 
+    # Returns object so that exceptions are handled
+    cdef object _handle_initials(CReach self, vector[Flowpipe] *initials_fpvect, ContinuousReachability *C, object vars, object initials):
+        """Declare variables for Taylor-models and produce a vector of
+        Flowpipes representing the initial conditions."""
+        # Must be called from inside the global manager
+        print("_handle_initials called!")
+
+        # Our result
+        # cdef vector[Flowpipe] initials_fpvect
+
+        # One per state dimension
+        cdef vector[TaylorModel] tms
+        # One per Taylor-model dimension
+        cdef vector[Interval] constants
+        # One per Taylor-model dimension
+        cdef vector[int] tm_var_ids
+        # One per Taylor-model dimension
+        cdef vector[Interval] domains
+        # Current tm var index
+        cdef const Interval zero_int
+        cdef Interval unit_int = Interval(1, 1)
+        cdef int tm_var_index
+        cdef Interval initial_int_C
+        cdef Interval initial_int_S
+
+        # Declare state/taylor model variables
+        C.declareTMVar(b"local_t")
+        cdef Interval one_int = Interval(0, 1)
+        domains.push_back(zero_int)
+        tm_var_index = 1
+
+        for i, (initial, var) in enumerate(zip(initials, vars), 1):
+            # Interpret initial condition
+            try:
+                initialC, initialS = initial
+            except TypeError:
+                initialC, initialS = initial, None
+        
+            # Declare state variable
+            var_str = var.encode('utf-8')
+            C.declareStateVar(<string>var_str)
+            assert i == C.getIDForStateVar(<string>var_str) + 1
+
+            if initialC is not None:
+                # Declare Taylor-model variable
+                C.declareTMVar(<string>"local_var_{}".format(i).encode('utf-8'))
+                initial_int_C = interval.make_interval(initialC)
+                print(f"C = {interval.as_str(initial_int_C)}")
+                self.initials.push_back(initial_int_C)
+                domains.push_back(initial_int_C)
+                tm_var_ids.push_back(tm_var_index)
+
+                tm_var_index += 1
+            else:
+                tm_var_ids.push_back(-1)
+            
+            if initialS is not None:
+                initial_int_S = interval.make_interval(initialS)
+                print(f"S = {interval.as_str(initial_int_S)}")
+                constants.push_back(initial_int_S)
+            else:
+                constants.push_back(zero_int)
+
+        cdef:
+            vector[int].iterator tm_var_id_iter = tm_var_ids.begin()
+            vector[Interval].iterator constant_iter = constants.begin()
+            TaylorModel tm
+            vector[Interval] coefficients
+            
+        # Loop through and create initial condition taylor models
+        while (    tm_var_id_iter != tm_var_ids.end()
+               and constant_iter  != constants.end()):
+
+            # Construct the desired taylor model
+            # tm = S + x_i where TM var x_i in C
+            coefficients.clear()
+            for i in range(domains.size()):
+                if i == deref(tm_var_id_iter):
+                    coefficients.push_back(unit_int)
+                else:
+                    coefficients.push_back(zero_int)
+            tm = TaylorModel(coefficients, deref(constant_iter))
+            tms.push_back(tm)
+
+            inc(tm_var_id_iter)
+            inc(constant_iter)
+        
+        initials_fpvect.push_back(
+            Flowpipe(
+                TaylorModelVec(tms),
+                domains,
+            )
+        )
+        print('initials = {}'.format(initials))
+
+        # return initials_fpvect
+
     def _init_non_polynomial_str_args(
         self,
         vars,
@@ -167,16 +264,6 @@ cdef class CReach:
             C.maxNumSteps = maxNumSteps
             C.max_remainder_queue = max_remainder_queue
 
-            # Declare state/taylor model variables
-            C.declareTMVar(b"local_t")
-            for i, var in enumerate(vars, 1):
-                var_str = var.encode('utf-8')
-                print('var =', var, 'type(var) =', type(var), 'var_str =',
-                    var_str.decode('utf-8'))
-                C.declareStateVar(<string>var_str)
-                assert i == C.getIDForStateVar(<string>var_str) + 1
-                C.declareTMVar(<string>"local_var_{}".format(i).encode('utf-8'))
-
             # --- Creating the continuous system ---
             assert len(odes) == len(initials)
             assert len(odes) > 0
@@ -188,12 +275,8 @@ cdef class CReach:
             for ode in odes:
                 ode_strs.push_back(ode.encode('utf-8'))
 
-            # Create initial conditions
-            for initial in initials:
-                self.initials.push_back(interval.make_interval(initial))
-
-            initials_fpvect.push_back(Flowpipe(self.initials, zero_int))
-            print('initials = {}'.format(initials))
+            # Handle initial conditions
+            self._handle_initials(&initials_fpvect, C, vars, initials)
 
             # Create system object
             # The continuousProblem needs to be setup and set in parser before we call
@@ -321,14 +404,9 @@ cdef class CReach:
 
         cdef TaylorModelVec odes_tmv = TaylorModelVec(odes_tms)
 
-        # Create initial conditions
-        # cdef vector[Interval] initials_vect
-        for initial in initials:
-            self.initials.push_back(interval.make_interval(initial))
-
-        cdef Interval zero_int
+        # Handle initial conditions
         cdef vector[Flowpipe] initials_fpvect
-        initials_fpvect.push_back(Flowpipe(self.initials, zero_int))
+        self._handle_initials(&initials_fpvect, C, vars, initials)
 
         # Create system object
         C.system = ContinuousSystem(odes_tmv, initials_fpvect)
@@ -385,16 +463,6 @@ cdef class CReach:
             C.estimation.push_back(Interval(-estimation,estimation))
         C.maxNumSteps = maxNumSteps
         C.max_remainder_queue = max_remainder_queue
-
-        # Declare state/taylor model variables
-        C.declareTMVar(b"local_t")
-        for i, var in enumerate(vars, 1):
-            var_str = var.encode('utf-8')
-            print('var =', var, 'type(var) =', type(var), 'var_str =',
-                  var_str.decode('utf-8'))
-            C.declareStateVar(<string>var_str)
-            assert i == C.getIDForStateVar(<string>var_str) + 1
-            C.declareTMVar(<string>"local_var_{}".format(i).encode('utf-8'))
 
         # Run immediately?
         if run:

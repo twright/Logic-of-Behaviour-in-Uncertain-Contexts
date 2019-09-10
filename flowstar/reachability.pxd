@@ -34,6 +34,11 @@ cdef class CReach:
     cdef void compose_flowpipe(CReach self,
                                const Flowpipe & fp,
                                optional[TaylorModelVec] & fp_compo)
+    cdef object _handle_initials(CReach self,
+                                 vector[Flowpipe] *initials_fpvect,
+                                 ContinuousReachability *C,
+                                 object vars,
+                                 object initials)
 
 
 cdef class FlowstarGlobalManager:

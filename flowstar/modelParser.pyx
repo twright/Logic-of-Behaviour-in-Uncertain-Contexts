@@ -6,6 +6,7 @@ from flowstar.Continuous cimport ContinuousReachability
 
 
 cdef void setYYDebug(bint debug):
-    global fyydebug
+    pass
+    # global fyydebug
 
-    fyydebug = debug
+    # fyydebug = debug

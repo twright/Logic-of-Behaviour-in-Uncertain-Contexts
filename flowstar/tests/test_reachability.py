@@ -63,6 +63,28 @@ class TestReachability(object):
         assert reach.ran
         assert reach.result == 2
 
+    @staticmethod
+    @pytest.mark.parametrize(
+        "initials",
+        [
+            [(RIF(1, 2), None), (RIF(3, 4), None)],
+            [(None, RIF(1, 2)), (None, RIF(3, 4))],
+            [(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 3.5), RIF(0, 0.5))],
+            [(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 4), None)],
+            [(RIF(1, 2), None), (RIF(3, 3.5), RIF(0, 0.5))],
+        ],
+    )
+    def test_reach_context_split(odes, initials):
+        r = Reach(odes, initials, 2 * sage.pi, (0.001, 0.1), order=10,
+                 verbosity=2)
+        assert intervals_approx_eq(r(RIF(0)), [RIF(1,2), RIF(3,4)], 0.1)
+        # assert intervals_approx_eq(
+        #     r(RIF(1, 2)),
+        #     [RIF(-4.5240526319578552, -1.3583472984326301),
+        #      RIF(-0.79464978559099065, 3.9296122373432128)],
+        #     0.5,
+        # )
+
 
 class TestEval(object):
     """Tests for interval evaluation."""
