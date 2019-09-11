@@ -1,7 +1,7 @@
 import pytest
 # Must import reachability before sage to avoid breaking
 # flow* parser!
-from flowstar.reachability import Reach
+from flowstar.reachability import Reach, InitialForm
 import sage.all as sage
 from sage.all import RIF
 
@@ -65,25 +65,37 @@ class TestReachability(object):
 
     @staticmethod
     @pytest.mark.parametrize(
-        "initials",
+        "initials, initial_form",
         [
-            [(RIF(1, 2), None), (RIF(3, 4), None)],
-            [(None, RIF(1, 2)), (None, RIF(3, 4))],
-            [(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 3.5), RIF(0, 0.5))],
-            [(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 4), None)],
-            [(RIF(1, 2), None), (RIF(3, 3.5), RIF(0, 0.5))],
+            ([RIF(1, 2), RIF(3, 4)], InitialForm.COMBINED),
+            ([(None, RIF(1, 2)), (None, RIF(3, 4))], InitialForm.REMAINDER),
+            ([(None, RIF(1, 2)), (None, RIF(3, 4))], InitialForm.SPLIT_VARS),
+            ([(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 3.5), RIF(0, 0.5))],
+             InitialForm.REMAINDER),
+            ([(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 3.5), RIF(0, 0.5))],
+             InitialForm.SPLIT_VARS),
+            ([(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 3.5), RIF(0, 0.5))],
+             InitialForm.COMBINED),
+            ([(RIF(1, 1.5), RIF(0, 0.5)), (None, RIF(3, 4))],
+             InitialForm.REMAINDER),
+            ([(RIF(1, 1.5), RIF(0, 0.5)), (None, RIF(3, 4))],
+             InitialForm.SPLIT_VARS),
+            # [(RIF(1, 2), None), (RIF(3, 3.5), RIF(0, 0.5))],
         ],
     )
-    def test_reach_context_split(odes, initials):
+    def test_reach_context_split(odes, initials, initial_form):
         r = Reach(odes, initials, 2 * sage.pi, (0.001, 0.1), order=10,
-                 verbosity=2)
+                 verbosity=2, initial_form=initial_form)
         assert intervals_approx_eq(r(RIF(0)), [RIF(1,2), RIF(3,4)], 0.1)
-        # assert intervals_approx_eq(
-        #     r(RIF(1, 2)),
-        #     [RIF(-4.5240526319578552, -1.3583472984326301),
-        #      RIF(-0.79464978559099065, 3.9296122373432128)],
-        #     0.5,
-        # )
+        assert intervals_approx_eq(
+            r(RIF(1, 2)),
+            [RIF(-4.5240526319578552, -1.3583472984326301),
+             RIF(-0.79464978559099065, 3.9296122373432128)],
+            # We note that REMAINDER mode is not very accurate
+            # since it defeats flowstar's mechanism of error
+            # control
+            3 if initial_form == InitialForm.REMAINDER else 0.1,
+        )
 
 
 class TestEval(object):

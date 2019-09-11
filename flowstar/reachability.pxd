@@ -38,7 +38,29 @@ cdef class CReach:
                                  vector[Flowpipe] *initials_fpvect,
                                  ContinuousReachability *C,
                                  object vars,
-                                 object initials)
+                                 object initials,
+                                 object mode)
+    cdef object _initial_flowpipe_combined(
+        CReach self,
+        # Returns via flowpipe parameter
+        Flowpipe* flowpipe,
+        vector[optional[Interval]] & context_intervals,
+        vector[Interval] & static_intervals,
+    )
+    cdef object _initial_flowpipe_remainder(
+        CReach self,
+        Flowpipe* flowpipe,
+        vector[optional[Interval]] & context_intervals,
+        vector[Interval] & static_intervals,
+    )
+    cdef object _initial_flowpipe_split_vars(
+        CReach self,
+        Flowpipe* flowpipe,
+        vector[optional[Interval]] & context_intervals,
+        vector[Interval] & static_intervals,
+        ContinuousReachability *C,
+        int & tm_var_index,
+    )
 
 
 cdef class FlowstarGlobalManager:

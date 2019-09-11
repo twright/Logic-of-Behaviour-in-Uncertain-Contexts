@@ -26,10 +26,23 @@ import sage.all as sage
 from sage.all import RIF
 from time import time as pytime
 from warnings import warn
+from enum import Enum
+from flowstar.cppstd cimport optional
 
 
 class FlowstarFailedException(Exception):
     pass
+
+
+class InitialForm(Enum):
+    # Represent the initials conditions as a single combined interval
+    COMBINED = 1
+    # Store the static portion of a context application in the Taylor
+    # model remainder
+    REMAINDER = 2
+    # Store the static portion of a context application in an extra
+    # Taylor model variable
+    SPLIT_VARS = 3
 
 
 cdef class CReach:
@@ -75,7 +88,9 @@ cdef class CReach:
         self._init_non_polynomial_str_args(str_vars, str_odes, *args, **kwargs)
 
     # Returns object so that exceptions are handled
-    cdef object _handle_initials(CReach self, vector[Flowpipe] *initials_fpvect, ContinuousReachability *C, object vars, object initials):
+    cdef object _handle_initials(CReach self, vector[Flowpipe] *initials_fpvect,
+            ContinuousReachability *C, object vars, object initials,
+            object mode):
         """Declare variables for Taylor-models and produce a vector of
         Flowpipes representing the initial conditions."""
         # Must be called from inside the global manager
@@ -84,25 +99,22 @@ cdef class CReach:
         # Our result
         # cdef vector[Flowpipe] initials_fpvect
 
-        # One per state dimension
-        cdef vector[TaylorModel] tms
-        # One per Taylor-model dimension
-        cdef vector[Interval] constants
-        # One per Taylor-model dimension
-        cdef vector[int] tm_var_ids
-        # One per Taylor-model dimension
-        cdef vector[Interval] domains
-        # Current tm var index
-        cdef const Interval zero_int
-        cdef Interval unit_int = Interval(1, 1)
-        cdef int tm_var_index
-        cdef Interval initial_int_C
-        cdef Interval initial_int_S
+        cdef:
+            # One per state dimension
+            vector[TaylorModel] tms
+            # One per Taylor-model dimension
+            vector[Interval] static_intervals
+            # One per Taylor-model dimension
+            vector[optional[Interval]] context_intervals
+            # Current tm var index
+            const Interval zero_int
+            int tm_var_index
+            Interval initial_int_C
+            Interval initial_int_S
+            Flowpipe flowpipe
 
         # Declare state/taylor model variables
         C.declareTMVar(b"local_t")
-        cdef Interval one_int = Interval(0, 1)
-        domains.push_back(zero_int)
         tm_var_index = 1
 
         for i, (initial, var) in enumerate(zip(initials, vars), 1):
@@ -110,7 +122,9 @@ cdef class CReach:
             try:
                 initialC, initialS = initial
             except TypeError:
-                initialC, initialS = initial, None
+                assert mode == InitialForm.COMBINED,\
+                    f"Unexpected mode = {mode}"
+                initialC, initialS = None, initial
         
             # Declare state variable
             var_str = var.encode('utf-8')
@@ -119,57 +133,185 @@ cdef class CReach:
 
             if initialC is not None:
                 # Declare Taylor-model variable
-                C.declareTMVar(<string>"local_var_{}".format(i).encode('utf-8'))
+                C.declareTMVar(<string>f"local_var_c{i}".encode('utf-8'))
                 initial_int_C = interval.make_interval(initialC)
                 print(f"C = {interval.as_str(initial_int_C)}")
                 self.initials.push_back(initial_int_C)
-                domains.push_back(initial_int_C)
-                tm_var_ids.push_back(tm_var_index)
+                context_intervals.push_back(optional[Interval](initial_int_C))
 
                 tm_var_index += 1
             else:
-                tm_var_ids.push_back(-1)
+                context_intervals.push_back(optional[Interval]())
             
             if initialS is not None:
                 initial_int_S = interval.make_interval(initialS)
                 print(f"S = {interval.as_str(initial_int_S)}")
-                constants.push_back(initial_int_S)
+                static_intervals.push_back(initial_int_S)
             else:
-                constants.push_back(zero_int)
+                static_intervals.push_back(zero_int)
 
+        if   mode == InitialForm.COMBINED:
+            self._initial_flowpipe_combined(
+                &flowpipe,
+                context_intervals,
+                static_intervals,
+            )
+        elif mode == InitialForm.REMAINDER:
+            self._initial_flowpipe_remainder(
+                &flowpipe,
+                context_intervals,
+                static_intervals,
+            )
+        elif mode == InitialForm.SPLIT_VARS:
+            self._initial_flowpipe_split_vars(
+                &flowpipe,
+                context_intervals,
+                static_intervals,
+                C,
+                tm_var_index,
+            )
+        else:
+            raise ValueError("Invalid mode")
+
+        
+        initials_fpvect.push_back(flowpipe)
+
+    cdef object _initial_flowpipe_combined(
+        CReach self,
+        # Returns via flowpipe parameter
+        Flowpipe* flowpipe,
+        vector[optional[Interval]] & context_intervals,
+        vector[Interval] & static_intervals,
+    ):
         cdef:
-            vector[int].iterator tm_var_id_iter = tm_var_ids.begin()
-            vector[Interval].iterator constant_iter = constants.begin()
+            const Interval zero_int
+            vector[Interval] initials
+            vector[optional[Interval]].iterator context_iter = context_intervals.begin()
+            vector[Interval].iterator static_iter = static_intervals.begin()
+            Interval I
+
+        assert static_intervals.size() == context_intervals.size()
+
+        while (    context_iter != context_intervals.end()
+               and static_iter  != static_intervals.end()):
+            I = deref(static_iter)
+            if deref(context_iter).has_value():
+                I.add_assign(deref(context_iter).value())
+            initials.push_back(I)
+
+            inc(context_iter)
+            inc(static_iter)
+
+        flowpipe[0] = Flowpipe(initials, zero_int)
+
+    cdef object _initial_flowpipe_remainder(
+        CReach self,
+        Flowpipe* flowpipe,
+        vector[optional[Interval]] & context_intervals,
+        vector[Interval] & static_intervals,
+    ):
+        cdef:
+            vector[optional[Interval]].iterator context_iter\
+                = context_intervals.begin()
+            vector[Interval].iterator static_iter = static_intervals.begin()
             TaylorModel tm
-            vector[Interval] coefficients
-            
+            vector[TaylorModel] tms
+            vector[Interval] domains
+            const Interval zero_int
+            int context_dim = context_intervals.size()
+            int context_i = 0
+
+        # Time domain
+        domains.push_back(zero_int)
+
         # Loop through and create initial condition taylor models
-        while (    tm_var_id_iter != tm_var_ids.end()
-               and constant_iter  != constants.end()):
+        while (    context_iter  != context_intervals.end()
+               and static_iter    != static_intervals.end()):
 
             # Construct the desired taylor model
             # tm = S + x_i where TM var x_i in C
-            coefficients.clear()
-            for i in range(domains.size()):
-                if i == deref(tm_var_id_iter):
-                    coefficients.push_back(unit_int)
-                else:
-                    coefficients.push_back(zero_int)
-            tm = TaylorModel(coefficients, deref(constant_iter))
+            if deref(context_iter).has_value():
+                domains.push_back(deref(context_iter).value())
+                tm = TaylorModel(Polynomial(1 + context_i, 1, 1 + context_dim),
+                                 deref(static_iter))
+            else:
+                tm = TaylorModel(Polynomial(), deref(static_iter))
             tms.push_back(tm)
 
-            inc(tm_var_id_iter)
-            inc(constant_iter)
-        
-        initials_fpvect.push_back(
-            Flowpipe(
-                TaylorModelVec(tms),
-                domains,
-            )
-        )
-        print('initials = {}'.format(initials))
+            inc(context_i)
+            inc(context_iter)
+            inc(static_iter)
 
-        # return initials_fpvect
+        flowpipe[0] = Flowpipe(TaylorModelVec(tms), domains)
+
+    cdef object _initial_flowpipe_split_vars(
+        CReach self,
+        Flowpipe* flowpipe,
+        vector[optional[Interval]] & context_intervals,
+        vector[Interval] & static_intervals,
+        ContinuousReachability *C,
+        int & tm_var_index,
+    ):
+        cdef:
+            vector[optional[Interval]].iterator context_iter\
+                = context_intervals.begin()
+            vector[Interval].iterator static_iter = static_intervals.begin()
+            vector[TaylorModel] tms
+            vector[Interval] domains, context_domains, static_domains
+            const Interval zero_int
+            Polynomial p_context
+            Polynomial p_static
+            int context_i = 0
+            int context_dim = tm_var_index - 1
+            int system_dim = static_intervals.size()
+            int static_i = 0
+
+        # Loop through and create initial condition taylor models
+        while (    context_iter  != context_intervals.end()
+               and static_iter   != static_intervals.end()):
+            # Construct the desired taylor model
+            # tm = y_i + x_i where TM var x_i in C, y_i in S
+
+            # Context parts
+            if deref(context_iter).has_value():
+                p_context = Polynomial(1 + context_i, 1,
+                    1 + context_dim + system_dim)
+
+                # Domain of context variable
+                context_domains.push_back(deref(context_iter).value())
+
+                inc(context_i)
+            else:
+                p_context = Polynomial(zero_int, 1 + context_dim + system_dim)
+
+            # Static parts
+            p_static = Polynomial(1 + context_dim + static_i, 1,
+                1 + context_dim + system_dim)
+            C.declareTMVar(<string>f"local_var_s{static_i}"
+                .encode('utf-8'))
+            static_domains.push_back(deref(static_iter))
+
+            # Create tm
+            tms.push_back(TaylorModel(p_context + p_static))
+
+            inc(static_i)
+            inc(context_iter)
+            inc(static_iter)
+
+        # Print context and static domains
+        print("contexts = {}".format([interval.as_str(c)
+            for c in context_domains]))
+        print("statics  = {}".format([interval.as_str(s)
+            for s in static_domains]))
+
+        # Assemble domains
+        domains.push_back(zero_int)
+        domains.insert(domains.end(), context_domains.begin(),
+            context_domains.end())
+        domains.insert(domains.end(), static_domains.begin(),
+            static_domains.end())
+
+        flowpipe[0] = Flowpipe(TaylorModelVec(tms), domains)
 
     def _init_non_polynomial_str_args(
         self,
@@ -191,6 +333,7 @@ cdef class CReach:
         run=True,
         symbolic_composition=True,
         precompose_taylor_models=False,
+        initial_form=InitialForm.COMBINED,
         **kwargs):
         global continuousProblem
 
@@ -258,9 +401,9 @@ cdef class CReach:
             C.bPlot = True
             C.bDump = False
             C.integrationScheme = 4 # NONPOLY_TAYLOR
-            C.cutoff_threshold = Interval(-cutoff_threshold,cutoff_threshold)
+            C.cutoff_threshold = Interval(-cutoff_threshold, cutoff_threshold)
             for _ in odes:
-                C.estimation.push_back(Interval(-estimation,estimation))
+                C.estimation.push_back(Interval(-estimation, estimation))
             C.maxNumSteps = maxNumSteps
             C.max_remainder_queue = max_remainder_queue
 
@@ -276,7 +419,8 @@ cdef class CReach:
                 ode_strs.push_back(ode.encode('utf-8'))
 
             # Handle initial conditions
-            self._handle_initials(&initials_fpvect, C, vars, initials)
+            self._handle_initials(&initials_fpvect, C, vars, initials,
+                initial_form)
 
             # Create system object
             # The continuousProblem needs to be setup and set in parser before we call
@@ -368,6 +512,7 @@ cdef class CReach:
         system=None,
         symbolic_composition=False,
         precompose_taylor_models=False,
+        initial_form=InitialForm.COMBINED,
         **kwargs):
         cdef ContinuousReachability * C = &self.c_reach
         self.system = system
@@ -406,7 +551,8 @@ cdef class CReach:
 
         # Handle initial conditions
         cdef vector[Flowpipe] initials_fpvect
-        self._handle_initials(&initials_fpvect, C, vars, initials)
+        self._handle_initials(&initials_fpvect, C, vars, initials,
+            initial_form)
 
         # Create system object
         C.system = ContinuousSystem(odes_tmv, initials_fpvect)
@@ -489,6 +635,7 @@ cdef class CReach:
                 initial = deref(iinitials)
                 il, iu = initial.inf(), initial.sup()
                 if il < iu:
+                    # This does not make sense since this is not how preconditioning works!
                     I = Interval(-1 + 2*(xl - il)/(iu - il),
                                  -1 + 2*(xu - il)/(iu - il))
                 else:
