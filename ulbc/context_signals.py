@@ -67,6 +67,11 @@ def space_domain_to_context(R, xs):
     return {str(g): x for g, x in zip(R.gens(), xs)}
 
 
+def preconditioned_space_domain(n : int):
+    '''Generate an initial space domain in n dimensions.'''
+    return [RIF(-1, 1) for _ in range(n)]
+
+
 class ChildIterator(object):
     def __init__(self, gen):
         self._gen = iter(gen)

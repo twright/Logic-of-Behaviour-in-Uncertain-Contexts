@@ -20,8 +20,13 @@ cdef class CReach:
     cdef readonly int result
     cdef public bint symbolic_composition
     cdef readonly object var_ring
-    cdef vector[Interval] initials
+    cdef readonly object initial_form
+    cdef readonly object system_vars
+    # cdef vector[Interval] initials
+    cdef readonly int context_dim
+    cdef readonly int static_dim
     cdef vector[Polynomial] odes
+    cdef optional[vector[string]] ode_strs
     cdef vector[optional[TaylorModelVec]] flowpipes_compo
     # Standardized orders and cutoff threshold
     # cdef vector[int] orders
@@ -29,8 +34,7 @@ cdef class CReach:
 
     cdef vector[Interval] eval_interval(CReach self, Interval I,
             optional[reference_wrapper[vector[Interval]]] space_domain=*)
-    cdef optional[vector[Interval]]\
-            _convert_space_domain(CReach self, space_domain=*)
+    cdef object _convert_space_domain(CReach self, vector[Interval]* res, space_domain=*)
     cdef void compose_flowpipe(CReach self,
                                const Flowpipe & fp,
                                optional[TaylorModelVec] & fp_compo)

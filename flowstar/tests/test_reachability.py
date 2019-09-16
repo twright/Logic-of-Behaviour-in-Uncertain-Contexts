@@ -33,8 +33,8 @@ def reach(odes, initials):
 class TestConvertSpaceDomain(object):
     def test_two_dimensional(self, reach):
         assert intervals_approx_eq(
-            reach.convert_space_domain([RIF(1, 1.5), RIF(3.5, 3.75)]),
-            [RIF(-1, 0), RIF(0, 0.5)],
+            reach.convert_space_domain([RIF(-0.5, 1), RIF(0.25, 0.5)]),
+            [RIF(-0.5, 1), RIF(0.25, 0.5)],
         )
 
 
@@ -111,10 +111,10 @@ class TestEval(object):
              RIF(-0.79464978559099065, 3.9296122373432128)],
         )
 
-    def test_restricted_context(self, ringxy, odes, reach):  # NOQA
+    def test_restricted_context(self, ringxy, odes, reach):
         # now necessary to prepare for plotting!
         # reach.prepare_for_plotting()
-        res = reach(RIF(1, 2), space_domain=[RIF(1, 1.5), RIF(3.5, 3.75)])
+        res = reach(RIF(1, 2), space_domain=[RIF(-1, 0), RIF(0, 0.5)])
         print(list(map(finterval, res)))
         assert intervals_approx_eq(
             res,

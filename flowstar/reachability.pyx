@@ -122,9 +122,9 @@ cdef class CReach:
             try:
                 initialC, initialS = initial
             except TypeError:
-                assert mode == InitialForm.COMBINED,\
-                    f"Unexpected mode = {mode}"
-                initialC, initialS = None, initial
+                # assert mode == InitialForm.COMBINED,\
+                #     f"Unexpected mode = {mode}"
+                initialC, initialS = initial, None
         
             # Declare state variable
             var_str = var.encode('utf-8')
@@ -136,10 +136,10 @@ cdef class CReach:
                 C.declareTMVar(<string>f"local_var_c{i}".encode('utf-8'))
                 initial_int_C = interval.make_interval(initialC)
                 print(f"C = {interval.as_str(initial_int_C)}")
-                self.initials.push_back(initial_int_C)
                 context_intervals.push_back(optional[Interval](initial_int_C))
 
                 tm_var_index += 1
+                self.context_dim += 1
             else:
                 context_intervals.push_back(optional[Interval]())
             
@@ -263,8 +263,15 @@ cdef class CReach:
             Polynomial p_static
             int context_i = 0
             int context_dim = tm_var_index - 1
-            int system_dim = static_intervals.size()
+            # int system_dim = static_intervals.size()
             int static_i = 0
+            int system_dim = 0
+
+        for I in static_intervals:
+            if I.width() > 0:
+                self.static_dim += 1
+
+        system_dim = 1 + self.context_dim + self.static_dim
 
         # Loop through and create initial condition taylor models
         while (    context_iter  != context_intervals.end()
@@ -274,22 +281,26 @@ cdef class CReach:
 
             # Context parts
             if deref(context_iter).has_value():
-                p_context = Polynomial(1 + context_i, 1,
-                    1 + context_dim + system_dim)
+                p_context = Polynomial(1 + context_i, 1, system_dim)
 
                 # Domain of context variable
                 context_domains.push_back(deref(context_iter).value())
 
                 inc(context_i)
             else:
-                p_context = Polynomial(zero_int, 1 + context_dim + system_dim)
+                p_context = Polynomial(zero_int, system_dim)
 
             # Static parts
-            p_static = Polynomial(1 + context_dim + static_i, 1,
-                1 + context_dim + system_dim)
-            C.declareTMVar(<string>f"local_var_s{static_i}"
-                .encode('utf-8'))
-            static_domains.push_back(deref(static_iter))
+            # Only expand if nonzero width
+            if deref(static_iter).width() > 0:
+                p_static = Polynomial(1 + self.context_dim + static_i, 1,
+                    system_dim)
+                C.declareTMVar(<string>f"local_var_s{static_i}"
+                    .encode('utf-8'))
+                self.static_dim += 1
+                static_domains.push_back(deref(static_iter))
+            else:
+                p_static = Polynomial(deref(static_iter), system_dim)
 
             # Create tm
             tms.push_back(TaylorModel(p_context + p_static))
@@ -314,7 +325,7 @@ cdef class CReach:
         flowpipe[0] = Flowpipe(TaylorModelVec(tms), domains)
 
     def _init_non_polynomial_str_args(
-        self,
+        CReach self,
         vars,
         odes,
         initials,
@@ -338,6 +349,8 @@ cdef class CReach:
         global continuousProblem
 
         self.ran = False
+        self.system_vars = vars
+        self.initial_form = initial_form
         self.prepared = False
         self.prepared_for_plotting = False
         self.result = 0
@@ -348,7 +361,6 @@ cdef class CReach:
         cdef ContinuousReachability * C
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
-        cdef vector[string] ode_strs
         self.var_ring = sage.PolynomialRing(sage.RIF, ', '.join([str(v) for v in vars]))
 
         # if symbolic_composition == False:
@@ -415,8 +427,9 @@ cdef class CReach:
 
             # We should do something about the var ring!
             # cdef 
+            self.ode_strs = optional[vector[string]](vector[string]())
             for ode in odes:
-                ode_strs.push_back(ode.encode('utf-8'))
+                self.ode_strs.value().push_back(ode.encode('utf-8'))
 
             # Handle initial conditions
             self._handle_initials(&initials_fpvect, C, vars, initials,
@@ -424,7 +437,7 @@ cdef class CReach:
 
             # Create system object
             # The continuousProblem needs to be setup and set in parser before we call
-            C.system = ContinuousSystem(ode_strs, initials_fpvect)
+            C.system = ContinuousSystem(self.ode_strs.value(), initials_fpvect)
             if not all([s.size() > 0 for s in C.system.strOde_centered]):
                 raise Exception("Flow* failed to parse ODEs!")
 
@@ -440,24 +453,51 @@ cdef class CReach:
                 t1 = pytime()
                 print("Pre-composing Taylor models: {} sec".format(t1 - t0))
 
-    def _init_clone(CReach self, CReach other, initials=None):
+    def _init_clone(CReach self, CReach other, initials=None, initial_form=None):
+        global continuousProblem
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
 
         self.system = other.system
+        self.system_vars = other.system_vars
+        if self.initial_form is None:
+            self.initial_form = other.initial_form
+        else:
+            self.initial_form = initial_form
         self.ran = False
         self.prepared = False
         self.result = 0
         self.symbolic_composition = other.symbolic_composition
+        self.ode_strs = other.ode_strs
+
         if initials is None:
-            self.initials = other.initials
+            # self.initials = other.initials
             self.c_reach.system = other.c_reach.system
+            self.c_reach.TI_Par_Tab = other.c_reach.TI_Par_Tab
+            self.c_reach.TI_Par_Names = other.c_reach.TI_Par_Names
+            self.c_reach.TV_Par_Tab = other.c_reach.TV_Par_Tab
+            self.c_reach.TV_Par_Names = other.c_reach.TV_Par_Names
+            self.c_reach.tmVarTab = other.c_reach.tmVarTab
+            self.c_reach.tmVarNames = other.c_reach.tmVarNames
         else:
-            for initial in initials:
-                self.initials.push_back(interval.make_interval(initial))
-            initials_fpvect.push_back(Flowpipe(self.initials, zero_int))
-            self.c_reach.system = ContinuousSystem(other.c_reach.system.tmvOde,
-                                                   initials_fpvect)
+            with self.global_manager:
+                self._handle_initials(
+                    &initials_fpvect,
+                    &continuousProblem,
+                    self.system_vars,
+                    initials,
+                    self.initial_form,
+                )
+                if self.ode_strs.has_value():
+                    self.c_reach.system = ContinuousSystem(
+                        self.ode_strs.value(),
+                        initials_fpvect,
+                    )
+                else:
+                    self.c_reach.system = ContinuousSystem(
+                        other.c_reach.system.tmvOde,
+                        initials_fpvect,
+                    )
         
         self.c_reach.bAdaptiveOrders = other.c_reach.bAdaptiveOrders
         self.c_reach.miniStep = other.c_reach.miniStep
@@ -481,14 +521,9 @@ cdef class CReach:
         self.c_reach.max_remainder_queue = other.c_reach.max_remainder_queue
         self.c_reach.stateVarTab = other.c_reach.stateVarTab
         self.c_reach.stateVarNames = other.c_reach.stateVarNames
-        self.c_reach.tmVarTab = other.c_reach.tmVarTab
         self.c_reach.parTab = other.c_reach.parTab
         self.c_reach.parNames = other.c_reach.parNames
         self.c_reach.parRanges = other.c_reach.parRanges
-        self.c_reach.TI_Par_Tab = other.c_reach.TI_Par_Tab
-        self.c_reach.TI_Par_Names = other.c_reach.TI_Par_Names
-        self.c_reach.TV_Par_Tab = other.c_reach.TV_Par_Tab
-        self.c_reach.TV_Par_Names = other.c_reach.TV_Par_Names
         # Run immediately? Do we need a flag for this?
         self.run()
 
@@ -516,6 +551,8 @@ cdef class CReach:
         **kwargs):
         cdef ContinuousReachability * C = &self.c_reach
         self.system = system
+        self.system_vars = vars
+        self.initial_form = initial_form
         self.ran = False
         self.prepared = False
         self.prepared_for_plotting = False
@@ -619,39 +656,22 @@ cdef class CReach:
                 t1 = pytime()
                 print("Pre-composing Taylor models: {} sec".format(t1 - t0))
 
-    cdef optional[vector[Interval]]\
-            _convert_space_domain(CReach self, space_domain=None):
-        cdef:
-            vector[Interval] c_space_domain
-            vector[Interval].iterator iinitials = self.initials.begin()
-            Interval I
+    cdef object _convert_space_domain(CReach self, vector[Interval] * res, space_domain=None):
+        cdef Interval I
 
-        if space_domain is None:
-            return optional[vector[Interval]]()
-        else:
+        res[0] = vector[Interval]()
+
+        if space_domain is not None:
             for x in space_domain:
-                print(x.endpoints())
-                xl, xu = x.endpoints()
-                initial = deref(iinitials)
-                il, iu = initial.inf(), initial.sup()
-                if il < iu:
-                    # This does not make sense since this is not how preconditioning works!
-                    I = Interval(-1 + 2*(xl - il)/(iu - il),
-                                 -1 + 2*(xu - il)/(iu - il))
-                else:
-                    I = Interval(-1, 1)
-                c_space_domain.push_back(I)
-
-                inc(iinitials)
-
-            return optional[vector[Interval]](c_space_domain)
+                I = interval.make_interval(x)
+                assert I.inf() >= -1
+                assert I.sup() <= 1
+                res[0].push_back(I)
 
     def convert_space_domain(CReach self, space_domain):
-        cdef optional[vector[Interval]] c_space_domain\
-            = self._convert_space_domain(space_domain)
-        assert c_space_domain.has_value()
-        return [sage.RIF(I.inf(), I.sup())
-                for I in c_space_domain.value()]
+        cdef vector[Interval] c_space_domain
+        self._convert_space_domain(&c_space_domain, space_domain)
+        return [sage.RIF(I.inf(), I.sup()) for I in c_space_domain]
 
     cdef vector[Interval] eval_interval(
             CReach self,
@@ -746,14 +766,16 @@ cdef class CReach:
         cdef:
             vector[Interval] res
             Interval I = interval.make_interval(t)
-            optional[vector[Interval]] c_space_domain\
-                = self._convert_space_domain(space_domain)
+            vector[Interval] c_space_domain
             optional[reference_wrapper[vector[Interval]]] c_space_domain_ref
+        
+
+        self._convert_space_domain(&c_space_domain, space_domain)
 
         # Convert optional to optional reference
-        if c_space_domain.has_value():
+        if space_domain is not None:
             c_space_domain_ref = optional[reference_wrapper[vector[Interval]]](
-                reference_wrapper[vector[Interval]](c_space_domain.value()))
+                reference_wrapper[vector[Interval]](c_space_domain))
 
         with self.global_manager: #  Use captured globals
             res = self.eval_interval(I, space_domain=c_space_domain_ref)

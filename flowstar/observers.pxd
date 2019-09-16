@@ -95,4 +95,4 @@ cdef class SageObserver(FunctionObserver):
 cdef class RestrictedObserver(PolyObserver):
     cdef vector[Interval] space_domain
 
-    cdef void _invalidate_indeterminate_polys(RestrictedObserver self)
+    cdef object _invalidate_indeterminate_polys(RestrictedObserver self)

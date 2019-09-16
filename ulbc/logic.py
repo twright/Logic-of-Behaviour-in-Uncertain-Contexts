@@ -15,13 +15,14 @@ import pytest
 import sage.all as sage
 from sage.all import RIF
 from flowstar.poly import Poly
-from flowstar.reachability import Reach, FlowstarFailedException
+from flowstar.reachability import (Reach, FlowstarFailedException, InitialForm)
 import ulbc.bondcalculus as bc
 from ulbc.symbolic import RelationConverter, is_relation
 
 from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver)
 from ulbc.context_signals import (ContextSignal,
-                                  true_context_signal, false_context_signal)
+                                  true_context_signal, false_context_signal,
+                                  preconditioned_space_domain)
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer, masked_ctx)
 from ulbc.interval_utils import finterval
@@ -134,9 +135,16 @@ class Logic(metaclass=ABCMeta):
 
         full_duration = duration + 1e-3
 
-        if use_masks and mask is None:
-            mask = true_context_mask(RIF(0, full_duration), system.y0)
+        # Generate a space domain of the correct dimension
+        # in terms of the preconditioned variables
+        # TODO: is this the correct number of variables
+        space_domain = preconditioned_space_domain(len(system.y0))
 
+        if use_masks and mask is None:
+            mask = true_context_mask(RIF(0, full_duration), space_domain)
+
+        if 'initial_form' not in kwargs:
+            kwargs['initial_form'] = InitialForm.SPLIT_VARS
 
         # This may or may not actually succeed!
         reach = system.reach(
@@ -490,7 +498,10 @@ class Atomic(Logic):
             mask=mask,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
+            initial_form=InitialForm.SPLIT_VARS,
         )
+
+        space_domain = preconditioned_space_domain(reach.context_dim)
 
         # Turn initials for a vector into a list
         return ContextSignal(domain, list(reach.system.y0),
@@ -911,7 +922,7 @@ class Context(Logic, metaclass=ABCMeta):
             use_masks=False, refine=0):
         # TODO: mask clearly needs defining!
         # mask=mask
-        # TODO context signal ontop of context signals is not currently sound
+        # TODO context signal on top of context signals is not currently sound
         ctx_sig = self.phi.context_signal_for_system(system, 1e-3,
                                                      use_masks=use_masks,
                                                      **kwargs)
@@ -1006,7 +1017,7 @@ class C(Context):
             mask=mask,
         )
 
-    def context_signal(self, reach: System, refine=0, **kwargs):
+    def context_signal(self, reach: Reach, refine=0, **kwargs):
         assert reach.system is not None
 
         def signal_fn(_, space_domain, mask=None):
@@ -1029,6 +1040,8 @@ class C(Context):
                 epsilon=kwargs.get('epsilon_ctx', 0.5),
                 verbosity=kwargs.get('verbosity', 0)
             )
+
+        # Define child space_domain based on preconditioned dimension
 
         return ContextSignal(RIF(0, reach.time), list(reach.system.y0),
                              signal_fn)

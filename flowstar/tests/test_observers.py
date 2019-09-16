@@ -17,7 +17,8 @@ from ulbc.logic import Atomic
 from ulbc.signal_masks import Mask
 from flowstar.tests.test_reachability import ringxy, odes, reach, initials
 from ulbc.bondcalculus import System
-import faulthandler
+# import faulthandler
+from flowstar.reachability import Reach, InitialForm
 
 
 @pytest.fixture
@@ -26,41 +27,52 @@ def mask1():
                 [RIF(0.15, 0.4)])
 
 
+@pytest.fixture(scope='module')
+def reach_split(odes, initials):
+    return Reach(odes, initials, 2 * sage.pi, (0.001, 0.1), order=10,
+                 verbosity=2, initial_form=InitialForm.SPLIT_VARS)
+
+
 @pytest.fixture
-def observer_masked(ringxy, reach, odes, mask1):
+def observer_masked(ringxy, reach_split, odes, mask1):
     _, (x, y) = ringxy
-    return PolyObserver(x, reach, symbolic_composition=False, mask=mask1)
+    return PolyObserver(x, reach_split, symbolic_composition=False, mask=mask1)
 
 
 @pytest.fixture
-def observer_masked_sym(ringxy, reach, odes, mask1):
+def observer_masked_sym(ringxy, reach_split, odes, mask1):
     _, (x, y) = ringxy
-    return PolyObserver(x, reach, symbolic_composition=True, mask=mask1)
+    return PolyObserver(x, reach_split, symbolic_composition=True, mask=mask1)
 
 
 
 @pytest.fixture
-def observer(ringxy, reach, odes):
+def observer(ringxy, reach_split, odes):
     _, (x, y) = ringxy
-    return PolyObserver(x, reach, symbolic_composition=False)
+    return PolyObserver(x, reach_split, symbolic_composition=False)
 
 
 @pytest.fixture
-def observer_y(ringxy, reach, odes):
+def observer_y(ringxy, reach_split, odes):
     _, (x, y) = ringxy
-    return PolyObserver(y, reach, symbolic_composition=False)
+    return PolyObserver(y, reach_split, symbolic_composition=False)
 
 
 @pytest.fixture
-def observer_sym(ringxy, reach, odes):
+def observer_sym(ringxy, reach_split, odes):
+    _, (x, y) = ringxy
+    return PolyObserver(x, reach_split, symbolic_composition=True)
+
+@pytest.fixture
+def observer_sym_combined(ringxy, reach, odes):
     _, (x, y) = ringxy
     return PolyObserver(x, reach, symbolic_composition=True)
 
 
 @pytest.fixture
-def observer_sym_y(ringxy, reach, odes):
+def observer_sym_y(ringxy, reach_split, odes):
     _, (x, y) = ringxy
-    return PolyObserver(y, reach, symbolic_composition=True)
+    return PolyObserver(y, reach_split, symbolic_composition=True)
 
 
 @pytest.fixture(scope='module')
@@ -168,7 +180,7 @@ class TestRestrictedObserverMask(object):
                                [RIF(0.23975290341611912, 0.4)])
 
         restricted = RestrictedObserver(observer_masked,
-                                        [RIF(1, 1.5), RIF(3.5, 3.75)])
+                                        [RIF(-1, 0), RIF(0, 0.5)])
         assert restricted.mask.approx_eq(mask1)
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.4)])
@@ -179,6 +191,11 @@ class TestPolyObserverRoots(object):
     def test_unrestricted(self, observer):
         observer.reach.prepare()
         assert roots_approx_eq(observer.roots(verbosity=10),
+                               [RIF(0.23975290341611912, 0.60000000000000020),
+                                RIF(3.38202621523960720, 3.7350404376435665)])
+
+    def test_unrestricted_symbolic_composition(self, observer_sym_combined):
+        assert roots_approx_eq(observer_sym_combined.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
@@ -196,22 +213,22 @@ class TestRestrictedObserverRoots(object):
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
         restricted = RestrictedObserver(observer,
-                                        [RIF(1, 1.5), RIF(3.5, 3.75)])
+                                        [RIF(-1, 0), (0, 0.5)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
     def test_restricted_no_cache(self, observer):
         restricted = RestrictedObserver(observer,
-                                        [RIF(1, 1.5), RIF(3.5, 3.75)])
+                                        [RIF(-1, 0), (0, 0.5)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
-    def test_restricted_no_oversharing(self, observer):  # NOQA
+    def test_restricted_no_oversharing(self, observer):
         # The caching on the child should not break the parent
         restricted = RestrictedObserver(observer,
-                                        [RIF(1, 1.5), RIF(3.5, 3.75)])
+                                        [RIF(-1, 0), (0, 0.5)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
@@ -228,34 +245,53 @@ class TestRestrictedObserverRoots(object):
         print("=== RestrictedObserver ===")
 
         restricted = RestrictedObserver(observer_sym,
-                                        [RIF(1, 1.5), RIF(3.5, 3.75)])
+                                        [RIF(-1, 0), (0, 0.5)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
     def test_restricted_symbolic_composition_no_cache(self, observer_sym):
         restricted = RestrictedObserver(observer_sym,
-                                        [RIF(1, 1.5), RIF(3.5, 3.75)])
+                                        [RIF(-1, 0), (0, 0.5)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
-    def test_one_dimensional_context(self, observer):  # NOQA
+    def test_one_dimensional_context(self, observer):
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
-        restricted = RestrictedObserver(observer, [RIF(1, 1.5), RIF(3.5, 3.5)])
-        assert roots_approx_eq(restricted.roots([RIF(1, 1.5), RIF(3.5, 3.5)]),
+        restricted = RestrictedObserver(observer, [RIF(-1, 0), (0, 0)])
+        assert roots_approx_eq(restricted.roots(),
                                [RIF(0.27559817196853414, 0.40515751487396307),
                                 RIF(3.41786626286944360, 3.5489199118809270)])
+
+    def test_one_dimensional_context_split(self, ringxy, odes, observer):
+        # Observer split context
+        initials = [(RIF(1, 2), None), (None, RIF(3.5))]
+        reach = Reach(odes, initials, 2 * sage.pi, (0.001, 0.1), order=10,
+                      verbosity=2, initial_form=InitialForm.SPLIT_VARS)
+        _, (x, y) = ringxy
+        observer = PolyObserver(x, reach, symbolic_composition=False)
+        assert roots_approx_eq(
+            observer.roots(),
+            [RIF('[0.27322681730749542 .. 0.52180390717263981]'),
+             RIF('[3.4159318723576319 .. 3.6689695049550802]')]
+        )
+        restricted = RestrictedObserver(observer, [RIF(-1, 0)])
+        assert roots_approx_eq(
+            restricted.roots(),
+            [RIF(0.27559817196853414, 0.40515751487396307),
+             RIF(3.41786626286944360, 3.5489199118809270)],
+        )
 
     def test_context_one_restricted_dimension(self, observer):
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
-        restricted = RestrictedObserver(observer, [RIF(1, 1.5), RIF(3, 4)])
+        restricted = RestrictedObserver(observer, [RIF(-1, 0), RIF(-1, 1)])
         assert roots_approx_eq(restricted.roots(),
                                [RIF(0.24153380171243452, 0.46837741667207051),
                                 RIF(3.38404800182969050, 3.6056159786942144)])
@@ -334,5 +370,5 @@ class TestPolyObserverBoolEval(object):
         print("=== RestrictedObserver ===")
 
         restricted = RestrictedObserver(observer_sym,
-                                        [RIF(1, 1.5), RIF(3.5, 3.75)])
+                                        [RIF(-1, 0), RIF(0, 0.5)])
         assert restricted.check(RIF(0.5)) is False

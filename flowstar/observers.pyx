@@ -49,22 +49,20 @@ cdef class RestrictedObserver(PolyObserver):
         self.fprime_interval_fn = p.fprime_interval_fn
         self.mask = p.mask
         self.masked_regions = p.masked_regions
-        cdef optional[vector[Interval]] c_space_domain
         if self.reach is not None:
             if not self.reach.successful:
                 self.reach = Reach(self.reach, space_domain)
                 self._init_stored_data()
 
-            c_space_domain = self.reach._convert_space_domain(space_domain)
-            assert c_space_domain.has_value()
-            self.space_domain = c_space_domain.value()
+            assert self.reach.context_dim == len(space_domain)
+            self.reach._convert_space_domain(&self.space_domain, space_domain)
 
             # Invalidate any composed polynomials for indeterminate intervals
             if self.reach.successful:
                 self._invalidate_indeterminate_polys()
 
 
-    cdef void _invalidate_indeterminate_polys(RestrictedObserver self):
+    cdef object _invalidate_indeterminate_polys(RestrictedObserver self):
         """If we restrict a PolyObserver, any cached composed polynomials
         for subdomains become invalid.
 
@@ -95,8 +93,10 @@ cdef class RestrictedObserver(PolyObserver):
 
 
     cdef optional[vector[Interval]] _global_domain(self):
-        cdef vector[Interval] domain = (<RestrictedObserver>self).space_domain
+        cdef vector[Interval] domain = (<RestrictedObserver?>self).space_domain
         domain.insert(domain.begin(), Interval(-1, 1))
+        for _ in range(self.reach.static_dim):
+            domain.push_back(Interval(-1, 1))
         return optional[vector[Interval]](domain)
 
 
