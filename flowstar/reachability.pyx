@@ -66,6 +66,7 @@ cdef class CReach:
             print("ode in polynomial ring")
             ## Construct polynomial from arguments
             self._init_args(*args, **kwargs)
+        assert self.system_vars is not None
 
     @property
     def vars(self):
@@ -86,6 +87,7 @@ cdef class CReach:
         str_odes = [converter(sage.SR(ode)) for ode in odes]
         print('str_odes =', repr(str_odes))
         self._init_non_polynomial_str_args(str_vars, str_odes, *args, **kwargs)
+        self.system_vars = vars
 
     # Returns object so that exceptions are handled
     cdef object _handle_initials(CReach self, vector[Flowpipe] *initials_fpvect,
@@ -95,6 +97,7 @@ cdef class CReach:
         Flowpipes representing the initial conditions."""
         # Must be called from inside the global manager
         print("_handle_initials called!")
+        print(f"vars = {repr(vars)}")
 
         # Our result
         # cdef vector[Flowpipe] initials_fpvect
@@ -127,7 +130,7 @@ cdef class CReach:
                 initialC, initialS = initial, None
         
             # Declare state variable
-            var_str = var.encode('utf-8')
+            var_str = str(var).encode('utf-8')
             C.declareStateVar(<string>var_str)
             assert i == C.getIDForStateVar(<string>var_str) + 1
 
@@ -460,6 +463,7 @@ cdef class CReach:
 
         self.system = other.system
         self.system_vars = other.system_vars
+        print(f"other = {repr(other)}\nother.system_vars = {repr(other.system_vars)}")
         if self.initial_form is None:
             self.initial_form = other.initial_form
         else:
@@ -551,7 +555,6 @@ cdef class CReach:
         **kwargs):
         cdef ContinuousReachability * C = &self.c_reach
         self.system = system
-        self.system_vars = vars
         self.initial_form = initial_form
         self.ran = False
         self.prepared = False
@@ -569,10 +572,13 @@ cdef class CReach:
 
         if vars is None:
             self.var_ring = odes[0].parent()
-            vars = [str(x) for x in self.var_ring.gens()]
             print('vars =', vars)
         else:
             self.var_ring = vars[0].parent()
+        # We really want the vars to be strings, rather than symbolic variables
+        # from this point on
+        vars = [x for x in self.var_ring.gens()]
+        self.system_vars = vars
 
         for ode in odes:
             self.odes.push_back(Poly(ode).c_poly)
@@ -664,8 +670,10 @@ cdef class CReach:
         if space_domain is not None:
             for x in space_domain:
                 I = interval.make_interval(x)
-                assert I.inf() >= -1
-                assert I.sup() <= 1
+                assert I.inf() >= -1,\
+                    f"Invalid space domain {repr(space_domain)}"
+                assert I.sup() <= 1,\
+                    f"Invalid space domain {repr(space_domain)}"
                 res[0].push_back(I)
 
     def convert_space_domain(CReach self, space_domain):

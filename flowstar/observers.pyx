@@ -50,11 +50,14 @@ cdef class RestrictedObserver(PolyObserver):
         self.mask = p.mask
         self.masked_regions = p.masked_regions
         if self.reach is not None:
+            assert isinstance(self.reach, CReach)
+            print(f"self.reach.vars = {repr(self.reach.vars)}")
             if not self.reach.successful:
                 self.reach = Reach(self.reach, space_domain)
                 self._init_stored_data()
 
-            assert self.reach.context_dim == len(space_domain)
+            assert self.reach.context_dim == len(space_domain),\
+                f"space_domain {repr(space_domain)} does not match context dimension {self.reach.context_dim}"
             self.reach._convert_space_domain(&self.space_domain, space_domain)
 
             # Invalidate any composed polynomials for indeterminate intervals

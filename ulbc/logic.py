@@ -409,7 +409,7 @@ class Atomic(Logic):
             )
 
     def observer(self, reach, space_domain=None, mask=None, symbolic_composition=False,
-                 tentative_unpreconditioning=False):
+        tentative_unpreconditioning=False):
         # Convert atomic proposition to a suitable ring and variable
         # namespace
         if reach.system is not None:
@@ -498,13 +498,16 @@ class Atomic(Logic):
             mask=mask,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
-            initial_form=InitialForm.SPLIT_VARS,
+            # Should already have been passed to Reach
+            # by context_signal_for_system
+            # initial_form=InitialForm.SPLIT_VARS,
         )
 
+        # Generate preconditioned space domain of correct dimension
         space_domain = preconditioned_space_domain(reach.context_dim)
 
         # Turn initials for a vector into a list
-        return ContextSignal(domain, list(reach.system.y0),
+        return ContextSignal(domain, space_domain,
                              partial(self.signal_fn, **kwargs),
                              observer=observer,
                              ctx_mask=mask)
@@ -804,8 +807,8 @@ class VarContextBody(ContextBody):
     
     def apply_jump(self, system: System, child_system: Optional[System] = None) -> System:
         sys_body = {system.embed(k): v for k, v in self._body.items()}
-        return system.with_y0([z + sys_body.get(k, 0.0)
-                               for k, z in zip(system.x, system.y0)])
+        y0_ctx = [sys_body.get(k, None) for k in system.x]
+        return system.with_y0(system.y0, y0_ctx)
 
     def child_system(self, system: System) -> System:
         # Assume we do nothing about the child system
@@ -822,6 +825,8 @@ class BondProcessContextBody(ContextBody):
     def apply_jump(self, system: bc.BondSystem, child_system: Optional[bc.BondSystem] = None):
         if child_system is None:
             # Directly compose the system to get the child
+            # TODO: this does not correctly separate out the static
+            # variables from the context variables
             assert isinstance(system, bc.BondSystem)
 
             proc: BondProcess = system.as_process
@@ -829,18 +834,14 @@ class BondProcessContextBody(ContextBody):
             return proc.compose(self._body).as_system
         else:
             # Assume we have already carried out the composition
-            # (resulting in child_system) and just add the vectors
-            # (after embedding)
+            # (resulting in child_system) and embed the context
+            # vector in the child system
             y0dict: dict = {child_system.v(system.varname(x)): y0
                             for x, y0 in zip(system.x, system.y0)}
-            y0child = sage.vector([
-                y0dict.get(x, RIF(0)) for x in child_system.x
-            ])
-            return child_system.with_y0(child_system.y0 + y0child)
-
-# , child_system: Optional[System] = None
-        # print(f"composed = {composed}")
-        # return composed
+            y0child = [
+                y0dict.get(k, None) for k in child_system.x
+            ]
+            return child_system.with_y0(child_system.y0, y0child)
 
     def child_system(self, system: bc.BondSystem) -> System:
         assert isinstance(system, System),\
@@ -911,6 +912,10 @@ class Context(Logic, metaclass=ABCMeta):
         return [self]
 
     def phi_fn(self, kwargs: dict, system: System, use_masks=False):
+        # As we just want the overall signal, not a context signal,
+        # in this case we should recombine the context and static
+        # variables
+        kwargs['initial_form'] = InitialForm.COMBINED
         sig = self.phi.signal_for_system(system, 1e-3, use_masks=use_masks,
                                          **kwargs)
         if kwargs.get('verbosity', 0) >= 3:
@@ -923,6 +928,8 @@ class Context(Logic, metaclass=ABCMeta):
         # TODO: mask clearly needs defining!
         # mask=mask
         # TODO context signal on top of context signals is not currently sound
+        if 'initial_form' not in kwargs:
+            kwargs['initial_form'] = InitialForm.SPLIT_VARS
         ctx_sig = self.phi.context_signal_for_system(system, 1e-3,
                                                      use_masks=use_masks,
                                                      **kwargs)
@@ -941,12 +948,16 @@ class Context(Logic, metaclass=ABCMeta):
         ...     [1, 2],
         ...     [var("-y"), var("x")],
         ... )
-        >>> [y.str(style='brackets') for y in
-        ...     ({var("x"): RIF(0.1,0.5)} >> Atomic(var("x"))
-        ...      ).context_jump(system.with_y0([RIF(3,4), RIF(4,5)])).y0
-        ... ]  # doctest: +NORMALIZE_WHITESPACE
-        ['[3.0999999999999996 .. 4.5000000000000000]',
+        >>> systemC = ({var("x"): RIF(0.1,0.5)} >> Atomic(var("x"))
+        ...      ).context_jump(system.with_y0([RIF(3,4), RIF(4,5)]))
+        >>> [y.str(style='brackets')
+        ...  for y in systemC.y0 ]  # doctest: +NORMALIZE_WHITESPACE
+        ['[3.0000000000000000 .. 4.0000000000000000]',
          '[4.0000000000000000 .. 5.0000000000000000]']
+        >>> [('None' if y is None else y.str(style='brackets'))
+        ...  for y in systemC.y0_ctx ]  # doctest: +NORMALIZE_WHITESPACE
+        ['[0.10000000000000000 .. 0.50000000000000000]',
+         'None']
         """
         return self.ctx.apply_jump(system,
             child_system=getattr(self.phi, 'system', None))
@@ -1042,8 +1053,10 @@ class C(Context):
             )
 
         # Define child space_domain based on preconditioned dimension
+        space_domain = preconditioned_space_domain(
+            len([y for y in reach.system.y0_ctx if y is not None]))
 
-        return ContextSignal(RIF(0, reach.time), list(reach.system.y0),
+        return ContextSignal(RIF(0, reach.time), space_domain,
                              signal_fn)
 
 
@@ -1097,8 +1110,11 @@ class D(Context):
 
     def context_signal(self, reach: Reach, refine=0, **kwargs):
         assert reach.system is not None
+        space_domain = preconditioned_space_domain(
+            len([y for y in reach.system.y0_ctx if y is not None])
+        )
         # This does not actually subdivide the differential context,
-        # but only the initial context, and each component of the inital set
+        # but only the initial context, and each component of the initial set
         # for the system once the differential context is composed.
         def signal_fn(_, space_domain, mask=None):
             return ctx(
@@ -1115,7 +1131,7 @@ class D(Context):
             )
 
         return ContextSignal(RIF(0, reach.time),
-                             list(reach.system.y0),
+                             space_domain,
                              signal_fn)
 
 

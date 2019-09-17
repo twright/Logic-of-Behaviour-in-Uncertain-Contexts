@@ -460,7 +460,7 @@ class TestLogicContextSignal(object):
         ctx = Atomic(x).context_signal_for_system(odes, initials, 5)
         child_context_sig = ctx.children[3]
         assert space_domain_approx_eq(child_context_sig.space_domain,
-                                      [RIF(1.5, 2), RIF(3.5, 4)])
+                                      [RIF(0, 1), RIF(0, 1)])
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.1)
 

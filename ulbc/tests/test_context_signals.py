@@ -9,7 +9,8 @@ from ulbc.context_signals import (ContextSignal,
                                   context_to_space_domain,
                                   gen_sub_space_domains,
                                   true_context_signal,
-                                  ChildIterator)
+                                  ChildIterator,
+                                  preconditioned_space_domain)
 from flowstar.reachability import Reach
 from flowstar.observers import PolyObserver
 from flowstar.tests.test_reachability import ringxy, odes  # NOQA
@@ -172,7 +173,8 @@ class TestContextSignal(object):
         def signal_fn(r, space_domain, mask=None):
             return atomic.signal(r, space_domain=space_domain)
 
-        space_domain = [RIF(1, 1.5), RIF(3.5, 3.75)]
+        # space_domain = [RIF(1, 1.5), RIF(3.5, 3.75)]
+        space_domain = [RIF(-1, 0), RIF(0, 0.5)]
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
             RIF(0, 5),
@@ -198,7 +200,8 @@ class TestContextSignal(object):
         def signal_fn(r, space_domain, mask=None):
             return atomic.signal(r, space_domain=space_domain)
 
-        space_domain = [RIF(1, 2), RIF(3, 4)]
+        # space_domain = [RIF(1, 2), RIF(3, 4)]
+        space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
             RIF(0, 5),
@@ -212,7 +215,7 @@ class TestContextSignal(object):
                             observer=observer)
         child_context_sig = ctx.children[3]
         assert space_domain_approx_eq(ctx.sub_space_domains[3],
-                                      [RIF(1.5, 2), RIF(3.5, 4)])
+                                      [RIF(0, 1), RIF(0, 1)])
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.1)
 
@@ -224,7 +227,7 @@ class TestContextSignal(object):
         def signal_fn(r, space_domain, mask=None):
             return Atomic(x).signal(r, space_domain=space_domain)
 
-        space_domain = [RIF(1, 2), RIF(3, 4)]
+        space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
             RIF(0, 5),
@@ -238,13 +241,13 @@ class TestContextSignal(object):
         ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
                             observer=observer)
         assert space_domain_approx_eq(ctx.sub_space_domains[3],
-                                      [RIF(1.5, 2), RIF(3.5, 4)])
+                                      [RIF(0, 1), RIF(0, 1)])
         assert space_domain_approx_eq(ctx.children[3].space_domain,
-                                      [RIF(1.5, 2), RIF(3.5, 4)])
+                                      [RIF(0, 1), RIF(0, 1)])
         print(ctx.sub_space_domains[3])
         child_context_sig = ctx.children[3].children[1]
         assert space_domain_approx_eq(child_context_sig.space_domain,
-                                      [RIF(1.5, 1.75), RIF(3.75, 4)])
+                                      [RIF(0, 0.5), RIF(0.5, 1)])
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.01)
 
@@ -256,7 +259,7 @@ class TestContextSignal(object):
         def signal_fn(r, space_domain, mask=None):
             return atomic.signal(r, space_domain=space_domain)
 
-        space_domain = [RIF(1, 2), RIF(3, 4)]
+        space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p), reach,
@@ -273,7 +276,7 @@ class TestContextSignal(object):
         def signal_fn(r, space_domain, mask=None):
             return atomic.signal(r, space_domain=space_domain)
 
-        space_domain = [RIF(1, 2), RIF(3, 4)]
+        space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
             RIF(0, 5),
@@ -297,7 +300,7 @@ class TestContextSignal(object):
         def signal_fn(r, space_domain, mask=None):
             return atomic.signal(r, space_domain=space_domain)
 
-        space_domain = [RIF(1, 2), RIF(3, 4)]
+        space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
             RIF(0, 5),

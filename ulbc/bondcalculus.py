@@ -34,16 +34,13 @@ class System:
             self._x = sg.vector(self.R.var(str(xi)) for xi in x)
         else:
             self._x = sg.vector(map(self.R, x))
-        # try:
-        # self._y0 = sg.vector([(sg.RIF(y00a), sg.RIF(y00b))
-            # for y00a, y00b in y0])
-        # except TypeError:
         self._y0 = sg.vector([sg.RIF(y00) for y00 in y0])
+        # y0_ctx is not a vector since it may contain None
         if y0_ctx is not None:
-            self._y0_ctx = sg.vector([None if y00 is None else sg.RIF(y00)
-                for y00 in y0_ctx])
+            self._y0_ctx = [None if y00 is None else sg.RIF(y00)
+                for y00 in y0_ctx]
         else:
-            self._y0_ctx = None
+            self._y0_ctx = None #[None]*len(self.x)
         self._y = sg.vector(map(self.R, y))
         if varmap is None:
             self._varmap = {str(xi): xi for xi in x}
@@ -58,7 +55,11 @@ class System:
         assert y0_ctx is None or len(y0_ctx) == len(self.x)
         return System(self._R, self.x, y0, self.y,
             varmap=self.varmap,
-            y0_ctx=y0_ctx)
+            y0_ctx=self._y0_ctx if y0_ctx is None else y0_ctx)
+
+    @property
+    def y0_ctx(self) -> List[Optional[sg.RIF]]:
+        return self._y0_ctx
 
     @property
     def PR(self):
@@ -164,7 +165,7 @@ class System:
             y0 = list(zip(self._y0_ctx, self.y0))
 
         try:
-            print(f"calling reach with y0 = {[(a.str(style='brackets'), b.str(style='brackets')) for a, b in y0]}")
+            print(f"calling reach with y0 = {[('None' if a is None else a.str(style='brackets'), b.str(style='brackets')) for a, b in y0]}")
         except TypeError:
             print(f"calling reach with y0 = {[a.str(style='brackets') for a in y0]}")
 
@@ -186,6 +187,7 @@ class System:
                 y0,
                 duration,
                 system=self,
+                vars=self.x,
                 **kwargs,
             )
 
@@ -201,16 +203,18 @@ class BondSystem(System):
             y: tuple,
             affinity_network: str,
             model: Optional['BondModel'] = None,
-            varmap: Optional[dict] = None):
-        super().__init__(R, x, y0, y, varmap=varmap)
+            varmap: Optional[dict] = None,
+            y0_ctx: Optional[tuple] = None):
+        super().__init__(R, x, y0, y, varmap=varmap, y0_ctx=y0_ctx)
         self.model = model
         self.affinity_network = affinity_network
 
-    def with_y0(self, y0):
+    def with_y0(self, y0, y0_ctx: Optional[tuple] = None):
         assert len(y0) == len(self.x)
         return BondSystem(self._R, self.x, y0, self.y, 
             self.affinity_network,
-            model=self.model, varmap=self.varmap)
+            model=self.model, varmap=self.varmap,
+            y0_ctx=self._y0_ctx if y0_ctx is None else y0_ctx)
 
     def process_from_state(self, state: List[Any]) -> 'BondProcess':
         assert self.model is not None
