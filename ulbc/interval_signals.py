@@ -316,6 +316,13 @@ class Signal(BaseSignal):
         else:
             self._mask = mask.to_domain(self.domain)
 
+    def inflate(self, epsilon: float):
+        return Signal(
+            self.domain,
+            ((x + RIF(-epsilon, epsilon), b) for x, b in self.values),
+            mask=self._mask,
+        )
+
     def to_mask_and(self):
         from ulbc.signal_masks import Mask
 
@@ -379,14 +386,17 @@ class Signal(BaseSignal):
         return self._mask
 
     def approx_eq(self, other, epsilon=1e-6):
-        sig_eq = super(Signal, self).approx_eq(other, epsilon)
-        mask_eq = (self.mask is None and other.mask is None
-                   or self.mask.approx_eq(other.mask, epsilon))
+        # Inflate both signals to bridge any small gaps
+        # of uncertainty
+        sig_eq = super(Signal, self.inflate(epsilon/6)).approx_eq(
+            other.inflate(epsilon/6), 2*epsilon/3)
+        mask_eq = ((self.mask is None) is (other.mask is None)
+                   and 
+                   (self.mask is other.mask
+                    or self.mask.approx_eq(other.mask, epsilon)))
         # print('sig_eq  =', sig_eq)
         # print('mask_eq =', mask_eq)
-        return (sig_eq
-                and (self.mask is None) is (other.mask is None)
-                and mask_eq)
+        return sig_eq and mask_eq
 
     def to_domain(self, J):
         return super(Signal, self).to_domain(

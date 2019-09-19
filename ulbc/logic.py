@@ -495,7 +495,10 @@ class Atomic(Logic):
         domain = RIF(0, reach.time - 1e-3)
         observer = self.observer(
             reach,
-            mask=mask,
+            # We should not pass in a mask here, since the mask is really
+            # a context mask, which will be applied inside ContextSignal
+            # as we move down the tree
+            # mask=mask,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
             # Should already have been passed to Reach
@@ -1053,8 +1056,7 @@ class C(Context):
             )
 
         # Define child space_domain based on preconditioned dimension
-        space_domain = preconditioned_space_domain(
-            len([y for y in reach.system.y0_ctx if y is not None]))
+        space_domain = preconditioned_space_domain(reach.context_dim)
 
         return ContextSignal(RIF(0, reach.time), space_domain,
                              signal_fn)
@@ -1110,9 +1112,7 @@ class D(Context):
 
     def context_signal(self, reach: Reach, refine=0, **kwargs):
         assert reach.system is not None
-        space_domain = preconditioned_space_domain(
-            len([y for y in reach.system.y0_ctx if y is not None])
-        )
+        space_domain = preconditioned_space_domain(reach.context_dim)
         # This does not actually subdivide the differential context,
         # but only the initial context, and each component of the initial set
         # for the system once the differential context is composed.

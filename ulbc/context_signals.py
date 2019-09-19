@@ -253,11 +253,12 @@ class ContextSignal(SignalTree):
                 children = (
                     ContextSignal(domain,
                                   c.space_domain,
-                                  partial(signal_fn, mask=c.mask),
-                                  observer=RestrictedObserver(observer,
+                                  signal_fn,
+                                  observer=(RestrictedObserver(observer,
                                                               c.space_domain)
-                                  if observer is not None
-                                  else None)
+                                            if observer is not None
+                                            else None),
+                                  ctx_mask=c)
                     for c in ctx_mask.children
                 )
 
@@ -281,14 +282,14 @@ class ContextSignal(SignalTree):
         #               tick_formatter=(xformatter, yformatter))
 
     def to_mask_and(self):
-        from ulbc.signal_masks import ContextMask
+        from ulbc.context_masks import ContextMask
 
         return ContextMask(self.domain, self.space_domain,
                            signal=self.signal.to_mask_and(),
                            children=(c.to_mask_and() for c in self.children))
 
     def to_mask_or(self):
-        from ulbc.signal_masks import ContextMask
+        from ulbc.context_masks import ContextMask
 
         return ContextMask(self.domain, self.space_domain,
                            signal=self.signal.to_mask_and(),

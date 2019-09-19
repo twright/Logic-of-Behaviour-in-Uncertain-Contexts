@@ -206,7 +206,7 @@ class TestC:
         print(f"sig1 = {sig1}\nsig2 = {sig2}")
         # The signals might not be that similar due to different computation
         # method for contexts
-        assert sig1.approx_eq(sig2, 0.3)
+        assert sig1.approx_eq(sig2, 0.5)
 
     @staticmethod
     @pytest.mark.slow
@@ -491,7 +491,7 @@ class TestLogicContextSignal(object):
         refined_sig = ctx.refined_signal(2)
         print('plain_sig   =', plain_sig)
         print('refined_sig =', refined_sig)
-        assert refined_sig.approx_eq(plain_sig, 0.3)
+        assert refined_sig.approx_eq(plain_sig, 0.5)
         assert refined_sig.approx_eq(expected, 0.01)
 
     @pytest.mark.slow
@@ -551,6 +551,37 @@ class TestLogicContextSignal(object):
                    ).context_signal_for_system(odes_whelks, initials, 10,
                                                **kwargs)
         assert ctx_sig.signal.approx_eq(sig, 0.001)
+
+
+class TestContextMasks:
+    @staticmethod
+    @pytest.mark.very_slow
+    def test_whelks_and_lobsters_context_mask(ringxy, odes_whelks):
+        R, (x, y) = ringxy
+
+        initials = [RIF(1, 1.2), RIF(4, 6)]
+        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        kwargs = dict(
+            order=5, step=(0.01, 0.5),
+            precondition=1,
+            estimation=1e-3,
+            integrationScheme=2,
+            cutoff_threshold=1e-5,
+            verbosity=0,
+            epsilon_ctx=0.5,
+            symbolic_composition=True,
+        )
+        sig0 = P.signal_for_system(odes_whelks, initials, 10, **kwargs)
+        ctx_sig1 = P.context_signal_for_system(odes_whelks, initials, 10, use_masks=False, **kwargs)
+        sig1 = ctx_sig1.refined_signal(1)
+        assert sig0.approx_eq(sig1, 0.5),\
+            f"We should have sig0 = sig1 where\nsig0 = {sig0}\nsig1 = {sig1}"
+        ctx_sig2 = P.context_signal_for_system(odes_whelks, initials, 10, use_masks=True, **kwargs)
+        sig2 = ctx_sig2.refined_signal(1).with_mask(None)
+        assert sig0.approx_eq(sig2, 0.5),\
+            f"We should have sig0 = sig2 where\nsig0 = {sig0}\nsig2 = {sig2}"
+        assert sig1.approx_eq(sig2, 1e-10),\
+            f"We should have sig1 = sig2 where\nsig1 = {sig1}\nsig2 = {sig2}"
 
 
 class TestWithSystem:

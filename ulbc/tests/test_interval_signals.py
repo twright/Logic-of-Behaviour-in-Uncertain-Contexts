@@ -134,7 +134,6 @@ class TestApproxEq(object):
                                    (RIF(3, 5), True)])
         assert not sig1.approx_eq(sig1b, 0.1)
 
-    @pytest.mark.xfail
     def test_tiny_gap(self, sig1):
         sig1b = Signal(RIF(0, 5), [(RIF(0, 0.99), True),
                                    (RIF(1.01, 2), True),
