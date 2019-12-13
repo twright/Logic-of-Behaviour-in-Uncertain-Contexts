@@ -24,14 +24,14 @@ def sympy_gens(R):
 
 def vec_to_numpy(R, v):
     t_ = sympy.var('t_')
-    return sympy.lambdify((t_, convert_vec(R.gens())),
+    return sympy.lambdify((t_, sympy_gens(R)),
                           convert_vec(v),
                           modules='numpy')
 
 
 def mat_to_numpy(R, m):
     t_ = sympy.var('t_')
-    return sympy.lambdify((t_, convert_vec(R.gens())),
+    return sympy.lambdify((t_, sympy_gens(R)),
                           convert_mat(m),
                           modules='numpy')
 

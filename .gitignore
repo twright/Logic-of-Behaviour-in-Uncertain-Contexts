@@ -32,4 +32,9 @@ tags
 *.sublime-workspace
 **/.idea/workspace.xml
 flowstar/flowstar-2.1.0
-.mypy_cache/*
+**/.mypy_cache/*
+**/*.tab.c
+**/*.tab.h
+**/*.output
+**/flowstar
+**/.history

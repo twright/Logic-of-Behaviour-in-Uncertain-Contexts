@@ -26,12 +26,25 @@ import sage.all as sage
 from sage.all import RIF
 from time import time as pytime
 from warnings import warn
-from enum import Enum
+from enum import Enum, IntEnum
 from flowstar.cppstd cimport optional
 
 
 class FlowstarFailedException(Exception):
     pass
+
+
+class IntegrationMethod(IntEnum):
+    # Taken from flow*'s include.h
+    ONLY_PICARD = 1
+    LOW_DEGREE = 2
+    HIGH_DEGREE = 3
+    NONPOLY_TAYLOR = 4
+    LTI = 5
+    LTV = 6
+    ONLY_PICARD_SYMB = 7
+    NONPOLY_TAYLOR_SYMB = 8
+
 
 
 class InitialForm(Enum):
@@ -340,6 +353,7 @@ cdef class CReach:
         verbose=False,
         # Must be NONPOLY_TAYLOR
         # integrationScheme=2,
+        integration_method=IntegrationMethod.NONPOLY_TAYLOR,
         cutoff_threshold=1e-7,
         estimation=1e-3,
         max_remainder_queue=200,
@@ -415,7 +429,9 @@ cdef class CReach:
             C.bSafetyChecking = False
             C.bPlot = True
             C.bDump = False
-            C.integrationScheme = 4 # NONPOLY_TAYLOR
+            assert (integration_method == IntegrationMethod.NONPOLY_TAYLOR
+                or integration_method == IntegrationMethod.NONPOLY_TAYLOR_SYMB)
+            C.integrationScheme = integration_method # NONPOLY_TAYLOR
             C.cutoff_threshold = Interval(-cutoff_threshold, cutoff_threshold)
             for _ in odes:
                 C.estimation.push_back(Interval(-estimation, estimation))
@@ -541,7 +557,7 @@ cdef class CReach:
         order=2,
         orders=None,
         verbose=False,
-        integrationScheme=2,
+        integration_method=IntegrationMethod.LOW_DEGREE,
         cutoff_threshold=1e-7,
         estimation=1e-3,
         max_remainder_queue=200,
@@ -646,7 +662,7 @@ cdef class CReach:
         C.bSafetyChecking = False
         C.bPlot = True
         C.bDump = False
-        C.integrationScheme = integrationScheme
+        C.integrationScheme = integration_method
         C.cutoff_threshold = Interval(-cutoff_threshold,cutoff_threshold)
         for _ in odes:
             C.estimation.push_back(Interval(-estimation,estimation))
@@ -917,6 +933,8 @@ cdef class CReach:
 
     def run(self):
         global continuousProblem
+
+        print(f"integrationScheme = {self.c_reach.integrationScheme}")
         if self.ran:
             raise Exception('Already ran')
         try:

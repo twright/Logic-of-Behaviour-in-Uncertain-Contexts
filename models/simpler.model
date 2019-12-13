@@ -1,0 +1,31 @@
+continuous reachability
+{
+ state var t,x
+
+
+ setting
+ {
+  fixed steps 0.5
+  time 5
+  remainder estimation 1e-3
+  identity precondition
+  gnuplot octagon t,x
+  fixed orders 3
+  cutoff 1e-7
+  precision 53
+  output genetic
+  print on
+ }
+
+ poly ode 2 # the symbolic remainder senario which can only be used with "poly ode 1" and "nonpoly ode"
+ {
+  t' = 1
+  x' = -x
+ }
+
+ init
+ {
+  t in [0, 0]
+  x in [5,5]
+ }
+}

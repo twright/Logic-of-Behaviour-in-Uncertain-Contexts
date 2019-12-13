@@ -5,7 +5,8 @@ import sage.all as sage
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem, C)
+from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
+    IntegrationMethod)
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
 from ulbc.bondcalculus import System, BondSystem
@@ -515,7 +516,7 @@ class TestLogicContextSignal(object):
             order=5, step=(0.01, 0.5),
             precondition=1,
             estimation=1e-3,
-            integrationScheme=2,
+            integration_method=IntegrationMethod.LOW_DEGREE,
             cutoff_threshold=1e-5,
             verbosity=0,
             epsilon_ctx=0.5,
@@ -539,7 +540,7 @@ class TestLogicContextSignal(object):
             order=5, step=(0.01, 0.5),
             precondition=1,
             estimation=1e-3,
-            integrationScheme=2,
+            integration_method=IntegrationMethod.LOW_DEGREE,
             cutoff_threshold=1e-5,
             verbosity=0,
             epsilon_ctx=0.5,
@@ -565,7 +566,7 @@ class TestContextMasks:
             order=5, step=(0.01, 0.5),
             precondition=1,
             estimation=1e-3,
-            integrationScheme=2,
+            integration_method=IntegrationMethod.LOW_DEGREE,
             cutoff_threshold=1e-5,
             verbosity=0,
             epsilon_ctx=0.5,

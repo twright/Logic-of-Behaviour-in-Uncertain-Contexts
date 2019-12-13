@@ -14,7 +14,7 @@ __all__ = ['BondModel', 'BondwbException', 'BondProcess', 'System',
            'BondSystem']
 
 
-BOND_DIRECTORY = "~/Documents/PhD/bondwb"
+BOND_DIRECTORY = "../bondwb"
 
 
 class BondwbException(Exception):
@@ -143,10 +143,10 @@ class System:
         if isinstance(x, int):
             ix = x
             x = self.x[ix]
-            y = self.x[ix]
+            y = self.x[iy]
         else:
-            ix = self.x.index(x)
-            iy = self.x.index(y)
+            ix = list(self.x).index(x)
+            iy = list(self.x).index(y)
 
         # return the streamline plot
         return sg.streamline_plot(
@@ -252,8 +252,9 @@ class BondSystem(System):
 
 class BondModel:
     def __init__(self, modelfile : str):
-        self._bondwb = pexpect.spawn('stack exec bondwb',
-                                     cwd="/home/twright/Documents/PhD/bondwb")
+        self._bondwb = pexpect.spawn('bondwb')
+        # pexpect.spawn('stack exec bondwb',
+        #                             cwd=BOND_DIRECTORY)
         self._modelfile = Path(modelfile)
         self._read()
         self._load(self._modelfile.as_posix())

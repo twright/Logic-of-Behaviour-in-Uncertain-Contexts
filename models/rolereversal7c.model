@@ -1,0 +1,36 @@
+continuous reachability
+{
+ state var x,y
+
+ par
+ {
+   b = 0.6  c = 0.3  e = 0.05 f = 2 k = 0.8
+ }
+
+
+ setting
+ {
+  adaptive steps {min 0.001, max 0.1}
+  time 10
+  remainder estimation 1e-3
+  QR precondition
+  gnuplot octagon x,y
+  fixed orders 8
+  cutoff 1e-7
+  precision 53
+  output rolereversal7b
+  print on
+ }
+
+ poly ode 1 {200}
+ {
+  x' = b*(x + [1,1.1])*(1 - x - [1,1.1]) - c*x*(k - x - [1,1.1])*(y + [4,5])
+  y' = -e*(y+[4,5])*(1+y+[4,5]) + f*(x+[1,1.1])*(k - x - [1,1.1])*(y + [4,5])
+ }
+
+ init
+ {
+  x in [0.0, 0.1]
+  y in [0, 1.0]
+ }
+}
