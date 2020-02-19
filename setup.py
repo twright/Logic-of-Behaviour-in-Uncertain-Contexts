@@ -97,6 +97,16 @@ extensions = [
         include_dirs=LIB_DIRS,
     ),
     Extension(
+        name='flowstar.global_manager',
+        sources=['flowstar/global_manager.pyx'],
+        language='c++',
+        libraries=LIBS,
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+    ),
+    Extension(
         name='flowstar.reachability',
         sources=['flowstar/reachability.pyx'],
         language='c++',
@@ -109,6 +119,16 @@ extensions = [
     Extension(
         name='flowstar.observers',
         sources=['flowstar/observers.pyx'],
+        language='c++',
+        libraries=LIBS,
+        extra_compile_args=COMPILE_ARGS,
+        extra_link_args=LINK_ARGS,
+        library_dirs=LIB_DIRS,
+        include_dirs=LIB_DIRS,
+    ),
+    Extension(
+        name='flowstar.instrumentation',
+        sources=['flowstar/instrumentation.pyx'],
         language='c++',
         libraries=LIBS,
         extra_compile_args=COMPILE_ARGS,

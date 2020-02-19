@@ -11,6 +11,7 @@ from collections import OrderedDict
 from functools import partial, reduce
 from warnings import warn
 import pytest
+import instrument
 
 import sage.all as sage
 from sage.all import RIF
@@ -73,10 +74,11 @@ class Logic(metaclass=ABCMeta):
         system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
 
         if precompose_systems:
-            t0 = time.time()
-            composed = self.with_system(system)
-            t1 = time.time()
-            print(f"Precomposed systems in {t1 - t0} sec")
+            # t0 = time.time()
+            with instrument.block(name="Precomposing Contexts"):
+                composed = self.with_system(system)
+            # t1 = time.time()
+            # print(f"Precomposed systems in {t1 - t0} sec")
             return composed.signal(duration, **kwargs)
         else:
             return self._signal_for_system(system, duration,
@@ -84,15 +86,16 @@ class Logic(metaclass=ABCMeta):
 
     def _signal_for_system(self, system, duration, use_masks=False, mask=None, **kwargs):
         use_masks |= mask is not None
-        t0 = time.time()
+        t0 = time.perf_counter()
         
-        reach = system.reach(
-            # Run for a little extra time to make sure endpoint of
-            # interval is strictly inside time-domain of reachset
-            # accounting for rounding errors and temporal quantifiers
-            self.duration + duration + 1e-3,
-            **kwargs
-        )
+        with instrument.block(name="Running Flow*"):
+            reach = system.reach(
+                # Run for a little extra time to make sure endpoint of
+                # interval is strictly inside time-domain of reachset
+                # accounting for rounding errors and temporal quantifiers
+                self.duration + duration + 1e-3,
+                **kwargs
+            )
 
         # Decide on an initial mask.
         if mask is None and use_masks:
@@ -106,15 +109,17 @@ class Logic(metaclass=ABCMeta):
                 "status = {}\nnum_flowpipes = {}".format(reach.result,
                                                          reach.num_flowpipes))
         # Report time of each stage of computation
-        t1 = time.time()
+        t1 = time.perf_counter()
         print("Computed {} flowpipes in {} sec".format(
             reach.num_flowpipes, t1 - t0))
         reach.prepare()
-        t2 = time.time()
-        res = self.signal(reach, mask=mask, **kwargs
-                          ).to_domain(RIF(0, duration))
-        t3 = time.time()
+        t2 = time.perf_counter()
+        with instrument.block(name=f"Monitoring Signal for {str(self)}"):
+            res = self.signal(reach, mask=mask, **kwargs
+                            ).to_domain(RIF(0, duration))
+        t3 = time.perf_counter()
         print("Monitored signal in {} sec".format(t3 - t2))
+        reach.instrumentor.print()
         return res
 
     @overload
@@ -289,6 +294,9 @@ class LogicWithSystem:
     def signal_for_system(self, system: System, duration: float, **kwargs):
         return self.with_system(system).signal(duration, **kwargs)
 
+    def bstr(self, _):
+        return repr(self)
+
 
 def is_polynomial(f, vars):
     f = sage.SR(f)
@@ -388,17 +396,19 @@ class Atomic(Logic):
 
         # Do the smart thing in the case of duration 0
         if duration == 0:
-            mask = mask_zero if use_masks else None
-            # print("our mask =", repr(mask))
-            initials = system.y0
-            res = RIF(self.p(**dict(zip(map(str, system.x), system.y0))))
-            # Poly(self.p)(initials)
-            if res.lower() > 0:
-                return true_signal(RIF(0, 0), mask=mask)
-            elif res.upper() < 0:
-                return false_signal(RIF(0, 0), mask=mask)
-            else:
-                return Signal(RIF(0, 0), [], mask=mask)
+            with instrument.block(name=f"Trivial atomic monitoring for "
+                f"{str(self)}"):
+                mask = mask_zero if use_masks else None
+                # print("our mask =", repr(mask))
+                initials = system.y0
+                res = RIF(self.p(**dict(zip(map(str, system.x), system.y0))))
+                # Poly(self.p)(initials)
+                if res.lower() > 0:
+                    return true_signal(RIF(0, 0), mask=mask)
+                elif res.upper() < 0:
+                    return false_signal(RIF(0, 0), mask=mask)
+                else:
+                    return Signal(RIF(0, 0), [], mask=mask)
         else:
             return super(Atomic, self).signal_for_system(
                 system,

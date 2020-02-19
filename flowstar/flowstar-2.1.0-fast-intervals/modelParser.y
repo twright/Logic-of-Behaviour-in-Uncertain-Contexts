@@ -16,6 +16,9 @@
 	#include "modelParser.h"
 	#define FYYDEBUG 0
 
+	extern int globalNumFlowpipes();
+	extern void swapContinuousProblem(
+		 flowstar::ContinuousReachability &);
 	extern void setContinuousProblem(flowstar::ContinuousReachability &);
 	extern void saveContinuousProblem(flowstar::ContinuousReachability &);
 	extern int fyyerror(const char *);
@@ -7066,6 +7069,66 @@ NUM
 
 
 %%
+
+void swapContinuousProblem(
+		flowstar::ContinuousReachability & other) {
+    std::cout << "swapping CP";
+    std::cout << "global num_flowpipes = " << continuousProblem.numOfFlowpipes() << std::endl;
+    std::cout << "other num_flowpipes = " << other.numOfFlowpipes() << std::endl;
+    std::swap(continuousProblem, other);
+    std::cout << "global num_flowpipes = " << continuousProblem.numOfFlowpipes() << std::endl;
+    std::cout << "other num_flowpipes = " << other.numOfFlowpipes() << std::endl;
+	return;
+
+    // Swap global continuous problem for the one passed in
+    std::swap(continuousProblem.system, other.system);
+    std::swap(continuousProblem.step, other.step);
+    std::swap(continuousProblem.time, other.time);
+    std::swap(continuousProblem.precondition, other.precondition);
+    continuousProblem.outputAxes.swap(other.outputAxes);
+    std::swap(continuousProblem.plotSetting, other.plotSetting);
+    std::swap(continuousProblem.plotFormat, other.plotFormat);
+    std::swap(continuousProblem.numSections, other.numSections);
+    std::swap(continuousProblem.orderType, other.orderType);
+    std::swap(continuousProblem.bAdaptiveOrders, other.bAdaptiveOrders);
+    continuousProblem.estimation.swap(other.estimation);
+    std::swap(continuousProblem.miniStep, other.miniStep);
+    continuousProblem.orders.swap(other.orders);
+    continuousProblem.maxOrders.swap(other.maxOrders);
+    std::swap(continuousProblem.globalMaxOrder, other.globalMaxOrder);
+    std::swap(continuousProblem.bPrint, other.bPrint);
+    std::swap(continuousProblem.bSafetyChecking, other.bSafetyChecking);
+    std::swap(continuousProblem.bPlot, other.bPlot);
+    std::swap(continuousProblem.bDump, other.bDump);
+    std::swap(continuousProblem.integrationScheme, other.integrationScheme);
+    std::swap(continuousProblem.cutoff_threshold, other.cutoff_threshold);
+    continuousProblem.flowpipes.swap(other.flowpipes);
+    continuousProblem.flowpipes_safety.swap(other.flowpipes_safety);
+    continuousProblem.flowpipesCompo.swap(other.flowpipesCompo);
+    continuousProblem.domains.swap(other.domains);
+    continuousProblem.flowpipes_contracted.swap(other.flowpipes_contracted);
+    continuousProblem.linearFlowpipes.swap(other.linearFlowpipes);
+    continuousProblem.unsafeSet.swap(other.unsafeSet);
+    continuousProblem.stateVarTab.swap(other.stateVarTab);
+    continuousProblem.stateVarNames.swap(other.stateVarNames);
+    continuousProblem.tmVarTab.swap(other.tmVarTab);
+    continuousProblem.tmVarNames.swap(other.tmVarNames);
+    continuousProblem.parTab.swap(other.parTab);
+    continuousProblem.parNames.swap(other.parNames);
+    continuousProblem.parRanges.swap(other.parRanges);
+    continuousProblem.TI_Par_Tab.swap(other.TI_Par_Tab);
+    continuousProblem.TI_Par_Names.swap(other.TI_Par_Names);
+    continuousProblem.TV_Par_Tab.swap(other.TV_Par_Tab);
+    continuousProblem.TV_Par_Names.swap(other.TV_Par_Names);
+    std::swap(continuousProblem.maxNumSteps, other.maxNumSteps);
+    std::swap(continuousProblem.max_remainder_queue, other.max_remainder_queue);
+    std::swap(continuousProblem.num_of_flowpipes, other.num_of_flowpipes);
+    std::iter_swap(continuousProblem.outputFileName, other.outputFileName);
+}
+
+int globalNumFlowpipes() {
+	return continuousProblem.numOfFlowpipes();
+}
 
 void setContinuousProblem(flowstar::ContinuousReachability & cr) {
 	continuousProblem = cr;

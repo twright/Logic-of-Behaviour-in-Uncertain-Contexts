@@ -8,6 +8,7 @@ from functools import partial, reduce
 from itertools import chain, takewhile
 import warnings
 import operator
+import instrument
 
 from sage.all import RIF, region_plot
 from ulbc.interval_root_isolation import isolate_roots
@@ -48,17 +49,22 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
 
 def signal_from_observer(observer, domain, verbosity=0, global_root_detection=False):  # , theta=0.01,
     # abs_inf=0.0001):
+    @instrument.function(name="observer.check",
+            metric=observer.reach.instrumentor.metric)
+    def check(x):
+        # Avoid reentering global guard at each step
+        return observer.check(x)
+
     mask = observer.mask
     if not observer.reach.successful:
         return Signal(domain, [], mask=mask)
-    if global_root_detection:
-        roots = observer.roots_global(domain)
-    else:
-        roots = observer.roots(verbosity=verbosity)
-    return signal_given_bool_roots((lambda x: observer.check(x)),
-                                   roots,
-                                   domain,
-                                   mask=mask)
+    with observer.reach.global_manager:
+        if global_root_detection:
+            roots = observer.roots_global(domain)
+        else:
+            roots = observer.roots(verbosity=verbosity)
+        return signal_given_bool_roots(
+            check, roots, domain, mask=mask)
 
 
 def signal_given_roots(f, roots, domain):  # , theta=0.01, abs_inf=0.0001):
@@ -93,11 +99,13 @@ def signal_given_bool_roots_single_seg(f_bool, roots, domain):
             #     RIF(J).str(style='brackets'),
             #     RIF(f(J)).str(style='brackets')))
             # if 0 not in RIF(f(I)):
-            values += [(J, f_bool(J.center()))]
+            with instrument.block(name="running f_bool"):
+                values += [(J, f_bool(J.center()))]
         a = min(root.upper(), domain.upper())
     b = domain.upper()
     J = RIF(a, b)
-    res = f_bool(J.center())
+    with instrument.block(name="running f_bool"):
+        res = f_bool(J.center())
     if res is not None:
         # print("  J  = {}\nf(J) = {}".format(
         #     RIF(J).str(style='brackets'),
@@ -108,6 +116,7 @@ def signal_given_bool_roots_single_seg(f_bool, roots, domain):
     return Signal(domain, values)
 
 
+@instrument.function(name="signal given bool roots")
 def signal_given_bool_roots(f_bool, roots, domain, mask=None):
     # , theta=0.01, abs_inf=0.0001):
     values = []
@@ -367,7 +376,7 @@ class Signal(BaseSignal):
 
     def to_mask_until(self, I):
         # We know that
-        # H[0, b] φ = ⋁_j (φ_j ∧ P[a, b] φ_j)
+        # H[0, a] φ = ⋁_j (φ_j ∧ P[a, b] φ_j)
         # where φ = ⋁_j φ_j is the unitary decomposition of phi
         return self.to_mask_and().H(RIF(0, I.lower('RNDD')))
         and_mask = self.to_mask_and()

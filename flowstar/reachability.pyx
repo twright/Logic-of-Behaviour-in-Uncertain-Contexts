@@ -7,14 +7,15 @@ from flowstar.Continuous cimport ContinuousReachability, ContinuousSystem, Flowp
 from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
 from flowstar.taylormodel import FlowstarConverter
 from flowstar.Interval cimport Interval, intervalNumPrecision
-from flowstar.Polynomial cimport (Polynomial, power_4, double_factorial,
-                                  factorial_rec)
+from flowstar.Polynomial cimport (Polynomial)
+from flowstar.instrumentation cimport AggregateMetric
 from flowstar.poly cimport Poly, poly_fn, tmv_interval_fn
 cimport flowstar.interval as interval
 cimport flowstar.plotting as plotting
 from flowstar.interval cimport interval_time_fn, interval_fn
 from flowstar.observable cimport observable
 from flowstar.modelParser cimport setContinuousProblem, saveContinuousProblem, setYYDebug, continuousProblem
+from flowstar.global_manager import flowstar_globals
 
 from cython.operator cimport dereference as deref, preincrement as inc
 from libcpp.vector cimport vector
@@ -22,12 +23,17 @@ from libcpp.list cimport list as clist
 from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.algorithm cimport sort as csort
+# from libcpp.algorithm cimport swap
 import sage.all as sage
 from sage.all import RIF
 from time import time as pytime
 from warnings import warn
 from enum import Enum, IntEnum
 from flowstar.cppstd cimport optional
+import instrument
+
+
+current_global_manager = None
 
 
 class FlowstarFailedException(Exception):
@@ -60,10 +66,12 @@ class InitialForm(Enum):
 
 cdef class CReach:
     def __cinit__(CReach self, *args, **kwargs):
-        # Create global variable manager
-        self.global_manager = FlowstarGlobalManager.forCReach(self.c_reach)
         # Associate system object
         self.system = kwargs.get('system', None)
+        # Create instrumentor for time logging
+        self.instrumentor = AggregateMetric()
+        # Create global variable manager
+        self.global_manager = FlowstarGlobalManager(self.instrumentor)
 
         if len(args) == 1 or len(args) == 2:
             ## Copy constructor
@@ -111,9 +119,6 @@ cdef class CReach:
         # Must be called from inside the global manager
         print("_handle_initials called!")
         print(f"vars = {repr(vars)}")
-
-        # Our result
-        # cdef vector[Flowpipe] initials_fpvect
 
         cdef:
             # One per state dimension
@@ -241,8 +246,8 @@ cdef class CReach:
         domains.push_back(zero_int)
 
         # Loop through and create initial condition taylor models
-        while (    context_iter  != context_intervals.end()
-               and static_iter    != static_intervals.end()):
+        while (    context_iter != context_intervals.end()
+               and static_iter  != static_intervals.end()):
 
             # Construct the desired taylor model
             # tm = S + x_i where TM var x_i in C
@@ -340,6 +345,7 @@ cdef class CReach:
 
         flowpipe[0] = Flowpipe(TaylorModelVec(tms), domains)
 
+    @flowstar_globals
     def _init_non_polynomial_str_args(
         CReach self,
         vars,
@@ -361,12 +367,15 @@ cdef class CReach:
         run=True,
         symbolic_composition=True,
         precompose_taylor_models=False,
+        crude_roots=False,
         initial_form=InitialForm.COMBINED,
         **kwargs):
         global continuousProblem
 
         self.ran = False
         self.system_vars = vars
+        self.crude_roots = crude_roots
+        print(f"crude_roots = {repr(crude_roots)}")
         self.initial_form = initial_form
         self.prepared = False
         self.prepared_for_plotting = False
@@ -383,100 +392,101 @@ cdef class CReach:
         # if symbolic_composition == False:
         #     warn("Manual composition being used on a non-polynomial systems.")
 
-        with self.global_manager:
-            C = &continuousProblem
-            # --- Steps
+        C = &continuousProblem
+        # --- Steps
+        try:
+            (step_lo, step_hi) = step
+            C.bAdaptiveSteps = True
+        except:
+            step_lo = step_hi = step
+            C.bAdaptiveSteps = False
+        C.miniStep = <double>step_lo
+        C.step = <double>step_hi
+
+        # --- Orders
+        # The orders and order kwargs are mutually exclusive
+        # Note: orderType = 0 means a single, global order
+        # importantly, in both cases we make sure
+        # len(orders) == len(C.orders) == len(vars)
+        if orders is None:
+            orders = [order if isinstance(order, tuple) else (order, order)]
+            orders *= len(vars)
+            C.orderType = 0
+        else:
+            C.orderType = 1
+        order_lo = min((order[0] if isinstance(order, tuple) else order)
+                    for order in orders)
+        order_hi = max((order[1] if isinstance(order, tuple) else order)
+                    for order in orders)
+        C.bAdaptiveOrders = order_lo < order_hi
+        for order in orders:
             try:
-                (step_lo, step_hi) = step
-                C.bAdaptiveSteps = True
+                (order_lo, order_hi) = order
             except:
-                step_lo = step_hi = step
-                C.bAdaptiveSteps = False
-            C.miniStep = <double>step_lo
-            C.step = <double>step_hi
+                order_lo = order_hi = order
+            C.orders.push_back(order_lo)
+            C.maxOrders.push_back(order_hi)
+        C.globalMaxOrder = order_hi
 
-            # --- Orders
-            # The orders and order kwargs are mutually exclusive
-            # Note: orderType = 0 means a single, global order
-            # importantly, in both cases we make sure
-            # len(orders) == len(C.orders) == len(vars)
-            if orders is None:
-                orders = [order if isinstance(order, tuple) else (order, order)]
-                orders *= len(vars)
-                C.orderType = 0
-            else:
-                C.orderType = 1
-            order_lo = min((order[0] if isinstance(order, tuple) else order)
-                        for order in orders)
-            order_hi = max((order[1] if isinstance(order, tuple) else order)
-                        for order in orders)
-            C.bAdaptiveOrders = order_lo < order_hi
-            for order in orders:
-                try:
-                    (order_lo, order_hi) = order
-                except:
-                    order_lo = order_hi = order
-                C.orders.push_back(order_lo)
-                C.maxOrders.push_back(order_hi)
-            C.globalMaxOrder = order_hi
+        # --- The rest
+        C.time = <double>time
+        C.precondition = precondition
+        C.plotSetting = 1  # We have to set this to something, but should be
+        # set by plot method
+        C.bPrint = verbose
+        C.bSafetyChecking = False
+        C.bPlot = True
+        C.bDump = False
+        assert (integration_method == IntegrationMethod.NONPOLY_TAYLOR
+            or integration_method == IntegrationMethod.NONPOLY_TAYLOR_SYMB)
+        C.integrationScheme = integration_method # NONPOLY_TAYLOR
+        C.cutoff_threshold = Interval(-cutoff_threshold, cutoff_threshold)
+        for _ in odes:
+            C.estimation.push_back(Interval(-estimation, estimation))
+        C.maxNumSteps = maxNumSteps
+        C.max_remainder_queue = max_remainder_queue
 
-            # --- The rest
-            C.time = <double>time
-            C.precondition = precondition
-            C.plotSetting = 1  # We have to set this to something, but should be
-            # set by plot method
-            C.bPrint = verbose
-            C.bSafetyChecking = False
-            C.bPlot = True
-            C.bDump = False
-            assert (integration_method == IntegrationMethod.NONPOLY_TAYLOR
-                or integration_method == IntegrationMethod.NONPOLY_TAYLOR_SYMB)
-            C.integrationScheme = integration_method # NONPOLY_TAYLOR
-            C.cutoff_threshold = Interval(-cutoff_threshold, cutoff_threshold)
-            for _ in odes:
-                C.estimation.push_back(Interval(-estimation, estimation))
-            C.maxNumSteps = maxNumSteps
-            C.max_remainder_queue = max_remainder_queue
+        # --- Creating the continuous system ---
+        assert len(odes) == len(initials)
+        assert len(odes) > 0
+        assert all(isinstance(ode, str)
+                for ode in odes)
 
-            # --- Creating the continuous system ---
-            assert len(odes) == len(initials)
-            assert len(odes) > 0
-            assert all(isinstance(ode, str)
-                    for ode in odes)
+        # We should do something about the var ring!
+        # cdef 
+        self.ode_strs = optional[vector[string]](vector[string]())
+        for ode in odes:
+            self.ode_strs.value().push_back(ode.encode('utf-8'))
 
-            # We should do something about the var ring!
-            # cdef 
-            self.ode_strs = optional[vector[string]](vector[string]())
-            for ode in odes:
-                self.ode_strs.value().push_back(ode.encode('utf-8'))
+        # Handle initial conditions
+        self._handle_initials(&initials_fpvect, C, vars, initials,
+            initial_form)
 
-            # Handle initial conditions
-            self._handle_initials(&initials_fpvect, C, vars, initials,
-                initial_form)
+        # Create system object
+        # The continuousProblem needs to be setup and set in parser before we call
+        C.system = ContinuousSystem(self.ode_strs.value(), initials_fpvect)
+        if not all([s.size() > 0 for s in C.system.strOde_centered]):
+            raise Exception("Flow* failed to parse ODEs!")
 
-            # Create system object
-            # The continuousProblem needs to be setup and set in parser before we call
-            C.system = ContinuousSystem(self.ode_strs.value(), initials_fpvect)
-            if not all([s.size() > 0 for s in C.system.strOde_centered]):
-                raise Exception("Flow* failed to parse ODEs!")
-
-            # === Set properties ===
+        # === Set properties ===
 
         # Run immediately?
+        print("run within string args")
         if run:
-            # setContinuousProblem(deref(C))
             self.run()
             if self.ran and precompose_taylor_models:
-                t0 = pytime()
-                self.precompose_taylor_models()
-                t1 = pytime()
-                print("Pre-composing Taylor models: {} sec".format(t1 - t0))
+                with instrument.block(
+                        name="precomposing taylor models",
+                        metric=self.instrumentor.metric):
+                    self.precompose_taylor_models()
 
+    @flowstar_globals
     def _init_clone(CReach self, CReach other, initials=None, initial_form=None):
         global continuousProblem
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
 
+        self.crude_roots = other.crude_roots
         self.system = other.system
         self.system_vars = other.system_vars
         print(f"other = {repr(other)}\nother.system_vars = {repr(other.system_vars)}")
@@ -490,63 +500,31 @@ cdef class CReach:
         self.symbolic_composition = other.symbolic_composition
         self.ode_strs = other.ode_strs
 
-        if initials is None:
-            # self.initials = other.initials
-            self.c_reach.system = other.c_reach.system
-            self.c_reach.TI_Par_Tab = other.c_reach.TI_Par_Tab
-            self.c_reach.TI_Par_Names = other.c_reach.TI_Par_Names
-            self.c_reach.TV_Par_Tab = other.c_reach.TV_Par_Tab
-            self.c_reach.TV_Par_Names = other.c_reach.TV_Par_Names
-            self.c_reach.tmVarTab = other.c_reach.tmVarTab
-            self.c_reach.tmVarNames = other.c_reach.tmVarNames
-        else:
-            with self.global_manager:
-                self._handle_initials(
-                    &initials_fpvect,
-                    &continuousProblem,
-                    self.system_vars,
-                    initials,
-                    self.initial_form,
+        continuousProblem = other.global_manager.continuousProblem[0]
+
+        if initials is not None:
+            self._handle_initials(
+                &initials_fpvect,
+                &continuousProblem,
+                self.system_vars,
+                initials,
+                self.initial_form,
+            )
+            if self.ode_strs.has_value():
+                continuousProblem.system = ContinuousSystem(
+                    self.ode_strs.value(),
+                    initials_fpvect,
                 )
-                if self.ode_strs.has_value():
-                    self.c_reach.system = ContinuousSystem(
-                        self.ode_strs.value(),
-                        initials_fpvect,
-                    )
-                else:
-                    self.c_reach.system = ContinuousSystem(
-                        other.c_reach.system.tmvOde,
-                        initials_fpvect,
-                    )
+            else:
+                continuousProblem.system = ContinuousSystem(
+                    other.global_manager.continuousProblem.system.tmvOde,
+                    initials_fpvect,
+                )
         
-        self.c_reach.bAdaptiveOrders = other.c_reach.bAdaptiveOrders
-        self.c_reach.miniStep = other.c_reach.miniStep
-        self.c_reach.step = other.c_reach.step
-        self.c_reach.orderType = other.c_reach.orderType
-        self.c_reach.bAdaptiveSteps = other.c_reach.bAdaptiveSteps
-        self.c_reach.orders = other.c_reach.orders
-        self.c_reach.maxOrders = other.c_reach.maxOrders
-        self.c_reach.globalMaxOrder = other.c_reach.globalMaxOrder
-        self.c_reach.time = other.c_reach.time
-        self.c_reach.precondition = other.c_reach.precondition
-        self.c_reach.plotSetting = other.c_reach.plotSetting
-        self.c_reach.bPrint = other.c_reach.bPrint
-        self.c_reach.bSafetyChecking = other.c_reach.bSafetyChecking
-        self.c_reach.bPlot = other.c_reach.bPlot
-        self.c_reach.bDump = other.c_reach.bDump
-        self.c_reach.integrationScheme = other.c_reach.integrationScheme
-        self.c_reach.cutoff_threshold = other.c_reach.cutoff_threshold
-        self.c_reach.estimation = other.c_reach.estimation
-        self.c_reach.maxNumSteps = other.c_reach.maxNumSteps
-        self.c_reach.max_remainder_queue = other.c_reach.max_remainder_queue
-        self.c_reach.stateVarTab = other.c_reach.stateVarTab
-        self.c_reach.stateVarNames = other.c_reach.stateVarNames
-        self.c_reach.parTab = other.c_reach.parTab
-        self.c_reach.parNames = other.c_reach.parNames
-        self.c_reach.parRanges = other.c_reach.parRanges
         # Run immediately? Do we need a flag for this?
         self.run()
 
+    @flowstar_globals
     def _init_args(
         self,
         odes,
@@ -567,14 +545,19 @@ cdef class CReach:
         system=None,
         symbolic_composition=False,
         precompose_taylor_models=False,
+        crude_roots=False,
         initial_form=InitialForm.COMBINED,
         **kwargs):
-        cdef ContinuousReachability * C = &self.c_reach
+        global continuousProblem
+
+        cdef ContinuousReachability * C = &continuousProblem
         self.system = system
         self.initial_form = initial_form
         self.ran = False
         self.prepared = False
         self.prepared_for_plotting = False
+        self.crude_roots = crude_roots
+        print(f"crude_roots = {repr(crude_roots)}")
         self.result = 0
         self.symbolic_composition = symbolic_composition
 
@@ -615,6 +598,8 @@ cdef class CReach:
 
         # Create system object
         C.system = ContinuousSystem(odes_tmv, initials_fpvect)
+        print(f"assigning system with dimension {odes_tmv.tms.size()}") 
+        print(f"resulting system has dimension {continuousProblem.system.tmvOde.tms.size()}") 
 
         # === Set properties ===
 
@@ -668,15 +653,21 @@ cdef class CReach:
             C.estimation.push_back(Interval(-estimation,estimation))
         C.maxNumSteps = maxNumSteps
         C.max_remainder_queue = max_remainder_queue
+        # Test if this is doing anything!
+        C.num_of_flowpipes = 42
+
+        print("run within tmv args")
 
         # Run immediately?
         if run:
+            # setContinuousProblem(deref(C))
+            # with self.global_manager:
             self.run()
             if self.ran and precompose_taylor_models:
-                t0 = pytime()
-                self.precompose_taylor_models()
-                t1 = pytime()
-                print("Pre-composing Taylor models: {} sec".format(t1 - t0))
+                with instrument.block(
+                        name="precomposing taylor models",
+                        metric=self.instrumentor.metric):
+                    self.precompose_taylor_models()
 
     cdef object _convert_space_domain(CReach self, vector[Interval] * res, space_domain=None):
         cdef Interval I
@@ -692,6 +683,7 @@ cdef class CReach:
                     f"Invalid space domain {repr(space_domain)}"
                 res[0].push_back(I)
 
+    @flowstar_globals
     def convert_space_domain(CReach self, space_domain):
         cdef vector[Interval] c_space_domain
         self._convert_space_domain(&c_space_domain, space_domain)
@@ -702,16 +694,19 @@ cdef class CReach:
             Interval I,
             optional[reference_wrapper[vector[Interval]]]
             space_domain=optional[reference_wrapper[vector[Interval]]]()):
+        global continuousProblem
+        assert self.global_manager.active
+
         cdef:
-            clist[Flowpipe].iterator fp = self.c_reach.flowpipes.begin()
-            clist[Flowpipe].iterator fp_end = self.c_reach.flowpipes.end()
+            clist[Flowpipe].iterator fp = continuousProblem.flowpipes.begin()
+            clist[Flowpipe].iterator fp_end = continuousProblem.flowpipes.end()
             vector[optional[TaylorModelVec]].iterator fp_compo \
                 = self.flowpipes_compo.begin()
             vector[optional[TaylorModelVec]].iterator fp_compo_end \
                 = self.flowpipes_compo.end()
 
-            clist[vector[Interval]].iterator domain = self.c_reach.domains.begin()
-            clist[vector[Interval]].iterator domain_end = self.c_reach.domains.end()
+            clist[vector[Interval]].iterator domain = continuousProblem.domains.begin()
+            clist[vector[Interval]].iterator domain_end = continuousProblem.domains.end()
             vector[Interval] res
             interval_time_fn f_fn, fprime_fn
             vector[int] varIDs # state variable ids
@@ -721,7 +716,7 @@ cdef class CReach:
 
         assert self.prepared
 
-        for i in self.c_reach.stateVarTab:
+        for i in continuousProblem.stateVarTab:
             varIDs.push_back(i.second)
         csort(varIDs.begin(), varIDs.end())
 
@@ -731,7 +726,7 @@ cdef class CReach:
 
         cdef vector[Interval] composed_domain
 
-        assert self.c_reach.tmVarTab[b'local_t'] == 0
+        assert continuousProblem.tmVarTab[b'local_t'] == 0
 
         if space_domain.has_value():
             composed_domain = space_domain.value().get()
@@ -783,6 +778,7 @@ cdef class CReach:
 
         return final_res
 
+    @flowstar_globals
     def __call__(self, t, space_domain=None):
         self.prepare()
 
@@ -801,12 +797,12 @@ cdef class CReach:
             c_space_domain_ref = optional[reference_wrapper[vector[Interval]]](
                 reference_wrapper[vector[Interval]](c_space_domain))
 
-        with self.global_manager: #  Use captured globals
-            res = self.eval_interval(I, space_domain=c_space_domain_ref)
+        res = self.eval_interval(I, space_domain=c_space_domain_ref)
 
         return [RIF(I.inf(), I.sup()) for I in res]
 
-    def prepare(self):
+    @flowstar_globals
+    def prepare(self, guard_globals=True):
         """Prepare for use.
 
         This used to correspond to prepare for plotting by composing the
@@ -820,24 +816,22 @@ cdef class CReach:
             raise Exception('Not ran!')
 
         if not self.prepared:
-            with self.global_manager:  # with local globals
-                # if we run prepareForPlotting more than once we crash
-                # self.c_reach.prepareForDumping()
-                # Initialize flowpipes_compo to an empty array of the right
-                # length
-                self.flowpipes_compo = vector[optional[TaylorModelVec]](
-                    continuousProblem.flowpipes.size(),
-                    optional[TaylorModelVec](),
-                )
-                # print("In prepare! flowpipes_compo.size() =",
-                #       self.flowpipes_compo.size())
-                self.prepared = True
+            # Initialize flowpipes_compo to an empty array of the right
+            # length
+            self.flowpipes_compo = vector[optional[TaylorModelVec]](
+                continuousProblem.flowpipes.size(),
+                optional[TaylorModelVec](),
+            )
+            # print("In prepare! flowpipes_compo.size() =",
+            #       self.flowpipes_compo.size())
+            self.prepared = True
 
-                # Prepare domains
-                continuousProblem.domains.clear()
-                for fp in continuousProblem.flowpipes:
-                    continuousProblem.domains.push_back(fp.domain)
+            # Prepare domains
+            continuousProblem.domains.clear()
+            for fp in continuousProblem.flowpipes:
+                continuousProblem.domains.push_back(fp.domain)
 
+    @flowstar_globals
     def prepare_for_plotting(self):
         """Prepare for plotting / evaluating."""
         global continuousProblem
@@ -848,17 +842,14 @@ cdef class CReach:
         # print("in prepare for plotting")
 
         cdef:
-            clist[Flowpipe].iterator fp
-            clist[Flowpipe].iterator fp_end
+            clist[Flowpipe].iterator fp = continuousProblem.flowpipes.begin()
+            clist[Flowpipe].iterator fp_end = continuousProblem.flowpipes.end()
             vector[optional[TaylorModelVec]].iterator fp_compo = \
                 self.flowpipes_compo.begin()
             vector[optional[TaylorModelVec]].iterator fp_compo_end = \
                 self.flowpipes_compo.end()
 
         with self.global_manager:
-            fp = continuousProblem.flowpipes.begin()
-            fp_end = continuousProblem.flowpipes.end()
-
             if not self.prepared_for_plotting:
                 continuousProblem.flowpipesCompo.clear()
                 continuousProblem.domains.clear()
@@ -880,27 +871,29 @@ cdef class CReach:
 
                 self.prepared_for_plotting = True
 
+    @flowstar_globals
     def precompose_taylor_models(self):
         """Prepare for plotting / evaluating."""
+        global continuousProblem
+
         if not self.ran:
             raise Exception('Not ran!')
 
-        self.prepare()
-
         cdef:
-            clist[Flowpipe].iterator fp = self.c_reach.flowpipes.begin()
-            clist[Flowpipe].iterator fp_end = self.c_reach.flowpipes.end()
+            clist[Flowpipe].iterator fp = continuousProblem.flowpipes.begin()
+            clist[Flowpipe].iterator fp_end = continuousProblem.flowpipes.end()
             vector[optional[TaylorModelVec]].iterator fp_compo = \
                 self.flowpipes_compo.begin()
             vector[optional[TaylorModelVec]].iterator fp_compo_end = \
                 self.flowpipes_compo.end()
 
-        with self.global_manager:  # with local globals
-            while fp != fp_end and fp_compo != fp_compo_end:
-                self.compose_flowpipe(deref(fp), deref(fp_compo))
+        self.prepare()
 
-                inc(fp)
-                inc(fp_compo)
+        while fp != fp_end and fp_compo != fp_compo_end:
+            self.compose_flowpipe(deref(fp), deref(fp_compo))
+
+            inc(fp)
+            inc(fp_compo)
 
     cdef void compose_flowpipe(CReach self,
                                 const Flowpipe & fp,
@@ -909,38 +902,45 @@ cdef class CReach:
         
         Result stored in (optional tmv) fp_compo.
         """
-        # Do nothing if fp_compo already has a value.
-        if fp_compo.has_value():
-            # print("compo has value")
-            return
+        global continuousProblem
 
-        # print("need to compo!")
+        assert self.global_manager.active
 
-        # Create an empty tmv for result of composition
-        (&fp_compo)[0] = optional[TaylorModelVec](TaylorModelVec())
+        with instrument.block(name="composing flowpipe",
+                metric=self.instrumentor.metric):
+            # Do nothing if fp_compo already has a value.
+            if fp_compo.has_value():
+                # print("compo has value")
+                return
 
-        # print("composing fp")
-        # print("orders =",
-        #       repr([o for o in self.c_reach.orders]))
-        # print("cutoff threshold =",
-        #       repr([interval.as_str(o) for o in
-        #             self.c_reach.cutoff_threshold]))
+            # print("need to compo!")
 
-        # Get flow* to perform the composition
-        fp.composition(fp_compo.value(),
-                       self.c_reach.orders,
-                       self.c_reach.cutoff_threshold)
+            # Create an empty tmv for result of composition
+            (&fp_compo)[0] = optional[TaylorModelVec](TaylorModelVec())
 
+            # print("composing fp")
+            # print("orders =",
+            #       repr([o for o in self.c_reach.orders]))
+            # print("cutoff threshold =",
+            #       repr([interval.as_str(o) for o in
+            #             self.c_reach.cutoff_threshold]))
+
+            # Get flow* to perform the composition
+            fp.composition(fp_compo.value(),
+                        continuousProblem.orders,
+                        continuousProblem.cutoff_threshold)
+
+    @flowstar_globals
     def run(self):
         global continuousProblem
 
-        print(f"integrationScheme = {self.c_reach.integrationScheme}")
         if self.ran:
             raise Exception('Already ran')
+
         try:
-            with self.global_manager:
-                FlowstarGlobalManager.clear_global()
-                self.result = int(continuousProblem.run())
+            print(f"integrationScheme = {continuousProblem.integrationScheme}")
+            # FlowstarGlobalManager.clear_globals()
+            self.result = int(continuousProblem.run())
 
             return self.result
         finally:
@@ -952,36 +952,61 @@ cdef class CReach:
 
     @property
     def cutoff_threshold(self):
-        i = self.c_reach.cutoff_threshold
-        return i.inf(), i.sup()
+        global continuousProblem
+
+        with self.global_manager:
+            i = continuousProblem.cutoff_threshold
+            return i.inf(), i.sup()
 
     @property
     def estimation(self):
-        return [(i.inf(), i.sup()) for i in self.c_reach.estimation]
+        global continuousProblem
+
+        with self.global_manager:
+            return [(i.inf(), i.sup())
+                    for i in continuousProblem.estimation]
 
     @property
     def num_flowpipes(self):
-        return int(self.c_reach.numOfFlowpipes())
+        global continuousProblem
+
+        with self.global_manager:
+            return int(continuousProblem.numOfFlowpipes())
 
     @property
     def num_state_vars(self):
-        return int(self.c_reach.stateVarNames.size())
+        global continuousProblem
+
+        with self.global_manager:
+            return int(continuousProblem.stateVarNames.size())
 
     @property
     def state_vars(self):
-        return [str(v) for v in self.c_reach.stateVarNames]
+        global continuousProblem
+
+        with self.global_manager:
+            return [str(v) for v in continuousProblem.stateVarNames]
 
     @property
     def num_initials(self):
-        return int(self.c_reach.system.initialSets.size())
+        global continuousProblem
+
+        with self.global_manager:
+            return int(continuousProblem.system.initialSets.size())
 
     @property
     def step(self):
-        return float(self.c_reach.step)
+        global continuousProblem
+
+        with self.global_manager:
+            return float(continuousProblem.step)
 
     @property
     def time(self):
-        return float(self.c_reach.time)
+        global continuousProblem
+
+        with self.global_manager:
+            return float(continuousProblem.time)
 
     @property
     def successful(self) -> bool:
@@ -990,20 +1015,28 @@ cdef class CReach:
 
     @property
     def ode_strs(self):
-        res = []
+        global continuousProblem
+
         cdef string ode_str
         cdef string interval_str
-        cdef vector[string] names = self.c_reach.stateVarNames
-        names.insert(names.begin(), b"local_t")
-        for v in self.c_reach.system.tmvOde.tms:
-            v.expansion.toString(ode_str, names)
-            v.remainder.toString(interval_str)
-            res.append("({}, {})".format(ode_str, interval_str))
-        return res
+        cdef vector[string] names
+
+        with self.global_manager:
+            res = []
+            names = continuousProblem.stateVarNames
+            names.insert(names.begin(), b"local_t")
+            for v in continuousProblem.system.tmvOde.tms:
+                v.expansion.toString(ode_str, names)
+                v.remainder.toString(interval_str)
+                res.append("({}, {})".format(ode_str, interval_str))
+            return res
 
     @property
     def num_odes(self):
-        return int(self.c_reach.system.tmvOde.tms.size())
+        global continuousProblem
+
+        with self.global_manager:
+            return int(continuousProblem.system.tmvOde.tms.size())
 
 
 class Reach(plotting.FlowstarPlotMixin,
@@ -1011,87 +1044,3 @@ class Reach(plotting.FlowstarPlotMixin,
             plotting.SageTubePlotMixin,
             CReach):
     pass
-
-
-cdef class FlowstarGlobalManager:
-    @staticmethod
-    cdef forCReach(ContinuousReachability & creach):
-        manager = FlowstarGlobalManager()
-        manager.continuousProblem = &creach
-        return manager
-
-    @staticmethod
-    def get_global_domain_var_names():
-        global domainVarNames
-
-        return [str(name) for name in domainVarNames]
-
-    @staticmethod
-    def get_global_factorial_rec():
-        global factorial_rec
-        return interval.intervals_to_list(factorial_rec)
-
-    @staticmethod
-    def get_global_power_4():
-        global power_4
-        return interval.intervals_to_list(power_4)
-
-    @staticmethod
-    def get_global_double_factorial():
-        global double_factorial
-        return interval.intervals_to_list(double_factorial)
-
-    @staticmethod
-    def clear_global():
-        global factorial_rec
-        global power_4
-        global double_factorial
-        global domainVarNames
-        global continuousProblem
-
-        # continuousProblem = ContinuousReachability()
-        factorial_rec.clear()
-        power_4.clear()
-        double_factorial.clear()
-        domainVarNames.clear()
-
-    def capture(FlowstarGlobalManager self):
-        global factorial_rec
-        global power_4
-        global double_factorial
-        global domainVarNames
-        global continuousProblem
-
-        self.continuousProblem[0] = continuousProblem
-        self.domainVarNames = domainVarNames
-        self.factorial_rec = factorial_rec
-        self.power_4 = power_4
-        self.double_factorial = double_factorial
-
-    def clear(self):
-        # self.continuousProblem = ContinuousReachability()
-        self.domainVarNames.clear()
-        self.factorial_rec.clear()
-        self.power_4.clear()
-        self.double_factorial.clear()
-
-    # Restore local copy of flowstar global variables
-    def restore(FlowstarGlobalManager self):
-        global factorial_rec
-        global power_4
-        global double_factorial
-        global domainVarNames
-        global continuousProblem
-
-        continuousProblem = self.continuousProblem[0]
-        domainVarNames = self.domainVarNames
-        factorial_rec = self.factorial_rec
-        power_4 = self.power_4
-        double_factorial = self.double_factorial
-
-    def __enter__(self):
-        self.restore()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.capture()
-        # FlowstarGlobalManager.clear_global()

@@ -113,3 +113,6 @@ cdef extern from "Continuous.h" namespace "flowstar" nogil:
         vector[string] TI_Par_Names
         cmap[string, int] TV_Par_Tab
         vector[string] TV_Par_Names
+        # Crude types: could be refined if needed
+        clist[void*] linearFlowpipes
+        clist[void*] unsafeSet

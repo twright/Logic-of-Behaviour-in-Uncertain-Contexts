@@ -8,15 +8,19 @@ from flowstar.Continuous cimport ContinuousReachability
 from flowstar.reachability cimport CReach
 from flowstar.poly cimport Poly
 import sage.all as sage
+from flowstar.modelParser cimport continuousProblem
+from flowstar.global_manager import flowstar_globals
 
 
 cdef class FlowstarPlotMixin:
+    @flowstar_globals
     def plot(CReach self, str x, str y, str filename, plot_type=1):
+        global continuousProblem
         if not self.ran:
             raise Exception('Not ran!')
 
         cdef CReach cself = <CReach?>self
-        cdef ContinuousReachability * C = &cself.c_reach
+        cdef ContinuousReachability * C = &continuousProblem
 
         C.plotFormat = 0 # GNUPLOT format
         C.plotSetting = plot_type
@@ -41,11 +45,11 @@ cdef class FlowstarPlotMixin:
         C.outputAxes.push_back(C.getIDForStateVar(y.encode('utf-8')))
 
         # Use class's version of flowstar global variables
-        with self.global_manager:
-            # We set projected to False since we use prepareForDumping
-            # which does not project the flowpipes to the output
-            # dimensions for us
-            C.plot_2D(False)
+        # with self.global_manager:
+        # We set projected to False since we use prepareForDumping
+        # which does not project the flowpipes to the output
+        # dimensions for us
+        C.plot_2D(False)
 
         # note: filename is unsanitized
         # print('trying to process', './outputs/{}.plt'.format(filename))
@@ -83,7 +87,7 @@ cdef class SagePlotMixin:
                                      symbolic_composition=self.symbolic_composition)
 
         if duration is None:
-            duration = (0, float((<CReach?>self).c_reach.time))
+            duration = (0, float((<CReach?>self).time))
 
         # Cache the evaluations
         ress = dict()
@@ -104,11 +108,13 @@ cdef class SagePlotMixin:
                     plot_points=sage.ceil(self.time/step),
                     **kwargs)
 
+    @flowstar_globals
     def sage_parametric_plot(self, str x, str y, double step=1e-2):
+        global continuousProblem
         from sage.all import parametric_plot
 
-        cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
-        cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
+        cdef int var_id_x = continuousProblem.getIDForStateVar(x.encode('utf-8'))
+        cdef int var_id_y = continuousProblem.getIDForStateVar(y.encode('utf-8'))
 
         def f(t):
             return self((t, t+step))[var_id_x].center()
@@ -117,11 +123,13 @@ cdef class SagePlotMixin:
 
         return parametric_plot((f, g), (0, float(self.c_reach.time)))
 
+    @flowstar_globals
     def sage_plot_manual(self, str x, double step=1e-1):
+        global continuousProblem
         from sage.all import Graphics, line
 
         p = Graphics()
-        cdef int var_id = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
+        cdef int var_id = continuousProblem.getIDForStateVar(x.encode('utf-8'))
         res1 = self((-1e-7,1e-7))[var_id]
         lo1, hi1 = res1.lower(), res1.upper()
         cdef double t = 0
@@ -143,15 +151,17 @@ cdef class SagePlotMixin:
 
         return p
 
+    @flowstar_globals
     def sage_interval_plot(self, str x, str y, double step=1e-1, poly = None,
                            **kwargs):
+        global continuousProblem
         from sage.all import Graphics, polygon
         from flowstar.observers import PolyObserver
 
         p = Graphics()
-        cdef int var_id_x = (<CReach?>self).c_reach.getIDForStateVar(
+        cdef int var_id_x = continuousProblem.getIDForStateVar(
             x.encode('utf-8'))
-        cdef int var_id_y = (<CReach?>self).c_reach.getIDForStateVar(
+        cdef int var_id_y = continuousProblem.getIDForStateVar(
             y.encode('utf-8'))
         print('var_id_x =', var_id_x)
         print('var_id_y =', var_id_y)
@@ -194,15 +204,18 @@ cdef class SageTubePlotMixin:
     def sage_time_tube_plot(self, str x, double step=1e-1,joins=True, str t='t'):
         return self.sage_tube_plot(t, x, step, straight=True, joins=joins)
 
+    @flowstar_globals
     def sage_tube_plot(self, str x, str y, double step=1e-1, bint arrows=False,
                        straight=False, tight=False, boundaries=True,
                        joins=True, **kwargs):
+        global continuousProblem
+
         from sage.all import (line, Graphics, RIF, sqrt, arctan, tan, cos,
                               sin, arrow, point, pi, vector)
 
         p = Graphics()
-        var_id_x = (<CReach?>self).c_reach.getIDForStateVar(x.encode('utf-8'))
-        var_id_y = (<CReach?>self).c_reach.getIDForStateVar(y.encode('utf-8'))
+        var_id_x = continuousProblem.getIDForStateVar(x.encode('utf-8'))
+        var_id_y = continuousProblem.getIDForStateVar(y.encode('utf-8'))
         cx0 = cy0 = None
         cx = cy = None
         tx = ty = None

@@ -252,9 +252,9 @@ class BondSystem(System):
 
 class BondModel:
     def __init__(self, modelfile : str):
-        self._bondwb = pexpect.spawn('bondwb')
-        # pexpect.spawn('stack exec bondwb',
-        #                             cwd=BOND_DIRECTORY)
+        # self._bondwb = pexpect.spawn('bondwb')
+        self._bondwb = pexpect.spawn('stack exec bondwb',
+                                     cwd=BOND_DIRECTORY)
         self._modelfile = Path(modelfile)
         self._read()
         self._load(self._modelfile.as_posix())

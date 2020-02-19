@@ -12,6 +12,8 @@
 #include "Hybrid.h"
 
 extern int lineNum;
+extern int globalNumFlowpipes();
+extern void swapContinuousProblem(flowstar::ContinuousReachability &);
 extern void setContinuousProblem(flowstar::ContinuousReachability &);
 extern void saveContinuousProblem(flowstar::ContinuousReachability &);
 extern flowstar::ContinuousReachability continuousProblem;

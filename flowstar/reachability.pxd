@@ -7,12 +7,17 @@ from flowstar.Continuous cimport ContinuousReachability, Flowpipe
 from flowstar.TaylorModel cimport TaylorModelVec
 from flowstar.Polynomial cimport Polynomial
 from flowstar.cppstd cimport reference_wrapper, optional
+from flowstar.global_manager cimport FlowstarGlobalManager
 
+# Object swap (added to Cython since current release)
+
+# cdef extern from "<iterator>" namespace "std" nogil:
+    # T* begin[T]( T (&array)[] )
 
 cdef class CReach:
     cdef public FlowstarGlobalManager global_manager
 
-    cdef ContinuousReachability c_reach
+    # cdef ContinuousReachability* c_reach
     cdef readonly object system
     cdef readonly bint ran
     cdef readonly bint prepared
@@ -20,6 +25,7 @@ cdef class CReach:
     cdef readonly int result
     cdef public bint symbolic_composition
     cdef readonly object var_ring
+    cdef readonly bint crude_roots
     cdef readonly object initial_form
     cdef readonly object system_vars
     # cdef vector[Interval] initials
@@ -28,6 +34,7 @@ cdef class CReach:
     cdef vector[Polynomial] odes
     cdef optional[vector[string]] ode_strs
     cdef vector[optional[TaylorModelVec]] flowpipes_compo
+    cdef readonly object instrumentor
     # Standardized orders and cutoff threshold
     # cdef vector[int] orders
     # cdef Interval cutoff_threshold
@@ -65,14 +72,3 @@ cdef class CReach:
         ContinuousReachability *C,
         int & tm_var_index,
     )
-
-
-cdef class FlowstarGlobalManager:
-    cdef ContinuousReachability * continuousProblem
-    cdef vector[Interval] factorial_rec
-    cdef vector[Interval] power_4
-    cdef vector[Interval] double_factorial
-    cdef vector[string] domainVarNames
-
-    @staticmethod
-    cdef forCReach(ContinuousReachability &)

@@ -8,9 +8,12 @@ from libcpp.list cimport list as clist
 from libcpp cimport bool as cbool
 from libcpp.cast cimport const_cast
 from warnings import warn
+import contextlib
 
 import sage.all as sage
 from sage.ext.fast_callable import fast_callable
+
+import instrument
 
 cimport flowstar.root_detection as root_detection
 from flowstar.Polynomial cimport Polynomial
@@ -26,11 +29,20 @@ from ulbc.interval_utils import fintervals
 from flowstar.tribool cimport tribool, unknown
 from flowstar.tribool cimport and_ as tri_and
 from flowstar.reachability import Reach
+from flowstar.global_manager import flowstar_globals
 from flowstar.observable cimport observable
-
+from flowstar.modelParser cimport continuousProblem
 
 
 __all__ = ('RestrictedObserver', 'PolyObserver')
+
+
+# def flowstar_globals(f):
+#     def g(self, *args, **kwargs):
+#         with self.reach.global_manager:
+#             f(*args, **kwargs)
+
+#     return g
 
 
 # noinspection PyUnreachableCode
@@ -116,6 +128,10 @@ cdef class FunctionObserver:
     """
 
     @property
+    def global_manager(self):
+        return self.reach.global_manager
+
+    @property
     def time(self):
         if self.reach is not None:
             return self.reach.time
@@ -136,12 +152,12 @@ cdef class FunctionObserver:
 
             # Initialise optional arrays
             self.bools = vector[optional[bint]](
-                self.reach.c_reach.flowpipes.size(), optional[bint]())
+                self.reach.num_flowpipes, optional[bint]())
             self.poly_f_fns = vector[optional[interval_time_fn]](
-                self.reach.c_reach.flowpipes.size(),
+                self.reach.num_flowpipes,
                 optional[interval_time_fn]())
             self.poly_fprime_fns = vector[optional[interval_time_fn]](
-                self.reach.c_reach.flowpipes.size(),
+                self.reach.num_flowpipes,
                 optional[interval_time_fn]())
 
         # Translate mask into a vector
@@ -168,6 +184,7 @@ cdef class FunctionObserver:
         # Return roots
         return [sage.RIF(r.inf(), r.sup()) for r in roots]
 
+    @flowstar_globals
     def roots(FunctionObserver self, space_domain=None,
               epsilon=0.00001, verbosity=0):
         # if not self.reach.successful:
@@ -181,8 +198,9 @@ cdef class FunctionObserver:
         if self.reach is None:
             return None
 
-        with self.reach.global_manager:
-            c_res = self.c_roots(epsilon=epsilon, verbosity=verbosity)
+        with instrument.block(name="top-level root detection"):
+            c_res = self.c_roots(epsilon=epsilon,
+                verbosity=verbosity)
 
         res = [sage.RIF(r.inf(), r.sup()) for r in c_res]
         print("roots =", fintervals(res))
@@ -190,15 +208,15 @@ cdef class FunctionObserver:
 
     cdef vector[Interval] c_roots(FunctionObserver self,
                                   double epsilon=0.00001, int verbosity=0):
+        global continuousProblem
+
+        assert self.global_manager.active
+
         cdef:
-            # clist[TaylorModelVec].iterator tmv =\
-            #     self.reach.c_reach.flowpipesCompo.begin()
             clist[Flowpipe].iterator fp = \
-                self.reach.c_reach.flowpipes.begin()
+                continuousProblem.flowpipes.begin()
             vector[optional[TaylorModelVec]].iterator fp_compo = \
                 self.reach.flowpipes_compo.begin()
-            # clist[vector[Interval]].iterator domain =\
-            #     self.reach.c_reach.domains.begin()
             vector[optional[bint]].iterator cached_bool = self.bools.begin()
             vector[optional[interval_time_fn]].iterator\
                 poly_f_fn = self.poly_f_fns.begin()
@@ -219,7 +237,7 @@ cdef class FunctionObserver:
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
-        assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
+        assert continuousProblem.tmVarTab[b'local_t'] == 0
 
         # print("fp.size() =", deref(fp.size(),
         #       "\n fp_compo.size()", derfp_compo.size())
@@ -254,7 +272,9 @@ cdef class FunctionObserver:
                 if verbosity >= 4:
                     print("doing tentative_unpreconditioning")
                 # Evaluate f over the whole domain
-                f_domain = f_fn.call(t0)
+                with instrument.block(name="tentative eval",
+                        metric=self.reach.instrumentor.metric):
+                    f_domain = f_fn.call(t0)
 
                 if verbosity >= 4:
                     print("f_domain =", interval.as_str(f_domain))
@@ -267,7 +287,10 @@ cdef class FunctionObserver:
                     # Annoying code to make Cython allow assignment to a r-value
                     (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
                     continue
-
+                # # Don't do anything in crude roots case
+                # elif (self.reach.crude_roots):
+                #     new_roots.push_back(t0)
+                #     continue
 
             ### Perform composition of preconditioned taylor model
             self.reach.compose_flowpipe(deref(fp), deref(fp_compo))
@@ -280,7 +303,9 @@ cdef class FunctionObserver:
                                  deref(fp_compo).value(), loop_domain)
 
             # Evaluate f over the whole domain
-            f_domain = f_fn.call(t0)
+            with instrument.block(name="whole domain eval",
+                    metric=self.reach.instrumentor.metric):
+                f_domain = f_fn.call(t0)
 
             # Only do anything if there is a chance of a root
             if not (f_domain.inf() <= 0 <= f_domain.sup()):
@@ -291,33 +316,44 @@ cdef class FunctionObserver:
                 continue
 
             ### Perform symbolic or functional composition.
-            self._post_retrieve_f(f_fn, fprime_fn,
-                                  deref(poly_f_fn), deref(poly_fprime_fn),
-                                  deref(fp_compo).value(), loop_domain)
+            with instrument.block(name="post retrieve",
+                    metric=self.reach.instrumentor.metric):
+                self._post_retrieve_f(f_fn, fprime_fn,
+                                    deref(poly_f_fn), deref(poly_fprime_fn),
+                                    deref(fp_compo).value(), loop_domain)
 
             ### Perform root detection
-            root_detection.detect_roots(new_roots, f_fn, fprime_fn, t0,
-                                        epsilon=epsilon,
-                                        verbosity=verbosity)
+            if (self.reach.crude_roots):
+                new_roots.push_back(t0)
+            else:
+                with instrument.block(name="root detection",
+                        metric=self.reach.instrumentor.metric):
+                    root_detection.detect_roots(new_roots, f_fn, fprime_fn, t0,
+                                            epsilon=epsilon,
+                                            verbosity=verbosity)
 
             ### Amalgamate new and existing roots, shifting new roots by
             ### current time, and merging adjacent roots
-            self._amalgamate_roots(roots, new_roots, t, verbosity=verbosity)
+            with instrument.block(name="root amalgamation",
+                    metric=self.reach.instrumentor.metric):
+                self._amalgamate_roots(roots, new_roots, t,
+                    verbosity=verbosity)
             new_roots.clear()
 
         return roots
 
     cdef Interval eval_interval(FunctionObserver self, const Interval & x,
                                 int verbosity=0):
+        global continuousProblem
+
+        assert self.global_manager.active,\
+            'our global_manager should now be active'
+
         cdef:
             clist[Flowpipe].iterator fp = \
-                self.reach.c_reach.flowpipes.begin()
+                continuousProblem.flowpipes.begin()
             vector[optional[TaylorModelVec]].iterator fp_compo = \
                 self.reach.flowpipes_compo.begin()
-            # clist[TaylorModelVec].iterator tmv =\
-            #     self.reach.c_reach.flowpipesCompo.begin()
-            # clist[vector[Interval]].iterator domain =\
-            #     self.reach.c_reach.domains.begin()
             vector[optional[bint]].iterator cached_bool = self.bools.begin()
             vector[optional[interval_time_fn]].iterator \
                 poly_f_fn = self.poly_f_fns.begin()
@@ -336,7 +372,8 @@ cdef class FunctionObserver:
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
-        assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
+        assert continuousProblem.tmVarTab[b'local_t'] == 0,\
+            'local_t should be variable 0'
 
         while (self._tm_segment_loop(i, loop_domain, global_domain,
                                      fp, fp_compo, cached_bool,
@@ -367,7 +404,8 @@ cdef class FunctionObserver:
 
             ### Perform composition of preconditioned taylor model
             self.reach.compose_flowpipe(deref(fp), deref(fp_compo))
-            assert deref(fp_compo).has_value()
+            assert deref(fp_compo).has_value(),\
+                'fp_compo should have a value'
 
             ### Intersect and shift back to relative reference
             y.intersect_assign(x)
@@ -398,38 +436,41 @@ cdef class FunctionObserver:
             else:
                 final_res = optional[Interval](res)
 
-        assert final_res.has_value()
+        assert final_res.has_value(),\
+            'final_res should have a value'
         return final_res.value()
 
+    # @flowstar_globals
     def __call__(self, t, verbosity=0):
         from sage.all import RIF
 
         if self.reach is None:
             return None
 
-        self.reach.prepare()
+        # self.reach.prepare()
 
         # Convert python interval to flow* interval
         cdef:
             Interval res
             Interval I = interval.make_interval(t)
 
-        with self.reach.global_manager: #  Use captured globals
+        with self.global_manager:
+            print("calling inner eval_interval")
             res = self.eval_interval(I, verbosity=verbosity)
 
         return RIF(res.inf(), res.sup())
 
     cdef tribool eval_bool_interval(FunctionObserver self, Interval & x,
                                     int verbosity=0):
+        global continuousProblem
+
+        assert self.global_manager.active
+
         cdef:
             clist[Flowpipe].iterator fp = \
-                self.reach.c_reach.flowpipes.begin()
+                continuousProblem.flowpipes.begin()
             vector[optional[TaylorModelVec]].iterator fp_compo = \
                 self.reach.flowpipes_compo.begin()
-            # clist[TaylorModelVec].iterator tmv =\
-            #     self.reach.c_reach.flowpipesCompo.begin()
-            # clist[vector[Interval]].iterator domain =\
-            #     self.reach.c_reach.domains.begin()
             vector[optional[bint]].iterator cached_bool = self.bools.begin()
             vector[optional[interval_time_fn]].iterator \
                 poly_f_fn = self.poly_f_fns.begin()
@@ -452,7 +493,7 @@ cdef class FunctionObserver:
 
         cdef optional[vector[Interval]] global_domain = self._global_domain()
 
-        assert self.reach.c_reach.tmVarTab[b'local_t'] == 0
+        assert continuousProblem.tmVarTab[b'local_t'] == 0
 
         while (self._tm_segment_loop(i, loop_domain, global_domain,
                                      fp, fp_compo, cached_bool,
@@ -530,18 +571,23 @@ cdef class FunctionObserver:
 
         return final_res
 
+    @flowstar_globals
     def check(self, t, space_domain=None):
         if self.reach is None:
             return None
 
-        self.reach.prepare()
+        with instrument.block(name="prepare in check",
+                metric=self.reach.instrumentor.metric):
+            self.reach.prepare()
 
         # Convert python interval to flow* interval
         cdef:
             tribool res
             Interval I = interval.make_interval(t)
 
-        with self.reach.global_manager: #  Use captured globals
+        with instrument.block(
+                name="check boolean [unguarded]",
+                metric=self.reach.instrumentor.metric):
             res = self.eval_bool_interval(I)
 
         if <cbool>res:
@@ -570,15 +616,15 @@ cdef class FunctionObserver:
                                Interval & t, Interval & t0,
                                const Interval & t00):
         """Control the iteration over all Taylor model segments."""
+        global continuousProblem
+
+        assert self.global_manager.active
+
         cdef:
-            # clist[TaylorModelVec].iterator tmv_end\
-            #     = self.reach.c_reach.flowpipesCompo.end()
             clist[Flowpipe].iterator fp_end \
-                = self.reach.c_reach.flowpipes.end()
+                = continuousProblem.flowpipes.end()
             vector[optional[TaylorModelVec]].iterator fp_compo_end\
                 = self.reach.flowpipes_compo.end()
-            # clist[vector[Interval]].iterator domain_end\
-            #     = self.reach.c_reach.domains.end()
             vector[optional[bint]].iterator cached_bool_end = self.bools.end()
             vector[optional[interval_time_fn]].iterator \
                 poly_f_fn_end = self.poly_f_fns.end()
@@ -638,35 +684,40 @@ cdef class FunctionObserver:
                                     Interval & t0, int verbosity):
         """Check there is a mask intersection and, if so, set t0 to the
         overlap interval."""
-        if self.mask is not None:
+        with instrument.block(name="mask intersect check",
+                metric=self.reach.instrumentor.metric):
+            if self.mask is None:
+                if verbosity >= 4:
+                    print("not using mask!")
+                return True
+
             if verbosity >= 4:
                 print("using mask!")
+
             mask_overlap = self._mask_overlap(t + t0)
 
-            if mask_overlap.has_value():
-                if verbosity >= 3:
-                    print("mask_overlap =",
-                          interval.as_str(mask_overlap.value()))
-                mask_overlap.value().sub_assign(t)
-                if verbosity >= 3:
-                    print("mask_overlap =",
-                          interval.as_str(mask_overlap.value()))
-                mask_overlap.value().intersect_assign(t0)
-                (&t0)[0] = mask_overlap.value()
-                if verbosity >= 2:
-                    print("t0 =", interval.as_str(t0))
-
-                return True
-            else:
+            if not mask_overlap.has_value():
                 if verbosity >= 2:
                     print("outside mask!")
                     # print('t + t0 =', interval.as_str(t + t0))
                     # print('mask =', self.mask)
-
                 return False
-        else:
-            if verbosity >= 4:
-                print("not using mask!")
+
+            if verbosity >= 3:
+                print("mask_overlap =",
+                        interval.as_str(mask_overlap.value()))
+
+            mask_overlap.value().sub_assign(t)
+
+            if verbosity >= 3:
+                print("mask_overlap =",
+                        interval.as_str(mask_overlap.value()))
+
+            mask_overlap.value().intersect_assign(t0)
+            (&t0)[0] = mask_overlap.value()
+
+            if verbosity >= 2:
+                print("t0 =", interval.as_str(t0))
 
             return True
 
@@ -726,14 +777,18 @@ cdef class FunctionObserver:
 
         Retrieve f and fprime, performing symbolic composition if desired.
         """
+        global continuousProblem
+
+        assert self.global_manager.active
+
         if self.symbolic_composition and not poly_f_fn.has_value():
             # Define f and fprime by symbolically composing polynomials
             # print("Performing symbolic composition!")
             observable(
                 f_fn, fprime_fn,
                 (<Poly?>self.f).c_poly, tmv, deref(loop_domain),
-                self.reach.c_reach.globalMaxOrder,
-                self.reach.c_reach.cutoff_threshold,
+                continuousProblem.globalMaxOrder,
+                continuousProblem.cutoff_threshold,
             )
             # print("setting f and fprime polys")
             # NOTE: Under symbolic composition, the polys depend on the space
