@@ -19,6 +19,15 @@ cdef swap_continuous_reachability(
     ContinuousReachability & b,
 )
 
+# cdef extern from * nogil:
+#     """
+#     flowstar::ContinuousReachability * global_continuous_problem() {
+#         return &continuousProblem;
+#     }
+#     """
+#     ContinuousReachability * global_continuous_problem()
+cdef extern ContinuousReachability * global_continuous_problem()
+
 
 cdef class FlowstarGlobalManager:
     cdef ContinuousReachability* continuousProblem

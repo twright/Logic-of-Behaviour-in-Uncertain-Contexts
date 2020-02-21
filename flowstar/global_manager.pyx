@@ -18,6 +18,12 @@ def flowstar_globals(f):
     return g
 
 
+cdef extern ContinuousReachability* global_continuous_problem():
+    global continuousProblem
+
+    return &continuousProblem
+
+
 cdef swap_continuous_reachability(
         ContinuousReachability & a,
         ContinuousReachability & b):

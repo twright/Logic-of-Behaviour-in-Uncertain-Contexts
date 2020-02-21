@@ -12,8 +12,16 @@ all: flowstar lib
 flowstar: $(OBJS) lex.fyy.o modelParser.tab.o modelParser.o
 	$(CXX) $(OFLAGS) -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
-lib: $(OBJS) lex.fyy.o modelParser.tab.o
-	ar rcs libflowstar.a $^
+lib: $(OBJS) lex.fyy.o modelParser.tab.o modelParser.o lex.fyy.o modelParser.tab.o
+	$(CXX) $(OFLAGS) -shared -w $(LINK_FLAGS) -o libflowstar.so $^ $(LIBS)
+
+install:
+	cp libflowstar.so /usr/lib
+	cp flowstar /usr/bin
+	ldconfig
+
+# lib: $(OBJS) lex.fyy.o modelParser.tab.o
+# 	ar rcs libflowstar.a $^
 
 %.o: %.cc
 	$(CXX) $(OFLAGS) -c $(CFLAGS) -o $@ $<
@@ -31,4 +39,4 @@ lex.fyy.c: modelLexer.l modelParser.tab.c
 	# flex --debug modelLexer.l
 
 clean:
-	rm -f flowstar *.o libflowstar.a *~ lex.fyy.c modelParser.tab.c modelParser.output lex.yy.c
+	rm -f flowstar *.o libflowstar.a libflowstar.so *~ lex.fyy.c modelParser.tab.c modelParser.output lex.yy.c

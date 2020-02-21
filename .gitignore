@@ -36,5 +36,5 @@ flowstar/flowstar-2.1.0
 **/*.tab.c
 **/*.tab.h
 **/*.output
-**/flowstar
+flowstar/flowstar*/flowstar
 **/.history
