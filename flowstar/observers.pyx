@@ -37,14 +37,6 @@ from flowstar.modelParser cimport continuousProblem
 __all__ = ('RestrictedObserver', 'PolyObserver')
 
 
-# def flowstar_globals(f):
-#     def g(self, *args, **kwargs):
-#         with self.reach.global_manager:
-#             f(*args, **kwargs)
-
-#     return g
-
-
 # noinspection PyUnreachableCode
 cdef class RestrictedObserver(PolyObserver):
     def __init__(RestrictedObserver self, PolyObserver p,
@@ -265,7 +257,8 @@ cdef class FunctionObserver:
             if not self._mask_intersect_check(t, t0, verbosity):
                 continue
 
-            if (self.tentative_unpreconditioning
+            if ((self.tentative_unpreconditioning
+                 or self.reach.skip_unpreconditioning)
                     and not deref(fp_compo).has_value()):
                 self._unpreconditioned_pre_retrieve_f(f_fn, deref(fp),
                                                       loop_domain)
@@ -287,10 +280,19 @@ cdef class FunctionObserver:
                     # Annoying code to make Cython allow assignment to a r-value
                     (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
                     continue
-                # # Don't do anything in crude roots case
-                # elif (self.reach.crude_roots):
-                #     new_roots.push_back(t0)
-                #     continue
+                # Don't do anything in skip_unpreconditioning case (implies crude roots)
+                elif (self.reach.skip_unpreconditioning):
+                    new_roots.push_back(t0)
+
+                    ### Amalgamate new and existing roots, shifting new roots by
+                    ### current time, and merging adjacent roots
+                    with instrument.block(name="root amalgamation",
+                            metric=self.reach.instrumentor.metric):
+                        self._amalgamate_roots(roots, new_roots, t,
+                            verbosity=verbosity)
+                    new_roots.clear()
+
+                    continue
 
             ### Perform composition of preconditioned taylor model
             self.reach.compose_flowpipe(deref(fp), deref(fp_compo))
@@ -455,7 +457,7 @@ cdef class FunctionObserver:
             Interval I = interval.make_interval(t)
 
         with self.global_manager:
-            print("calling inner eval_interval")
+            # print("calling inner eval_interval")
             res = self.eval_interval(I, verbosity=verbosity)
 
         return RIF(res.inf(), res.sup())
@@ -1020,6 +1022,7 @@ cdef class PolyObserver(FunctionObserver):
         self.f = Poly(f)
         self.reach = reach
         if fprime is not None:
+            print(f"fprime = {repr(fprime)}")
             self.fprime = Poly(fprime)
         else:
             self.fprime = self._fprime_given_f()

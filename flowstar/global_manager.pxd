@@ -1,5 +1,4 @@
 from libcpp.vector cimport vector
-# from libcpp.list cimport list as clist
 from libcpp.string cimport string
 
 from flowstar.Interval cimport Interval
@@ -7,7 +6,7 @@ from flowstar.Continuous cimport ContinuousReachability, Flowpipe
 from flowstar.TaylorModel cimport TaylorModelVec
 from flowstar.Polynomial cimport Polynomial
 from flowstar.cppstd cimport reference_wrapper, optional
-from flowstar.modelParser cimport swapContinuousProblem
+
 
 cdef extern from "<algorithm>" namespace "std" nogil:
     void swap[T](T& a, T& b)
@@ -19,15 +18,6 @@ cdef swap_continuous_reachability(
     ContinuousReachability & b,
 )
 
-# cdef extern from * nogil:
-#     """
-#     flowstar::ContinuousReachability * global_continuous_problem() {
-#         return &continuousProblem;
-#     }
-#     """
-#     ContinuousReachability * global_continuous_problem()
-cdef extern ContinuousReachability * global_continuous_problem()
-
 
 cdef class FlowstarGlobalManager:
     cdef ContinuousReachability* continuousProblem
@@ -37,4 +27,3 @@ cdef class FlowstarGlobalManager:
     cdef vector[Interval] double_factorial
     cdef vector[string] domainVarNames
     cdef readonly object instrumentor
-    cdef readonly int entry_count

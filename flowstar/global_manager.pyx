@@ -2,7 +2,7 @@ cimport flowstar.interval as interval
 from flowstar.Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
 from flowstar.Polynomial cimport (Polynomial, power_4, double_factorial,
                                   factorial_rec)
-from flowstar.modelParser cimport (setContinuousProblem, saveContinuousProblem, setYYDebug, continuousProblem, swapContinuousProblem, globalNumFlowpipes)
+from flowstar.modelParser cimport (continuousProblem)
 from cython.operator cimport dereference as deref, preincrement as inc
 import instrument
 import functools
@@ -11,29 +11,17 @@ import functools
 def flowstar_globals(f):
     @functools.wraps(f)
     def g(self, *args, **kwargs):
-        print(f"entering managed function {f.__name__}")
+        # print(f"entering managed function {f.__name__}")
         with self.global_manager:
             return f(self, *args, **kwargs)
 
     return g
 
 
-cdef extern ContinuousReachability* global_continuous_problem():
-    global continuousProblem
-
-    return &continuousProblem
-
-
 cdef swap_continuous_reachability(
         ContinuousReachability & a,
         ContinuousReachability & b):
     '''Swap the contents of two continuous reachability objects.'''
-    # cdef ContinuousReachability tmp
-    # tmp = a
-    # (&a)[0] = b
-    # (&b)[0] = tmp
-    # # swap(&a[0], b)
-    # # tmp = self.
     swap(a.system, b.system)
     swap(a.step, b.step)
     swap(a.time, b.time)
@@ -86,7 +74,6 @@ cdef class FlowstarGlobalManager:
     def __cinit__(FlowstarGlobalManager self,
         instrumentor):
         self.continuousProblem = new ContinuousReachability()
-        self.entry_count = 0
         self.instrumentor = instrumentor
 
     def __dealloc__(self):
@@ -96,20 +83,8 @@ cdef class FlowstarGlobalManager:
     def active(self):
         global global_manager_stack
 
-        # print(f"active {self} with stack {global_manager_stack}")
-
         return (global_manager_stack and 
             global_manager_stack[-1] is self)
-        # return self.__class__.active_global_manager is self
-        # return self.entry_count >= 0
-
-    # @staticmethod
-    # cdef forCReach(ContinuousReachability & creach, object instrumentor):
-    #     manager = FlowstarGlobalManager()
-    #     manager.continuousProblem = &creach
-    #     manager.instrumentor = instrumentor
-    #     # manager.capture()
-    #     return manager
 
     @staticmethod
     def get_global_domain_var_names():
@@ -154,72 +129,13 @@ cdef class FlowstarGlobalManager:
         global domainVarNames
         global continuousProblem
 
-        print("swapping variables")
-        print("=== before ===")
-        print(f"global: {continuousProblem.system.tmvOde.tms.size()} dim")
-        print(f"local: {self.continuousProblem.system.tmvOde.tms.size()} dim")
-        # print(f"global: {list(continuousProblem.system.strOde)}")
-        # print(f"stored: {list(self.continuousProblem[0].system.strOde)}")
-        print(f"global: {continuousProblem.flowpipes.size()} flowpipes")
-        print(f"global [reported]: {continuousProblem.numOfFlowpipes()} flowpipes")
-        print(f"global [external]: {globalNumFlowpipes()} flowpipes")
-        print(f"stored: {self.continuousProblem[0].numOfFlowpipes()} flowpipes")
-        # swap_continuous_reachability(
-        #     self.continuousProblem[0],
-        #     continuousProblem,
-        # )
-        swapContinuousProblem(self.continuousProblem[0])
+        swap_continuous_reachability(
+            self.continuousProblem[0],
+            continuousProblem,
+        )
         self.domainVarNames.swap(domainVarNames)
         self.factorial_rec.swap(factorial_rec)
         self.double_factorial.swap(double_factorial)
-        print("=== after ===")
-        print(f"global: {continuousProblem.system.tmvOde.tms.size()} dim")
-        print(f"local: {self.continuousProblem.system.tmvOde.tms.size()} dim")
-        # print(f"global: {list(continuousProblem.system.strOde)}")
-        # print(f"stored: {list(self.continuousProblem[0].system.strOde)}")
-        print(f"global: {continuousProblem.flowpipes.size()} flowpipes")
-        print(f"global [reported]: {continuousProblem.numOfFlowpipes()} flowpipes")
-        print(f"global [external]: {globalNumFlowpipes()} flowpipes")
-        print(f"stored: {self.continuousProblem[0].flowpipes.size()} flowpipes")
-
-        # self.active = !self.active
-        # if self.active:
-        #     self.creachContinuousProblem = &continuousProblem
-        # else:
-        #     self.creachContinuousProblem 
-
-    # def incremental_capture(FlowstarGlobalManager self):
-    #     global factorial_rec
-    #     global power_4
-    #     global double_factorial
-    #     global domainVarNames
-    #     global continuousProblem
-
-    #     print(f"{repr(self)} capturing")
-
-    #     self.continuousProblem[0] = continuousProblem
-    #     self.domainVarNames = domainVarNames
-
-    #     assert factorial_rec.size() == power_4.size()
-    #     assert power_4.size() == double_factorial.size()
-    #     assert self.factorial_rec.size() == self.power_4.size()
-    #     assert self.power_4.size() == self.double_factorial.size()
-    #     assert self.power_4.size() <= power_4.size()
-
-    #     cdef int i = self.factorial_rec.size()
-    #     cdef int global_data_size = factorial_rec.size()
-
-    #     while i < global_data_size:
-    #         self.factorial_rec.push_back(factorial_rec[i])
-    #         self.power_4.push_back(power_4[i])
-    #         self.double_factorial.push_back(double_factorial[i])
-
-    #         inc(i)
-        
-
-    #     self.factorial_rec = factorial_rec
-    #     self.power_4 = power_4
-    #     self.double_factorial = double_factorial
 
     def clear(self):
         print(f"{repr(self)} clearing")
@@ -233,54 +149,26 @@ cdef class FlowstarGlobalManager:
 
     def __enter__(self):
         global global_manager_stack
-        global continuousProblem
 
-        print("entering global manager")
-        print(f"num_flowpipes [reported]: {continuousProblem.numOfFlowpipes()}")
-        print(f"num_flowpipes: {continuousProblem.flowpipes.size()}")
-        print(f"global num_flowpipes: {globalNumFlowpipes()} flowpipes")
-        print(f"system with dimension {continuousProblem.system.tmvOde.tms.size()}")
-
-        # if len(global_manager_stack) > 0 and global_manager_stack[-1] is not self:
-        #     global_manager_stack[-1].swap_globals():
         if not self.active:
             with instrument.block(
                     name="restoring globals",
                     metric=self.instrumentor.metric):
                 self.swap_globals()
-        # self.entry_count += 1
+
         global_manager_stack.append(self)
+
         assert self.active
-        print(f"stack: {global_manager_stack}")
-        print(f"num_flowpipes [reported]: {continuousProblem.numOfFlowpipes()}")
-        print(f"global num_flowpipes: {globalNumFlowpipes()} flowpipes")
-        print(f"num_flowpipes: {continuousProblem.flowpipes.size()}")
-        print(f"system with dimension {continuousProblem.system.tmvOde.tms.size()}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         global global_manager_stack
-        global continuousProblem
 
-        print("exiting global manager")
-        print(f"num_flowpipes [reported]: {continuousProblem.numOfFlowpipes()}")
-        print(f"global num_flowpipes: {globalNumFlowpipes()} flowpipes")
-        print(f"num_flowpipes: {continuousProblem.flowpipes.size()}")
-        print(f"system with dimension {continuousProblem.system.tmvOde.tms.size()}")
-
-        # self.entry_count -= 1
         assert self.active
+
         global_manager_stack.pop()
 
         if not self.active:
-        # if (self not in global_manager_stack
-        #     or global_manager_stack.index(self) != len(global_manager_stack) - 1):
             with instrument.block(
                     name="capturing globals [on exit]",
                     metric=self.instrumentor.metric):
                 self.swap_globals()
-
-        print(f"stack: {global_manager_stack}")
-        print(f"num_flowpipes [reported]: {continuousProblem.numOfFlowpipes()}")
-        print(f"global num_flowpipes: {globalNumFlowpipes()} flowpipes")
-        print(f"num_flowpipes: {continuousProblem.flowpipes.size()}")
-        print(f"system with dimension {continuousProblem.system.tmvOde.tms.size()}")

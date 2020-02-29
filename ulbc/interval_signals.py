@@ -201,13 +201,19 @@ class BaseSignal(object):
     def __init__(self, domain : RIF, values, expect_consistent=True):
         if domain is None:
             raise ValueError("Domain is None!")
+
+        # We do some canonicalization when constructing a signal to
+        # merge overlapping intervals, remove nulls,
+        # and restrict domains to positive time
+
         self._domain = RIF(max(0, domain.lower()),
-                           domain.upper())  # :: RIF
+                           max(0, domain.upper()))  # :: RIF
         # self._values = list(values) # :: [(RIF, Bool)]
         self._values = list(values)
         self._values = [p for p in self._values if p is not None]
-        self._values = [(RIF(max(0, v.lower()), v.upper()), b)
+        self._values = [(self._domain.intersection(v), b)
                         for v, b in self._values
+                        if self._domain.overlaps(v)
                         if b is not None and v is not None]
         dup = True
         while dup:

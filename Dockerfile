@@ -19,6 +19,9 @@ ENV PYTHONPATH=/lbuc:${PYTHONPATH}
 ENV JUPYTERPATH=/lbuc:${JUPYTERPATH}
 ENV SAGE_PATH=/lbuc:${SAGE_PATH}
 RUN ./setup.py choose_flowstar -m fastintervals && ./setup.py build_ext
+USER root
+RUN cd flowstar/flowstar-2.1.0 && make install
+USER lbuc
 # RUN ./setup.py install --user
 RUN cp -R flowstar/ /home/lbuc/.local/lib/python3.7/site-packages/ && cp -R ulbc/ /home/lbuc/.local/lib/python3.7/site-packages/ && cp -R interval_utils.py /home/lbuc/.local/lib/python3.7/site-packages/
 EXPOSE 8888

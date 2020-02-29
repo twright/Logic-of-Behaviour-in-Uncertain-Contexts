@@ -7,14 +7,14 @@ from flowstar.Continuous cimport ContinuousReachability, ContinuousSystem, Flowp
 from flowstar.TaylorModel cimport TaylorModel, TaylorModelVec
 from flowstar.taylormodel import FlowstarConverter
 from flowstar.Interval cimport Interval, intervalNumPrecision
-from flowstar.Polynomial cimport (Polynomial)
+from flowstar.Polynomial cimport Polynomial
 from flowstar.instrumentation cimport AggregateMetric
 from flowstar.poly cimport Poly, poly_fn, tmv_interval_fn
 cimport flowstar.interval as interval
 cimport flowstar.plotting as plotting
 from flowstar.interval cimport interval_time_fn, interval_fn
 from flowstar.observable cimport observable
-from flowstar.modelParser cimport setContinuousProblem, saveContinuousProblem, setYYDebug, continuousProblem
+from flowstar.modelParser cimport continuousProblem
 from flowstar.global_manager import flowstar_globals
 
 from cython.operator cimport dereference as deref, preincrement as inc
@@ -368,6 +368,7 @@ cdef class CReach:
         symbolic_composition=True,
         precompose_taylor_models=False,
         crude_roots=False,
+        skip_unpreconditioning=False,
         initial_form=InitialForm.COMBINED,
         **kwargs):
         global continuousProblem
@@ -381,6 +382,7 @@ cdef class CReach:
         self.prepared_for_plotting = False
         self.result = 0
         self.symbolic_composition = symbolic_composition
+        self.skip_unpreconditioning = skip_unpreconditioning
 
         print("run =", run)
 
@@ -499,6 +501,7 @@ cdef class CReach:
         self.result = 0
         self.symbolic_composition = other.symbolic_composition
         self.ode_strs = other.ode_strs
+        self.skip_unpreconditioning = other.skip_unpreconditioning
 
         continuousProblem = other.global_manager.continuousProblem[0]
 
@@ -546,6 +549,7 @@ cdef class CReach:
         symbolic_composition=False,
         precompose_taylor_models=False,
         crude_roots=False,
+        skip_unpreconditioning=False,
         initial_form=InitialForm.COMBINED,
         **kwargs):
         global continuousProblem
@@ -560,6 +564,7 @@ cdef class CReach:
         print(f"crude_roots = {repr(crude_roots)}")
         self.result = 0
         self.symbolic_composition = symbolic_composition
+        self.skip_unpreconditioning = skip_unpreconditioning
 
         # Create global variable manager
         # self.global_manager = FlowstarGlobalManager()

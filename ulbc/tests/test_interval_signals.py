@@ -2,7 +2,8 @@ from __future__ import print_function
 # absolute_import,
 
 import pytest
-from ulbc.interval_signals import Signal, interval_complements, isplit
+from ulbc.interval_signals import (Signal, interval_complements, isplit,
+    shift_G, shift_F)
 from ulbc.signal_masks import Mask
 from sage.all import RIF
 
@@ -70,6 +71,31 @@ def int_dist(I, J):
 
 def int_approx_eq(I, J, epsilon=1e-3):
     return int_dist(I, J) <= epsilon
+
+
+class TestSignalOperations:
+    def test_shift_G_zero_true(self):
+        J = RIF(2.5)
+        Kb = (RIF(0, 2), True)
+        expJ = RIF(-2.5, -0.5)
+        res = shift_G(J, Kb)
+        assert f"({res[0].str(style='brackets')}, {res[1]})"\
+            == f"({expJ.str(style='brackets')}, True)"
+
+    def test_shift_G_zero_false(self):
+        J = RIF(2.5)
+        Kb = (RIF(0, 2), False)
+        expJ = RIF(-2.5, -0.5)
+        res = shift_G(J, Kb)
+        assert f"({res[0].str(style='brackets')}, {res[1]})"\
+            == f"({expJ.str(style='brackets')}, False)"
+
+    def test_G_time_zero(self, sig1):
+        sig1G = sig1.G(RIF(2.5))
+        print(f"sig1.G(2.5) == {sig1G}")
+        assert sig1(2.5) is None
+        # These two should be equal
+        assert sig1G(0) is None
 
 
 class TestISplit:

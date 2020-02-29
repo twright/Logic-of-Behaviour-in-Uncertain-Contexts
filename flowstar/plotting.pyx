@@ -170,7 +170,8 @@ cdef class SagePlotMixin:
         if poly is None:
             p_observer = None
         else:
-            p_observer = PolyObserver(poly, self, self.symbolic_composition)
+            p_observer = PolyObserver(poly, self,
+                symbolic_composition=self.symbolic_composition)
 
         for i in range(sage.ceil(self.time/step)):
             t = step*i
