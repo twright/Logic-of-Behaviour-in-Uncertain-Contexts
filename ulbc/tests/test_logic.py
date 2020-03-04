@@ -287,6 +287,43 @@ class TestMasks(object):
         assert sigc.approx_eq(siga & sigb)
 
     @pytest.mark.slow
+    def test_and_binary_point_two_pass(self, atomic_p, atomic_q, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        sigb = atomic_q.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        propc = atomic_p & atomic_q
+        sigc = propc.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True,
+                                       two_pass_masks=True)
+        assert sigc.mask is not None
+        assert sigc.mask.approx_eq(Mask(RIF(0, 2*sage.pi),
+                                        [RIF(0, 2*sage.pi)]))
+        print(sigc)
+        print(siga & sigb)
+        assert sigc.approx_eq(siga & sigb)
+
+    @pytest.mark.slow
+    def test_and_binary_point_two_pass_masks_symbolic(self, atomic_p, atomic_q, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True,
+                                          symbolic_composition=True)
+        sigb = atomic_q.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True,
+                                          symbolic_composition=True)
+        propc = atomic_p & atomic_q
+        sigc = propc.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True,
+                                       two_pass_masks=True,
+                                       symbolic_composition=True)
+        assert sigc.mask is not None
+        assert sigc.mask.approx_eq(Mask(RIF(0, 2*sage.pi),
+                                        [RIF(0, 2*sage.pi)]))
+        print(sigc)
+        print(siga & sigb)
+        assert sigc.approx_eq(siga & sigb)
+
+    @pytest.mark.slow
     def test_or_unary_point(self, atomic_p, odes, initials2):
         siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
                                           use_masks=True)
@@ -305,6 +342,43 @@ class TestMasks(object):
         propc = atomic_p | atomic_q
         sigc = propc.signal_for_system(odes, initials2, 2*sage.pi,
                                        use_masks=True)
+        assert sigc.mask is not None
+        assert sigc.mask.approx_eq(Mask(RIF(0, 2*sage.pi),
+                                        [RIF(0, 2*sage.pi)]))
+        print(sigc)
+        print(siga | sigb)
+        assert sigc.approx_eq(siga | sigb)
+
+    @pytest.mark.slow
+    def test_or_binary_point_two_pass(self, atomic_p, atomic_q, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        sigb = atomic_q.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True)
+        propc = atomic_p | atomic_q
+        sigc = propc.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True,
+                                       two_pass_masks=True)
+        assert sigc.mask is not None
+        assert sigc.mask.approx_eq(Mask(RIF(0, 2*sage.pi),
+                                        [RIF(0, 2*sage.pi)]))
+        print(sigc)
+        print(siga | sigb)
+        assert sigc.approx_eq(siga | sigb)
+
+    @pytest.mark.slow
+    def test_and_binary_point_two_pass_masks_symbolic(self, atomic_p, atomic_q, odes, initials2):
+        siga = atomic_p.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True,
+                                          symbolic_composition=True)
+        sigb = atomic_q.signal_for_system(odes, initials2, 2*sage.pi,
+                                          use_masks=True,
+                                          symbolic_composition=True)
+        propc = atomic_p | atomic_q
+        sigc = propc.signal_for_system(odes, initials2, 2*sage.pi,
+                                       use_masks=True,
+                                       two_pass_masks=True,
+                                       symbolic_composition=True)
         assert sigc.mask is not None
         assert sigc.mask.approx_eq(Mask(RIF(0, 2*sage.pi),
                                         [RIF(0, 2*sage.pi)]))
