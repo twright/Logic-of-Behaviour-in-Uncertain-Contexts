@@ -173,6 +173,8 @@ def shift_F(J, Kb):
 
 def shift_G(J, Kb):
     (K, b) = Kb
+    assert J is not None
+    assert Kb is not None
     if J not in RIF:
         J = RIF(J)
     tl, tu = J.edges()
@@ -181,7 +183,7 @@ def shift_G(J, Kb):
 
     if not b:
         return inner_inverse_minkowski(K, J), False
-    elif Ktl.overlaps(Ktu):
+    elif Ktl and Ktu and Ktl.overlaps(Ktu):
         return Ktl.intersection(Ktu), True
     else:
         return None

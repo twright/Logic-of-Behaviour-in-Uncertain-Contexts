@@ -367,9 +367,12 @@ class Atomic(Logic):
         return sage.plot((lo, up), (0, observer.time), *args, fill={0:[1]}, **kwargs)
 
     def visualize(self, *args, **kwargs):
-        reach = kwargs.get('reach', None)
-        system = kwargs.get('system', args[0] if len(args) > 0 else None)
-        odes = kwargs.get('odes', system.y)
+        reach = kwargs.pop('reach', None)
+        if reach and reach.system:
+            system = reach.system
+        else:
+            assert len(args) > 0 or 'system' in 'kwargs'
+            system = kwargs.get('system', args[0])
         if reach is None:
             if system is not None:
                 reach = system.reach(args[1]
@@ -378,14 +381,17 @@ class Atomic(Logic):
                                      **kwargs)
             else:
                 raise ValueError("No system!")
-        sig = self.signal(reach, odes, **kwargs)
+        print("computing sig")
+        sig = self.signal(reach, **kwargs)
 
+        print("generating plot")
         sage_plot = self.sage_plot(
             reach,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
         )
         axes_range = sage_plot.get_axes_range()
+        print("plotting signal")
         sig_plot = sig.plot(y_range=(axes_range['ymin'], axes_range['ymax']))
         return sig_plot + sage_plot 
 

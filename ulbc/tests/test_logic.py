@@ -34,6 +34,35 @@ def atomic_q(ringxy):
 class TestAtomic:
     @staticmethod
     @pytest.mark.slow
+    def test_polynomial_vizualize(ringxy, odes):
+        R, (x,y) = ringxy
+        sys = System(R, (x,y), [(4,5), (1,2)], (-y, x))
+        at = Atomic(x - 3)
+        # This should not crash
+        assert at.visualize(sys, 5) is not None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_polynomial_vizualize_with_reach(ringxy, odes):
+        R, (x,y) = ringxy
+        sys = System(R, (x,y), [(4,5), (1,2)], (-y, x))
+        at = Atomic(x - 3)
+        reach = sys.reach(5)
+        # This should not crash
+        assert at.visualize(reach=reach) is not None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_polynomial_vizualize_with_reach_at_sys(ringxy, odes):
+        R, (x,y) = ringxy
+        sys = System(R, (x,y), [(4,5), (1,2)], (-y, x))
+        at = Atomic(x - 3)
+        reach = sys.reach(5)
+        # This should not crash
+        assert at.visualize(sys, reach=reach) is not None
+
+    @staticmethod
+    @pytest.mark.slow
     def test_dpdt(plant_clock):
         p = plant_clock.v('Protein(dEL,iEL;)')
         q = plant_clock.v('MRNA(tEL,dMEL,dEL,iEL;)')
@@ -153,6 +182,17 @@ class TestC:
                                 epsilon_ctx=0.1)
         res2 = Atomic("x").signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 5)
         assert res1.approx_eq(res2, 0.5)
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_context_with_jump_at_zero(ringxy, odes):
+        _, (x, y) = ringxy
+        prop = G(RIF(sage.pi/8), Atomic(x + 0.5))
+        resa = ({y: RIF(1, 5)} >> prop).signal_for_system(
+            odes, [RIF(1, 2), RIF(3, 4)], 0, epsilon_ctx=0.1)(0)
+        resb = prop.signal_for_system(
+            odes, [RIF(1, 2), RIF(4, 9)], 0, epsilon_ctx=0.1)(0)
+        assert resa is resb
 
     @staticmethod
     @pytest.mark.slow
@@ -742,7 +782,7 @@ class TestWithSystem:
         assert isinstance(prop_with_sys, LogicWithSystem)
         assert prop_with_sys.system.x == enzyme['system'].x
         assert prop_with_sys.system.y == enzyme['system'].y
-        assert isinstance(prop_with_sys.phi, C)
+        assert isinstance(prop_with_sys.phi, ctx)
         assert isinstance(prop_with_sys.phi.phi, LogicWithSystem)
         assert isinstance(prop_with_sys.phi.phi.phi, F)
         assert prop_with_sys.phi.phi.phi.phi == atS 
