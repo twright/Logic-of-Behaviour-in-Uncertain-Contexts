@@ -20,7 +20,8 @@ from flowstar.reachability import (Reach, FlowstarFailedException, InitialForm)
 import ulbc.bondcalculus as bc
 from ulbc.symbolic import RelationConverter, is_relation
 
-from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver)
+from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver,
+    RestrictionMethod)
 from ulbc.context_signals import (ContextSignal,
                                   true_context_signal, false_context_signal,
                                   preconditioned_space_domain)
@@ -124,14 +125,17 @@ class Logic(metaclass=ABCMeta):
 
     @overload
     def context_signal_for_system(self, odes : List[Any], initials : List[Any], duration : float, use_masks : bool, mask : Optional[Mask],
+        restriction_method : RestrictionMethod,
         **kwargs) -> ContextSignal: ...
 
     @overload
     def context_signal_for_system(self, system : System, duration : float,
-        use_masks : bool, mask : Optional[Mask], **kwargs) -> ContextSignal: ...
+        use_masks : bool, mask : Optional[Mask],
+        restriction_method : RestrictionMethod, **kwargs) -> ContextSignal: ...
 
     def context_signal_for_system(self, *args,
                                   use_masks=False, mask=None,
+                                  restriction_method=RestrictionMethod.SYMBOLIC,
                                   **kwargs):
         use_masks |= mask is not None
         system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
@@ -169,6 +173,7 @@ class Logic(metaclass=ABCMeta):
         t2 = time.time()
         res = self.context_signal(reach,
                                   mask=mask,
+                                  restriction_method=restriction_method,
                                   **kwargs)
         t3 = time.time()
         print("Monitored initial signal {} sec".format(t3 - t2))
@@ -234,9 +239,10 @@ class Logic(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def context_signal(self, reach: Reach, mask=None, **kwargs):
+    def context_signal(self, reach: Reach, mask=None,
+            restriction_method=RestrictionMethod.SYMBOLIC, **kwargs):
         pass
-
+       
     @abstractmethod
     def numerical_signal(self, f, events, duration):
         pass
@@ -425,7 +431,8 @@ class Atomic(Logic):
             )
 
     def observer(self, reach, space_domain=None, mask=None, symbolic_composition=False,
-        tentative_unpreconditioning=False):
+        tentative_unpreconditioning=False,
+        restriction_method : Optional[RestrictionMethod]=None):
         # Convert atomic proposition to a suitable ring and variable
         # namespace
         if reach.system is not None:
@@ -476,7 +483,10 @@ class Atomic(Logic):
         if space_domain is not None:
             # Due to Cython's stricter types, space_domain needs to be a
             # list rather than a list like object such a sage's vectors
-            observer = RestrictedObserver(observer, list(space_domain))
+            observer = RestrictedObserver(observer, list(space_domain),
+                restriction_method=restriction_method
+                    if restriction_method
+                    else RestrictionMethod.SYMBOLIC)
 
         return observer
 
@@ -507,7 +517,7 @@ class Atomic(Logic):
         ).to_domain(RIF(0, RIF(0, reach.time - 1e-3)))
 
     def context_signal(self, reach: Reach, mask: Optional[Mask] = None,         
-            **kwargs):
+            restriction_method=RestrictionMethod.SYMBOLIC, **kwargs):
         domain = RIF(0, reach.time - 1e-3)
         observer = self.observer(
             reach,
@@ -517,6 +527,7 @@ class Atomic(Logic):
             # mask=mask,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
+            restriction_method=restriction_method,
             # Should already have been passed to Reach
             # by context_signal_for_system
             # initial_form=InitialForm.SPLIT_VARS,

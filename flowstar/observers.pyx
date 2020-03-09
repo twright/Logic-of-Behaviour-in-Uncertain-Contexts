@@ -12,6 +12,7 @@ import contextlib
 
 import sage.all as sage
 from sage.ext.fast_callable import fast_callable
+from enum import IntEnum
 
 import instrument
 
@@ -34,13 +35,21 @@ from flowstar.observable cimport observable
 from flowstar.modelParser cimport continuousProblem
 
 
-__all__ = ('RestrictedObserver', 'PolyObserver')
+__all__ = ('RestrictedObserver', 'PolyObserver', 'RestrictionMethod')
+
+
+class RestrictionMethod(IntEnum):
+    """The method used for reachability on a restricted region of the flowpipe's
+    spatial domain."""
+    SYMBOLIC = 1
+    RECOMPUTE_FLOWPIPE = 2
 
 
 # noinspection PyUnreachableCode
 cdef class RestrictedObserver(PolyObserver):
     def __init__(RestrictedObserver self, PolyObserver p,
-                 list space_domain not None):
+                 list space_domain not None,
+                 restriction_method : RestrictionMethod=RestrictionMethod.SYMBOLIC):
         self.f = p.f
         self.fprime = p.fprime
         self.poly_f_fns = p.poly_f_fns
@@ -53,13 +62,17 @@ cdef class RestrictedObserver(PolyObserver):
         self.fprime_interval_fn = p.fprime_interval_fn
         self.mask = p.mask
         self.masked_regions = p.masked_regions
+        self.restriction_method = restriction_method
+        print(f"restriction_method = {restriction_method} in RestrictedObserver")
         if self.reach is not None:
             assert isinstance(self.reach, CReach)
             print(f"self.reach.vars = {repr(self.reach.vars)}")
-            if not self.reach.successful:
+            if (not self.reach.successful
+                or self.restriction_method
+                    == RestrictionMethod.RECOMPUTE_FLOWPIPE):
+                print("recomputing flowpipe!")
                 self.reach = Reach(self.reach, space_domain)
                 self._init_stored_data()
-
             assert self.reach.context_dim == len(space_domain),\
                 f"space_domain {repr(space_domain)} does not match context dimension {self.reach.context_dim}"
             self.reach._convert_space_domain(&self.space_domain, space_domain)
@@ -1004,8 +1017,9 @@ cdef class PolyObserver(FunctionObserver):
                  object mask=None):
         from ulbc.signal_masks import Mask
 
-        print("PolyObserver({}, {}, {} symbolic_composition={}, "
+        print("{}({}, {}, {}, symbolic_composition={}, "
               "tentative_unpreconditioning={}, mask={})".format(
+            self.__class__.__name__,
             f, reach, fprime, symbolic_composition, tentative_unpreconditioning,
             mask,
         ))
@@ -1058,6 +1072,7 @@ cdef class PolyObserver(FunctionObserver):
         return observer
 
     def with_f(self, f):
+        # TODO: make sure Restricted observer overrides this
         observer = PolyObserver(
             f,
             self.reach,
