@@ -463,11 +463,6 @@ class Atomic(Logic):
                 mask=mask,
             )
         else:
-        # elif (reach.system is not None
-        #     and ((isinstance(self.p, sage.Expression) and
-        #           any(not self.p.is_polynomial(v)
-        #               for v in self.p.free_variables()))
-        #         or (reach.system.R == sage.SR and not symbolic_composition))):
             if symbolic_composition:
                 warn("symbolic_composition not supported for non-polynomial properties")
                 symbolic_composition = False
@@ -768,7 +763,7 @@ class Or(Logic):
     def __str__(self):
         return ' | '.join(t.bstr(self.priority) for t in self.terms)
 
-    def signal(self, reach : Reach, mask=None, **kwargs):
+    def _signal_one_pass(self, reach : Reach, mask=None, **kwargs):
         sig = false_signal(RIF(0, reach.time), mask)
         for t in self.terms:
             sig_mask = sig.to_mask_or() if mask is not None else None
@@ -776,6 +771,57 @@ class Or(Logic):
                 return sig
             sig |= t.signal(reach, mask=sig_mask, **kwargs)
         return sig
+
+    def _signal_two_pass(self, reach: Reach, mask=None,
+            symbolic_composition=False, skip_unpreconditioning=False,
+            crude_roots=False, **kwargs):
+        if len(self.terms) < 2:
+            return self._signal_one_pass(reach, mask=mask, two_pass_masks=True, **kwargs)
+        
+        P = self.terms[0]
+        Q = Or(*self.terms[1:])
+
+        # First attempt crude monitoring of P
+        with instrument.block(
+                name=f"Monitoring crude P=[{P}]",
+                metric=reach.instrumentor.metric):
+            sigPc = P.signal(reach, mask=mask,
+                symbolic_composition=False,
+                skip_unpreconditioning=True,
+                crude_roots=True,
+                **kwargs)
+        # Then attempt monitoring of Q with mask from P
+        maskQ = sigPc.to_mask_or()
+        with instrument.block(
+                name=f"Monitoring full Q=[{Q}]",
+                metric=reach.instrumentor.metric):
+            sigQ = Q.signal(reach, mask=maskQ,
+                two_pass_masks=True,
+                symbolic_composition=symbolic_composition,
+                skip_unpreconditioning=skip_unpreconditioning,
+                crude_roots=crude_roots,
+                **kwargs)
+        # Finally attempt monitoring of P again with
+        # mask from Q
+        maskPu = sigPc.to_mask_and() & sigPc.to_mask_or()
+        maskPr = maskPu & sigQ.to_mask_or()
+        with instrument.block(
+                name=f"Monitoring full P=[{P}]",
+                metric=reach.instrumentor.metric):
+            sigPr = P.signal(reach, mask=mask,
+                symbolic_composition=symbolic_composition,
+                skip_unpreconditioning=skip_unpreconditioning,
+                crude_roots=True,
+                **kwargs)
+
+        # Return answer constructed from component signals
+        return sigPc.union(sigPr) | sigQ
+
+    def signal(self, reach: Reach, mask=None, two_pass_masks=False, **kwargs):
+        if two_pass_masks:
+            return self._signal_two_pass(reach, mask=mask, **kwargs)
+        else:
+            return self._signal_one_pass(reach, mask=mask, **kwargs)
 
     def context_signal(self, reach: Reach, mask=None, **kwargs):
         sig = false_context_signal(RIF(0, reach.time), list(reach.system.y0),
