@@ -6,7 +6,7 @@ from sage.all import RIF, QQ
 # from builtins import *
 
 from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
-    IntegrationMethod)
+    IntegrationMethod, C)
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
 from ulbc.bondcalculus import System, BondSystem
@@ -782,7 +782,7 @@ class TestWithSystem:
         assert isinstance(prop_with_sys, LogicWithSystem)
         assert prop_with_sys.system.x == enzyme['system'].x
         assert prop_with_sys.system.y == enzyme['system'].y
-        assert isinstance(prop_with_sys.phi, ctx)
+        assert isinstance(prop_with_sys.phi, C)
         assert isinstance(prop_with_sys.phi.phi, LogicWithSystem)
         assert isinstance(prop_with_sys.phi.phi.phi, F)
         assert prop_with_sys.phi.phi.phi.phi == atS 
