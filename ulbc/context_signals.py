@@ -36,7 +36,7 @@ def true_context_signal(J, dim, coordinate=(), top_level_domain=None, reach_leve
 def false_context_signal(J, dim, coordinate=(), top_level_domain=None, reach_level=0, ctx_mask=None):
     return base_context_signal(J, dim, coordinate, false_signal(J), reach_level=reach_level,
         top_level_domain=top_level_domain,
-        mask=ctx_mask)
+        ctx_mask=ctx_mask)
 
 
 def gen_sub_space_domains(xs):
@@ -215,10 +215,15 @@ class SignalTree(object):
                 return sage.matrix([[0]])
         else:
             assert len(list(self.children)) == 4
-            return sage.block_matrix(2, 2,
-                                     [c.histogram2d(n - 1)
-                                      for c in self.children]) \
-                .transpose()
+            cs = [c.histogram2d(n - 1) for c in self.children]
+            return sage.block_matrix(
+                2, 2,
+                [cs[0], cs[2], cs[1], cs[3]],
+            )
+            # return sage.block_matrix(2, 2,
+            #                          [c.histogram2d(n - 1)
+            #                           for c in self.children]) \
+            #     .transpose()
 
     def plot_histogram2d(self, n : int):
         from matplotlib.colors import LinearSegmentedColormap

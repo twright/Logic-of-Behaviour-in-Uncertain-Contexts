@@ -701,11 +701,13 @@ class And(Logic):
             return self._signal_one_pass(reach, mask=mask, **kwargs)
 
     def context_signal(self, reach: Reach, mask: Optional[Mask] = None, **kwargs):
-        sig = true_context_signal(RIF(0, reach.time),
-            # Not always true: what if only some dimensions need subdividing?
-            len(list(reach.system.y0)),
-            top_level_domain=list(reach.system.y0),
-            ctx_mask=mask)
+        sig = true_context_signal(
+            RIF(0, reach.time),
+            # Do we get the domain subdivision right?
+            reach.context_dim,
+            top_level_domain=list(reach.system.y0_composed),
+            ctx_mask=mask,
+        )
         for t in self.terms:
             sig_mask = sig.to_mask_and() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.mask.pos):
@@ -849,8 +851,12 @@ class Or(Logic):
             return self._signal_one_pass(reach, mask=mask, **kwargs)
 
     def context_signal(self, reach: Reach, mask=None, **kwargs):
-        sig = false_context_signal(RIF(0, reach.time), list(reach.system.y0),
-                                   ctx_mask=mask)
+        sig = false_context_signal(
+            RIF(0, reach.time),
+            reach.context_dim,
+            top_level_domain=list(reach.system.y0_composed),
+            ctx_mask=mask,
+        )
         for t in self.terms:
             sig_mask = sig.to_mask_or() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.mask.pos):
