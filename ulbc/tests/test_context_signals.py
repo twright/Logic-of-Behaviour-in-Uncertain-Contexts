@@ -113,29 +113,45 @@ class TestContextSignal(object):
     #             == "ContextSignal([1 .. 2], [[1 .. 3], "
     #                "[5 .. 7]], None, None)")
 
-    def test_sub_space_domains(self):
-        ctx = ContextSignal(RIF(1, 2),
-                            [RIF(1, 3), RIF(5, 7)],
-                            None)
-        assert space_domains_approx_eq(ctx.sub_space_domains,
-                                       [[RIF(1, 2), RIF(5, 6)],
-                                        [RIF(1, 2), RIF(6, 7)],
-                                        [RIF(2, 3), RIF(5, 6)],
-                                        [RIF(2, 3), RIF(6, 7)]])
+    # def test_sub_space_domains(self):
+        # ctx = ContextSignal(RIF(1, 2),
+        #                     [RIF(1, 3), RIF(5, 7)],
+        #                     None)
+        # assert space_domains_approx_eq(ctx.sub_space_domains,
+        #                                [[RIF(1, 2), RIF(5, 6)],
+        #                                 [RIF(1, 2), RIF(6, 7)],
+        #                                 [RIF(2, 3), RIF(5, 6)],
+        #                                 [RIF(2, 3), RIF(6, 7)]])
+        # ctx = ContextSignal(RIF(1, 2),
+        #                     [RIF(1, 3), RIF(5, 7)],
+        #                     None)
+        # assert space_domains_approx_eq(ctx.sub_space_domains,
+        #                                [[RIF(1, 2), RIF(5, 6)],
+        #                                 [RIF(1, 2), RIF(6, 7)],
+        #                                 [RIF(2, 3), RIF(5, 6)],
+        #                                 [RIF(2, 3), RIF(6, 7)]])
 
     def test_sub_sub_child_space_domain(self):
-        ctx = true_context_signal(RIF(1, 2), [RIF(1, 3), RIF(5, 7)])
-        assert space_domain_approx_eq(ctx.children[3].children[2].space_domain,
-                                      [RIF(2.5, 3), RIF(6, 6.5)])
-
-    # def test_children(self):
-    #     ctx = ContextSignal(RIF(1, 2), {'x': RIF(2), 'y': RIF(5, 7)},
-    #                         None, None)
-    #     assert (repr(ctx.children)
-    #             == "[ContextSignal([1 .. 2], {'x': 2, 'y': [5 .. 6]},"
-    #                " ..., ...),"
-    #                " ContextSignal([1 .. 2], {'x': 2, 'y': [6 .. 7]},"
-    #                " None, None)]")
+        ctx = true_context_signal(RIF(1, 2), 2)
+        assert ctx.coordinate == ()
+        assert ctx.reach_level == 0
+        assert ctx.children[3].coordinate == (3,)
+        print([x.str(style='brackets')
+            for x in ctx.children[3].symbolic_space_domain])
+        assert space_domain_approx_eq(
+            ctx.children[3].symbolic_space_domain,
+            [RIF(0, 1), RIF(0, 1)],
+        )
+        chosen_child = ctx.children[3].children[2]
+        assert chosen_child.coordinate == (3, 2)
+        assert chosen_child.reach_level == 2
+        assert chosen_child.symbolic_coordinate == (3, 2)
+        print([x.str(style='brackets')
+            for x in chosen_child.symbolic_space_domain])
+        assert space_domain_approx_eq(
+            chosen_child.symbolic_space_domain,
+            [RIF(0.5, 1), RIF(0, 0.5)],
+        )
 
     @pytest.mark.slow
     def test_signal_gen(self, ringxy):  # NOQA
@@ -143,7 +159,7 @@ class TestContextSignal(object):
         odes = [-y, x]
         atomic = Atomic(x)
 
-        def signal_fn(r, _, mask=None):
+        def signal_fn(r, _1, _2, mask=None):
             return Atomic(x).signal(r)
 
         space_domain = [RIF(1, 2), RIF(3, 4)]
@@ -161,7 +177,7 @@ class TestContextSignal(object):
         observer = PolyObserver(R(atomic.p), reach,
             fprime=R(atomic.dpdt(odes, (x, y))),
             symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
+        ctx = ContextSignal(RIF(0, 5), 2, signal=signal_fn,
                             observer=observer)
         assert ctx.signal.approx_eq(expected, 0.1)
 
@@ -187,8 +203,9 @@ class TestContextSignal(object):
                                 Reach(odes, initials, 5, (0.001, 0.1),
                                       order=10),
                                 symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), space_domain, signal_fn,
+        ctx = ContextSignal(RIF(0, 5), 2, (3), signal=signal_fn,
                             observer=observer)
+        assert space_domain_approx_eq(ctx.space_domain, space_domain)
         print(ctx.signal)
         assert ctx.signal.approx_eq(expected, 0.1)
 

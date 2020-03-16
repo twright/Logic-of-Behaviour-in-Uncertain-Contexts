@@ -73,13 +73,19 @@ cdef class RestrictedObserver(PolyObserver):
                 print("recomputing flowpipe!")
                 self.reach = Reach(self.reach, space_domain)
                 self._init_stored_data()
+                self.recomputed = True
             assert self.reach.context_dim == len(space_domain),\
                 f"space_domain {repr(space_domain)} does not match context dimension {self.reach.context_dim}"
+            # This just converts the format to a C data structure
+            print("converting reachset")
             self.reach._convert_space_domain(&self.space_domain, space_domain)
 
             # Invalidate any composed polynomials for indeterminate intervals
+            # TODO: why this condition?
             if self.reach.successful:
                 self._invalidate_indeterminate_polys()
+        
+        # print(f"restricted space_domain={fintervals(self.space_domain)}")
 
 
     cdef object _invalidate_indeterminate_polys(RestrictedObserver self):

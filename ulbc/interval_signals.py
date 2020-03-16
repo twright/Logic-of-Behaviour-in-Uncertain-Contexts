@@ -9,6 +9,7 @@ from itertools import chain, takewhile
 import warnings
 import operator
 import instrument
+from typing import *
 
 from sage.all import RIF, region_plot
 from ulbc.interval_root_isolation import isolate_roots
@@ -95,21 +96,12 @@ def signal_given_bool_roots_single_seg(f_bool, roots, domain):
 
         if a < root.lower():
             J = RIF(a, root.lower())
-            # print("  J  = {}\nf(J) = {}".format(
-            #     RIF(J).str(style='brackets'),
-            #     RIF(f(J)).str(style='brackets')))
-            # if 0 not in RIF(f(I)):
-            with instrument.block(name="running f_bool"):
-                values += [(J, f_bool(J.center()))]
+            values += [(J, f_bool(J.center()))]
         a = min(root.upper(), domain.upper())
     b = domain.upper()
     J = RIF(a, b)
-    with instrument.block(name="running f_bool"):
-        res = f_bool(J.center())
+    res = f_bool(J.center())
     if res is not None:
-        # print("  J  = {}\nf(J) = {}".format(
-        #     RIF(J).str(style='brackets'),
-        #     RIF(f(J)).str(style='brackets')))
         values += [(J, res)]
     else:
         print("0 at {}".format(b))
@@ -387,9 +379,10 @@ class Signal(BaseSignal):
         # H[0, a] φ = ⋁_j (φ_j ∧ P[a, b] φ_j)
         # where φ = ⋁_j φ_j is the unitary decomposition of phi
         return self.to_mask_and().H(RIF(0, I.lower('RNDD')))
-        and_mask = self.to_mask_and()
-        return and_mask & and_mask.shift(I)
+        # and_mask = self.to_mask_and()
+        # return and_mask & and_mask.shift(I)
 
+#  : Optional[Mask]
     def with_mask(self, mask):
         values = (self.values if mask is None else
                   [(I.intersection(J), b)

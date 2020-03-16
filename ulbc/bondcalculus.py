@@ -4,6 +4,7 @@ import sage.all as sg
 from pathlib import Path
 import tempfile
 import random
+import itertools
 from flowstar.reachability import Reach
 from ulbc.interval_utils import fintervals, finterval
 from ulbc.symbolic import *
@@ -57,6 +58,15 @@ class System:
     @property
     def y0_ctx(self) -> List[Optional[sg.RIF]]:
         return self._y0_ctx
+
+    @property
+    def y0_composed(self) -> List[sg.RIF]:
+        return [
+            y0a + y0b if y0b else y0a
+            for (y0a, y0b)
+            in zip(self.y0,
+                   self.y0_ctx if self.y0_ctx else itertools.cycle([None]))
+        ]
 
     @property
     def PR(self):

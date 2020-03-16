@@ -485,10 +485,18 @@ class Atomic(Logic):
 
         return observer
 
-    def signal(self, reach: Reach, space_domain=None, mask=None, global_root_detection=False, two_pass_masks=False, **kwargs):
+    def signal_from_observer(self, observer,  global_root_detection=False, two_pass_masks=False, **kwargs):
+        return signal_from_observer(
+            observer,
+            RIF(0, observer.time - 1e-3),
+            verbosity=kwargs.get('verbosity', 0),
+            global_root_detection=global_root_detection,
+        )
+
+    def signal(self, reach: Reach, absolute_space_domain=None, symbolic_space_domain=None, mask=None, two_pass_masks=False, **kwargs):
         observer = self.observer(
             reach,
-            space_domain=space_domain,
+            space_domain=symbolic_space_domain,
             mask=mask,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
@@ -496,20 +504,29 @@ class Atomic(Logic):
 
         print(f"symbolic_composition={observer.symbolic_composition}, tentative_unpreconditioning={observer.tentative_unpreconditioning},two_pass_masks={two_pass_masks}")
 
-        return signal_from_observer(
+        return self.signal_from_observer(
             observer,
-            RIF(0, reach.time - 1e-3),
-            verbosity=kwargs.get('verbosity', 0),
-            global_root_detection=global_root_detection,
+            **kwargs
         )
 
-    def signal_fn(self, reach: Reach, space_domain, mask=None, **kwargs):
-        return self.signal(
-            reach,
-            space_domain=space_domain,
+    def signal_fn(self, observer, absolute_space_domain, symbolic_space_domain, mask=None, **kwargs):
+        str_abs_space_domain = [[sage.QQ(w)
+            for w in s.endpoints()]
+            for s in absolute_space_domain]
+        str_sym_space_domain = [[sage.QQ(w)
+            for w in s.endpoints()]
+            for s in symbolic_space_domain]
+        print("=== in signal_fn ===")
+        print(f"observer = {observer}")
+        print(f"absolute_space_domain = {str_abs_space_domain}")
+        print(f"symbolic_space_domain = {str_sym_space_domain}")
+        return self.signal_from_observer(
+            observer,
+            absolute_space_domain=absolute_space_domain,
+            symbolic_space_domain=symbolic_space_domain,
             mask=mask,
             **kwargs,
-        ).to_domain(RIF(0, RIF(0, reach.time - 1e-3)))
+        )
 
     def context_signal(self, reach: Reach, mask: Optional[Mask] = None,         
             restriction_method=RestrictionMethod.SYMBOLIC, **kwargs):
@@ -529,13 +546,18 @@ class Atomic(Logic):
         )
 
         # Generate preconditioned space domain of correct dimension
-        space_domain = preconditioned_space_domain(reach.context_dim)
+        # space_domain = preconditioned_space_domain(reach.context_dim)
 
         # Turn initials for a vector into a list
-        return ContextSignal(domain, space_domain,
-                             partial(self.signal_fn, **kwargs),
-                             observer=observer,
-                             ctx_mask=mask)
+        return ContextSignal(
+            domain,
+            reach.context_dim,
+            (),
+            signal=partial(self.signal_fn, **kwargs),
+            observer=observer,
+            top_level_domain=list(reach.system.y0_composed),
+            ctx_mask=mask
+        )
 
     def __repr__(self):
         return 'Atomic({})'.format(repr(self._p_raw))
@@ -679,8 +701,11 @@ class And(Logic):
             return self._signal_one_pass(reach, mask=mask, **kwargs)
 
     def context_signal(self, reach: Reach, mask: Optional[Mask] = None, **kwargs):
-        sig = true_context_signal(RIF(0, reach.time), list(reach.system.y0),
-                                  ctx_mask=mask)
+        sig = true_context_signal(RIF(0, reach.time),
+            # Not always true: what if only some dimensions need subdividing?
+            len(list(reach.system.y0)),
+            top_level_domain=list(reach.system.y0),
+            ctx_mask=mask)
         for t in self.terms:
             sig_mask = sig.to_mask_and() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.mask.pos):
