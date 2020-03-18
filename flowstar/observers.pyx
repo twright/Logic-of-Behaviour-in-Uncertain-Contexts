@@ -12,7 +12,6 @@ import contextlib
 
 import sage.all as sage
 from sage.ext.fast_callable import fast_callable
-from enum import IntEnum
 
 import instrument
 
@@ -38,18 +37,10 @@ from flowstar.modelParser cimport continuousProblem
 __all__ = ('RestrictedObserver', 'PolyObserver', 'RestrictionMethod')
 
 
-class RestrictionMethod(IntEnum):
-    """The method used for reachability on a restricted region of the flowpipe's
-    spatial domain."""
-    SYMBOLIC = 1
-    RECOMPUTE_FLOWPIPE = 2
-
-
 # noinspection PyUnreachableCode
 cdef class RestrictedObserver(PolyObserver):
     def __init__(RestrictedObserver self, PolyObserver p,
-                 list space_domain not None,
-                 restriction_method : RestrictionMethod=RestrictionMethod.SYMBOLIC):
+                 list space_domain not None):
         self.f = p.f
         self.fprime = p.fprime
         self.poly_f_fns = p.poly_f_fns
@@ -62,31 +53,29 @@ cdef class RestrictedObserver(PolyObserver):
         self.fprime_interval_fn = p.fprime_interval_fn
         self.mask = p.mask
         self.masked_regions = p.masked_regions
-        self.restriction_method = restriction_method
-        print(f"restriction_method = {restriction_method} in RestrictedObserver")
         if self.reach is not None:
             assert isinstance(self.reach, CReach)
-            print(f"self.reach.vars = {repr(self.reach.vars)}")
-            if (not self.reach.successful
-                or self.restriction_method
-                    == RestrictionMethod.RECOMPUTE_FLOWPIPE):
-                print("recomputing flowpipe!")
-                self.reach = Reach(self.reach, space_domain)
-                self._init_stored_data()
-                self.recomputed = True
             assert self.reach.context_dim == len(space_domain),\
                 f"space_domain {repr(space_domain)} does not match context dimension {self.reach.context_dim}"
             # This just converts the format to a C data structure
-            print("converting reachset")
+            self.py_space_domain = space_domain
             self.reach._convert_space_domain(&self.space_domain, space_domain)
 
             # Invalidate any composed polynomials for indeterminate intervals
-            # TODO: why this condition?
-            if self.reach.successful:
-                self._invalidate_indeterminate_polys()
-        
-        # print(f"restricted space_domain={fintervals(self.space_domain)}")
+            # Does this depend on the reach being successful, or freshly recomputed?
+            self._invalidate_indeterminate_polys()
 
+    def recompute_on_space_domain(self, space_domain) -> 'RestrictedObserver':
+        assert self.reach is not None
+
+        # Be careful, this method does not always make much sense
+        # for RestrictedObservers
+
+        # Restrict to physical space_domain
+        observer = super().recompute_on_space_domain(space_domain)
+
+        # Restrict to symbolic space_domain
+        return RestrictedObserver(observer, self.py_space_domain)
 
     cdef object _invalidate_indeterminate_polys(RestrictedObserver self):
         """If we restrict a PolyObserver, any cached composed polynomials
@@ -137,6 +126,13 @@ cdef class FunctionObserver:
     supports the combined functionality of all of its subclasses,
     baring a few details they must fill in.
     """
+
+    def recompute_on_space_domain(self, space_domain):
+        # Physically recompute flowpipe on a subspacedomain
+        raise NotImplementedError()
+
+    def restrict(self, space_domain) -> 'RestrictedObserver':
+        return RestrictedObserver(self, space_domain=space_domain)
 
     @property
     def global_manager(self):
@@ -569,6 +565,8 @@ cdef class FunctionObserver:
                 if not (f_domain.inf() <= 0 <= f_domain.sup()):
                     # Annoying code to make Cython allow assignment to a r-value
                     (&deref(cached_bool))[0] = optional[bint](f_domain.inf() > 0)
+                    # Check that we do not conflate unknown and false
+                    assert (f_domain.inf() > 0) or f_domain.sup() < 0
                 else:
                     self._post_retrieve_f(f_fn, fprime_fn,
                                           deref(poly_f_fn),
@@ -971,6 +969,21 @@ cdef class SageObserver(FunctionObserver):
         self.mask = mask
         self._init_stored_data()
 
+    def recompute_on_space_domain(self, space_domain) -> 'PolyObserver':
+        assert self.reach is not None
+
+        observer = SageObserver(
+            self.f,
+            # Do the recomputation
+            Reach(self.reach, space_domain),
+            fprime=self.fprime,
+            symbolic_composition=self.symbolic_composition,
+            tentative_unpreconditioning=self.tentative_unpreconditioning,
+            mask=self.mask,
+        )
+
+        return observer
+
     def with_mask(self, mask):
         from ulbc.signal_masks import Mask
 
@@ -994,12 +1007,10 @@ cdef class SageObserver(FunctionObserver):
         observer = SageObserver(
             f,
             self.reach,
-            # fprime=self.fprime,
             symbolic_composition=self.symbolic_composition,
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=self.mask,
         )
-        # observer.bools = self.bools
 
         return observer
 
@@ -1030,15 +1041,6 @@ cdef class PolyObserver(FunctionObserver):
             mask,
         ))
 
-        # This now works if fprime is passed explicitly
-        # (and, presumably, is also a polynomial)
-        # if (reach.system is not None
-        #     and reach.system.R == sage.SR
-        #     and fprime is None):
-        #     raise ValueError("PolyObserver can only be used with "
-        #         "non-polynomial systems when symbolic_composition "
-        #         "is enabled!")
-
         self.f = Poly(f)
         self.reach = reach
         if fprime is not None:
@@ -1057,6 +1059,20 @@ cdef class PolyObserver(FunctionObserver):
             self.fprime_interval_fn = poly_fn(self.fprime.c_poly)
         else:
             self.fprime_interval_fn = <interval_fn>NULL
+
+    def recompute_on_space_domain(self, space_domain) -> 'PolyObserver':
+        assert self.reach is not None
+
+        observer = PolyObserver(
+            self.f,
+            Reach(self.reach, space_domain),
+            fprime=self.fprime,
+            symbolic_composition=self.symbolic_composition,
+            tentative_unpreconditioning=self.tentative_unpreconditioning,
+            mask=self.mask,
+        )
+
+        return observer
 
     def with_mask(self, mask):
         from ulbc.signal_masks import Mask

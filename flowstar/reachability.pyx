@@ -674,6 +674,7 @@ cdef class CReach:
                         metric=self.instrumentor.metric):
                     self.precompose_taylor_models()
 
+
     cdef object _convert_space_domain(CReach self, vector[Interval] * res, space_domain=None):
         cdef Interval I
 

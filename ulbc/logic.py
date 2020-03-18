@@ -20,11 +20,11 @@ from flowstar.reachability import (Reach, FlowstarFailedException, InitialForm)
 import ulbc.bondcalculus as bc
 from ulbc.symbolic import RelationConverter, is_relation
 
-from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver,
-    RestrictionMethod)
+from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver)
 from ulbc.context_signals import (ContextSignal,
                                   true_context_signal, false_context_signal,
-                                  preconditioned_space_domain)
+                                  preconditioned_space_domain,
+                                  RestrictionMethod)
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer, masked_ctx)
 from ulbc.interval_utils import finterval
@@ -478,10 +478,7 @@ class Atomic(Logic):
         if space_domain is not None:
             # Due to Cython's stricter types, space_domain needs to be a
             # list rather than a list like object such a sage's vectors
-            observer = RestrictedObserver(observer, list(space_domain),
-                restriction_method=restriction_method
-                    if restriction_method
-                    else RestrictionMethod.SYMBOLIC)
+            observer = RestrictedObserver(observer, list(space_domain)) 
 
         return observer
 

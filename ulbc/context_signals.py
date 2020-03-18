@@ -4,6 +4,8 @@ from __future__ import (division,
 
 from functools import reduce, partial
 import itertools
+from typing import *
+from enum import IntEnum
 
 import sage.all as sage
 # from builtins import *  # NOQA
@@ -14,9 +16,15 @@ from ulbc.interval_signals import (true_signal, false_signal, BaseSignal,
                                    Signal)
 from ulbc.signal_masks import Mask
 from ulbc.interval_utils import finterval, fintervals as space_domain_str
-from typing import *
 
-__all__ = ('true_context_signal', 'false_context_signal', 'ContextSignal', 'SignalTree')
+__all__ = ('true_context_signal', 'false_context_signal', 'ContextSignal', 'SignalTree', 'RestrictionMethod')
+
+
+class RestrictionMethod(IntEnum):
+    """The method used for reachability on a restricted region of the flowpipe's
+    spatial domain."""
+    SYMBOLIC = 1
+    RECOMPUTE_FLOWPIPE = 2
 
 
 def base_context_signal(J, dim, coordinate, signal, reach_level=0, top_level_domain=None, ctx_mask=None):
@@ -141,6 +149,7 @@ class SignalTree(object):
         self._signal = signal
         assert top_level_domain is None or isinstance(top_level_domain, list)
         self._top_level_domain = top_level_domain
+        assert isinstance(coordinate, tuple)
         self._coordinate = coordinate
         # print(f"ContextSignal with coord={coordinate} and children={children}")
         self._children = (
@@ -220,10 +229,6 @@ class SignalTree(object):
                 2, 2,
                 [cs[0], cs[2], cs[1], cs[3]],
             )
-            # return sage.block_matrix(2, 2,
-            #                          [c.histogram2d(n - 1)
-            #                           for c in self.children]) \
-            #     .transpose()
 
     def plot_histogram2d(self, n : int):
         from matplotlib.colors import LinearSegmentedColormap
@@ -304,6 +309,7 @@ class ContextSignal(SignalTree):
                         Callable[[Any, List[RIF], Mask], Signal],
                         None]=None,
         reach_level=0,
+        restriction_method=RestrictionMethod.SYMBOLIC,
         top_level_domain=None,
         children=None, observer=None, ctx_mask=None):
         from ulbc.context_masks import ContextMask
@@ -312,16 +318,9 @@ class ContextSignal(SignalTree):
         assert ctx_mask is None or isinstance(ctx_mask, ContextMask),\
             'ctx_mask = {}'.format(ctx_mask)
 
-        # Rename 'signal' from super to 'signal_fn'
-        signal_fn, signal = signal, None
+        print(f"creating ContextSignal with coord={coordinate} and signal = {signal}")
 
-        print(f"creating ContextSignal with coord={coordinate} and signal_fn={signal_fn} and signal = {signal}")
-
-        # if observer is not None and observer.reach is not None and top_level_domain is None:
-        #     top_level_domain = observer
-
-        # We call parent __init__ a first time with the 
-        # arguments we know so far
+        # We call parent __init__ with the arguments we know so far
         super(ContextSignal, self).__init__(
             domain,
             dimension,
@@ -332,41 +331,55 @@ class ContextSignal(SignalTree):
             children=None,
         )
 
+        self._restriction_method = restriction_method
+
         # Automatically restrict observer to space domain
         if observer is not None:
-            observer = RestrictedObserver(
-                observer,
-                space_domain=self.symbolic_space_domain,
+            if (observer.reach is not None
+                and (
+                    not observer.reach.successful
+                    or self.restriction_method
+                        == RestrictionMethod.RECOMPUTE_FLOWPIPE)
+                ):
+                # Reset reach_level to 0 since the reachset will be computed
+                # at this level
+                self._reach_level = 0
+                # Flowpipe recomputation
+                observer = observer.recompute_on_subdomain(
+                    self.absolute_space_domain,
+                )
+
+            # Symbolic restriction
+            observer = observer.restrict(
+                self.symbolic_space_domain,
             )
 
-        if isinstance(signal_fn, Signal):
-            signal = signal_fn
-        elif signal_fn is not None:
+        # Determine signal
+        if isinstance(signal, Signal):
+            self._signal = signal
+        elif signal is not None:
             # assert observer is not None
             mask = ctx_mask.mask if ctx_mask is not None else None
-            signal = signal_fn(
+            self._signal= signal(
                 observer,
                 self.absolute_space_domain,
                 self.symbolic_space_domain,
                 mask,
             )
-            if observer is None or observer.recomputed:
-                # Set reach level to 0 regardless if we are recomputing on this level
-                # Or if observer is None (in this case we are just
-                # reusing a static signal)
-                self._reach_level = 0
         else:
-            signal = None
+            self._signal = None
 
-        if children is None and signal_fn is not None:
-            children = (
+        # Generate children
+        if children is None and signal is not None:
+            self._children = ChildIterator(
                 ContextSignal(
                     domain,
                     dimension,
                     self.coordinate + (coord,),
-            # Important! This is the signal_fn, not the concrete signal we have
-            # computed at just this level!
-                    signal=signal_fn,
+                    # Important! This is the signal function, not the
+                    # concrete signal we have computed at just
+                    # this level!
+                    signal=signal,
                     reach_level=self.reach_level + 1,
                     # Top level domain does not change for children
                     top_level_domain=top_level_domain,
@@ -381,37 +394,17 @@ class ContextSignal(SignalTree):
                        else itertools.repeat(None))
             )
 
-        # We call parent __init__ a second time now we know the children and signal
-        super(ContextSignal, self).__init__(
-            domain,
-            dimension,
-            coordinate,
-            reach_level=reach_level,
-            signal=signal,
-            top_level_domain=top_level_domain,
-            children=children,
-        )
-
-    # def with_parent(self, parent : 'ContextSignal') -> 'ContextSignal':
-    #     # assert self.domain == parent.domain
-    #     assert self.dimension == parent.dimension
-    #     assert self.reach_level != 0 or parent.reach_level == 0
-    #     print(f"to parent={parent.coordinate} attaching child={self.coordinate}")
-    #     return self.__class__(
-    #         self.domain,
-    #         self.dimension,
-    #         parent.coordinate + self.coordinate,
-    #         parent.reach_level + 1
-    #             if self.reach_level == 0
-    #             else parent.reach_level,
-    #         signal=self.signal,
-    #         children=self.children,
-    #     )
+    @property
+    def restriction_method(self) -> RestrictionMethod:
+        return self._restriction_method
 
     def __repr__(self):
-        return 'ContextSignal({}, <...>, children={})'.format(
-            finterval(self.domain), space_domain_str(self.space_domain),
-            self.children)
+        return 'ContextSignal({}, {}, {}, children={})'.format(
+            finterval(self.domain),
+            space_domain_str(self.absolute_space_domain),
+            space_domain_str(self.symbolic_space_domain),
+            self.children,
+        )
 
     def refined_signal(self, n):
         if n == 0:
@@ -421,8 +414,6 @@ class ContextSignal(SignalTree):
                           (c.refined_signal(n - 1) for c in self.children))
         else:
             raise ValueError('n should be a possible integer')
-        # return p.show(gridlines=(gridlines, gridlines),
-        #               tick_formatter=(xformatter, yformatter))
 
     def to_mask_and(self):
         from ulbc.context_masks import ContextMask

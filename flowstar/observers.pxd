@@ -94,6 +94,7 @@ cdef class SageObserver(FunctionObserver):
 
 cdef class RestrictedObserver(PolyObserver):
     cdef vector[Interval] space_domain
+    cdef readonly object py_space_domain # Python version of space domain
     cdef readonly object restriction_method 
     cdef readonly bint recomputed 
 
