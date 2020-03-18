@@ -151,7 +151,6 @@ class SignalTree(object):
         self._top_level_domain = top_level_domain
         assert isinstance(coordinate, tuple)
         self._coordinate = coordinate
-        # print(f"ContextSignal with coord={coordinate} and children={children}")
         self._children = (
             ChildIterator(children)
             if children is not None
@@ -170,7 +169,7 @@ class SignalTree(object):
     @property
     def absolute_coordinate(self) -> Optional[List[int]]:
         """Coordinate of reach computation."""
-        return self.coordinate[:-self.reach_level]
+        return self.coordinate[:-self.reach_level if self.reach_level > 0 else None]
 
     @property
     def reach_level(self) -> int:
@@ -336,6 +335,7 @@ class ContextSignal(SignalTree):
         # Automatically restrict observer to space domain
         if observer is not None:
             if (observer.reach is not None
+                and self.coordinate != ()
                 and (
                     not observer.reach.successful
                     or self.restriction_method
@@ -345,7 +345,7 @@ class ContextSignal(SignalTree):
                 # at this level
                 self._reach_level = 0
                 # Flowpipe recomputation
-                observer = observer.recompute_on_subdomain(
+                observer = observer.recompute_on_space_domain(
                     self.absolute_space_domain,
                 )
 
@@ -383,6 +383,8 @@ class ContextSignal(SignalTree):
                     reach_level=self.reach_level + 1,
                     # Top level domain does not change for children
                     top_level_domain=top_level_domain,
+                    # Pass down the restriction method
+                    restriction_method=restriction_method,
                     # Restricted in child constructor
                     observer=observer
                     if observer is not None
@@ -393,6 +395,10 @@ class ContextSignal(SignalTree):
                        if ctx_mask is not None
                        else itertools.repeat(None))
             )
+        elif children is None:
+            self._children = None
+        else:
+            self._children = ChildIterator(children)
 
     @property
     def restriction_method(self) -> RestrictionMethod:
@@ -404,6 +410,31 @@ class ContextSignal(SignalTree):
             space_domain_str(self.absolute_space_domain),
             space_domain_str(self.symbolic_space_domain),
             self.children,
+        )
+
+    def signal_map(self, f):
+        return self.__class__(
+            self.domain,
+            self.dimension,
+            self.coordinate,
+            signal=f(self.signal),
+            reach_level=self.reach_level,
+            top_level_domain=self.top_level_domain,
+            restriction_method=self.restriction_method,
+            children=self.children.map(lambda c: c.signal_map(f)),
+        )
+
+    def signal_zip_with(self, f, other):
+        return self.__class__(
+            self.domain,
+            self.dimension,
+            self.coordinate,
+            signal=f(self.signal, other.signal),
+            reach_level=self.reach_level,
+            restriction_method=self.restriction_method,
+            children=self.children.zip_with(
+                lambda c1, c2: c1.signal_zip_with(f, c2),
+                other.children),
         )
 
     def refined_signal(self, n):

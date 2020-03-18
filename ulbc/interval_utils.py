@@ -4,7 +4,7 @@ from __future__ import division, print_function, annotations
 # from builtins import *  # NOQA
 
 from functools import partial
-from sage.all import RIF
+from sage.all import RIF, QQ
 from typing import Optional
 
 
@@ -55,8 +55,17 @@ def finterval(I):
     if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
         return str(ra) if ra == rb else '[{} .. {}]'.format(ra, rb)
     else:
+        # return f"[{QQ(I.lower())}..{QQ(I.upper())}]"
         return I.str(style='brackets')
 
+def fqqinterval(I):
+    a, b = I.endpoints()
+    ra, rb = a.floor(), b.ceil()
+    if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
+        return str(ra) if ra == rb else '[{} .. {}]'.format(ra, rb)
+    else:
+        return f"[{QQ(I.lower())} .. {QQ(I.upper())}]"
+        # return I.str(style='brackets')
 
 def intervals_approx_eq(xs, ys, epsilon=1e-3):
     xs = list(map(RIF, xs))
@@ -77,6 +86,10 @@ def int_dist(I, J):
 
 def fintervals(space_domain):
     return '[{}]'.format(', '.join(map(finterval, space_domain)))
+
+
+def fqqintervals(space_domain):
+    return '[{}]'.format(', '.join(map(fqqinterval, space_domain)))
 
 
 def int_sorted(kxs):

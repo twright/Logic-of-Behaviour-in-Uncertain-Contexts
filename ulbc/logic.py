@@ -50,7 +50,6 @@ class Logic(metaclass=ABCMeta):
         if len(args) == 3:
             odes, initials, duration = args
             R, x = odes[0].parent().objgens()
-            # print(f"R = {R}")
             system = System(R, x, initials, odes)
         elif len(args) == 2:
             system, duration = args
@@ -75,11 +74,8 @@ class Logic(metaclass=ABCMeta):
         system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
 
         if precompose_systems:
-            # t0 = time.time()
             with instrument.block(name="Precomposing Contexts"):
                 composed = self.with_system(system)
-            # t1 = time.time()
-            # print(f"Precomposed systems in {t1 - t0} sec")
             return composed.signal(duration, **kwargs)
         else:
             return self._signal_for_system(system, duration,
@@ -94,13 +90,13 @@ class Logic(metaclass=ABCMeta):
                 # Run for a little extra time to make sure endpoint of
                 # interval is strictly inside time-domain of reachset
                 # accounting for rounding errors and temporal quantifiers
-                self.duration + duration + 1e-3,
+                self.duration + duration + 2e-3,
                 **kwargs
             )
 
         # Decide on an initial mask.
         if mask is None and use_masks:
-            domain = RIF(0, duration + 1e-3)
+            domain = RIF(0, duration + 2e-3)
             mask = Mask(domain, [domain])
 
         # Check that flowstar ran for the whole timeframe
@@ -114,12 +110,9 @@ class Logic(metaclass=ABCMeta):
         print("Computed {} flowpipes in {} sec".format(
             reach.num_flowpipes, t1 - t0))
         reach.prepare()
-        t2 = time.perf_counter()
         with instrument.block(name=f"Monitoring Signal for {str(self)}"):
             res = self.signal(reach, mask=mask, **kwargs
                             ).to_domain(RIF(0, duration))
-        t3 = time.perf_counter()
-        print("Monitored signal in {} sec".format(t3 - t2))
         reach.instrumentor.print()
         return res
 
@@ -142,7 +135,7 @@ class Logic(metaclass=ABCMeta):
 
         assert 'mask' not in kwargs
 
-        full_duration = duration + 1e-3
+        full_duration = duration + 2e-3
 
         # Generate a space domain of the correct dimension
         # in terms of the preconditioned variables
@@ -170,13 +163,11 @@ class Logic(metaclass=ABCMeta):
                 reach.num_flowpipes, t1 - t0))
             reach.prepare()
 
-        t2 = time.time()
-        res = self.context_signal(reach,
-                                  mask=mask,
-                                  restriction_method=restriction_method,
-                                  **kwargs)
-        t3 = time.time()
-        print("Monitored initial signal {} sec".format(t3 - t2))
+        with instrument.block(name="Monitoring initial signal"):
+            res = self.context_signal(reach,
+                                    mask=mask,
+                                    restriction_method=restriction_method,
+                                    **kwargs)
 
         return res.to_domain(RIF(0, duration))
 
@@ -485,7 +476,7 @@ class Atomic(Logic):
     def signal_from_observer(self, observer,  global_root_detection=False, two_pass_masks=False, **kwargs):
         return signal_from_observer(
             observer,
-            RIF(0, observer.time - 1e-3),
+            RIF(0, observer.time - 2e-3),
             verbosity=kwargs.get('verbosity', 0),
             global_root_detection=global_root_detection,
         )
@@ -527,7 +518,7 @@ class Atomic(Logic):
 
     def context_signal(self, reach: Reach, mask: Optional[Mask] = None,         
             restriction_method=RestrictionMethod.SYMBOLIC, **kwargs):
-        domain = RIF(0, reach.time - 1e-3)
+        domain = RIF(0, reach.time - 2e-3)
         observer = self.observer(
             reach,
             # We should not pass in a mask here, since the mask is really
@@ -536,7 +527,6 @@ class Atomic(Logic):
             # mask=mask,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
-            restriction_method=restriction_method,
             # Should already have been passed to Reach
             # by context_signal_for_system
             # initial_form=InitialForm.SPLIT_VARS,
@@ -552,6 +542,7 @@ class Atomic(Logic):
             (),
             signal=partial(self.signal_fn, **kwargs),
             observer=observer,
+            restriction_method=restriction_method,
             top_level_domain=list(reach.system.y0_composed),
             ctx_mask=mask
         )
@@ -1071,7 +1062,7 @@ class Context(Logic, metaclass=ABCMeta):
         # in this case we should recombine the context and static
         # variables
         kwargs['initial_form'] = InitialForm.COMBINED
-        sig = self.phi.signal_for_system(system, 1e-3, use_masks=use_masks,
+        sig = self.phi.signal_for_system(system, 2e-3, use_masks=use_masks,
                                          **kwargs)
         if kwargs.get('verbosity', 0) >= 3:
             print('sig    =', sig)
@@ -1083,9 +1074,11 @@ class Context(Logic, metaclass=ABCMeta):
         # TODO: mask clearly needs defining!
         # mask=mask
         # TODO context signal on top of context signals is not currently sound
+        # (this may now be correct)
+        # TODO restriction method
         if 'initial_form' not in kwargs:
             kwargs['initial_form'] = InitialForm.SPLIT_VARS
-        ctx_sig = self.phi.context_signal_for_system(system, 1e-3,
+        ctx_sig = self.phi.context_signal_for_system(system, 2e-3,
                                                      use_masks=use_masks,
                                                      **kwargs)
         sig = ctx_sig.refined_signal(refine)
@@ -1263,6 +1256,7 @@ class D(Context):
         )
 
     def context_signal(self, reach: Reach, refine=0, **kwargs):
+        # TODO: fix for use with restriction method
         assert reach.system is not None
         space_domain = preconditioned_space_domain(reach.context_dim)
         # This does not actually subdivide the differential context,

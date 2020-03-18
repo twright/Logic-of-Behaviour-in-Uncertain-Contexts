@@ -3,6 +3,7 @@
 from sage.all import RIF
 import pytest
 import sage.all as sg
+from functools import partial
 
 from ulbc.interval_signals import Signal
 from ulbc.context_signals import (ContextSignal,
@@ -10,12 +11,13 @@ from ulbc.context_signals import (ContextSignal,
                                   gen_sub_space_domains,
                                   true_context_signal,
                                   ChildIterator,
-                                  preconditioned_space_domain)
+                                  preconditioned_space_domain,
+                                  RestrictionMethod)
 from flowstar.reachability import Reach
 from flowstar.observers import PolyObserver
 from flowstar.tests.test_reachability import ringxy, odes  # NOQA
 from ulbc.logic import Atomic
-from ulbc.interval_utils import finterval, int_dist, int_sorted
+from ulbc.interval_utils import finterval, int_dist, int_sorted, fqqintervals
 from ulbc.bondcalculus import System
 # from flowstar.interval import int_dist
 
@@ -48,8 +50,8 @@ def ctx_dicts_approx_eq(xs, ys, epsilon=1e-3):
 
 
 def space_domain_approx_eq(xs, ys, epsilon=1e-3):
-    print('xs = {}\nys = {}'.format(list(map(finterval, xs)),
-                                    list(map(finterval, ys))))
+    print('xs = {}\nys = {}'.format(fqqintervals(xs),
+                                    fqqintervals(ys)))
     return (len(xs) == len(ys)
             and all(int_dist(x, y) <= epsilon for x, y in zip(xs, ys)))
 
@@ -58,6 +60,10 @@ def space_domains_approx_eq(xs, ys, epsilon=1e-3):
     return (len(xs) == len(ys)
             and all(space_domain_approx_eq(x, y, epsilon)
                     for x, y in zip(xs, ys)))
+
+
+def signal_fn(prop, r, absolute_space_domain, symbolic_space_domain, mask=None):
+    return prop.signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
 
 
 class TestCtxToSpaceDomain(object):
@@ -177,8 +183,9 @@ class TestContextSignal(object):
         observer = PolyObserver(R(atomic.p), reach,
             fprime=R(atomic.dpdt(odes, (x, y))),
             symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), 2, signal=signal_fn,
-                            observer=observer)
+        ctx = ContextSignal(RIF(0, 5), 2,
+            signal=signal_fn,
+            observer=observer)
         assert ctx.signal.approx_eq(expected, 0.1)
 
     @pytest.mark.slow
@@ -186,9 +193,6 @@ class TestContextSignal(object):
     def test_signal_gen_restricted_context(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
-
-        def signal_fn(r, absolute_space_domain, symbolic_space_domain, mask=None):
-            return atomic.signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
 
         # space_domain = [RIF(1, 1.5), RIF(3.5, 3.75)]
         space_domain = [RIF(-1, 0), RIF(0, 0.5)]
@@ -204,22 +208,77 @@ class TestContextSignal(object):
                                 Reach(odes, initials, 5, (0.001, 0.1),
                                       order=10),
                                 symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), 2, (3,), signal=signal_fn,
-                            observer=observer)
+        ctx = ContextSignal(RIF(0, 5), 2, (3,),
+            signal=partial(signal_fn, atomic),
+            observer=observer)
         assert space_domain_approx_eq(ctx.symbolic_space_domain, space_domain)
         print(ctx.signal)
         assert ctx.signal.approx_eq(expected, 0.1)
+
+    @pytest.mark.slow
+    def test_restricted_context_symbolic_vs_manual(self, ringxy, odes):  # NOQA
+        R, (x, y) = ringxy
+        atomic = Atomic(x)
+
+        space_domain = [RIF(1.5, 3), RIF(3, 3.25)]
+        symbolic_space_domain = [RIF(1/2, 1), RIF(-1, -1/2)]
+        initials = [RIF(1, 2), RIF(3, 4)]
+        expected = atomic.signal_for_system(
+            odes, space_domain, 5, step=(0.001, 0.1), order=10,
+        )
+        # reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
+        observer = PolyObserver(R(atomic.p),
+                                Reach(odes, initials, 5 + 2e-3, (0.001, 0.1),
+                                      order=10),
+                                symbolic_composition=False)
+        ctx = ContextSignal(RIF(0, 5), 2, (),
+            signal=partial(signal_fn, atomic),
+            observer=observer,
+            restriction_method=RestrictionMethod.SYMBOLIC)
+        child = ctx.children[2].children[2]
+        assert space_domain_approx_eq(child.symbolic_space_domain, symbolic_space_domain)
+        print(ctx.signal)
+        assert child.signal.approx_eq(expected, 0.5)
+
+    @pytest.mark.slow
+    def test_restricted_context_recompute_flowpipe(self, ringxy, odes):  # NOQA
+        R, (x, y) = ringxy
+        atomic = Atomic(x)
+
+        space_domain = [RIF(1.75, 2), RIF(3, 3.25)]
+        # space_domain = [RIF(-1, 0), RIF(0, 0.5)]
+        initials = [RIF(1, 2), RIF(3, 4)]
+        expected = atomic.signal_for_system(
+            odes, space_domain, 5, step=0.01, order=10,
+        )
+        # reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
+        observer = PolyObserver(R(atomic.p),
+                                Reach(odes, space_domain, 5 + 2e-3, 0.01,
+                                      order=10),
+                                symbolic_composition=False)
+        ctx = ContextSignal(RIF(0, 5), 2,
+            signal=partial(signal_fn, atomic),
+            observer=observer,
+            top_level_domain=initials,
+            restriction_method=RestrictionMethod.RECOMPUTE_FLOWPIPE)
+        child = ctx.children[2].children[2]
+        assert ctx.reach_level == 0
+        assert ctx.children[2].reach_level == 0
+        assert child.reach_level == 0
+        print(child.coordinate)
+        assert child.coordinate == (2, 2)
+        assert child.absolute_coordinate == (2, 2)
+        assert space_domain_approx_eq(child.absolute_space_domain, space_domain)
+        print(child.signal)
+        # TODO: why do these not agree better: they should be almost exactly the same!
+        assert child.signal.approx_eq(expected, 0.2), \
+            f"expected equal:\n{child.signal}\n{expected}"
 
     @pytest.mark.slow
     def test_signal_restricted_via_children(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
-        def signal_fn(r, absolute_space_domain, symbolic_space_domain, mask=None):
-            return Atomic(x).signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
-
-        # space_domain = [RIF(1, 2), RIF(3, 4)]
-        # space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
             RIF(0, 5),
@@ -229,8 +288,9 @@ class TestContextSignal(object):
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p), reach, symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), 2, signal=signal_fn,
-                            observer=observer)
+        ctx = ContextSignal(RIF(0, 5), 2,
+            signal=partial(signal_fn, atomic),
+            observer=observer)
         child_context_sig = ctx.children[3]
         # assert space_domain_approx_eq(ctx.sub_space_domains[3],
         #                               [RIF(0, 1), RIF(0, 1)])
@@ -242,10 +302,6 @@ class TestContextSignal(object):
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
-        def signal_fn(r, absolute_space_domain, symbolic_space_domain, mask=None):
-            return Atomic(x).signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
-
-        # space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
             RIF(0, 5),
@@ -256,8 +312,9 @@ class TestContextSignal(object):
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p), reach,
             symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), 2, signal=signal_fn,
-                            observer=observer)
+        ctx = ContextSignal(RIF(0, 5), 2,
+            signal=partial(signal_fn, atomic),
+            observer=observer)
         # assert space_domain_approx_eq(ctx.sub_space_domains[3],
         #                               [RIF(0, 1), RIF(0, 1)])
         assert space_domain_approx_eq(
@@ -278,24 +335,19 @@ class TestContextSignal(object):
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
-        def signal_fn(r, absolute_space_domain, symbolic_space_domain, mask=None):
-            return Atomic(x).signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
-
         initials = [RIF(1, 2), RIF(3, 4)]
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p), reach,
             symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), 2, signal=signal_fn,
-                            observer=observer)
+        ctx = ContextSignal(RIF(0, 5), 2,
+            signal=partial(signal_fn, atomic),
+            observer=observer)
         assert ctx.refined_signal(0).approx_eq(ctx.signal, 0.01)
 
     @pytest.mark.slow
     def test_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
-
-        def signal_fn(r, absolute_space_domain, symbolic_space_domain, mask=None):
-            return Atomic(x).signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
 
         # space_domain = preconditioned_space_domain(2)
         initials = [RIF(1, 2), RIF(3, 4)]
@@ -308,8 +360,9 @@ class TestContextSignal(object):
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p), reach,
             symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), 2, signal=signal_fn,
-                            observer=observer)
+        ctx = ContextSignal(RIF(0, 5), 2,
+            signal=partial(signal_fn, atomic),
+            observer=observer)
         print(ctx.refined_signal(1))
         assert ctx.refined_signal(1).approx_eq(expected, 0.01)
 
@@ -317,9 +370,6 @@ class TestContextSignal(object):
     def test_further_refined_signal(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
-
-        def signal_fn(r, absolute_space_domain, symbolic_space_domain, mask=None):
-            return Atomic(x).signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
 
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
@@ -330,8 +380,9 @@ class TestContextSignal(object):
         )
         reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p), reach, symbolic_composition=False)
-        ctx = ContextSignal(RIF(0, 5), 2, signal=signal_fn,
-                            observer=observer)
+        ctx = ContextSignal(RIF(0, 5), 2,
+            signal=partial(signal_fn, atomic),
+            observer=observer)
         for c in ctx.children:
             print(c.refined_signal(1))
         print(ctx.children[0].refined_signal(1)
