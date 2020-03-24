@@ -24,7 +24,8 @@ from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver)
 from ulbc.context_signals import (ContextSignal,
                                   true_context_signal, false_context_signal,
                                   preconditioned_space_domain,
-                                  RestrictionMethod)
+                                  RestrictionMethod,
+                                  ReachTree)
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer, masked_ctx)
 from ulbc.interval_utils import finterval
@@ -140,7 +141,7 @@ class Logic(metaclass=ABCMeta):
         # Generate a space domain of the correct dimension
         # in terms of the preconditioned variables
         # TODO: is this the correct number of variables
-        space_domain = preconditioned_space_domain(len(system.y0))
+        # space_domain = preconditioned_space_domain(len(system.y0))
 
         if use_masks and mask is None:
             mask = true_context_mask(RIF(0, full_duration), space_domain)
@@ -148,27 +149,28 @@ class Logic(metaclass=ABCMeta):
         if 'initial_form' not in kwargs:
             kwargs['initial_form'] = InitialForm.SPLIT_VARS
 
-        # This may or may not actually succeed!
-        reach = system.reach(
-            # Run for a little extra time to account for rounding
-            # errors and temporal quantifiers
-            self.duration + full_duration,
-            **kwargs
-        )
+        # Run for a little extra time to account for rounding
+        # errors and temporal quantifiers
+        reach_duration = self.duration + full_duration
 
-        t0 = time.time()
-        if reach.ran and reach.result <= 3:
-            t1 = time.time()
-            print("Computed {} flowpipes in {} sec".format(
-                reach.num_flowpipes, t1 - t0))
-            reach.prepare()
+        def reach_fn(space_domain):
+            return system.with_y0(space_domain).reach(
+                reach_duration,
+                **kwargs
+            )
+            # TODO: Do we need to call reach.prepare() ?
 
         with instrument.block(name="Monitoring initial signal"):
-            res = self.context_signal(reach,
-                                    mask=mask,
-                                    restriction_method=restriction_method,
-                                    **kwargs)
+            print("==> calling context signal")
+            res = self.context_signal(
+                ReachTree(duration, len(system.y0),
+                    list(system.y0), reach_fn, system=system),
+                mask=mask,
+                restriction_method=restriction_method,
+                **kwargs,
+            )
 
+        print("==> calling to_domain")
         return res.to_domain(RIF(0, duration))
 
     def numerical_signal_for_system(self, odes, initials, duration):
@@ -289,7 +291,7 @@ class LogicWithSystem:
         return self.phi.signal_for_system(self.system, duration, **kwargs)
 
     def signal_for_system(self, system: System, duration: float, **kwargs):
-        return self.with_system(system).signal(duration, **kwargs)
+        return self.with_system(system).signal(duration + 2e-3, **kwargs).to_domain(RIF(0, duration))
 
     def bstr(self, _):
         return repr(self)
@@ -476,7 +478,9 @@ class Atomic(Logic):
     def signal_from_observer(self, observer,  global_root_detection=False, two_pass_masks=False, **kwargs):
         return signal_from_observer(
             observer,
-            RIF(0, observer.time - 2e-3),
+            RIF(0, observer.time),
+            # It should only be at the top level we trim the time domain
+            # RIF(0, observer.time - 2e-3),
             verbosity=kwargs.get('verbosity', 0),
             global_root_detection=global_root_detection,
         )
@@ -497,53 +501,58 @@ class Atomic(Logic):
             **kwargs
         )
 
-    def signal_fn(self, observer, absolute_space_domain, symbolic_space_domain, mask=None, **kwargs):
-        str_abs_space_domain = [[sage.QQ(w)
-            for w in s.endpoints()]
-            for s in absolute_space_domain]
-        str_sym_space_domain = [[sage.QQ(w)
-            for w in s.endpoints()]
-            for s in symbolic_space_domain]
+    def signal_fn(self, _, observer, mask=None, **kwargs):
+        # str_abs_space_domain = [[sage.QQ(w)
+        #     for w in s.endpoints()]
+        #     for s in absolute_space_domain]
+        # str_sym_space_domain = [[sage.QQ(w)
+        #     for w in s.endpoints()]
+        #     for s in symbolic_space_domain]
         print("=== in signal_fn ===")
         print(f"observer = {observer}")
-        print(f"absolute_space_domain = {str_abs_space_domain}")
-        print(f"symbolic_space_domain = {str_sym_space_domain}")
+        # print(f"absolute_space_domain = {str_abs_space_domain}")
+        # print(f"symbolic_space_domain = {str_sym_space_domain}")
         return self.signal_from_observer(
             observer,
-            absolute_space_domain=absolute_space_domain,
-            symbolic_space_domain=symbolic_space_domain,
+            # absolute_space_domain=absolute_space_domain,
+            # symbolic_space_domain=symbolic_space_domain,
             mask=mask,
             **kwargs,
         )
 
-    def context_signal(self, reach: Reach, mask: Optional[Mask] = None,         
+    # reach should be a reach tree
+    def context_signal(self, reach_tree, mask: Optional[Mask] = None,         
             restriction_method=RestrictionMethod.SYMBOLIC, **kwargs):
-        domain = RIF(0, reach.time - 2e-3)
-        observer = self.observer(
-            reach,
-            # We should not pass in a mask here, since the mask is really
-            # a context mask, which will be applied inside ContextSignal
-            # as we move down the tree
-            # mask=mask,
+        observer_fn = partial(self.observer,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
-            # Should already have been passed to Reach
-            # by context_signal_for_system
-            # initial_form=InitialForm.SPLIT_VARS,
         )
+        #  self.observer(
+        #     reach,
+        #     # We should not pass in a mask here, since the mask is really
+        #     # a context mask, which will be applied inside ContextSignal
+        #     # as we move down the tree
+        #     # mask=mask,
+        #     symbolic_composition=kwargs.get('symbolic_composition', False),
+        #     tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
+        #     # Should already have been passed to Reach
+        #     # by context_signal_for_system
+        #     # initial_form=InitialForm.SPLIT_VARS,
+        # )
 
         # Generate preconditioned space domain of correct dimension
         # space_domain = preconditioned_space_domain(reach.context_dim)
 
         # Turn initials for a vector into a list
         return ContextSignal(
-            domain,
-            reach.context_dim,
+            reach_tree.time_domain,
+            reach_tree.dim,
             (),
+            reach_tree=reach_tree,
             signal=partial(self.signal_fn, **kwargs),
-            observer=observer,
+            observer_fn=observer_fn,
             restriction_method=restriction_method,
-            top_level_domain=list(reach.system.y0_composed),
+            top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask
         )
 
@@ -688,19 +697,19 @@ class And(Logic):
         else:
             return self._signal_one_pass(reach, mask=mask, **kwargs)
 
-    def context_signal(self, reach: Reach, mask: Optional[Mask] = None, **kwargs):
+    def context_signal(self, reach_tree: ReachTree, mask: Optional[Mask] = None, **kwargs):
         sig = true_context_signal(
-            RIF(0, reach.time),
+            reach_tree.time_domain,
             # Do we get the domain subdivision right?
-            reach.context_dim,
-            top_level_domain=list(reach.system.y0_composed),
+            reach_tree.dim,
+            top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask,
         )
         for t in self.terms:
             sig_mask = sig.to_mask_and() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.mask.pos):
                 return sig
-            sig &= t.context_signal(reach,
+            sig &= t.context_signal(reach_tree,
                                     ctx_mask=sig_mask, **kwargs)
         return sig
 
@@ -838,18 +847,20 @@ class Or(Logic):
         else:
             return self._signal_one_pass(reach, mask=mask, **kwargs)
 
-    def context_signal(self, reach: Reach, mask=None, **kwargs):
+    def context_signal(self, reach_tree: ReachTree, mask: Optional[Mask] = None, **kwargs):
         sig = false_context_signal(
-            RIF(0, reach.time),
-            reach.context_dim,
-            top_level_domain=list(reach.system.y0_composed),
+            reach_tree.time_domain,
+            # Do we get the domain subdivision right?
+            reach_tree.dim,
+            top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask,
         )
         for t in self.terms:
             sig_mask = sig.to_mask_or() if mask is not None else None
             if sig_mask is not None and not len(sig_mask.mask.pos):
                 return sig
-            sig |= t.context_signal(reach, ctx_mask=sig_mask, **kwargs)
+            sig |= t.context_signal(reach_tree,
+                                    ctx_mask=sig_mask, **kwargs)
         return sig
 
     @property
@@ -1176,10 +1187,10 @@ class C(Context):
             mask=mask,
         )
 
-    def context_signal(self, reach: Reach, refine=0, **kwargs):
-        assert reach.system is not None
+    def context_signal(self, reach_tree: ReachTree, refine=0, **kwargs):
+        assert reach_tree.system is not None
 
-        def signal_fn(_, space_domain, mask=None):
+        def signal_fn(reach, observer, mask=None):
             # should we refer to the parent reach object or the child
             # observer?
             kwargs2 = dict(kwargs)
@@ -1188,22 +1199,27 @@ class C(Context):
             except:
                 pass
             return masked_ctx(
-                system=reach.system,
-                domain=RIF(0, reach.time),
+                system=reach_tree.system,
+                domain=reach_tree.time_domain,
                 C=self.context_jump,
                 D=identity,
                 phi=partial(self.context_signal_phi_fn, kwargs2,
                             use_masks=mask is not None,
                             refine=refine),
-                f=partial(reach, space_domain=space_domain),
+                f=reach,
                 epsilon=kwargs.get('epsilon_ctx', 0.5),
                 verbosity=kwargs.get('verbosity', 0)
             )
 
-        # Define child space_domain based on preconditioned dimension
-        space_domain = preconditioned_space_domain(reach.context_dim)
+        # TODO: fix me!
 
-        return ContextSignal(RIF(0, reach.time), space_domain,
+        # Define child space_domain based on preconditioned dimension
+        space_domain = preconditioned_space_domain(reach_tree.dim)
+
+        return ContextSignal(reach_tree.time_domain,
+                             reach_tree.dim,
+                            #  top_level_domain=reach,
+                              space_domain,
                              signal_fn)
 
 

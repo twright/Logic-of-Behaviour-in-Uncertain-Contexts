@@ -148,6 +148,8 @@ def to_signal_bisection(f, domain, epsilon=0.1):
 
 
 def shift_F(J, Kb):
+    assert J is not None
+    assert Kb is not None
     (K, b) = Kb
     if J not in RIF:
         J = RIF(J)
@@ -157,16 +159,16 @@ def shift_F(J, Kb):
 
     if b:
         return inner_inverse_minkowski(K, J), True
-    elif Ktl.overlaps(Ktu):
+    elif Ktl is not None and Ktu is not None and Ktl.overlaps(Ktu):
         return Ktl.intersection(Ktu), False
     else:
         return None
 
 
 def shift_G(J, Kb):
-    (K, b) = Kb
     assert J is not None
     assert Kb is not None
+    (K, b) = Kb
     if J not in RIF:
         J = RIF(J)
     tl, tu = J.edges()
@@ -175,7 +177,7 @@ def shift_G(J, Kb):
 
     if not b:
         return inner_inverse_minkowski(K, J), False
-    elif Ktl and Ktu and Ktl.overlaps(Ktu):
+    elif Ktl is not None and Ktu is not None and Ktl.overlaps(Ktu):
         return Ktl.intersection(Ktu), True
     else:
         return None
@@ -396,6 +398,8 @@ class Signal(BaseSignal):
         return self._mask
 
     def approx_eq(self, other, epsilon=1e-6):
+        print("==> Testing signal equality:")
+        print(f"self:  {self}\nother: {other}")
         # Inflate both signals to bridge any small gaps
         # of uncertainty
         sig_eq = super(Signal, self.inflate(epsilon/6)).approx_eq(

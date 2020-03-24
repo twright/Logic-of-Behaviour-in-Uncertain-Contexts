@@ -50,6 +50,9 @@ def inner_shift_back(K, J):
 
 
 def finterval(I):
+    if I is None:
+        return repr(I)
+
     a, b = I.endpoints()
     ra, rb = a.floor(), b.ceil()
     if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
@@ -59,6 +62,9 @@ def finterval(I):
         return I.str(style='brackets')
 
 def fqqinterval(I):
+    if I is None:
+        return repr(I)
+
     a, b = I.endpoints()
     ra, rb = a.floor(), b.ceil()
     if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:

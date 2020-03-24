@@ -12,7 +12,8 @@ from ulbc.context_signals import (ContextSignal,
                                   true_context_signal,
                                   ChildIterator,
                                   preconditioned_space_domain,
-                                  RestrictionMethod)
+                                  RestrictionMethod,
+                                  ReachTree)
 from flowstar.reachability import Reach
 from flowstar.observers import PolyObserver
 from flowstar.tests.test_reachability import ringxy, odes  # NOQA
@@ -53,7 +54,8 @@ def space_domain_approx_eq(xs, ys, epsilon=1e-3):
     print('xs = {}\nys = {}'.format(fqqintervals(xs),
                                     fqqintervals(ys)))
     return (len(xs) == len(ys)
-            and all(int_dist(x, y) <= epsilon for x, y in zip(xs, ys)))
+            and all((x is y is None)
+                    or int_dist(x, y) <= epsilon for x, y in zip(xs, ys)))
 
 
 def space_domains_approx_eq(xs, ys, epsilon=1e-3):
@@ -62,17 +64,71 @@ def space_domains_approx_eq(xs, ys, epsilon=1e-3):
                     for x, y in zip(xs, ys)))
 
 
-def signal_fn(prop, r, absolute_space_domain, symbolic_space_domain, mask=None):
-    return prop.signal(r, absolute_space_domain=absolute_space_domain, symbolic_space_domain=symbolic_space_domain)
+def signal_fn(prop, _, o, mask=None):
+    return prop.signal_from_observer(o)
 
 
-class TestCtxToSpaceDomain(object):
+class TestReachTreeGen:
+    def dummy_reach_fn(self, domain):
+        self.num_dummy_calls += 1
+        return domain
+
+    def test_reach_calls(self):
+        self.num_dummy_calls = 0
+
+        tree = ReachTree(
+            5, 2, [RIF(1, 2), RIF(3, 4)], self.dummy_reach_fn)
+
+        # Try some calls
+        assert space_domain_approx_eq(tree(()), [RIF(1, 2), RIF(3, 4)])
+        assert self.num_dummy_calls == 1
+        assert space_domain_approx_eq(tree((1,)), [RIF(1, 1.5), RIF(3.5, 4)])
+        assert self.num_dummy_calls == 2
+        assert space_domain_approx_eq(tree((1,3)),
+            [RIF(1.25, 1.5), RIF(3.75, 4)])
+        assert self.num_dummy_calls == 3
+
+        # Try the same calls again
+        assert space_domain_approx_eq(tree(()), [RIF(1, 2), RIF(3, 4)])
+        assert self.num_dummy_calls == 3
+        assert space_domain_approx_eq(tree((1,)), [RIF(1, 1.5), RIF(3.5, 4)])
+        assert self.num_dummy_calls == 3
+        assert space_domain_approx_eq(tree((1,3)),
+            [RIF(1.25, 1.5), RIF(3.75, 4)])
+        assert self.num_dummy_calls == 3
+
+    def test_reach_calls_nones(self):
+        self.num_dummy_calls = 0
+
+        tree = ReachTree(
+            5, 2, [RIF(1, 2), None, RIF(3, 4)], self.dummy_reach_fn)
+
+        # Try some calls
+        assert space_domain_approx_eq(tree(()), [RIF(1, 2), None, RIF(3, 4)])
+        assert self.num_dummy_calls == 1
+        assert space_domain_approx_eq(tree((1,)), [RIF(1, 1.5), None, RIF(3.5, 4)])
+        assert self.num_dummy_calls == 2
+        assert space_domain_approx_eq(tree((1,3)),
+            [RIF(1.25, 1.5), None, RIF(3.75, 4)])
+        assert self.num_dummy_calls == 3
+
+        # Try the same calls again
+        assert space_domain_approx_eq(tree(()), [RIF(1, 2), None, RIF(3, 4)])
+        assert self.num_dummy_calls == 3
+        assert space_domain_approx_eq(tree((1,)),
+            [RIF(1, 1.5), None, RIF(3.5, 4)])
+        assert self.num_dummy_calls == 3
+        assert space_domain_approx_eq(tree((1,3)),
+            [RIF(1.25, 1.5), None, RIF(3.75, 4)])
+        assert self.num_dummy_calls == 3
+
+
+class TestCtxToSpaceDomain:
     def test_two_dimensional(self, ringxy):  # NOQA
         R, (x, y) = ringxy
         ctx = {'x': RIF(1, 3), 'y': RIF(5, 7)}
         assert space_domain_approx_eq(context_to_space_domain(R, ctx),
                                       [RIF(1, 3), RIF(5, 7)])
-
 
 
 class TestGenSubSpaceDomains(object):
@@ -82,6 +138,11 @@ class TestGenSubSpaceDomains(object):
     def test_one_dimensional(self):
         assert space_domains_approx_eq(gen_sub_space_domains([RIF(1, 3)]),
                                        [[RIF(1, 2)], [RIF(2, 3)]])
+                                    
+    def test_none_one_dimensional(self):
+        assert space_domains_approx_eq(gen_sub_space_domains([None, RIF(1, 3)]),
+                                       [[None, RIF(1, 2)],
+                                        [None, RIF(2, 3)]])
 
     def test_singleton_one_dimensional(self):
         assert space_domains_approx_eq(gen_sub_space_domains([RIF(2)]),
@@ -165,9 +226,6 @@ class TestContextSignal(object):
         odes = [-y, x]
         atomic = Atomic(x)
 
-        def signal_fn(r, _1, _2, mask=None):
-            return Atomic(x).signal(r)
-
         space_domain = [RIF(1, 2), RIF(3, 4)]
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
@@ -184,7 +242,7 @@ class TestContextSignal(object):
             fprime=R(atomic.dpdt(odes, (x, y))),
             symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), 2,
-            signal=signal_fn,
+            signal=partial(signal_fn, atomic),
             observer=observer)
         assert ctx.signal.approx_eq(expected, 0.1)
 
@@ -252,13 +310,17 @@ class TestContextSignal(object):
             odes, space_domain, 5, step=0.01, order=10,
         )
         # reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
-        observer = PolyObserver(R(atomic.p),
-                                Reach(odes, space_domain, 5 + 2e-3, 0.01,
-                                      order=10),
+        def reach_fn(space_domain):
+            return Reach(odes, space_domain, 5 + 2e-3, 0.01,
+                                      order=10)
+        def observer_fn(reach):
+            return PolyObserver(R(atomic.p),
+                                reach,
                                 symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), 2,
             signal=partial(signal_fn, atomic),
-            observer=observer,
+            reach_tree=ReachTree(5 + 2e-3, 2, initials, reach_fn),
+            observer_fn=observer_fn,
             top_level_domain=initials,
             restriction_method=RestrictionMethod.RECOMPUTE_FLOWPIPE)
         child = ctx.children[2].children[2]
