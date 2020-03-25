@@ -231,7 +231,11 @@ class SignalTree(object):
     @property
     def symbolic_coordinate(self) -> Optional[List[int]]:
         """Coordinate relative to level of reach computation."""
-        return self.coordinate[-self.reach_level:]
+        return (
+            self.coordinate[-self.reach_level:]
+                if self.reach_level > 0
+                else ()
+        )
 
     @property
     def absolute_coordinate(self) -> Optional[List[int]]:
@@ -341,7 +345,9 @@ class SignalTree(object):
             self.dimension,
             self.coordinate,
             signal=f(self.signal, other.signal),
-            reach_level=self.reach_level,
+            # Perhaps this should really be None?
+            reach_level=min(self.reach_level, other.reach_level),
+            top_level_domain=self.top_level_domain,
             children=self.children.zip_with(
                 lambda c1, c2: c1.signal_zip_with(f, c2),
                 other.children),
@@ -524,7 +530,8 @@ class ContextSignal(SignalTree):
             self.coordinate,
             reach_tree=self._reach_tree,
             signal=f(self.signal, other.signal),
-            reach_level=self.reach_level,
+            reach_level=min(self.reach_level, other.reach_level),
+            top_level_domain=self.top_level_domain,
             restriction_method=self.restriction_method,
             children=self.children.zip_with(
                 lambda c1, c2: c1.signal_zip_with(f, c2),

@@ -6,7 +6,7 @@ from sage.all import RIF, QQ
 # from builtins import *
 
 from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
-    IntegrationMethod, C)
+    IntegrationMethod, RestrictionMethod, C)
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
 from ulbc.bondcalculus import System, BondSystem
@@ -697,6 +697,136 @@ class TestContextMasks:
             f"We should have sig0 = sig2 where\nsig0 = {sig0}\nsig2 = {sig2}"
         assert sig1.approx_eq(sig2, 1e-10),\
             f"We should have sig1 = sig2 where\nsig1 = {sig1}\nsig2 = {sig2}"
+
+
+class TestContextSignalRefinement:
+    @staticmethod
+    @pytest.mark.slow
+    def test_atomic_context_tree_recompute(ringxy, odes):
+        R, x = ringxy
+        initials = [RIF(0, 3), RIF(0, 3)]
+        system = System(R, x, initials, odes)
+        csig = Atomic(var("x")**2 + var("y")**2 < 4).context_signal_for_system(
+            system,
+            2*sage.pi,
+            symbolic_composition=True,
+            restriction_method=RestrictionMethod.RECOMPUTE_FLOWPIPE,
+        )
+        assert csig.reach_level == 0
+        assert space_domain_approx_eq(csig.top_level_domain, initials) 
+        assert csig.children[1].children[0].reach_level == 0
+        assert csig.children[1].children[0].coordinate == (1, 0)
+        assert csig.children[1].children[0].absolute_coordinate == (1, 0)
+        assert csig.children[1].children[0].symbolic_coordinate == ()
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].top_level_domain,
+            initials,
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].absolute_space_domain,
+            [RIF(0, 0.75), RIF(1.5, 2.25)],
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].symbolic_space_domain,
+            [RIF(-1, 1), RIF(-1, 1)],
+        ) 
+        assert csig.children[1].children[0].signal(0) is None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_complex_context_tree_recompute(ringxy, odes):
+        R, x = ringxy
+        initials = [RIF(0, 3), RIF(0, 3)]
+        system = System(R, x, initials, odes)
+        csig = (Atomic(var("x")**2 + var("y")**2 < 4) | Atomic(var("x") > var("y"))).context_signal_for_system(
+            system,
+            2*sage.pi,
+            symbolic_composition=True,
+            restriction_method=RestrictionMethod.RECOMPUTE_FLOWPIPE,
+        )
+        assert csig.reach_level == 0
+        assert space_domain_approx_eq(csig.top_level_domain, initials) 
+        assert csig.children[1].children[0].reach_level == 0
+        assert csig.children[1].children[0].coordinate == (1, 0)
+        assert csig.children[1].children[0].absolute_coordinate == (1, 0)
+        assert csig.children[1].children[0].symbolic_coordinate == ()
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].top_level_domain,
+            initials,
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].absolute_space_domain,
+            [RIF(0, 0.75), RIF(1.5, 2.25)],
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].symbolic_space_domain,
+            [RIF(-1, 1), RIF(-1, 1)],
+        ) 
+        assert csig.children[1].children[0].signal(0) is None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_atomic_context_tree_symbolic(ringxy, odes):
+        R, x = ringxy
+        initials = [RIF(0, 3), RIF(0, 3)]
+        system = System(R, x, initials, odes)
+        csig = Atomic(var("x")**2 + var("y")**2 < 4).context_signal_for_system(
+            system,
+            2*sage.pi,
+            symbolic_composition=True,
+            restriction_method=RestrictionMethod.SYMBOLIC,
+        )
+        assert csig.reach_level == 0
+        assert space_domain_approx_eq(csig.top_level_domain, initials) 
+        assert csig.children[1].children[0].reach_level == 2
+        assert csig.children[1].children[0].coordinate == (1, 0)
+        assert csig.children[1].children[0].absolute_coordinate == ()
+        assert csig.children[1].children[0].symbolic_coordinate == (1, 0)
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].top_level_domain,
+            initials,
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].absolute_space_domain,
+            [RIF(0, 3), RIF(0, 3)],
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].symbolic_space_domain,
+            [RIF(-1, -0.5), RIF(0, 0.5)],
+        ) 
+        assert csig.children[1].children[0].signal(0) is None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_complex_context_tree_symbolic(ringxy, odes):
+        R, x = ringxy
+        initials = [RIF(0, 3), RIF(0, 3)]
+        system = System(R, x, initials, odes)
+        csig = (Atomic(var("x")**2 + var("y")**2 < 4) | Atomic(var("x") > var("y"))).context_signal_for_system(
+            system,
+            2*sage.pi,
+            symbolic_composition=True,
+            restriction_method=RestrictionMethod.SYMBOLIC,
+        )
+        assert csig.reach_level == 0
+        assert space_domain_approx_eq(csig.top_level_domain, initials) 
+        assert csig.children[1].children[0].reach_level == 2
+        assert csig.children[1].children[0].coordinate == (1, 0)
+        assert csig.children[1].children[0].absolute_coordinate == ()
+        assert csig.children[1].children[0].symbolic_coordinate == (1, 0)
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].top_level_domain,
+            initials,
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].absolute_space_domain,
+            [RIF(0, 3), RIF(0, 3)],
+        ) 
+        assert space_domain_approx_eq(
+            csig.children[1].children[0].symbolic_space_domain,
+            [RIF(-1, -0.5), RIF(0, 0.5)],
+        ) 
+        assert csig.children[1].children[0].signal(0) is None
 
 
 class TestWithSystem:

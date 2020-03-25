@@ -91,10 +91,14 @@ def int_dist(I, J):
 
 
 def fintervals(space_domain):
+    if space_domain is None:
+        return repr(space_domain)
     return '[{}]'.format(', '.join(map(finterval, space_domain)))
 
 
 def fqqintervals(space_domain):
+    if space_domain is None:
+        return repr(space_domain)
     return '[{}]'.format(', '.join(map(fqqinterval, space_domain)))
 
 

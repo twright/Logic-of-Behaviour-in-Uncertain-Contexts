@@ -53,13 +53,15 @@ def ctx_dicts_approx_eq(xs, ys, epsilon=1e-3):
 def space_domain_approx_eq(xs, ys, epsilon=1e-3):
     print('xs = {}\nys = {}'.format(fqqintervals(xs),
                                     fqqintervals(ys)))
-    return (len(xs) == len(ys)
+    return ((xs is None) == (ys is None)
+            and len(xs) == len(ys)
             and all((x is y is None)
                     or int_dist(x, y) <= epsilon for x, y in zip(xs, ys)))
 
 
 def space_domains_approx_eq(xs, ys, epsilon=1e-3):
-    return (len(xs) == len(ys)
+    return ((xs is None) == (ys is None)
+            and len(xs) == len(ys)
             and all(space_domain_approx_eq(x, y, epsilon)
                     for x, y in zip(xs, ys)))
 
