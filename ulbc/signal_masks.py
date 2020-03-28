@@ -114,5 +114,8 @@ class Mask(BaseSignal):
         """Translate a mask back for F."""
         return self.shift_back(J)
 
+    def __call__(self, t):
+        return super().__call__(t) is True
+
 
 mask_zero = Mask(RIF(0), [RIF(0)])

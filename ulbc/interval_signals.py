@@ -288,6 +288,19 @@ class BaseSignal(object):
         return self.__class__(self.domain,
                               [(x, not b) for x, b in self.values])
 
+    def __call__(self, y):
+        if any(y in x for (x, b) in self.values if b):
+            return True
+        elif any(y in x for (x, b) in self.values if not b):
+            return False
+        else:
+            return None
+
+    def __bool__(self):
+        b = self(0)
+        return (b is not None) and b
+    __nonzero__ = __bool__  # For python 2 this is the correct name
+
     def plot(self, **kwargs):
         def trues(x, _):
             return any(b and x in II for II, b in self.values)
@@ -626,19 +639,6 @@ class Signal(BaseSignal):
         else:
             raise Exception("Incompatible domains: {} {} {}!".format(
                 self.domain, J, other.domain))
-
-    def __call__(self, y):
-        if any(y in x for (x, b) in self.values if b):
-            return True
-        elif any(y in x for (x, b) in self.values if not b):
-            return False
-        else:
-            return None
-
-    def __bool__(self):
-        b = self(0)
-        return (b is not None) and b
-    __nonzero__ = __bool__  # For python 2 this is the correct name
 
 
 def to_signal_piecewise(f, fprime, time, step):

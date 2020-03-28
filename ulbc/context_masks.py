@@ -24,37 +24,36 @@ class ContextMask(SignalTree):
     F_inverse = P
 
 
-def context_mask_zero(space_domain):
+def context_mask_zero(dimension, coordinate=()):
     return ContextMask(
         RIF(0),
-        space_domain,
+        dimension,
         signal=mask_zero,
-        children=(context_mask_zero(s)
-                  for s in gen_sub_space_domains(space_domain)),
+        coordinate=coordinate,
+        children=(context_mask_zero(dimension, coordinate + (k,))
+                  for k in range(2**dimension)),
     )
 
 
-def true_context_mask(domain, space_domain):
-    mask = Mask(domain, [domain])
-    # print("domain =", domain.str(style='brackets'))
-    # print("mask   =", mask)
+def true_context_mask(domain, dimension, coordinate=()):
+    mask = true_mask(domain)
     return ContextMask(
         domain,
-        space_domain,
+        dimension,
         signal=mask,
-        children=(true_context_mask(domain, s)
-                  for s in gen_sub_space_domains(space_domain)),
+        coordinate=coordinate,
+        children=(true_context_mask(domain, dimension, coordinate + (k,))
+                  for k in range(2**dimension)),
     )
 
 
-def false_context_mask(domain, space_domain):
-    mask = Mask(domain, [])
-    # print("domain =", domain.str(style='brackets'))
-    # print("mask   =", mask)
+def false_context_mask(domain, dimension, coordinate=()):
+    mask = false_mask(domain)
     return ContextMask(
         domain,
-        space_domain,
+        dimension,
         signal=mask,
-        children=(false_context_mask(domain, s)
-                  for s in gen_sub_space_domains(space_domain)),
+        coordinate=coordinate,
+        children=(false_context_mask(domain, dimension, coordinate + (k,))
+                  for k in range(2**dimension)),
     )
