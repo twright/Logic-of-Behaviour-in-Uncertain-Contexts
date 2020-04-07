@@ -31,7 +31,7 @@ from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
 from ulbc.interval_utils import finterval
 from ulbc.signal_masks import *
 from ulbc.context_masks import *
-from ulbc.matricies import *
+from ulbc.matrices import *
 from ulbc.bondcalculus import System
 
 

@@ -110,3 +110,16 @@ def enzyme(request, enzyme_model):
 @pytest.mark.parametrize("enzyme", ["Pi1"], indirect=True)
 def enzyme_full(enzyme):
     return enzyme
+
+
+@pytest.fixture()
+def poly_low_kwargs():
+    from flowstar.reachability import IntegrationMethod
+
+    return dict(
+        order=5, step=(0.01, 0.5),
+        precondition=1,
+        estimation=1e-3,
+        integration_method=IntegrationMethod.LOW_DEGREE,
+        cutoff_threshold=1e-7,
+    )

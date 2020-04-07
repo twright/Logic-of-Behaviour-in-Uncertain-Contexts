@@ -14,11 +14,12 @@ from ulbc.context_signals import (ContextSignal,
                                   preconditioned_space_domain,
                                   RestrictionMethod,
                                   ReachTree)
-from flowstar.reachability import Reach
+from flowstar.reachability import Reach, InitialForm
 from flowstar.observers import PolyObserver
 from flowstar.tests.test_reachability import ringxy, odes  # NOQA
 from ulbc.logic import Atomic
-from ulbc.interval_utils import finterval, int_dist, int_sorted, fqqintervals
+from ulbc.interval_utils import (finterval, int_dist, int_sorted,
+    fqqintervals, fintervals)
 from ulbc.bondcalculus import System
 # from flowstar.interval import int_dist
 
@@ -53,6 +54,8 @@ def ctx_dicts_approx_eq(xs, ys, epsilon=1e-3):
 def space_domain_approx_eq(xs, ys, epsilon=1e-3):
     print('xs = {}\nys = {}'.format(fqqintervals(xs),
                                     fqqintervals(ys)))
+    print('xs = {}\nys = {}'.format(fintervals(xs),
+                                    fintervals(ys)))
     return ((xs is None) == (ys is None)
             and len(xs) == len(ys)
             and all((x is y is None)
@@ -133,7 +136,7 @@ class TestCtxToSpaceDomain:
                                       [RIF(1, 3), RIF(5, 7)])
 
 
-class TestGenSubSpaceDomains(object):
+class TestGenSubSpaceDomains:
     def test_zero_dimensional(self):
         assert gen_sub_space_domains([]) == [[]]
 
@@ -164,7 +167,7 @@ class TestGenSubSpaceDomains(object):
             [[RIF(1, 2), RIF(6)], [RIF(2, 3), RIF(6)]])
 
 
-class TestChildIterator(object):
+class TestChildIterator:
     def test_iterate(self):
         assert list(ChildIterator(range(1, 5))) == [1, 2, 3, 4]
 
@@ -174,32 +177,7 @@ class TestChildIterator(object):
         assert list(iterator) == [1, 2, 3, 4]
 
 
-class TestContextSignal(object):
-    # def test_repr(self):
-    #     assert (repr(ContextSignal(RIF(1, 2),
-    #                                {'x': RIF(1, 3), 'y': RIF(5, 7)},
-    #                                None, None))
-    #             == "ContextSignal([1 .. 2], [[1 .. 3], "
-    #                "[5 .. 7]], None, None)")
-
-    # def test_sub_space_domains(self):
-        # ctx = ContextSignal(RIF(1, 2),
-        #                     [RIF(1, 3), RIF(5, 7)],
-        #                     None)
-        # assert space_domains_approx_eq(ctx.sub_space_domains,
-        #                                [[RIF(1, 2), RIF(5, 6)],
-        #                                 [RIF(1, 2), RIF(6, 7)],
-        #                                 [RIF(2, 3), RIF(5, 6)],
-        #                                 [RIF(2, 3), RIF(6, 7)]])
-        # ctx = ContextSignal(RIF(1, 2),
-        #                     [RIF(1, 3), RIF(5, 7)],
-        #                     None)
-        # assert space_domains_approx_eq(ctx.sub_space_domains,
-        #                                [[RIF(1, 2), RIF(5, 6)],
-        #                                 [RIF(1, 2), RIF(6, 7)],
-        #                                 [RIF(2, 3), RIF(5, 6)],
-        #                                 [RIF(2, 3), RIF(6, 7)]])
-
+class TestContextSignalSinCos:
     def test_sub_sub_child_space_domain(self):
         ctx = true_context_signal(RIF(1, 2), 2)
         assert ctx.coordinate == ()
@@ -454,3 +432,4 @@ class TestContextSignal(object):
         sig = ctx.refined_signal(2)
         print(sig)
         assert sig.approx_eq(expected, 0.01)
+

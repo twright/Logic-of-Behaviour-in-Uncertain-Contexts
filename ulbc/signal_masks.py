@@ -101,7 +101,7 @@ class Mask(BaseSignal):
         return Mask(RIF(0, self.domain + J), [I + J for I in self.pos])
 
     def __invert__(self):
-        """A mask for an inverse is the same as the orignal mask."""
+        """A mask for an inverse is the same as the original mask."""
         return self
 
     F_inverse = P
@@ -118,4 +118,5 @@ class Mask(BaseSignal):
         return super().__call__(t) is True
 
 
+# The mask containing time zero and only time zero
 mask_zero = Mask(RIF(0), [RIF(0)])
