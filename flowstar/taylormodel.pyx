@@ -171,20 +171,21 @@ class FlowstarConverter(Converter):
         op_table = arithmetic_operators
         op_table[operator.neg] = 'neg'
         op_symb = op_table[op]
-        operands = [self(operand) for operand in ex.operands()]
+        raw_operands = [f"{self(operand)}" for operand in ex.operands()]
+        operands = [f"({s})" for s in raw_operands] if len(raw_operands) > 1 else raw_operands
         # print("ex = {}, op = {}, op_symb = {}, operands = {}".format(
         #     repr(ex), repr(op), repr(op_symb), repr(operands)))
 
         if op_symb == "*":
             return '*'.join(operands)
         elif op_symb == "+":
-            return ' + '.join(operands)
+            return ' + '.join(raw_operands)
         elif op_symb == "/":
             assert len(operands) == 2
-            return '({})/({})'.format(*operands)
+            return '{}/{}'.format(*operands)
         elif op_symb == "neg":
             assert len(operands) == 1
-            return '-({})'.format(operands[0])
+            return f'-({raw_operands[0]})'
         elif op_symb == "^":
             assert len(operands) == 2
             expn = ex.operands()[1]
@@ -192,10 +193,10 @@ class FlowstarConverter(Converter):
             if expn == -1:
                 # Flowstar seems to cope much better with a fraction than a negative
                 # power
-                return "[1, 1]/({})".format(operands[0])
+                return "[1, 1]/{}".format(operands[0])
             else:
                 # We had better hope that the exponent is some king of number
-                return '({})^{}'.format(operands[0], expn)
+                return '{}^{}'.format(operands[0], expn)
         else:
             raise NotImplementedError
 
