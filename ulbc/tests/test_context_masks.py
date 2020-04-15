@@ -5,7 +5,7 @@ from functools import partial
 
 from ulbc.interval_utils import finterval, fqqintervals
 
-from ulbc.tests.test_context_signals import (space_domain_approx_eq, space_domains_approx_eq)
+from ulbc.tests.test_reach_trees import (space_domain_approx_eq, space_domains_approx_eq)
 
 from ulbc.signal_masks import true_mask, false_mask
 from ulbc.context_masks import *

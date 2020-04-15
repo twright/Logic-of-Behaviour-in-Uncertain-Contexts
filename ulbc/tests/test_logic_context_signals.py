@@ -1,5 +1,3 @@
-from __future__ import print_function, division
-
 import pytest
 import sage.all as sg
 from sage.all import RIF, QQ
@@ -7,9 +5,10 @@ from sage.all import RIF, QQ
 
 from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
     IntegrationMethod, RestrictionMethod, C)
-from ulbc.tests.test_context_signals import space_domain_approx_eq
+from ulbc.tests.test_reach_trees import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
-from ulbc.bondcalculus import System, BondSystem
+from ulbc.systems import System
+from ulbc.bondcalculus import BondSystem
 from ulbc.symbolic import var
 from ulbc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
@@ -115,14 +114,14 @@ class TestContextSignalRefinement:
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 0
         assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].absolute_coordinate == (1, 0)
+        assert csig.children[1].children[0].physical_coordinate == (1, 0)
         assert csig.children[1].children[0].symbolic_coordinate == ()
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
         ) 
         assert space_domain_approx_eq(
-            csig.children[1].children[0].absolute_space_domain,
+            csig.children[1].children[0].physical_space_domain,
             [RIF(0, 0.75), RIF(1.5, 2.25)],
         ) 
         assert space_domain_approx_eq(
@@ -147,14 +146,14 @@ class TestContextSignalRefinement:
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 0
         assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].absolute_coordinate == (1, 0)
+        assert csig.children[1].children[0].physical_coordinate == (1, 0)
         assert csig.children[1].children[0].symbolic_coordinate == ()
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
         ) 
         assert space_domain_approx_eq(
-            csig.children[1].children[0].absolute_space_domain,
+            csig.children[1].children[0].physical_space_domain,
             [RIF(0, 0.75), RIF(1.5, 2.25)],
         ) 
         assert space_domain_approx_eq(
@@ -179,14 +178,14 @@ class TestContextSignalRefinement:
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 2
         assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].absolute_coordinate == ()
+        assert csig.children[1].children[0].physical_coordinate == ()
         assert csig.children[1].children[0].symbolic_coordinate == (1, 0)
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
         ) 
         assert space_domain_approx_eq(
-            csig.children[1].children[0].absolute_space_domain,
+            csig.children[1].children[0].physical_space_domain,
             [RIF(0, 3), RIF(0, 3)],
         ) 
         assert space_domain_approx_eq(
@@ -201,7 +200,8 @@ class TestContextSignalRefinement:
         R, x = ringxy
         initials = [RIF(0, 3), RIF(0, 3)]
         system = System(R, x, initials, odes)
-        csig = (Atomic(var("x")**2 + var("y")**2 < 4) | Atomic(var("x") > var("y"))).context_signal_for_system(
+        csig = (Atomic(var("x")**2 + var("y")**2 < 4)
+              | Atomic(var("x") > var("y"))).context_signal_for_system(
             system,
             2*sg.pi,
             symbolic_composition=True,
@@ -211,14 +211,14 @@ class TestContextSignalRefinement:
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 2
         assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].absolute_coordinate == ()
+        assert csig.children[1].children[0].physical_coordinate == ()
         assert csig.children[1].children[0].symbolic_coordinate == (1, 0)
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
         ) 
         assert space_domain_approx_eq(
-            csig.children[1].children[0].absolute_space_domain,
+            csig.children[1].children[0].physical_space_domain,
             [RIF(0, 3), RIF(0, 3)],
         ) 
         assert space_domain_approx_eq(
@@ -266,15 +266,15 @@ class TestContextSignalWhelksAndLobsters:
         assert sig1.approx_eq(sig2, 0.5)
 
         # assert space_domain_approx_eq(
-        #     csig.absolute_space_domain,
+        #     csig.physical_space_domain,
         #     [RIF(-1, 1), RIF(-1, 1)],
         # )
         # assert space_domain_approx_eq(
-        #     csig.children[0].absolute_space_domain,
+        #     csig.children[0].physical_space_domain,
         #     [RIF(-1, 1), RIF(-1, 1)],
         # )
         # assert space_domain_approx_eq(
-        #     csig.children[0].children[0].absolute_space_domain,
+        #     csig.children[0].children[0].physical_space_domain,
         #     [RIF(-1, 1), RIF(-1, 1)],
         # )
 
@@ -311,15 +311,15 @@ class TestContextSignalWhelksAndLobsters:
 
         # Check absolute space domains
         assert space_domain_approx_eq(
-            csigp.absolute_space_domain,
+            csigp.physical_space_domain,
             [RIF(1, 1.1), RIF(4, 5)],
         )
         assert space_domain_approx_eq(
-            csigp.children[0].absolute_space_domain,
+            csigp.children[0].physical_space_domain,
             [RIF(1, 1.05), RIF(4, 4.5)],
         )
         assert space_domain_approx_eq(
-            csigp.children[0].children[0].absolute_space_domain,
+            csigp.children[0].children[0].physical_space_domain,
             [RIF(1, 1.025), RIF(4, 4.25)],
         )
 
@@ -378,15 +378,15 @@ class TestContextSignalWhelksAndLobsters:
 
         # Check absolute space domains
         assert space_domain_approx_eq(
-            csigs.absolute_space_domain,
+            csigs.physical_space_domain,
             [RIF(0, 0.05), RIF(0, 0.5)],
         )
         assert space_domain_approx_eq(
-            csigs.children[0].absolute_space_domain,
+            csigs.children[0].physical_space_domain,
             [RIF(0, 0.05), RIF(0, 0.5)],
         )
         assert space_domain_approx_eq(
-            csigs.children[0].children[0].absolute_space_domain,
+            csigs.children[0].children[0].physical_space_domain,
             [RIF(0, 0.05), RIF(0, 0.5)],
         )
         
@@ -429,15 +429,15 @@ class TestContextSignalWhelksAndLobsters:
 
         # Check absolute space domains
         assert space_domain_approx_eq(
-            csigs.absolute_space_domain,
+            csigs.physical_space_domain,
             [RIF(0, 0.05), RIF(0, 0.5)],
         )
         assert space_domain_approx_eq(
-            csigs.children[0].absolute_space_domain,
+            csigs.children[0].physical_space_domain,
             [RIF(0, 0.05), RIF(0, 0.5)],
         )
         assert space_domain_approx_eq(
-            csigs.children[0].children[0].absolute_space_domain,
+            csigs.children[0].children[0].physical_space_domain,
             [RIF(0, 0.05), RIF(0, 0.5)],
         )
         

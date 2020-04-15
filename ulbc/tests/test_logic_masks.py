@@ -10,7 +10,8 @@ from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessC
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.tests.test_logic import atomic_p, atomic_q, atomic_x
 from ulbc.signal_masks import Mask, mask_zero
-from ulbc.bondcalculus import System, BondSystem
+from ulbc.systems import System
+from ulbc.bondcalculus import BondSystem
 from ulbc.symbolic import var
 from ulbc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)

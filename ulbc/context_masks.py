@@ -1,6 +1,6 @@
 from sage.all import RIF
 
-from ulbc.context_signals import SignalTree, gen_sub_space_domains
+from ulbc.context_signals import SignalTree
 from ulbc.signal_masks import *
 
 

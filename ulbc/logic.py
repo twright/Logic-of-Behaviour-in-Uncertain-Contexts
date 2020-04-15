@@ -1,7 +1,3 @@
-from __future__ import (division,
-                        print_function)
-# absolute_import,
-
 import itertools
 import operator
 from typing import *
@@ -32,7 +28,7 @@ from ulbc.interval_utils import finterval
 from ulbc.signal_masks import *
 from ulbc.context_masks import *
 from ulbc.matrices import *
-from ulbc.bondcalculus import System
+from ulbc.systems import System
 
 
 class Logic(metaclass=ABCMeta):
@@ -142,35 +138,30 @@ class Logic(metaclass=ABCMeta):
         # in terms of the preconditioned variables
         # TODO: is this the correct number of variables
         # space_domain = preconditioned_space_domain(len(system.y0))
-
-        if use_masks and mask is None:
-            mask = true_context_mask(RIF(0, full_duration), space_domain)
-
-        if 'initial_form' not in kwargs:
-            kwargs['initial_form'] = InitialForm.SPLIT_VARS
+        with instrument.block(name="Generating Reach Tree"):
+            reach_tree = system.reach_tree(full_duration, **kwargs)
 
         # Run for a little extra time to account for rounding
         # errors and temporal quantifiers
         reach_duration = self.duration + full_duration
 
-        def reach_fn(space_domain):
-            return system.with_y0(space_domain).reach(
-                reach_duration,
-                **kwargs
-            )
-            # TODO: Do we need to call reach.prepare() ?
+        if use_masks and mask is None:
+            # TODO: fix this; parameters incorrect
+            # TODO: Should get dimension from system
+            mask = true_context_mask(RIF(0, full_duration),
+                                     reach_tree.dimension)
+
+        if 'initial_form' not in kwargs:
+            kwargs['initial_form'] = InitialForm.SPLIT_VARS
 
         with instrument.block(name="Monitoring initial signal"):
-            print("==> calling context signal")
             res = self.context_signal(
-                ReachTree(duration, len(system.y0),
-                    list(system.y0), reach_fn, system=system),
+                reach_tree,
                 mask=mask,
                 restriction_method=restriction_method,
                 **kwargs,
             )
 
-        print("==> calling to_domain")
         return res.to_domain(RIF(0, duration))
 
     def numerical_signal_for_system(self, odes, initials, duration):
@@ -485,7 +476,7 @@ class Atomic(Logic):
             global_root_detection=global_root_detection,
         )
 
-    def signal(self, reach: Reach, absolute_space_domain=None, symbolic_space_domain=None, mask=None, two_pass_masks=False, **kwargs):
+    def signal(self, reach: Reach, physical_space_domain=None, symbolic_space_domain=None, mask=None, two_pass_masks=False, **kwargs):
         observer = self.observer(
             reach,
             space_domain=symbolic_space_domain,
@@ -504,17 +495,17 @@ class Atomic(Logic):
     def signal_fn(self, _, observer, mask=None, **kwargs):
         # str_abs_space_domain = [[sage.QQ(w)
         #     for w in s.endpoints()]
-        #     for s in absolute_space_domain]
+        #     for s in physical_space_domain]
         # str_sym_space_domain = [[sage.QQ(w)
         #     for w in s.endpoints()]
         #     for s in symbolic_space_domain]
         print("=== in signal_fn ===")
         print(f"observer = {observer}")
-        # print(f"absolute_space_domain = {str_abs_space_domain}")
+        # print(f"physical_space_domain = {str_abs_space_domain}")
         # print(f"symbolic_space_domain = {str_sym_space_domain}")
         return self.signal_from_observer(
             observer,
-            # absolute_space_domain=absolute_space_domain,
+            # physical_space_domain=physical_space_domain,
             # symbolic_space_domain=symbolic_space_domain,
             mask=mask,
             **kwargs,
@@ -546,7 +537,7 @@ class Atomic(Logic):
         # Turn initials for a vector into a list
         return ContextSignal(
             reach_tree.time_domain,
-            reach_tree.dim,
+            reach_tree.dimension,
             (),
             reach_tree=reach_tree,
             signal=partial(self.signal_fn, **kwargs),
@@ -557,7 +548,7 @@ class Atomic(Logic):
         )
 
     def __repr__(self):
-        return 'Atomic({})'.format(repr(self._p_raw))
+        return f'Atomic({repr(self._p_raw)})'
 
     def __str__(self):
         if is_relation(self._p_raw):
@@ -701,7 +692,7 @@ class And(Logic):
         sig = true_context_signal(
             reach_tree.time_domain,
             # Do we get the domain subdivision right?
-            reach_tree.dim,
+            reach_tree.dimension,
             top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask,
         )
@@ -851,7 +842,7 @@ class Or(Logic):
         sig = false_context_signal(
             reach_tree.time_domain,
             # Do we get the domain subdivision right?
-            reach_tree.dim,
+            reach_tree.dimension,
             top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask,
         )
@@ -1211,16 +1202,15 @@ class C(Context):
                 verbosity=kwargs.get('verbosity', 0)
             )
 
-        # TODO: fix me!
+        # TODO: finish fixing me!
 
-        # Define child space_domain based on preconditioned dimension
-        space_domain = preconditioned_space_domain(reach_tree.dim)
-
-        return ContextSignal(reach_tree.time_domain,
-                             reach_tree.dim,
-                            #  top_level_domain=reach,
-                              space_domain,
-                             signal_fn)
+        return ContextSignal(
+            reach_tree.time_domain,
+            reach_tree.dimension,
+            signal=signal_fn,
+            reach_tree=reach_tree,
+            top_level_domain=reach_tree.top_level_domain,
+        )
 
 
 class D(Context):
@@ -1384,10 +1374,10 @@ class F(Logic):
         return self.phi.duration + self.interval.upper()
 
     def __repr__(self):
-        return 'F({}, {})'.format(finterval(self.interval), repr(self.phi))
+        return f"F({finterval(self.interval)}, {repr(self.phi)})"
 
     def __str__(self):
-        return 'F({}, {})'.format(finterval(self.interval), str(self.phi))
+        return f"F({finterval(self.interval)}, {str(self.phi)})"
 
     def signal(self, reach: Reach, mask=None, **kwargs):
         if mask is not None:

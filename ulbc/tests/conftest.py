@@ -3,7 +3,8 @@ from ulbc.symbolic import VariableManager
 import sage.all as sg
 from sage.all import RIF
 from ulbc import Atomic
-from ulbc.bondcalculus import System, BondSystem, BondModel
+from ulbc.systems import System
+from ulbc.bondcalculus import BondSystem, BondModel
 
 
 @pytest.fixture()

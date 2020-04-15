@@ -1,8 +1,3 @@
-from __future__ import division, print_function, annotations
-# absolute_import,
-
-# from builtins import *  # NOQA
-
 from functools import partial
 from sage.all import RIF, QQ
 from typing import Optional
@@ -53,6 +48,7 @@ def finterval(I):
     if I is None:
         return repr(I)
 
+    I = RIF(I)
     a, b = I.endpoints()
     ra, rb = a.floor(), b.ceil()
     if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
@@ -65,6 +61,7 @@ def fqqinterval(I):
     if I is None:
         return repr(I)
 
+    I = RIF(I)
     a, b = I.endpoints()
     ra, rb = a.floor(), b.ceil()
     if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
@@ -83,8 +80,8 @@ def intervals_approx_eq(xs, ys, epsilon=1e-3):
 
 
 def int_dist(I, J):
-    il, iu = I.edges()
-    jl, ju = J.edges()
+    il, iu = RIF(I).edges()
+    jl, ju = RIF(J).edges()
     # Round up/down endpoints so as to overapproximate the real distance
     return max((il - jl).upper('RNDU'), (jl - il).upper('RNDU'),
                (iu - ju).upper('RNDU'), (ju - iu).upper('RNDU'))

@@ -1,203 +1,22 @@
 import pexpect
-from typing import Optional, Any, Union
 import sage.all as sg
 from pathlib import Path
 import tempfile
 import random
 import itertools
-from flowstar.reachability import Reach
-from ulbc.interval_utils import fintervals, finterval
-from ulbc.symbolic import *
 from typing import *
 from bidict import bidict
 
-__all__ = ['BondModel', 'BondwbException', 'BondProcess', 'System',
-           'BondSystem']
+from flowstar.reachability import Reach
+from ulbc.interval_utils import fintervals, finterval
+from ulbc.symbolic import *
+from ulbc.systems import System
+
+__all__ = ('BondModel', 'BondwbException', 'BondProcess', 'BondSystem')
 
 
 class BondwbException(Exception):
     pass
-
-
-class System:
-    def __init__(self,
-            R,
-            x : tuple,
-            y0 : tuple,
-            y : tuple,
-            varmap : Optional[dict] = None,
-            y0_ctx : Optional[tuple] = None):
-        self._R = R
-        if R == sg.SR:
-            self._x = sg.vector(self.R.var(str(xi)) for xi in x)
-        else:
-            self._x = sg.vector(map(self.R, x))
-        self._y0 = sg.vector([sg.RIF(y00) for y00 in y0])
-        # y0_ctx is not a vector since it may contain None
-        if y0_ctx is not None:
-            self._y0_ctx = [None if y00 is None else sg.RIF(y00)
-                for y00 in y0_ctx]
-        else:
-            self._y0_ctx = None #[None]*len(self.x)
-        self._y = sg.vector(map(self.R, y))
-        if varmap is None:
-            self._varmap = {str(xi): xi for xi in x}
-        else:
-            self._varmap = varmap
-        self._varmap = bidict(self._varmap)
-        self._poly_var_ring = sg.PolynomialRing(sg.RIF,
-            ', '.join(map(str, self._varmap.values())))
-
-    def with_y0(self, y0, y0_ctx=None):
-        assert len(y0) == len(self.x)
-        assert y0_ctx is None or len(y0_ctx) == len(self.x)
-        return System(self._R, self.x, y0, self.y,
-            varmap=self.varmap,
-            y0_ctx=self._y0_ctx if y0_ctx is None else y0_ctx)
-
-    @property
-    def y0_ctx(self) -> List[Optional[sg.RIF]]:
-        return self._y0_ctx
-
-    @property
-    def y0_composed(self) -> List[sg.RIF]:
-        return [
-            y0a + y0b if y0b else y0a
-            for (y0a, y0b)
-            in zip(self.y0,
-                   self.y0_ctx if self.y0_ctx else itertools.cycle([None]))
-        ]
-
-    @property
-    def PR(self):
-        return self._poly_var_ring
-
-    def embed(self, expr):
-        """Embed an expression from the global variable manager
-        within the variables of the system."""
-        return self.R(sg.SR(expr).substitute({
-            var(n): v
-            for n, v in self.varmap.items()
-        }))
-    
-    # @classmethod
-    # def embed_subsystem(Cls, subsys : 'System', sys : 'System', expr):
-    #     return sys.R(sg.SR(expr).substitute(**{
-    #             v: sys.v(n)
-    #             for n, v in subsys.varmap.items()
-    #         }))
-
-    @classmethod 
-    def load_from_script(Cls, filename : str):
-        data : dict = {}
-
-        exec(Path(filename).read_text(), data)
-
-        if data['y'] is not None:
-            return System(data['R'], data['x'], data['y0'], data['y'],
-                          varmap=data['varmap'])
-        else:
-            return System(sg.SR, data['xsr'], data['y0'], data['ysr'],
-                varmap={k: v for k, v in data['varmapsr'].items()})
-        
-    @property
-    def R(self):
-        return self._R
-
-    @property
-    def x(self) -> tuple:
-        return self._x
-
-    @property
-    def y0(self) -> tuple:
-        return self._y0
-
-    @property
-    def y(self) -> tuple:
-        return self._y
-
-    @property
-    def varmap(self) -> dict:
-        if self._varmap is not None:
-            return self._varmap
-        else:
-            return {str(x): x for x in self.x}
-
-    def v(self, name : str) -> Any: 
-        """Lookup a variable with a given name."""
-        return self.varmap[name]
-
-    def n(self, name : str) -> Any: 
-        """Lookup the bond-calculus name for a variable with a given name."""
-        return str(self.varmap[name])
-    
-    def varname(self, var) -> str:
-        """Lookup the name of a given variable."""
-        return str(self.varmap.inv[var])
-
-    def __repr__(self):
-        return "System(R, {}, {}, {}".format(
-            self.x, fintervals(self.y0), self.y,
-        ) + (", varmap={})".format(repr(self.varmap))
-             if self.varmap is not None
-             else ")")
-
-    def streamline_plot(self, xarg, yarg, **kwargs):
-        (x, xmin, xmax) = xarg
-        (y, ymin, ymax) = yarg
-
-        # Allow either numbers or variables as args
-        if isinstance(x, int):
-            ix = x
-            x = self.x[ix]
-            y = self.x[iy]
-        else:
-            ix = list(self.x).index(x)
-            iy = list(self.x).index(y)
-
-        # return the streamline plot
-        return sg.streamline_plot(
-            (self.y[ix], self.y[iy]),
-            (x, xmin, xmax),
-            (y, ymin, ymax),
-            **kwargs,
-        )
-
-    def reach(self, duration, **kwargs) -> Reach:
-        if self._y0_ctx is None:
-            # Single, unified initial set
-            y0 = self.y0
-        else:
-            # Fixed initial set with variable context
-            y0 = list(zip(self._y0_ctx, self.y0))
-
-        try:
-            # First segment: context, second segment, static portion
-            print(f"calling reach with y0 = {[('None' if a is None else a.str(style='brackets'), b.str(style='brackets')) for a, b in y0]}")
-        except TypeError:
-            print(f"calling reach with y0 = {[a.str(style='brackets') for a in y0]}")
-
-        if self.R == sg.SR:
-            # Non-Polynomial case
-            return Reach(
-                self.x,
-                self.y,
-                y0,
-                duration,
-                system=self,
-                **kwargs,
-            )
-        else:
-            # Polynomial case
-            # print("reach polynomial case")
-            return Reach(
-                self.y,
-                y0,
-                duration,
-                system=self,
-                vars=self.x,
-                **kwargs,
-            )
 
 
 class BondSystem(System):

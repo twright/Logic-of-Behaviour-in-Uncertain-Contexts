@@ -16,7 +16,7 @@ from ulbc.interval_utils import (finterval, int_dist,
 from ulbc.logic import Atomic
 from ulbc.signal_masks import Mask
 from flowstar.tests.test_reachability import ringxy, odes, reach, initials
-from ulbc.bondcalculus import System
+from ulbc.systems import System
 # import faulthandler
 from flowstar.reachability import Reach, InitialForm
 

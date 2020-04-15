@@ -15,7 +15,7 @@ from sage.all import RIF, region_plot
 from ulbc.interval_root_isolation import isolate_roots
 from flowstar.reachability import FlowstarFailedException
 from ulbc.interval_utils import inner_inverse_minkowski, int_dist
-from ulbc.bondcalculus import System
+from ulbc.systems import System
 
 
 __all__ = ('to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',

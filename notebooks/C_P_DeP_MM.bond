@@ -1,0 +1,15 @@
+species S = signal -> S;
+
+species R = phosphorylate -> RP;
+
+species RP = dephosphorylate -> R;
+
+kinetic law MM1(k,km; S,R) = (k*S*R) / (km + R);
+kinetic law MM2(k,km; RP)  = (k*RP) / (km + RP);
+
+affinity network N(k1, k2, km1, km2) = {
+    signal || phosphorylate at rate MM1(k1,km1);
+    dephosphorylate at rate MM2(k2,km2);
+}
+
+process Pi = [1.0] S || [1.0] R || [0.0] RP with network N(1,1,0.05,0.05);
