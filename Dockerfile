@@ -6,11 +6,12 @@ RUN dnf -y install git wget glpk-devel bison bison-devel flex patch ImageMagick-
 RUN wget -qO- https://get.haskellstack.org/ | sh
 ENV PATH="/root/.local/bin:${PATH}"
 # Update this line with specific bondwb revision
-RUN git clone -n https://github.com/twright/bondwb.git && cd bondwb && git checkout f639a0e8332e67d1c16f4c7d35c537e77a67ff20 
+RUN git clone -n https://github.com/twright/bondwb.git && cd bondwb && git checkout ba7ccec5140618cbc32a150fa6743f415fc93c3a
 # RUN cd bondwb && perl -pe 's/(?<=enable: )true/false/g' stack.yaml && stack setup
 #COPY local.patch bondwb/local.patch
 RUN cd bondwb && ./install-deps-fedora.sh #&& patch < local.patch 
 RUN cd bondwb && stack setup && stack install && ./install-bins.sh
+RUN dnf -y install python3-pip
 COPY . lbuc
 RUN useradd -m -s /bin/bash -N -u 1000 lbuc && chown -R lbuc lbuc && chown -R lbuc bondwb
 USER lbuc
