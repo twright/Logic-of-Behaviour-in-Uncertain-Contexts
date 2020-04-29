@@ -69,7 +69,10 @@ cdef class CReach:
         # Associate system object
         self.system = kwargs.get('system', None)
         # Create instrumentor for time logging
-        self.instrumentor = AggregateMetric()
+        try:
+            self.instrumentor = kwargs['instrumentor']
+        except KeyError:
+            self.instrumentor = AggregateMetric()
         # Create global variable manager
         self.global_manager = FlowstarGlobalManager(self.instrumentor)
 

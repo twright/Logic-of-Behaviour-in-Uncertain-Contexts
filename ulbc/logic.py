@@ -71,7 +71,11 @@ class Logic(metaclass=ABCMeta):
         system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
 
         if precompose_systems:
-            with instrument.block(name="Precomposing Contexts"):
+            with instrument.block(
+                    name="Precomposing Contexts",
+                    metric=kwargs['instrumentor'].metric
+                        if 'instrumentor' in kwargs
+                        else instrument.call_default):
                 composed = self.with_system(system)
             return composed.signal(duration, **kwargs)
         else:
@@ -82,7 +86,11 @@ class Logic(metaclass=ABCMeta):
         use_masks |= mask is not None
         t0 = time.perf_counter()
         
-        with instrument.block(name="Running Flow*"):
+        with instrument.block(
+                name="Running Flow*",
+                metric=kwargs['instrumentor'].metric
+                    if 'instrumentor' in kwargs
+                    else instrument.call_default):
             reach = system.reach(
                 # Run for a little extra time to make sure endpoint of
                 # interval is strictly inside time-domain of reachset
@@ -107,7 +115,11 @@ class Logic(metaclass=ABCMeta):
         print("Computed {} flowpipes in {} sec".format(
             reach.num_flowpipes, t1 - t0))
         reach.prepare()
-        with instrument.block(name=f"Monitoring Signal for {str(self)}"):
+        with instrument.block(
+                name=f"Monitoring Signal for {str(self)}",
+                metric=kwargs['instrumentor'].metric
+                    if 'instrumentor' in kwargs
+                    else instrument.call_default):
             res = self.signal(reach, mask=mask, **kwargs
                             ).to_domain(RIF(0, duration))
         reach.instrumentor.print()
@@ -392,8 +404,12 @@ class Atomic(Logic):
 
         # Do the smart thing in the case of duration 0
         if duration == 0:
-            with instrument.block(name=f"Trivial atomic monitoring for "
-                f"{str(self)}"):
+            with instrument.block(
+                    name=f"Trivial atomic monitoring for "
+                         f"{str(self)}",
+                    metric=kwargs['instrumentor'].metric
+                        if 'instrumentor' in kwargs
+                        else instrument.call_default):
                 mask = mask_zero if use_masks else None
                 # print("our mask =", repr(mask))
                 initials = system.y0
@@ -487,10 +503,15 @@ class Atomic(Logic):
 
         print(f"symbolic_composition={observer.symbolic_composition}, tentative_unpreconditioning={observer.tentative_unpreconditioning},two_pass_masks={two_pass_masks}")
 
-        return self.signal_from_observer(
-            observer,
-            **kwargs
-        )
+        with instrument.block(
+                name=f"Monitoring atomic {self}",
+                metric=kwargs['instrumentor'].metric
+                    if 'instrumentor' in kwargs
+                    else instrument.call_default):
+            return self.signal_from_observer(
+                observer,
+                **kwargs
+            )
 
     def signal_fn(self, _, observer, mask=None, **kwargs):
         # str_abs_space_domain = [[sage.QQ(w)
