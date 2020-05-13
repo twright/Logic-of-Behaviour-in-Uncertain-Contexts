@@ -1,7 +1,15 @@
 import sys, os, warnings
 from contextlib import contextmanager
+import gc
 
 sys.path.insert(0, "/home/twright/Documents/PhD/Notebooks")
+
+@contextmanager
+def pause_gc():
+    gc.disable()
+    yield
+    gc.enable()
+    gc.collect()
 
 
 @contextmanager
@@ -60,6 +68,7 @@ y0 = [
 system = System(R, R.gens(), y0, y)
 
 
+@pause_gc
 def test_monitoring(prop, duration, **kwargs):
     t0 = time.time()
     sig = prop.signal_for_system(system,
@@ -78,7 +87,7 @@ def test_monitoring(prop, duration, **kwargs):
 import concurrent.futures as fut
 import flowstar.instrumentation as instrumentation
 
-pool = fut.ProcessPoolExecutor(4)
+pool = fut.ProcessPoolExecutor(7)
 
 thread_pool = fut.ThreadPoolExecutor(100)
 
@@ -161,7 +170,6 @@ def gen_results_managed(*args, warmup=0, **kwargs):
     for r in results:
         r['result'] = r['future'].result()
         del r['future']
-    restart_pool()
     return results[warmup:]
 
 

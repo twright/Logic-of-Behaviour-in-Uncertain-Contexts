@@ -80,7 +80,7 @@ cdef class CReach:
             ## Copy constructor
             self._init_clone(*args)
         elif isinstance(args[1][0], str):
-            ## Construct from string formatted ODE arguments 
+            ## Construct from string formatted ODE arguments
             self._init_non_polynomial_str_args(*args, **kwargs)
         elif any(isinstance(ode, sage.Expression) for ode in args[1]):
             print("ode in symbolic ring")
@@ -91,6 +91,10 @@ cdef class CReach:
             ## Construct polynomial from arguments
             self._init_args(*args, **kwargs)
         assert self.system_vars is not None
+
+    def __dealloc__(CReach self):
+        print("Deallocing CReach")
+        # self.global_manager.clear()
 
     @property
     def vars(self):
@@ -506,7 +510,7 @@ cdef class CReach:
         self.ode_strs = other.ode_strs
         self.skip_unpreconditioning = other.skip_unpreconditioning
 
-        continuousProblem = other.global_manager.continuousProblem[0]
+        continuousProblem = other.global_manager.continuousProblem
 
         if initials is not None:
             self._handle_initials(

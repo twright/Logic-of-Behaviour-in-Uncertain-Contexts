@@ -1,5 +1,6 @@
 cimport flowstar.interval as interval
 from flowstar.Continuous cimport ContinuousReachability, ContinuousSystem, Flowpipe, domainVarNames
+from flowstar.Continuous cimport *
 from flowstar.Polynomial cimport (Polynomial, power_4, double_factorial,
                                   factorial_rec)
 from flowstar.modelParser cimport (continuousProblem)
@@ -73,11 +74,10 @@ global_manager_stack = []
 cdef class FlowstarGlobalManager:
     def __cinit__(FlowstarGlobalManager self,
         instrumentor):
-        self.continuousProblem = new ContinuousReachability()
         self.instrumentor = instrumentor
 
     def __dealloc__(self):
-        del self.continuousProblem
+        print("Deallocing GlobalManager")
 
     @property
     def active(self):
@@ -115,7 +115,7 @@ cdef class FlowstarGlobalManager:
         global domainVarNames
         global continuousProblem
 
-        # continuousProblem = ContinuousReachability()
+        continuousProblem = ContinuousReachability()
         factorial_rec.clear()
         power_4.clear()
         double_factorial.clear()
@@ -130,7 +130,7 @@ cdef class FlowstarGlobalManager:
         global continuousProblem
 
         swap_continuous_reachability(
-            self.continuousProblem[0],
+            self.continuousProblem,
             continuousProblem,
         )
         self.domainVarNames.swap(domainVarNames)
@@ -142,6 +142,7 @@ cdef class FlowstarGlobalManager:
         if self.active:
             self.clear_globals()
         else:
+            self.continuousProblem = ContinuousReachability()
             self.domainVarNames.clear()
             self.factorial_rec.clear()
             self.power_4.clear()
@@ -162,9 +163,11 @@ cdef class FlowstarGlobalManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         global global_manager_stack
+        global continuousProblem
 
         assert self.active
 
+        print(f"original num_flowpipes = {continuousProblem.flowpipes.size()}")
         global_manager_stack.pop()
 
         if not self.active:
@@ -172,3 +175,4 @@ cdef class FlowstarGlobalManager:
                     name="capturing globals [on exit]",
                     metric=self.instrumentor.metric):
                 self.swap_globals()
+        

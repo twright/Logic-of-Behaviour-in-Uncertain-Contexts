@@ -20,8 +20,7 @@ cdef swap_continuous_reachability(
 
 
 cdef class FlowstarGlobalManager:
-    cdef ContinuousReachability* continuousProblem
-    cdef previous_global_manager
+    cdef ContinuousReachability continuousProblem
     cdef vector[Interval] factorial_rec
     cdef vector[Interval] power_4
     cdef vector[Interval] double_factorial

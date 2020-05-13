@@ -54,7 +54,7 @@ cdef extern from "Continuous.h" namespace "flowstar" nogil:
         cbool bAuto
 
     cdef cppclass ContinuousReachability:
-        CountinuousReachability()
+        ContinuousReachability()
 
         int run()
         int numOfFlowpipes()
