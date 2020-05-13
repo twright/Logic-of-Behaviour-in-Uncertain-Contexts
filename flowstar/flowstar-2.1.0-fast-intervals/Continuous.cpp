@@ -787,7 +787,7 @@ int Flowpipe::advance_picard(Flowpipe & result, const std::vector<HornerForm> & 
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -993,7 +993,7 @@ int Flowpipe::advance_picard(Flowpipe & result, const std::vector<HornerForm> & 
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -1201,7 +1201,7 @@ int Flowpipe::advance_picard(Flowpipe & result, const std::vector<HornerForm> & 
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -1438,7 +1438,7 @@ int Flowpipe::advance_picard(Flowpipe & result, const std::vector<HornerForm> & 
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -1668,7 +1668,7 @@ int Flowpipe::advance_picard(Flowpipe & result, const std::vector<HornerForm> & 
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -1916,7 +1916,7 @@ int Flowpipe::advance_picard(Flowpipe & result, const std::vector<HornerForm> & 
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -2250,7 +2250,7 @@ int Flowpipe::advance_low_degree(Flowpipe & result, const std::vector<HornerForm
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -2456,7 +2456,7 @@ int Flowpipe::advance_low_degree(Flowpipe & result, const std::vector<HornerForm
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -2665,7 +2665,7 @@ int Flowpipe::advance_low_degree(Flowpipe & result, const std::vector<HornerForm
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -2903,7 +2903,7 @@ int Flowpipe::advance_low_degree(Flowpipe & result, const std::vector<HornerForm
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -3136,7 +3136,7 @@ int Flowpipe::advance_low_degree(Flowpipe & result, const std::vector<HornerForm
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -3384,7 +3384,7 @@ int Flowpipe::advance_low_degree(Flowpipe & result, const std::vector<HornerForm
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -3769,7 +3769,7 @@ int Flowpipe::advance_high_degree(Flowpipe & result, const std::vector<HornerFor
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -4009,7 +4009,7 @@ int Flowpipe::advance_high_degree(Flowpipe & result, const std::vector<HornerFor
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -4253,7 +4253,7 @@ int Flowpipe::advance_high_degree(Flowpipe & result, const std::vector<HornerFor
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -4526,7 +4526,7 @@ int Flowpipe::advance_high_degree(Flowpipe & result, const std::vector<HornerFor
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -4795,7 +4795,7 @@ int Flowpipe::advance_high_degree(Flowpipe & result, const std::vector<HornerFor
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -5079,7 +5079,7 @@ int Flowpipe::advance_high_degree(Flowpipe & result, const std::vector<HornerFor
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -7149,7 +7149,7 @@ int Flowpipe::advance_picard_symbolic_remainder(Flowpipe & result, const std::ve
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -7391,7 +7391,7 @@ int Flowpipe::advance_picard_symbolic_remainder(Flowpipe & result, const std::ve
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);
@@ -7658,7 +7658,7 @@ int Flowpipe::advance_picard_symbolic_remainder(Flowpipe & result, const std::ve
 	}
 
 	TaylorModelVec tmvTemp;
-	std::vector<RangeTree *> trees;
+	std::vector<RangeTree> trees;
 
 	std::vector<Interval> xPolyRange;
 	x.polyRangeNormal(xPolyRange, step_exp_table);

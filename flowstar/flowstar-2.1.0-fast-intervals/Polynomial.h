@@ -9,6 +9,7 @@
 #ifndef POLYNOMIAL_H_
 #define POLYNOMIAL_H_
 
+#include <memory>
 #include "Monomial.h"
 #include "Matrix.h"
 
@@ -29,11 +30,12 @@ class RangeTree
 {
 public:
 	std::list<Interval> ranges;
-	std::list<RangeTree *> children;
+	std::list<RangeTree> children;
 
 	RangeTree();
-	RangeTree(const std::list<Interval> & ranges_input, const std::list<RangeTree *> & children_input);
+	RangeTree(const std::list<Interval> & ranges_input, const std::list<RangeTree> & children_input);
 	RangeTree(const RangeTree & tree);
+	RangeTree(const RangeTree && tree);
 	~RangeTree();
 
 	RangeTree & operator = (const RangeTree & tree);
@@ -69,9 +71,9 @@ public:
 	void insert_ctrunc_normal(TaylorModel & result, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold) const;
 	void insert_ctrunc_normal_no_cutoff(TaylorModel & result, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order) const;
 
-	void insert_ctrunc_normal(TaylorModel & result, RangeTree * & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold) const;
-	void insert_ctrunc_normal_no_cutoff(TaylorModel & result, RangeTree * & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order) const;
-	void insert_only_remainder(Interval & result, RangeTree *tree, const TaylorModelVec & vars, const Interval & timeStep) const;
+	void insert_ctrunc_normal(TaylorModel & result, RangeTree & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold) const;
+	void insert_ctrunc_normal_no_cutoff(TaylorModel & result, RangeTree & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order) const;
+	void insert_only_remainder(Interval & result, const RangeTree & tree, const TaylorModelVec & vars, const Interval & timeStep) const;
 
 	void dump(FILE *fp, const std::vector<std::string> & varNames) const;	// only for tests
 

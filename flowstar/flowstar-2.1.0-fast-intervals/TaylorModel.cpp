@@ -2866,14 +2866,14 @@ void TaylorModelVec::Picard_ctrunc_normal_assign(const TaylorModelVec & x0, cons
 	*this = result;
 }
 
-void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<RangeTree *> & trees, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold, const std::vector<bool> & constant) const
+void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<RangeTree> & trees, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold, const std::vector<bool> & constant) const
 {
 	TaylorModelVec tmvTemp;
 
 	trees.clear();
 	for(int i=0; i<ode.size(); ++i)
 	{
-		trees.push_back(NULL);
+		trees.push_back(RangeTree());
 	}
 /*
 	if(order <= 1)
@@ -2911,14 +2911,14 @@ void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<R
 	x0.add(result, tmvTemp2);
 }
 
-void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<RangeTree *> & trees, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<Interval> & step_exp_table, const int numVars, const std::vector<int> & orders, const Interval & cutoff_threshold, const std::vector<bool> & constant) const
+void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<RangeTree> & trees, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<Interval> & step_exp_table, const int numVars, const std::vector<int> & orders, const Interval & cutoff_threshold, const std::vector<bool> & constant) const
 {
 	TaylorModelVec tmvTemp;
 
 	trees.clear();
 	for(int i=0; i<ode.size(); ++i)
 	{
-		trees.push_back(NULL);
+		trees.push_back(RangeTree());
 	}
 
 	for(int i=0; i<ode.size(); ++i)
@@ -2953,7 +2953,7 @@ void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<R
 	x0.add(result, tmvTemp2);
 }
 
-void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<RangeTree *> & trees, std::vector<std::vector<Interval> > & trunc_parts, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<std::vector<bool> > & substitution, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold) const
+void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<RangeTree> & trees, std::vector<std::vector<Interval> > & trunc_parts, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<std::vector<bool> > & substitution, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold) const
 {
 	TaylorModelVec tmvTemp;
 	Interval intZero;
@@ -2961,7 +2961,7 @@ void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<R
 	trees.clear();
 	for(int i=0; i<ode.size(); ++i)
 	{
-		trees.push_back(NULL);
+		trees.push_back(RangeTree());
 	}
 /*
 	TaylorModelVec simplified_tms = *this;
@@ -3059,7 +3059,7 @@ void TaylorModelVec::Picard_ctrunc_normal(TaylorModelVec & result, std::vector<R
 	x0.add(result, tmvTemp2);
 }
 
-void TaylorModelVec::Picard_only_remainder(std::vector<Interval> & result, std::vector<RangeTree *> & trees, std::vector<std::vector<Interval> > & trunc_parts, const TaylorModelVec & x0, const std::vector<HornerForm> & ode, const Interval & timeStep) const
+void TaylorModelVec::Picard_only_remainder(std::vector<Interval> & result, std::vector<RangeTree> & trees, std::vector<std::vector<Interval> > & trunc_parts, const TaylorModelVec & x0, const std::vector<HornerForm> & ode, const Interval & timeStep) const
 {
 	result.clear();
 
@@ -3079,14 +3079,14 @@ void TaylorModelVec::Picard_only_remainder(std::vector<Interval> & result, std::
 	}
 }
 
-void TaylorModelVec::Picard_ctrunc_normal_no_cutoff(TaylorModelVec & result, std::vector<RangeTree *> & trees, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<Interval> & step_exp_table, const int numVars, const int order) const
+void TaylorModelVec::Picard_ctrunc_normal_no_cutoff(TaylorModelVec & result, std::vector<RangeTree> & trees, const TaylorModelVec & x0, const std::vector<Interval> & polyRange, const std::vector<HornerForm> & ode, const std::vector<Interval> & step_exp_table, const int numVars, const int order) const
 {
 	TaylorModelVec tmvTemp;
 
 	trees.clear();
 	for(int i=0; i<ode.size(); ++i)
 	{
-		trees.push_back(NULL);
+		trees.push_back(RangeTree());
 	}
 
 	if(order <= 1)
@@ -3153,7 +3153,7 @@ void TaylorModelVec::Picard_ctrunc_normal_no_cutoff(TaylorModelVec & result, std
 }
 */
 
-void TaylorModelVec::Picard_only_remainder(std::vector<Interval> & result, std::vector<RangeTree *> & trees, const TaylorModelVec & x0, const std::vector<HornerForm> & ode, const Interval & timeStep, const std::vector<bool> & constant) const
+void TaylorModelVec::Picard_only_remainder(std::vector<Interval> & result, std::vector<RangeTree> & trees, const TaylorModelVec & x0, const std::vector<HornerForm> & ode, const Interval & timeStep, const std::vector<bool> & constant) const
 {
 	result.clear();
 
@@ -4274,11 +4274,3 @@ void sqrt_taylor_only_remainder(Interval & result, const Interval & remainder, s
 }
 
 }
-
-
-
-
-
-
-
-

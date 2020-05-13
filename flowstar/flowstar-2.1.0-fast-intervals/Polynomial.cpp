@@ -23,7 +23,7 @@ RangeTree::RangeTree()
 {
 }
 
-RangeTree::RangeTree(const std::list<Interval> & ranges_input, const std::list<RangeTree *> & children_input)
+RangeTree::RangeTree(const std::list<Interval> & ranges_input, const std::list<RangeTree> & children_input)
 {
 	ranges = ranges_input;
 	children = children_input;
@@ -35,15 +35,14 @@ RangeTree::RangeTree(const RangeTree & tree)
 	children = tree.children;
 }
 
+RangeTree::RangeTree(const RangeTree && tree)
+{
+	ranges = std::move(tree.ranges);
+	children = std::move(tree.children);
+}
+
 RangeTree::~RangeTree()
 {
-	std::list<RangeTree *>::iterator iter = children.begin();
-
-	for(; iter!=children.end(); ++iter)
-	{
-		delete *iter;
-	}
-
 	ranges.clear();
 	children.clear();
 }
@@ -58,30 +57,6 @@ RangeTree & RangeTree::operator = (const RangeTree & tree)
 
 	return *this;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -403,7 +378,7 @@ void HornerForm::insert_ctrunc_normal_no_cutoff(TaylorModel & result, const Tayl
 	}
 }
 
-void HornerForm::insert_ctrunc_normal(TaylorModel & result, RangeTree * & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold) const
+void HornerForm::insert_ctrunc_normal(TaylorModel & result, RangeTree & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order, const Interval & cutoff_threshold) const
 {
 	Interval intZero;
 	result.clear();
@@ -414,12 +389,11 @@ void HornerForm::insert_ctrunc_normal(TaylorModel & result, RangeTree * & tree, 
 		result = tmConstant;
 	}
 
-	RangeTree *pnode = new RangeTree;
 
 	if(hornerForms.size() > 0)						// the first variable is t
 	{
 		TaylorModel tmTemp;
-		RangeTree *child;
+		RangeTree child;
 
 		hornerForms[0].insert_ctrunc_normal(tmTemp, child, vars, varsPolyRange, step_exp_table, numVars, order, cutoff_threshold);
 
@@ -430,34 +404,33 @@ void HornerForm::insert_ctrunc_normal(TaylorModel & result, RangeTree * & tree, 
 		tmTemp.expansion.ctrunc_normal(intTrunc, step_exp_table, order);
 		tmTemp.remainder += intTrunc;
 
-		pnode->ranges.push_back(intTrunc);
-		pnode->children.push_back(child);
+		tree.ranges.push_back(std::move(intTrunc));
+		tree.children.emplace_back(child);
 
 		result.add_assign(tmTemp);
 
 		for(int i=1; i<hornerForms.size(); ++i)
 		{
 			TaylorModel tmTemp;
-			RangeTree *child;
+			RangeTree subChild;
 
-			hornerForms[i].insert_ctrunc_normal(tmTemp, child, vars, varsPolyRange, step_exp_table, numVars, order, cutoff_threshold);	// recursive call
+			hornerForms[i].insert_ctrunc_normal(tmTemp, subChild, vars, varsPolyRange, step_exp_table, numVars, order, cutoff_threshold);	// recursive call
 
 			Interval tm1, intTrunc2;
 			tmTemp.mul_insert_ctrunc_normal_assign(tm1, intTrunc2, vars.tms[i-1], varsPolyRange[i-1], step_exp_table, order, cutoff_threshold); 	// here coefficient_range = tm1
 
-			pnode->ranges.push_back(tm1);
-			pnode->ranges.push_back(varsPolyRange[i-1]);
-			pnode->ranges.push_back(intTrunc2);
-			pnode->children.push_back(child);
+			// Definitely tree and not child?
+			tree.ranges.push_back(tm1);
+			tree.ranges.push_back(varsPolyRange[i-1]);
+			tree.ranges.push_back(intTrunc2);
+			tree.children.emplace_back(subChild);
 
 			result.add_assign(tmTemp);
 		}
 	}
-
-	tree = pnode;
 }
 
-void HornerForm::insert_ctrunc_normal_no_cutoff(TaylorModel & result, RangeTree * & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order) const
+void HornerForm::insert_ctrunc_normal_no_cutoff(TaylorModel & result, RangeTree & tree, const TaylorModelVec & vars, const std::vector<Interval> & varsPolyRange, const std::vector<Interval> & step_exp_table, const int numVars, const int order) const
 {
 	Interval intZero;
 	result.clear();
@@ -468,12 +441,10 @@ void HornerForm::insert_ctrunc_normal_no_cutoff(TaylorModel & result, RangeTree 
 		result = tmConstant;
 	}
 
-	RangeTree *pnode = new RangeTree;
-
 	if(hornerForms.size() > 0)						// the first variable is t
 	{
 		TaylorModel tmTemp;
-		RangeTree *child;
+		RangeTree child;
 
 		hornerForms[0].insert_ctrunc_normal_no_cutoff(tmTemp, child, vars, varsPolyRange, step_exp_table, numVars, order);
 
@@ -484,40 +455,38 @@ void HornerForm::insert_ctrunc_normal_no_cutoff(TaylorModel & result, RangeTree 
 		tmTemp.expansion.ctrunc_normal(intTrunc, step_exp_table, order);
 		tmTemp.remainder += intTrunc;
 
-		pnode->ranges.push_back(intTrunc);
-		pnode->children.push_back(child);
+		tree.ranges.push_back(intTrunc);
+		tree.children.emplace_back(child);
 
 		result.add_assign(tmTemp);
 
 		for(int i=1; i<hornerForms.size(); ++i)
 		{
 			TaylorModel tmTemp;
-			RangeTree *child;
+			RangeTree subChild;
 
-			hornerForms[i].insert_ctrunc_normal_no_cutoff(tmTemp, child, vars, varsPolyRange, step_exp_table, numVars, order);	// recursive call
+			hornerForms[i].insert_ctrunc_normal_no_cutoff(tmTemp, subChild, vars, varsPolyRange, step_exp_table, numVars, order);	// recursive call
 
 			Interval tm1, intTrunc2;
 			tmTemp.mul_insert_ctrunc_normal_no_cutoff_assign(tm1, intTrunc2, vars.tms[i-1], varsPolyRange[i-1], step_exp_table, order); 	// here coefficient_range = tm1
 
-			pnode->ranges.push_back(tm1);
-			pnode->ranges.push_back(varsPolyRange[i-1]);
-			pnode->ranges.push_back(intTrunc2);
-			pnode->children.push_back(child);
+			tree.ranges.push_back(tm1);
+			tree.ranges.push_back(varsPolyRange[i-1]);
+			tree.ranges.push_back(intTrunc2);
+			tree.children.emplace_back(subChild);
 
 			result.add_assign(tmTemp);
 		}
 	}
-
-	tree = pnode;
 }
 
-void HornerForm::insert_only_remainder(Interval & result, RangeTree *tree, const TaylorModelVec & vars, const Interval & timeStep) const
+void HornerForm::insert_only_remainder(Interval & result, const RangeTree & tree, const TaylorModelVec & vars, const Interval & timeStep) const
 {
 	Interval intZero;
 
 	result = intZero;
-	std::list<Interval>::const_iterator iter = tree->ranges.begin();
-	std::list<RangeTree *>::const_iterator child = tree->children.begin();
+	std::list<Interval>::const_iterator iter = tree.ranges.begin();
+	std::list<RangeTree>::const_iterator child = tree.children.begin();
 
 	if(hornerForms.size() > 0)						// the first variable is t
 	{
