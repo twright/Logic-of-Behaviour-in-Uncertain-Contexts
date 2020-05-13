@@ -1,6 +1,11 @@
 flowstar/*.cpp
 flowstar/*.c
 flowstar/*.h
+flowstar/**/*.model
+**.core.*
+**.out.*
+**.insyncdl
+.eggs/*
 **/.ipynb_checkpoints/*
 .tags
 .tags_swap
