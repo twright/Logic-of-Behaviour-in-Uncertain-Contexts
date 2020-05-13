@@ -665,12 +665,15 @@ bool Interval::within(const Interval & I, const double e) const
 
 double Interval::width() const
 {
-	std::fesetround(FE_UPWARD);
+	saveMode();
+	setMode(FE_UPWARD);
 	return up - lo;
+	restoreMode();
 }
 
 void Interval::width(Interval & W) const
 {
+	saveMode();
 	setMode(FE_UPWARD);
 	W.lo = up - lo;
 	W.up = W.up;
@@ -731,24 +734,17 @@ void Interval::abs_assign()
 
 bool Interval::subseteq(const Interval & I) const
 {
-	if( (I.lo <= lo) && (I.up >= up) )
-		return true;
-	return false;
+	return (I.lo <= lo) && (I.up >= up);
 }
 
 bool Interval::supseteq(const Interval & I) const
 {
-	if( (lo <= I.lo) && (up >= I.up) )
-		return true;
-	return false;
+	return (lo <= I.lo) && (up >= I.up);
 }
 
 bool Interval::valid() const
 {
-	if(up >= lo) {
-		return true;
-	}
-	return false;
+	return up >= lo;
 }
 
 bool Interval::operator == (const Interval & I) const
