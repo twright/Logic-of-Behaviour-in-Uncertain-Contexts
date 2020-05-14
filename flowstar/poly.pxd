@@ -1,6 +1,6 @@
 # from __future__ import absolute_import
 
-from flowstar.Polynomial cimport Polynomial
+from flowstar.Polynomial cimport Polynomial, HornerForm
 from flowstar.Interval cimport Interval
 from flowstar.TaylorModel cimport TaylorModelVec, TaylorModel
 from flowstar.interval cimport interval_fn, interval_time_fn, \
@@ -15,6 +15,22 @@ cdef TaylorModel compose(const Polynomial & P,
                          const int order,
                          const Interval cutoff_threshold,
                          int verbosity=?) nogil
+
+
+cdef TaylorModel fast_compose(const Polynomial & p,
+                              const TaylorModelVec tmv,
+                              const vector[Interval] & domain,
+                              const int order,
+                              const Interval cutoff_threshold,
+                              int verbosity=?) nogil
+
+
+cdef TaylorModel fast_compose_hf(const HornerForm & hf,
+                              const TaylorModelVec tmv,
+                              const vector[Interval] & domain,
+                              const int order,
+                              const Interval cutoff_threshold,
+                              int verbosity=?) nogil
 
 cdef extern from * nogil:
     """
@@ -34,12 +50,14 @@ cdef extern from * nogil:
 
     std::function<flowstar::Interval(const flowstar::Interval&)>
     poly_time_fn(const flowstar::Polynomial & p) {
-        return [p](const flowstar::Interval & t) -> flowstar::Interval {
+        flowstar::HornerForm hf;
+        p.toHornerForm(hf);
+        return [hf](const flowstar::Interval & t) -> flowstar::Interval {
             flowstar::Interval res;
             std::vector<flowstar::Interval> v;
             v.push_back(t);
             // v.push_back(t);
-            p.intEval(res, v);
+            hf.intEval(res, v);
             return res;
         };
     }

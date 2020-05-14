@@ -30,7 +30,7 @@ from flowstar.tribool cimport tribool, unknown
 from flowstar.tribool cimport and_ as tri_and
 from flowstar.reachability import Reach
 from flowstar.global_manager import flowstar_globals
-from flowstar.observable cimport observable
+from flowstar.observable cimport observable, observable_hf
 from flowstar.modelParser cimport continuousProblem
 
 
@@ -42,6 +42,7 @@ cdef class RestrictedObserver(PolyObserver):
     def __init__(RestrictedObserver self, PolyObserver p,
                  list space_domain not None):
         self.f = p.f
+        p.f.c_poly.toHornerForm(self.f_hf)
         self.fprime = p.fprime
         self.poly_f_fns = p.poly_f_fns
         self.poly_fprime_fns = p.poly_fprime_fns
@@ -803,9 +804,15 @@ cdef class FunctionObserver:
         if self.symbolic_composition and not poly_f_fn.has_value():
             # Define f and fprime by symbolically composing polynomials
             # print("Performing symbolic composition!")
-            observable(
+            # observable_hf( 
+            #     f_fn, fprime_fn,
+            #     (<PolyObserver?>self).f_hf, tmv, deref(loop_domain),
+            #     continuousProblem.globalMaxOrder,
+            #     continuousProblem.cutoff_threshold,
+            # )
+            observable( 
                 f_fn, fprime_fn,
-                (<Poly?>self.f).c_poly, tmv, deref(loop_domain),
+                (<PolyObserver?>self).f.c_poly, tmv, deref(loop_domain),
                 continuousProblem.globalMaxOrder,
                 continuousProblem.cutoff_threshold,
             )
@@ -1042,6 +1049,7 @@ cdef class PolyObserver(FunctionObserver):
         ))
 
         self.f = Poly(f)
+        self.f.c_poly.toHornerForm(self.f_hf)
         self.reach = reach
         if fprime is not None:
             print(f"fprime = {repr(fprime)}")

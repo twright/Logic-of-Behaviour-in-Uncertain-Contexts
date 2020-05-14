@@ -38,6 +38,7 @@ cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
     Polynomial expansion
     Interval remainder
 
+    void insert_ctrunc(TaylorModel & result, const TaylorModelVec & vars, const vector[Interval] & varsPolyRange, const vector[Interval] & domain, const int order, const Interval & cutoff_threshold) const
     # RangeTree related operations
     void polyRangeNormal(Interval & result, const vector[Interval] & step_exp_table) const
 
@@ -92,3 +93,7 @@ cdef extern from "TaylorModel.h" namespace "flowstar" nogil:
                  const vector[Interval] & domain) const
 
     vector[TaylorModel] tms
+
+    void polyRange(vector[Interval] & result, const vector[Interval] & domain) const
+
+    void insert_ctrunc(TaylorModelVec & result, const TaylorModelVec & vars, const vector[Interval] & varsPolyRange, const vector[Interval] & domain, const int order, const Interval & cutoff_threshold) const

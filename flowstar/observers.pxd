@@ -9,6 +9,7 @@ from flowstar.poly cimport Poly
 from flowstar.reachability cimport CReach
 from flowstar.tribool cimport tribool
 from flowstar.Continuous cimport Flowpipe
+from flowstar.Polynomial cimport HornerForm
 
 
 
@@ -73,6 +74,7 @@ cdef class FunctionObserver:
 
 cdef class PolyObserver(FunctionObserver):
     cdef readonly Poly f
+    cdef HornerForm f_hf
     cdef readonly Poly fprime
 
     cdef Poly _fprime_given_f(PolyObserver self)

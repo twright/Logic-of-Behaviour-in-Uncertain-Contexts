@@ -6,7 +6,7 @@ from __future__ import (division,
 import pytest
 import sage.all as sage
 
-from flowstar.poly import (Poly, do_compose_test, do_tm_power_test,
+from flowstar.poly import (Poly, do_compose_test, do_fast_compose_test, do_tm_power_test,
                            do_tm_power_test2, poly_eval)
 
 
@@ -63,6 +63,10 @@ def test_tm_power2():
 
 def test_compose():
     assert (do_compose_test() == '(([9.0000000000 , 9.0000000000])) +'
+                                 ' [-8.0000000000 , 8.0000000000]')
+
+def test_fast_compose():
+    assert (do_fast_compose_test() == '(([9.0000000000 , 9.0000000000])) +'
                                  ' [-8.0000000000 , 8.0000000000]')
 
 

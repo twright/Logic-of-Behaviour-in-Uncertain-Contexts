@@ -11,7 +11,7 @@ import sage.all as sage
 from functools import reduce
 
 from flowstar.Polynomial cimport (Polynomial, PolyWrap, PolyWrapPtr,
-                                  PolynomialPtr)
+                                  PolynomialPtr, HornerForm)
 from flowstar.Monomial cimport Monomial, MonoWrapPtr, MonomialPtr
 from flowstar.TaylorModel cimport TaylorModelVec, TaylorModel
 from flowstar.interval cimport make_interval, compose_interval_fn
@@ -90,6 +90,218 @@ def do_tm_power_test2():
 
     return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
 
+cdef TaylorModel fast_compose_hf(const HornerForm & p,
+                         const TaylorModelVec tmv,
+                         const vector[Interval] & domain,
+                         const int order,
+                         const Interval cutoff_threshold,
+                         int verbosity = 0) nogil:
+    cdef:
+        vector[Interval] tmv_poly_range
+        TaylorModel res
+
+
+    tmv.polyRange(tmv_poly_range, domain)
+
+    p.insert_ctrunc(res, tmv, tmv_poly_range, domain, order, cutoff_threshold)
+
+    return res
+
+
+cdef TaylorModel fast_compose(const Polynomial & p,
+                         const TaylorModelVec tmv,
+                         const vector[Interval] & domain,
+                         const int order,
+                         const Interval cutoff_threshold,
+                         int verbosity = 0) nogil:
+    cdef:
+        HornerForm p_horner
+
+    p.toHornerForm(p_horner)
+
+    return fast_compose_hf(p_horner, tmv, domain,
+        order, cutoff_threshold, verbosity)
+
+def do_fast_compose_test():
+    from sage.all import RIF, PolynomialRing
+
+    R, (x, y) = PolynomialRing(RIF, 'x, y').objgens()
+
+    cdef Poly P = Poly(x**3 + y**2)
+
+    cdef Polynomial Q1 = Polynomial(0, 1, 3) * Interval(-2,2)
+    cdef Polynomial Q2 = Polynomial(Interval(3,3), 3)
+    cdef TaylorModelVec tmv
+    tmv.tms.push_back(TaylorModel(Q1))
+    tmv.tms.push_back(TaylorModel(Q2))
+
+    cdef vector[Interval] domain
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    cdef int order = 10
+    cdef Interval cutoff_threshold = Interval(-1e-20, 1e-20)
+
+    cdef TaylorModel tm = fast_compose(P.c_poly, tmv,
+                                       domain, order,
+                                       cutoff_threshold)
+
+    cdef string s
+    cdef string i
+    cdef vector[string] var_names
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
+
+    tm.expansion.toString(s, var_names)
+    tm.remainder.toString(i)
+
+    return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
+
+def do_compose_test2():
+    from sage.all import RIF, PolynomialRing
+
+    R, (x, y) = PolynomialRing(RIF, 'x, y').objgens()
+
+    cdef Poly P = Poly(x**3 + y**2 - y)
+
+    cdef Polynomial Q1 = Poly(2*x**3).c_poly
+    cdef Polynomial Q2 = Poly(2*x + 3*y**2).c_poly
+    cdef TaylorModelVec tmv
+    tmv.tms.push_back(TaylorModel(Q1))
+    tmv.tms.push_back(TaylorModel(Q2))
+
+    cdef vector[Interval] domain
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    cdef int order = 10
+    cdef Interval cutoff_threshold = Interval(-1e-20, 1e-20)
+
+    cdef TaylorModel tm = compose(P.c_poly, tmv,
+                                  domain, order,
+                                  cutoff_threshold)
+
+    cdef string s
+    cdef string i
+    cdef vector[string] var_names
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
+
+    tm.expansion.toString(s, var_names)
+    tm.remainder.toString(i)
+
+    return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
+
+def do_fast_compose_test2():
+    from sage.all import RIF, PolynomialRing
+
+    R, (x, y) = PolynomialRing(RIF, 'x, y').objgens()
+
+    cdef Poly P = Poly(x**3 + y**2 - y)
+
+    cdef Polynomial Q1 = Poly(2*x**3).c_poly
+    cdef Polynomial Q2 = Poly(2*x + 3*y**2).c_poly
+    cdef TaylorModelVec tmv
+    tmv.tms.push_back(TaylorModel(Q1))
+    tmv.tms.push_back(TaylorModel(Q2))
+
+    cdef vector[Interval] domain
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    cdef int order = 10
+    cdef Interval cutoff_threshold = Interval()
+
+    cdef TaylorModel tm = fast_compose(P.c_poly, tmv,
+                                       domain, order,
+                                       cutoff_threshold)
+
+    cdef string s
+    cdef string i
+    cdef vector[string] var_names
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
+
+    tm.expansion.toString(s, var_names)
+    tm.remainder.toString(i)
+
+    return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
+
+def do_compose_test3():
+    from sage.all import RIF, PolynomialRing
+
+    R, (x, y) = PolynomialRing(RIF, 'x, y').objgens()
+
+    cdef Poly P = Poly(x**3 + y**2 - y)
+
+    cdef Polynomial Q1 = Poly(2*x**3).c_poly
+    cdef Polynomial Q2 = Poly(2*x + 3*y**2).c_poly
+    cdef TaylorModelVec tmv
+    tmv.tms.push_back(TaylorModel(Q1))
+    tmv.tms.push_back(TaylorModel(Q2))
+
+    cdef vector[Interval] domain
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    cdef int order = 4
+    cdef Interval cutoff_threshold = Interval()
+
+    cdef TaylorModel tm = compose(P.c_poly, tmv,
+                                  domain, order,
+                                  cutoff_threshold)
+
+    cdef string s
+    cdef string i
+    cdef vector[string] var_names
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
+
+    tm.expansion.toString(s, var_names)
+    tm.remainder.toString(i)
+
+    return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
+
+def do_fast_compose_test3():
+    from sage.all import RIF, PolynomialRing
+
+    R, (x, y) = PolynomialRing(RIF, 'x, y').objgens()
+
+    cdef Poly P = Poly(x**3 + y**2 - y)
+
+    cdef Polynomial Q1 = Poly(2*x**3).c_poly
+    cdef Polynomial Q2 = Poly(2*x + 3*y**2).c_poly
+    cdef TaylorModelVec tmv
+    tmv.tms.push_back(TaylorModel(Q1))
+    tmv.tms.push_back(TaylorModel(Q2))
+
+    cdef vector[Interval] domain
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    cdef int order = 4
+    cdef Interval cutoff_threshold = Interval()
+
+    cdef TaylorModel tm = fast_compose(P.c_poly, tmv,
+                                       domain, order,
+                                       cutoff_threshold)
+
+    cdef string s
+    cdef string i
+    cdef vector[string] var_names
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
+
+    tm.expansion.toString(s, var_names)
+    tm.remainder.toString(i)
+
+    return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
+
 
 cdef TaylorModel compose(const Polynomial & P,
                          const TaylorModelVec tmv,
@@ -110,17 +322,18 @@ cdef TaylorModel compose(const Polynomial & P,
 
     cdef string s
     cdef vector[string] var_names
-    with gil:
-        var_names.push_back(b't')
-        var_names.push_back(b'x')
-        var_names.push_back(b'y')
+    # if verbosity >= 1:
+    #     with gil:
+    #         var_names.push_back(b't')
+    #         var_names.push_back(b'x')
+    #         var_names.push_back(b'y')
 
     for mono in monomials:
-        if verbosity >= 1:
-            mono.toString(s, var_names)
-            with gil:
-                print("---")
-                print(s)
+        # if verbosity >= 1:
+        #     mono.toString(s, var_names)
+        #     with gil:
+        #         print("---")
+        #         print(s)
 
         MW = reinterpret_cast[MonoWrapPtr](&mono)
         # The length of tmv is one less than the number of vars
@@ -130,45 +343,45 @@ cdef TaylorModel compose(const Polynomial & P,
         term = TaylorModel(Polynomial(MW.getCoefficient(), degrees.size()))
         for d in degrees:
             if i >= 0 and d > 0:
-                if verbosity >= 2:
-                    term.expansion.toString(s, var_names)
-                    with gil:
-                        print("term.expansion =", s)
-                    term.remainder.toString(s)
-                    with gil:
-                        print("term.remainder =", s)
-                    with gil: print("===")
+                # if verbosity >= 2:
+                #     term.expansion.toString(s, var_names)
+                #     with gil:
+                #         print("term.expansion =", s)
+                #     term.remainder.toString(s)
+                #     with gil:
+                #         print("term.remainder =", s)
+                #     with gil: print("===")
                 var = tmv.tms.at(i)
-                if verbosity >= 2:
-                    var.expansion.toString(s, var_names)
-                    with gil:
-                        print("var.expansion =", s)
-                    var.remainder.toString(s)
-                    with gil:
-                        print("var.remainder =", s)
+                # if verbosity >= 2:
+                #     var.expansion.toString(s, var_names)
+                #     with gil:
+                #         print("var.expansion =", s)
+                #     var.remainder.toString(s)
+                #     with gil:
+                #         print("var.remainder =", s)
                 tm_power(var, d, domain, order, cutoff_threshold)
-                if verbosity >= 3:
-                    var.expansion.toString(s, var_names)
-                    with gil:
-                        print("i =", i)
-                        print("d =", d)
-                        print("var'.expansion =", s)
-                    var.remainder.toString(s)
-                    with gil:
-                        print("var'.remainder =", s)
+                # if verbosity >= 3:
+                #     var.expansion.toString(s, var_names)
+                #     with gil:
+                #         print("i =", i)
+                #         print("d =", d)
+                #         print("var'.expansion =", s)
+                #     var.remainder.toString(s)
+                #     with gil:
+                #         print("var'.remainder =", s)
                 term.mul_ctrunc_assign(var, domain, order, cutoff_threshold)
             i += 1
-        if verbosity >= 2:
-            with gil:
-                print("---")
+        # if verbosity >= 2:
+        #     with gil:
+        #         print("---")
 
-        if verbosity >= 1:
-            term.expansion.toString(s, var_names)
-            with gil:
-                print("term.expansion =", s)
-            term.remainder.toString(s)
-            with gil:
-                print("term.remainder =", s)
+        # if verbosity >= 1:
+        #     term.expansion.toString(s, var_names)
+        #     with gil:
+        #         print("term.expansion =", s)
+        #     term.remainder.toString(s)
+        #     with gil:
+        #         print("term.remainder =", s)
 
         R.add_assign(term)
 

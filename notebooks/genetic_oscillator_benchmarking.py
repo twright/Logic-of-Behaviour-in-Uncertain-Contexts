@@ -68,7 +68,7 @@ y0 = [
 system = System(R, R.gens(), y0, y)
 
 
-@pause_gc
+@pause_gc()
 def test_monitoring(prop, duration, **kwargs):
     t0 = time.time()
     sig = prop.signal_for_system(system,

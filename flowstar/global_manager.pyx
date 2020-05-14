@@ -76,9 +76,6 @@ cdef class FlowstarGlobalManager:
         instrumentor):
         self.instrumentor = instrumentor
 
-    def __dealloc__(self):
-        print("Deallocing GlobalManager")
-
     @property
     def active(self):
         global global_manager_stack
@@ -167,7 +164,6 @@ cdef class FlowstarGlobalManager:
 
         assert self.active
 
-        print(f"original num_flowpipes = {continuousProblem.flowpipes.size()}")
         global_manager_stack.pop()
 
         if not self.active:
