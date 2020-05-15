@@ -11,6 +11,7 @@ from flowstar.global_manager cimport FlowstarGlobalManager
 cdef class CReach:
     cdef public FlowstarGlobalManager global_manager
 
+    cdef readonly object order
     cdef readonly object system
     cdef readonly bint ran
     cdef readonly bint prepared

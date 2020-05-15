@@ -43,7 +43,7 @@ cdef void observable_hf(
     # f_tm.insert_ctrunc(f1, tmv, f_poly_range, space_domain, order+100, cutoff_threshold2)
     # p.insert(f1, tmv, f_poly_range, domain, cutoff_threshold2)
     # f1 = compose(f, tmv, domain, order + 100, cutoff_threshold)
-    f1 = fast_compose_hf(f, tmv, domain, order, zero_interval)
+    f1 = fast_compose_hf(f, tmv, domain, order, cutoff_threshold)
     # p_horner.insert(f1, tmv, f_poly_range, domain, cutoff_threshold2)
 
     # Substitute domain variables
@@ -89,7 +89,7 @@ cdef void observable(interval_time_fn & f_fn, interval_time_fn & f_prime_fn,
         varIDs.push_back(i)
         space_domain.push_back(domain[i])
 
-    # Compose
+    # Composes
     # f_tm = TaylorModel(p)
     # f_tmv = TaylorModelVec(tms_input)
 
@@ -98,7 +98,7 @@ cdef void observable(interval_time_fn & f_fn, interval_time_fn & f_prime_fn,
     # f_tm.insert_ctrunc(f1, tmv, f_poly_range, space_domain, order+100, cutoff_threshold2)
     # p.insert(f1, tmv, f_poly_range, domain, cutoff_threshold2)
     # f1 = compose(f, tmv, domain, order, cutoff_threshold)
-    f1 = fast_compose(f, tmv, domain, 2, cutoff_threshold)
+    f1 = fast_compose(f, tmv, domain, order, cutoff_threshold)
     # p_horner.insert(f1, tmv, f_poly_range, domain, cutoff_threshold2)
 
     # Substitute domain variables

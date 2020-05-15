@@ -47,6 +47,7 @@ cdef class RestrictedObserver(PolyObserver):
         self.poly_f_fns = p.poly_f_fns
         self.poly_fprime_fns = p.poly_fprime_fns
         self.bools = p.bools
+        self.symbolic_composition_order = p.symbolic_composition_order
         self.symbolic_composition = p.symbolic_composition
         self.tentative_unpreconditioning = p.tentative_unpreconditioning
         self.reach = p.reach
@@ -692,7 +693,7 @@ cdef class FunctionObserver:
 
             # print("unmodified loop domain:")
             # for j in range(0, deref(loop_domain).size()):
-                # print(f"loop_domain[{j}] = {interval.as_str(loop_domain.at(j))}")
+            #     print(f"loop_domain[{j}] = {interval.as_str(loop_domain.at(j))}")
 
             # Absolute time domain for current interval
             (&t0)[0] = loop_domain[0][0] = deref(fp).domain[0]
@@ -798,24 +799,30 @@ cdef class FunctionObserver:
         Retrieve f and fprime, performing symbolic composition if desired.
         """
         global continuousProblem
+        cdef order
 
         assert self.global_manager.active
 
         if self.symbolic_composition and not poly_f_fn.has_value():
             # Define f and fprime by symbolically composing polynomials
             # print("Performing symbolic composition!")
-            # observable_hf( 
-            #     f_fn, fprime_fn,
-            #     (<PolyObserver?>self).f_hf, tmv, deref(loop_domain),
-            #     continuousProblem.globalMaxOrder,
-            #     continuousProblem.cutoff_threshold,
-            # )
-            observable( 
+            observable_hf( 
                 f_fn, fprime_fn,
-                (<PolyObserver?>self).f.c_poly, tmv, deref(loop_domain),
-                continuousProblem.globalMaxOrder,
+                (<PolyObserver?>self).f_hf, tmv, deref(loop_domain),
+                self.symbolic_composition_order,
                 continuousProblem.cutoff_threshold,
             )
+            # if self.symbolic_composition_order == -1:
+            #     order = continuousProblem.globalMaxOrder
+            # else:
+            #     order = self.symbolic_composition_order
+
+            # observable( 
+            #     f_fn, fprime_fn,
+            #     (<PolyObserver?>self).f.c_poly, tmv, deref(loop_domain),
+            #     self.symbolic_composition_order,
+            #     continuousProblem.cutoff_threshold,
+            # )
             # print("setting f and fprime polys")
             # NOTE: Under symbolic composition, the polys depend on the space
             # variables and so are invalidated when the space domain is
@@ -948,6 +955,7 @@ cdef class SageObserver(FunctionObserver):
     def __init__(SageObserver self, f, CReach reach,
                  object fprime=None,
                  bint symbolic_composition=False,
+                 int symbolic_composition_order=-1,
                  bint tentative_unpreconditioning=False,
                  object mask=None):
         from ulbc.signal_masks import Mask
@@ -970,6 +978,7 @@ cdef class SageObserver(FunctionObserver):
             self.fprime = self._fprime_given_f()
         self._define_callables()
         self.tentative_unpreconditioning = tentative_unpreconditioning
+        self.symbolic_composition_order = -1
         self.symbolic_composition = False
         assert mask is None or isinstance(mask, Mask),\
             'mask = {}'.format(repr(mask))
@@ -985,6 +994,7 @@ cdef class SageObserver(FunctionObserver):
             Reach(self.reach, space_domain),
             fprime=self.fprime,
             symbolic_composition=self.symbolic_composition,
+            symbolic_composition_order=self.symbolic_composition_order,
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=self.mask,
         )
@@ -1001,6 +1011,7 @@ cdef class SageObserver(FunctionObserver):
             self.reach,
             fprime=self.fprime,
             symbolic_composition=self.symbolic_composition,
+            symbolic_composition_order=self.symbolic_composition_order,
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=mask,
         )
@@ -1015,6 +1026,7 @@ cdef class SageObserver(FunctionObserver):
             f,
             self.reach,
             symbolic_composition=self.symbolic_composition,
+            symbolic_composition_order=self.symbolic_composition_order,
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=self.mask,
         )
@@ -1037,14 +1049,17 @@ cdef class PolyObserver(FunctionObserver):
     def __init__(PolyObserver self, f, CReach reach,
                  object fprime=None,
                  bint symbolic_composition=False,
+                 int symbolic_composition_order=-1,
                  bint tentative_unpreconditioning=False,
                  object mask=None):
         from ulbc.signal_masks import Mask
 
-        print("{}({}, {}, {}, symbolic_composition={}, "
+        print("{}({}, {}, {}, symbolic_composition={}, symbolic_composition_order={}, "
               "tentative_unpreconditioning={}, mask={})".format(
             self.__class__.__name__,
-            f, reach, fprime, symbolic_composition, tentative_unpreconditioning,
+            f, reach, fprime, symbolic_composition,
+            symbolic_composition_order,
+            tentative_unpreconditioning,
             mask,
         ))
 
@@ -1058,6 +1073,7 @@ cdef class PolyObserver(FunctionObserver):
             self.fprime = self._fprime_given_f()
         self.tentative_unpreconditioning = tentative_unpreconditioning
         self.symbolic_composition = symbolic_composition
+        self.symbolic_composition_order = symbolic_composition_order
         assert mask is None or isinstance(mask, Mask),\
             'mask = {}'.format(repr(mask))
         self.mask = mask
@@ -1076,6 +1092,7 @@ cdef class PolyObserver(FunctionObserver):
             Reach(self.reach, space_domain),
             fprime=self.fprime,
             symbolic_composition=self.symbolic_composition,
+            symbolic_composition_order=self.symbolic_composition_order,
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=self.mask,
         )
@@ -1092,6 +1109,7 @@ cdef class PolyObserver(FunctionObserver):
             self.reach,
             fprime=self.fprime,
             symbolic_composition=self.symbolic_composition,
+            symbolic_composition_order=self.symbolic_composition_order,
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=mask,
         )
@@ -1107,6 +1125,7 @@ cdef class PolyObserver(FunctionObserver):
             f,
             self.reach,
             symbolic_composition=self.symbolic_composition,
+            symbolic_composition_order=self.symbolic_composition_order,
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=self.mask,
         )

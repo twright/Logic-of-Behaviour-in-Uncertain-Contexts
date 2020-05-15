@@ -346,12 +346,13 @@ class Atomic(Logic):
         # print(f"vars = {vars}, diffs = {diffs}, odes = {odes}")
         return sage.vector(diffs) * sage.vector(map(sage.SR, odes))
 
-    def sage_plot(self, observer, *args, symbolic_composition=False, tentative_unpreconditioning=True, **kwargs):
+    def sage_plot(self, observer, *args, symbolic_composition=False, tentative_unpreconditioning=True, symbolic_composition_order=None, **kwargs):
         # idx = Poly(self.p)
 
         observer = self.observer(
             observer,
             symbolic_composition=symbolic_composition,
+            symbolic_composition_order=symbolic_composition_order,
             tentative_unpreconditioning=tentative_unpreconditioning,
         )
 
@@ -390,6 +391,7 @@ class Atomic(Logic):
         sage_plot = self.sage_plot(
             reach,
             symbolic_composition=kwargs.get('symbolic_composition', False),
+            symbolic_composition_order=kwargs.get('symbolic_composition_order', None),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
         )
         axes_range = sage_plot.get_axes_range()
@@ -430,7 +432,9 @@ class Atomic(Logic):
                 **kwargs,
             )
 
-    def observer(self, reach, space_domain=None, mask=None, symbolic_composition=False,
+    def observer(self, reach, space_domain=None, mask=None,
+        symbolic_composition=False,
+        symbolic_composition_order=None,
         tentative_unpreconditioning=False,
         restriction_method : Optional[RestrictionMethod]=None):
         # Convert atomic proposition to a suitable ring and variable
@@ -442,6 +446,9 @@ class Atomic(Logic):
             p = sage.SR(self.p)
             pprime = None
 
+        if symbolic_composition_order is None:
+            symbolic_composition_order = reach.order
+
         if isinstance(reach, (PolyObserver, SageObserver)):
             observer = reach.with_mask(mask)
         elif (is_polynomial(p, reach.system.x) and is_polynomial(pprime, reach.system.x)):
@@ -450,6 +457,7 @@ class Atomic(Logic):
                 reach,
                 reach.system.PR(pprime),
                 symbolic_composition,
+                symbolic_composition_order,
                 tentative_unpreconditioning,
                 mask=mask,
             )
@@ -459,6 +467,7 @@ class Atomic(Logic):
                 reach,
                 None,
                 symbolic_composition,
+                symbolic_composition_order,
                 tentative_unpreconditioning,
                 mask=mask,
             )
@@ -471,6 +480,7 @@ class Atomic(Logic):
                 reach,
                 pprime,
                 symbolic_composition, # False
+                symbolic_composition_order,
                 tentative_unpreconditioning,
                 mask=mask,
             )
@@ -498,10 +508,11 @@ class Atomic(Logic):
             space_domain=symbolic_space_domain,
             mask=mask,
             symbolic_composition=kwargs.get('symbolic_composition', False),
+            symbolic_composition_order=kwargs.get('symbolic_composition_order', None),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
         )
 
-        print(f"symbolic_composition={observer.symbolic_composition}, tentative_unpreconditioning={observer.tentative_unpreconditioning},two_pass_masks={two_pass_masks}")
+        print(f"symbolic_composition={observer.symbolic_composition},symbolic_composition_order={observer.symbolic_composition_order}, tentative_unpreconditioning={observer.tentative_unpreconditioning},two_pass_masks={two_pass_masks}")
 
         with instrument.block(
                 name=f"Monitoring atomic {self}",
@@ -537,6 +548,7 @@ class Atomic(Logic):
             restriction_method=RestrictionMethod.SYMBOLIC, **kwargs):
         observer_fn = partial(self.observer,
             symbolic_composition=kwargs.get('symbolic_composition', False),
+            symbolic_composition_order=kwargs.get('symbolic_composition_order', None),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
         )
         #  self.observer(

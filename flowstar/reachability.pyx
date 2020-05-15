@@ -92,10 +92,6 @@ cdef class CReach:
             self._init_args(*args, **kwargs)
         assert self.system_vars is not None
 
-    def __dealloc__(CReach self):
-        print("Deallocing CReach")
-        # self.global_manager.clear()
-
     @property
     def vars(self):
         if self.system is None:
@@ -417,6 +413,7 @@ cdef class CReach:
         # Note: orderType = 0 means a single, global order
         # importantly, in both cases we make sure
         # len(orders) == len(C.orders) == len(vars)
+        self.order = order
         if orders is None:
             orders = [order if isinstance(order, tuple) else (order, order)]
             orders *= len(vars)
@@ -495,6 +492,7 @@ cdef class CReach:
         cdef Interval zero_int
         cdef vector[Flowpipe] initials_fpvect
 
+        self.order = other.order
         self.crude_roots = other.crude_roots
         self.system = other.system
         self.system_vars = other.system_vars
@@ -562,6 +560,7 @@ cdef class CReach:
         global continuousProblem
 
         cdef ContinuousReachability * C = &continuousProblem
+        self.order = order
         self.system = system
         self.initial_form = initial_form
         self.ran = False

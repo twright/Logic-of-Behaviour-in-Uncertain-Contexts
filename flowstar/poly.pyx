@@ -90,6 +90,7 @@ def do_tm_power_test2():
 
     return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
 
+
 cdef TaylorModel fast_compose_hf(const HornerForm & p,
                          const TaylorModelVec tmv,
                          const vector[Interval] & domain,
@@ -100,10 +101,14 @@ cdef TaylorModel fast_compose_hf(const HornerForm & p,
         vector[Interval] tmv_poly_range
         TaylorModel res
 
-
     tmv.polyRange(tmv_poly_range, domain)
 
-    p.insert_ctrunc(res, tmv, tmv_poly_range, domain, order, cutoff_threshold)
+    if order >= 0:
+        # Compose and truncate resulting Taylor model
+        p.insert_ctrunc(res, tmv, tmv_poly_range, domain, order, cutoff_threshold)
+    else:
+        # Compose without truncating
+        p.insert(res, tmv, tmv_poly_range, domain, cutoff_threshold)
 
     return res
 
@@ -301,6 +306,78 @@ def do_fast_compose_test3():
     tm.remainder.toString(i)
 
     return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
+
+def do_fast_compose_test4():
+    from sage.all import RIF, PolynomialRing
+
+    R, (x, y) = PolynomialRing(RIF, 'x, y').objgens()
+
+    cdef Poly P = Poly(x**3 + y**2 - y)
+
+    cdef Polynomial Q1 = Poly(2*x**3).c_poly
+    cdef Polynomial Q2 = Poly(2*x + 3*y**2).c_poly
+    cdef TaylorModelVec tmv
+    tmv.tms.push_back(TaylorModel(Q1))
+    tmv.tms.push_back(TaylorModel(Q2))
+
+    cdef vector[Interval] domain
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    cdef int order = -1
+    cdef Interval cutoff_threshold = Interval()
+
+    cdef TaylorModel tm = fast_compose(P.c_poly, tmv,
+                                       domain, order,
+                                       cutoff_threshold)
+
+    cdef string s
+    cdef string i
+    cdef vector[string] var_names
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
+
+    tm.expansion.toString(s, var_names)
+    tm.remainder.toString(i)
+
+    return "{} + {}".format(s.decode('utf-8'), i.decode('utf-8'))
+
+
+def do_fast_compose_test5(order):
+    from sage.all import RIF, PolynomialRing
+
+    R, (x, y) = PolynomialRing(RIF, 'x, y').objgens()
+
+    cdef Poly P = Poly(x**2 + y**2)
+
+    cdef Polynomial Q1 = Poly(-y).c_poly
+    cdef Polynomial Q2 = Poly(x).c_poly
+    cdef TaylorModelVec tmv
+    tmv.tms.push_back(TaylorModel(Q1))
+    tmv.tms.push_back(TaylorModel(Q2))
+
+    cdef vector[Interval] domain
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    domain.push_back(Interval(0, 1))
+    cdef Interval cutoff_threshold = Interval()
+
+    cdef TaylorModel tm = fast_compose(P.c_poly, tmv,
+                                       domain, <int?>order,
+                                       cutoff_threshold)
+
+    cdef string s
+    cdef string i
+    cdef vector[string] var_names
+    var_names.push_back(b't')
+    var_names.push_back(b'x')
+    var_names.push_back(b'y')
+
+    tm.expansion.toString(s, var_names)
+    tm.remainder.toString(i)
+
+    return "({}, {})".format(s.decode('utf-8'), i.decode('utf-8'))
 
 
 cdef TaylorModel compose(const Polynomial & P,

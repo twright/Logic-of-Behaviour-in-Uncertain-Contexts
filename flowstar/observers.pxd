@@ -18,6 +18,7 @@ cdef class FunctionObserver:
     cdef vector[optional[interval_time_fn]] poly_f_fns
     cdef vector[optional[interval_time_fn]] poly_fprime_fns
     cdef vector[optional[bint]] bools
+    cdef readonly int symbolic_composition_order
     cdef readonly bint symbolic_composition
     cdef readonly bint tentative_unpreconditioning
     cdef readonly object mask  # Mask
