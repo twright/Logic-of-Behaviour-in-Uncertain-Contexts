@@ -369,6 +369,8 @@ cdef class CReach:
         maxNumSteps=100,
         run=True,
         symbolic_composition=True,
+        unpreconditioning_order=None,
+        unpreconditioning_orders=None,
         precompose_taylor_models=False,
         crude_roots=False,
         skip_unpreconditioning=False,
@@ -409,30 +411,10 @@ cdef class CReach:
         C.step = <double>step_hi
 
         # --- Orders
-        # The orders and order kwargs are mutually exclusive
-        # Note: orderType = 0 means a single, global order
-        # importantly, in both cases we make sure
-        # len(orders) == len(C.orders) == len(vars)
-        self.order = order
-        if orders is None:
-            orders = [order if isinstance(order, tuple) else (order, order)]
-            orders *= len(vars)
-            C.orderType = 0
-        else:
-            C.orderType = 1
-        order_lo = min((order[0] if isinstance(order, tuple) else order)
-                    for order in orders)
-        order_hi = max((order[1] if isinstance(order, tuple) else order)
-                    for order in orders)
-        C.bAdaptiveOrders = order_lo < order_hi
-        for order in orders:
-            try:
-                (order_lo, order_hi) = order
-            except:
-                order_lo = order_hi = order
-            C.orders.push_back(order_lo)
-            C.maxOrders.push_back(order_hi)
-        C.globalMaxOrder = order_hi
+        self._handle_orders(
+            C, order, orders,
+            unpreconditioning_order, unpreconditioning_orders,
+        )
 
         # --- The rest
         C.time = <double>time
@@ -507,6 +489,8 @@ cdef class CReach:
         self.symbolic_composition = other.symbolic_composition
         self.ode_strs = other.ode_strs
         self.skip_unpreconditioning = other.skip_unpreconditioning
+        self.unpreconditioning_orders = other.unpreconditioning_orders
+        self.unpreconditioning_max_order = other.unpreconditioning_max_order
 
         continuousProblem = other.global_manager.continuousProblem
 
@@ -542,6 +526,8 @@ cdef class CReach:
         precondition=0,
         order=2,
         orders=None,
+        unpreconditioning_order=None,
+        unpreconditioning_orders=None,
         verbose=False,
         integration_method=IntegrationMethod.LOW_DEGREE,
         cutoff_threshold=1e-7,
@@ -614,6 +600,9 @@ cdef class CReach:
 
         # === Set properties ===
 
+        self._handle_orders(C, order, orders, unpreconditioning_order,
+            unpreconditioning_orders)
+
         # --- Steps
         try:
             (step_lo, step_hi) = step
@@ -624,30 +613,6 @@ cdef class CReach:
         C.miniStep = <double>step_lo
         C.step = <double>step_hi
 
-        # --- Orders
-        # The orders and order kwargs are mutually exclusive
-        # Note: orderType = 0 means a single, global order
-        # importantly, in both cases we make sure
-        # len(orders) == len(C.orders) == len(vars)
-        if orders is None:
-            orders = [order if isinstance(order, tuple) else (order, order)]
-            orders *= len(vars)
-            C.orderType = 0
-        else:
-            C.orderType = 1
-        order_lo = min((order[0] if isinstance(order, tuple) else order)
-                       for order in orders)
-        order_hi = max((order[1] if isinstance(order, tuple) else order)
-                       for order in orders)
-        C.bAdaptiveOrders = order_lo < order_hi
-        for order in orders:
-            try:
-                (order_lo, order_hi) = order
-            except:
-                order_lo = order_hi = order
-            C.orders.push_back(order_lo)
-            C.maxOrders.push_back(order_hi)
-        C.globalMaxOrder = order_hi
 
         # --- The rest
         C.time = <double>time
@@ -665,7 +630,7 @@ cdef class CReach:
         C.maxNumSteps = maxNumSteps
         C.max_remainder_queue = max_remainder_queue
         # Test if this is doing anything!
-        C.num_of_flowpipes = 42
+        # C.num_of_flowpipes = 42
 
         print("run within tmv args")
 
@@ -679,6 +644,59 @@ cdef class CReach:
                         name="precomposing taylor models",
                         metric=self.instrumentor.metric):
                     self.precompose_taylor_models()
+
+    cdef object _handle_orders(
+        CReach self,
+        ContinuousReachability *C,
+        object order,
+        object orders,
+        object unpreconditioning_order,
+        object unpreconditioning_orders,
+    ):
+        # --- Orders
+        # The orders and order kwargs are mutually exclusive
+        # Note: orderType = 0 means a single, global order
+        # importantly, in both cases we make sure
+        # len(orders) == len(C.orders) == len(vars)
+        if orders is None:
+            orders = [order if isinstance(order, tuple) else (order, order)]
+            orders *= len(self.system_vars)
+            C.orderType = 0
+        else:
+            C.orderType = 1
+        order_lo = min((order[0] if isinstance(order, tuple) else order)
+                       for order in orders)
+        order_hi = max((order[1] if isinstance(order, tuple) else order)
+                       for order in orders)
+        C.bAdaptiveOrders = order_lo < order_hi
+        for order in orders:
+            try:
+                (order_lo, order_hi) = order
+            except:
+                order_lo = order_hi = order
+            C.orders.push_back(order_lo)
+            C.maxOrders.push_back(order_hi)
+        C.globalMaxOrder = order_hi
+
+        # These options are mutually exclusive
+        assert (unpreconditioning_order is None
+            or unpreconditioning_orders is None)
+
+        if unpreconditioning_orders is None:
+            if unpreconditioning_order is None:
+                self.unpreconditioning_orders = C.maxOrders
+                self.unpreconditioning_max_order = C.globalMaxOrder
+            else:
+                for _ in range(len(self.system_vars)):
+                    self.unpreconditioning_orders.push_back(
+                        unpreconditioning_order,
+                    )
+                self.unpreconditioning_max_order = unpreconditioning_order
+        else:
+            print(f"unpreconditioning_orders = {unpreconditioning_orders}")
+            for o in unpreconditioning_orders:
+                self.unpreconditioning_orders.push_back(o)
+            self.unpreconditioning_max_order = max(unpreconditioning_orders)
 
 
     cdef object _convert_space_domain(CReach self, vector[Interval] * res, space_domain=None):
@@ -918,6 +936,15 @@ cdef class CReach:
 
         assert self.global_manager.active
 
+        cdef:
+            int i = 0
+            vector[Interval] poly_range
+            int dim = len(self.system_vars)
+            TaylorModel tm_tmp
+            # Interval int_zero
+            TaylorModel tm_zero
+            int order
+
         with instrument.block(name="composing flowpipe",
                 metric=self.instrumentor.metric):
             # Do nothing if fp_compo already has a value.
@@ -938,9 +965,30 @@ cdef class CReach:
             #             self.c_reach.cutoff_threshold]))
 
             # Get flow* to perform the composition
-            fp.composition(fp_compo.value(),
-                        continuousProblem.orders,
+            # Manual composition
+            # (skipping certain dimensions)
+            fp.tmv.polyRange(poly_range, fp.domain)
+
+            while i < dim:
+                order = self.unpreconditioning_orders[i]
+                if order >= 0:
+                    fp.tmvPre.tms[i].insert_ctrunc(
+                        tm_tmp, fp.tmv, poly_range, fp.domain, 
+                        order,
                         continuousProblem.cutoff_threshold)
+                    fp_compo.value().tms.push_back(tm_tmp)
+                else:
+                    fp_compo.value().tms.push_back(tm_zero)
+
+                inc(i)
+            
+            # Get flowstar to do the composition
+            # fp.composition(
+            #     fp_compo.value(),
+            #     self.unpreconditioning_orders,
+            #     # continuousProblem.orders,
+            #     continuousProblem.cutoff_threshold,
+            # )
 
     @flowstar_globals
     def run(self):

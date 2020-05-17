@@ -64,6 +64,18 @@ def observer_sym(ringxy, reach_split, odes):
     return PolyObserver(x, reach_split, symbolic_composition=True)
 
 @pytest.fixture
+def observer_sym_low_order(ringxy, reach_split, odes):
+    _, (x, y) = ringxy
+    return PolyObserver(x, reach_split, symbolic_composition=True,
+        symbolic_composition_order=2)
+
+@pytest.fixture
+def observer_sym_no_trunc(ringxy, reach_split, odes):
+    _, (x, y) = ringxy
+    return PolyObserver(x, reach_split, symbolic_composition=True,
+        symbolic_composition_order=-1)
+
+@pytest.fixture
 def observer_sym_combined(ringxy, reach, odes):
     _, (x, y) = ringxy
     return PolyObserver(x, reach, symbolic_composition=True)
@@ -202,6 +214,18 @@ class TestPolyObserverRoots(object):
     # @pytest.mark.slow
     def test_unrestricted_symbolic_composition(self, observer_sym):
         assert roots_approx_eq(observer_sym.roots(verbosity=10),
+                               [RIF(0.23975290341611912, 0.60000000000000020),
+                                RIF(3.38202621523960720, 3.7350404376435665)])
+
+    # @pytest.mark.slow
+    def test_unrestricted_symbolic_composition_low_order(self, observer_sym_low_order):
+        assert roots_approx_eq(observer_sym_low_order.roots(verbosity=10),
+                               [RIF(0.23975290341611912, 0.60000000000000020),
+                                RIF(3.38202621523960720, 3.7350404376435665)])
+
+    # @pytest.mark.slow
+    def test_unrestricted_symbolic_composition_no_trunc(self, observer_sym_no_trunc):
+        assert roots_approx_eq(observer_sym_no_trunc.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 

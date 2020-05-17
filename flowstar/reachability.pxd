@@ -19,6 +19,8 @@ cdef class CReach:
     cdef readonly int result
     cdef readonly bint symbolic_composition
     cdef readonly bint skip_unpreconditioning
+    cdef vector[int] unpreconditioning_orders
+    cdef readonly int unpreconditioning_max_order
     cdef readonly object var_ring
     cdef readonly bint crude_roots
     cdef readonly object initial_form
@@ -33,15 +35,27 @@ cdef class CReach:
     cdef vector[Interval] eval_interval(CReach self, Interval I,
             optional[reference_wrapper[vector[Interval]]] space_domain=*)
     cdef object _convert_space_domain(CReach self, vector[Interval]* res, space_domain=*)
-    cdef void compose_flowpipe(CReach self,
-                               const Flowpipe & fp,
-                               optional[TaylorModelVec] & fp_compo)
-    cdef object _handle_initials(CReach self,
-                                 vector[Flowpipe] *initials_fpvect,
-                                 ContinuousReachability *C,
-                                 object vars,
-                                 object initials,
-                                 object mode)
+    cdef void compose_flowpipe(
+        CReach self,
+        const Flowpipe & fp,
+        optional[TaylorModelVec] & fp_compo,
+    )
+    cdef object _handle_orders(
+        CReach self,
+        ContinuousReachability *C,
+        object order,
+        object orders,
+        object unpreconditioning_order,
+        object unpreconditioning_orders,
+    )
+    cdef object _handle_initials(
+        CReach self,
+        vector[Flowpipe] *initials_fpvect,
+        ContinuousReachability *C,
+        object vars,
+        object initials,
+        object mode,
+    )
     cdef object _initial_flowpipe_combined(
         CReach self,
         # Returns via flowpipe parameter

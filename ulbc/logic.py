@@ -29,6 +29,7 @@ from ulbc.signal_masks import *
 from ulbc.context_masks import *
 from ulbc.matrices import *
 from ulbc.systems import System
+from ulbc.symbolic import var, varname
 
 
 class Logic(metaclass=ABCMeta):
@@ -82,9 +83,43 @@ class Logic(metaclass=ABCMeta):
             return self._signal_for_system(system, duration,
                 precompose_systems=False, **kwargs)
 
-    def _signal_for_system(self, system, duration, use_masks=False, mask=None, **kwargs):
+    def _signal_for_system(self, system, duration, use_masks=False, mask=None, 
+        # Set all variables which do not occur in the atomics to zero
+        # when performing symbolic composition
+        selective_unpreconditioning=True,
+        unpreconditioning_include_derivs=None, **kwargs):
         use_masks |= mask is not None
         t0 = time.perf_counter()
+
+        if unpreconditioning_include_derivs is None:
+            # WARNING: when this is False,
+            # calculating dP/dt by LieDerivative will be invalid 
+            unpreconditioning_include_derivs = not kwargs.get(
+                'symbolic_composition', False,
+            )
+
+        print(f"include_derivs = {unpreconditioning_include_derivs}")
+
+        if 'order' not in kwargs:
+            kwargs['order'] = 10
+
+        # Choose order to be used for unpreconditioning
+        # TODO: cope better with adaptive orders
+        print(f"phi variables sfs = {self.variables(system)}")
+        print(f"system sfs = {system}")
+        unpreconditioning_order = kwargs.pop('unpreconditioning_order',
+            kwargs['order'])
+        if ('unpreconditioning_orders' in kwargs
+            and kwargs['unpreconditioning_orders'] is not None
+            or unpreconditioning_order is None):
+            pass
+        elif selective_unpreconditioning:
+            kwargs['unpreconditioning_orders'] = self._unpreconditioning_orders(
+                system, unpreconditioning_order,
+                unpreconditioning_include_derivs)
+            # kwargs.pop('unpreconditioning_order', None)
+        else:
+            kwargs['unpreconditioning_order'] = unpreconditioning_order
         
         with instrument.block(
                 name="Running Flow*",
@@ -124,6 +159,34 @@ class Logic(metaclass=ABCMeta):
                             ).to_domain(RIF(0, duration))
         reach.instrumentor.print()
         return res
+
+    def _unpreconditioning_orders(self, system : System, order : int,
+            full : bool) -> List[int]:
+        """Set unpreconditioning orders based on variable actually occuring in the property.
+        
+        -1 Denotes skipping the variable entirely."""
+        variables = (self.variables_full(system)
+            if full else self.variables(system))
+        return [
+            (order if v in variables else -1)
+            for v in system.x
+        ]
+
+    def variables(self, system):
+        return reduce(
+            lambda a, b: a.union(b),
+            (prop.variables(system)
+             for prop in self.atomic_propositions),
+            set(),
+        )
+
+    def variables_full(self, system):
+        return reduce(
+            lambda a, b: a.union(b),
+            (prop.variables_full(system)
+             for prop in self.atomic_propositions),
+            set(),
+        )
 
     @overload
     def context_signal_for_system(self, odes : List[Any], initials : List[Any], duration : float, use_masks : bool, mask : Optional[Mask],
@@ -336,8 +399,6 @@ class Atomic(Logic):
     def dpdt(self, odes, vars):
         assert vars is not None
         # print(f"vars = {vars}, p = {self.p}")
-        # import pytest
-        # pytest.set_trace()
         # print(f"self.p = {repr(self.p)}, type = {type(self.p)}")
         # Let's not be too polymorphic: make sure we work with
         # SR internally and return a result in SR,
@@ -447,7 +508,7 @@ class Atomic(Logic):
             pprime = None
 
         if symbolic_composition_order is None:
-            symbolic_composition_order = reach.order
+            symbolic_composition_order = reach.unpreconditioning_max_order
 
         if isinstance(reach, (PolyObserver, SageObserver)):
             observer = reach.with_mask(mask)
@@ -589,6 +650,18 @@ class Atomic(Logic):
         else:
             return f'{self._p_raw} > 0'
         #     return f'{self.p} > 0'
+
+    def variables(self, system):
+        return set(
+            system.v(varname(x))
+            for x in self.p.variables()
+        )
+
+    def variables_full(self, system):
+        '''Combined variables of P and dP/dt.'''
+        return self.variables(system).union(
+            Atomic(self.dpdt(system.y, system.x)
+            ).variables(system))
 
     @property
     def atomic_propositions(self):
@@ -1065,6 +1138,13 @@ class Context(Logic, metaclass=ABCMeta):
         self._ctx = to_context_body(ctx)
         self._phi = phi
 
+    def variables(self, system):
+        return set(system.x)
+
+    def variables_full(self, system):
+        '''Combined variables of P and dP/dt.'''
+        return self.variables(system)
+
     @property
     def phi(self) -> Logic:
         return self._phi
@@ -1198,6 +1278,11 @@ class C(Context):
         # except:
             # pass
         # print(kwargs2)
+
+        # Remove arguments which don't make sense to forward
+        # to composed system
+        kwargs.pop('unpreconditioning_orders', None)
+
         assert reach.system is not None
         return masked_ctx(
             system=reach.system,

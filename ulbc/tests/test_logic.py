@@ -76,6 +76,15 @@ class TestAtomic:
     @staticmethod
     @pytest.mark.slow
     @pytest.mark.very_slow
+    def test_plant_clock_variables(plant_clock):
+        p = var('Protein(dEL,iEL;)')
+        at = Atomic(p - 1.5)
+        assert (at.variables(plant_clock)
+            == {plant_clock.v('Protein(dEL,iEL;)'),})
+
+    @staticmethod
+    @pytest.mark.slow
+    @pytest.mark.very_slow
     def test_plant_clock_signal_vars(plant_clock):
         p = var('Protein(dEL,iEL;)')
         at = Atomic(p - 1.5)
@@ -119,6 +128,64 @@ class TestAtomic:
     def test_signal_for_system_zero(ringxy, odes, initials, k, res):
         _, (x, y) = ringxy
         assert Atomic(x - k).signal_for_system(odes, initials, 0)(0) is res
+    
+    @staticmethod
+    def test_variables_x(ringxy, odes, initials):
+        R, (x, y) = ringxy
+        system = System(R, (x, y), initials, odes)
+
+        # We always return SR variables
+        assert Atomic(x).variables(system) == {x,}
+        assert Atomic(y).variables(system) == {y,}
+
+    @staticmethod
+    def test_variables_x_varmap(ringxy, odes, initials):
+        R, (x, y) = ringxy
+        varmap = {
+            'a': x,
+            'b': y,
+        }
+        system = System(R, (x, y), initials, odes, varmap)
+
+        # We always return SR variables
+        assert Atomic(var("a")).variables(system) == {x,}
+        assert Atomic(var("b")).variables(system) == {y,}
+
+    @staticmethod
+    def test_variables_unpreconditioning_orders(ringxy, odes):
+        R, (x, y) = ringxy
+
+        sys = System(R, (x,y), [(4,5), (1,2)], odes)
+
+        # We always return SR variables
+        assert (Atomic(x)._unpreconditioning_orders(sys, 3, False)
+            == [3, -1])
+        assert (Atomic(x)._unpreconditioning_orders(sys, 3, True)
+            == [3, 3])
+        assert (Atomic(y)._unpreconditioning_orders(sys, 3, False)
+            == [-1, 3])
+        assert (Atomic(y)._unpreconditioning_orders(sys, 3, True)
+            == [3, 3])
+
+    @staticmethod
+    def test_variables_full_x(ringxy, odes, initials):
+        R, (x, y) = ringxy
+        system = System(R, (x, y), initials, odes)
+
+        # We always return SR variables
+        assert Atomic(x).variables_full(system) == {x, y}
+
+    @staticmethod
+    def test_variables_SR():
+        at = Atomic(var("x") + 2 * var("y"))
+        system = System(sage.SR, (var("x"), var("y")), (0,0), (-var("y"), var("x")))
+        assert at.variables(system) == {var("x"), var("y")}
+
+    @staticmethod
+    def test_variables_relation():
+        at = Atomic(var("x") + 2 > var("y"))
+        system = System(sage.SR, (var("x"), var("y")), (0,0), (-var("y"), var("x")))
+        assert at.variables(system) == {var("x"), var("y")}
 
 
 class TestU:
@@ -347,3 +414,11 @@ class TestLogicWithSystem:
         assert atomic_x.with_system(system).signal(5).approx_eq(expected, 0.1)
         assert atomic_x.with_system(system).signal(None,
             5).approx_eq(expected, 0.1)
+
+    # @staticmethod
+    # @pytest.mark.slow
+    # def test_variables(ringxy, atomic_x, odes, initials):
+    #     R, x = ringxy
+    #     system = System(R, x, initials, odes)
+    #     assert (atomic_x.with_system(system).variables(system)
+    #         == {var("x"),})

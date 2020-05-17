@@ -668,7 +668,9 @@ cdef class FunctionObserver:
             inc(poly_f_fn)
             inc(poly_fprime_fn)
             inc(cached_bool)
-            # Restore loop domains
+            # # Restore loop domains
+            # print(f"original loop domain = {interval.as_str(deref(loop_domain)[0])}")
+            # print(f"our loop domain = {interval.as_str(t00)}")
             deref(loop_domain)[0] = (&t0)[0] = t00
         inc(i)
 

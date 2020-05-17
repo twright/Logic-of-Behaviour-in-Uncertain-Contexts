@@ -154,6 +154,7 @@ class TestReach:
 
 class TestReachTree:
     @staticmethod
+    @pytest.mark.xfail
     @pytest.mark.parametrize(
         "initial_form",
         [
@@ -209,6 +210,7 @@ class TestReachTree:
         )
 
     @staticmethod
+    @pytest.mark.xfail
     @pytest.mark.parametrize(
         "initial_form",
         [
