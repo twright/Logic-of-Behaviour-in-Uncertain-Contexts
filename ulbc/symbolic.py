@@ -111,4 +111,7 @@ def var(*names):
 def varname(v) -> str:
     global varmanager
 
-    return varmanager.varname(v)
+    try:
+        return varmanager.varname(v)
+    except KeyError:
+        return str(v)
