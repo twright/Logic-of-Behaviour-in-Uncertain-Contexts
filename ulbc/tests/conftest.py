@@ -20,6 +20,23 @@ def ringxy():
 
 
 @pytest.fixture(scope='module')
+def sysxy(ringxy, odes, initials):
+    R, vs = ringxy
+    return System(R, vs, initials, odes)
+
+
+@pytest.fixture(scope='module')
+def sysxy2(ringxy, odes, initials2):
+    R, vs = ringxy
+    return System(R, vs, initials2, odes)
+
+
+@pytest.fixture(scope='module')
+def reachxy2(sysxy2):
+    return sysxy2.reach(5)
+
+
+@pytest.fixture(scope='module')
 def ringxyQQ():
     return sg.PolynomialRing(sg.QQ, 'x, y').objgens()
 

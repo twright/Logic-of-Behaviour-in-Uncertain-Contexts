@@ -157,6 +157,9 @@ class ChooseFlowstarCommand(Command):
         elif self.mode == 'fastintervals':
             self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
                                              'flowstar-2.1.0-fast-intervals')
+        elif self.mode == 'stockintervals':
+            self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
+                                             'flowstar-2.1.0-stock-intervals')
         elif self.mode == 'debug':
             self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
                                              'flowstar-2.1.0-debug')

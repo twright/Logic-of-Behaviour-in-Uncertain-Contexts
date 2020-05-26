@@ -174,8 +174,8 @@ cdef class SagePlotMixin:
                 symbolic_composition=self.symbolic_composition)
 
         for i in range(sage.ceil(self.time/step)):
-            t = step*i
-            res = self((t, t+step))
+            t = min(step*i, self.time)
+            res = self((t, min(t+step, self.time)))
             try:
                 (xlo, xhi) = res[var_id_x].endpoints()
                 (ylo, yhi) = res[var_id_y].endpoints()

@@ -67,6 +67,11 @@ cdef class RestrictedObserver(PolyObserver):
             # Does this depend on the reach being successful, or freshly recomputed?
             self._invalidate_indeterminate_polys()
 
+    def check_single_point(self, t):
+        robs = RestrictedObserver(self,
+            [x.center() for x in self.py_space_domain])
+        return robs.check(t)
+
     def recompute_on_space_domain(self, space_domain) -> 'RestrictedObserver':
         assert self.reach is not None
 
@@ -593,7 +598,7 @@ cdef class FunctionObserver:
         return final_res
 
     @flowstar_globals
-    def check(self, t, space_domain=None):
+    def check(self, t):
         if self.reach is None:
             return None
 
@@ -617,6 +622,10 @@ cdef class FunctionObserver:
             return False
         else:
             return None
+
+    def check_single_point(self, t):
+        robs = RestrictedObserver(self, [0]*self.reach.context_dim)
+        return robs.check(t)
 
     ### Helper methods
 

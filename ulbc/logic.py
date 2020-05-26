@@ -5,6 +5,7 @@ import time
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict
 from functools import partial, reduce
+from functional import compose
 from warnings import warn
 import pytest
 import instrument
@@ -407,7 +408,12 @@ class Atomic(Logic):
         # print(f"vars = {vars}, diffs = {diffs}, odes = {odes}")
         return sage.vector(diffs) * sage.vector(map(sage.SR, odes))
 
-    def sage_plot(self, observer, *args, symbolic_composition=False, tentative_unpreconditioning=True, symbolic_composition_order=None, **kwargs):
+    def sage_plot(self, observer, *args, symbolic_composition=False, tentative_unpreconditioning=True, symbolic_composition_order=None,
+        color_scheme='blue',
+        log=False,
+        min_log=1e-3,
+        duration=None,
+        **kwargs):
         # idx = Poly(self.p)
 
         observer = self.observer(
@@ -424,11 +430,34 @@ class Atomic(Logic):
             return observer(t).lower()
 
         if 'color' not in kwargs:
-            kwargs['color'] = ('blue', 'blue')
+            kwargs['color'] = (color_scheme, color_scheme)
         if 'fillcolor' not in kwargs:
-            kwargs['fillcolor'] = ('blue',)
+            kwargs['fillcolor'] = (color_scheme,)
 
-        return sage.plot((lo, up), (0, observer.time), *args, fill={0:[1]}, **kwargs)
+        def wrap_log(f,s):
+            def g(t):
+                try:
+                    return sage.log(max(s*f(t), 1e-3), 10)
+                except:
+                    return 1e-3
+            return g
+        
+        upp = wrap_log(up, 1)
+        upn = wrap_log(up, -1)
+        lon = wrap_log(lo, -1)
+        lop = wrap_log(lo, 1)
+
+        if duration is None:
+            duration = (0, observer.time)
+        # raise Exception("BAH!")
+
+        if log:
+            # minp = 1e-10# max(lo(RIF(0, observer.time)).lower(), 1e-10)
+            return sage.plot((lop, upp, lon, upn), duration, *args, **kwargs)
+                # + sage.plot((lon, upn), (0, observer.time), *args, fill={0:[1]}, **kwargs)
+        else:
+            return sage.plot((lo, up), duration, *args, fill={0:[1]}, **kwargs)
+
 
     def visualize(self, *args, **kwargs):
         reach = kwargs.pop('reach', None)

@@ -54,7 +54,7 @@ def signal_from_observer(observer, domain, verbosity=0, global_root_detection=Fa
             metric=observer.reach.instrumentor.metric)
     def check(x):
         # Avoid reentering global guard at each step
-        return observer.check(x)
+        return observer.check_single_point(x)
 
     mask = observer.mask
     if not observer.reach.successful:

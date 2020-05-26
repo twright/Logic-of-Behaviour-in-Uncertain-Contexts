@@ -37,32 +37,59 @@ def atomic_q(ringxy):
 class TestAtomic:
     @staticmethod
     @pytest.mark.slow
-    def test_polynomial_vizualize(ringxy, odes):
-        R, (x,y) = ringxy
-        sys = System(R, (x,y), [(4,5), (1,2)], (-y, x))
+    def test_polynomial_vizualize(sysxy2, reachxy2):
+        x, y = sysxy2.x
         at = Atomic(x - 3)
         # This should not crash
-        assert at.visualize(sys, 5) is not None
+        assert at.visualize(sysxy2, 5) is not None
 
     @staticmethod
     @pytest.mark.slow
-    def test_polynomial_visualize_with_reach(ringxy, odes):
-        R, (x,y) = ringxy
-        sys = System(R, (x,y), [(4,5), (1,2)], (-y, x))
+    def test_polynomial_visualize_with_reach(sysxy2, reachxy2):
+        x, y = sysxy2.x
         at = Atomic(x - 3)
-        reach = sys.reach(5)
         # This should not crash
-        assert at.visualize(reach=reach) is not None
+        assert at.visualize(reach=reachxy2) is not None
 
     @staticmethod
     @pytest.mark.slow
-    def test_polynomial_visualize_with_reach_at_sys(ringxy, odes):
-        R, (x,y) = ringxy
-        sys = System(R, (x,y), [(4,5), (1,2)], (-y, x))
+    def test_polynomial_sage_plot(sysxy2, reachxy2):
+        x, y = sysxy2.x
         at = Atomic(x - 3)
-        reach = sys.reach(5)
         # This should not crash
-        assert at.visualize(sys, reach=reach) is not None
+        assert at.sage_plot(reachxy2) is not None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_polynomial_sage_plot(sysxy2, reachxy2, duration=(3, 4)):
+        x, y = sysxy2.x
+        at = Atomic(x - 3)
+        # This should not crash
+        assert at.sage_plot(reachxy2) is not None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_polynomial_sage_log_plot(sysxy2, reachxy2):
+        x, y = sysxy2.x
+        at = Atomic(x - 3)
+        # This should not crash
+        assert at.sage_plot(reachxy2, log=True) is not None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_polynomial_sage_log_plot_duration(sysxy2, reachxy2):
+        x, y = sysxy2.x
+        at = Atomic(x - 3)
+        # This should not crash
+        assert at.sage_plot(reachxy2, log=True, duration=(3, 4)) is not None
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_polynomial_visualize_with_reach_at_sys(sysxy2, reachxy2):
+        x, y = sysxy2.x
+        at = Atomic(x - 3)
+        # This should not crash
+        assert at.visualize(sysxy2, reach=reachxy2) is not None
 
     @staticmethod
     @pytest.mark.slow
