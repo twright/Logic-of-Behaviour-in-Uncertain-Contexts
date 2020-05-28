@@ -2,3 +2,4 @@ bidict==0.18.3
 wand==0.5.7
 instrument==0.6.0
 functional==0.4
+jupyterlab==2.1.3
