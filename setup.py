@@ -141,7 +141,7 @@ extensions = [
 
 class ChooseFlowstarCommand(Command):
     user_options = [
-        ('mode=', 'm', 'which version for flowstar to use? [upstream/debug]')
+        ('mode=', 'm', 'which version for flowstar to use? [fastintervals/stockintervals]')
     ]
 
     flowstar_link_path = os.path.join(os.getcwd(), 'flowstar',
@@ -200,6 +200,7 @@ class CleanFlowstarCommand(Command):
 
 class TestCommand(Command):
     user_options = [
+        ('no-rebuild', 'n', "Don't rebuild before testing."),
         ('verbose-test', 'v', 'Verbose?'),
         ('all', 'a', 'Run all tests?'),
         ('most', 'm', 'Run most tests (including slower ones)?'),
@@ -208,6 +209,7 @@ class TestCommand(Command):
     ]
 
     def initialize_options(self):
+        self.no_rebuild = False
         self.verbose_test = False
         self.all = False
         self.most = False
@@ -215,6 +217,7 @@ class TestCommand(Command):
         self.fail_fast = False
 
     def finalize_options(self):
+        self.no_rebuild = bool(self.no_rebuild)
         self.verbose_test = bool(self.verbose_test)
         self.all = bool(self.all)
         self.most = bool(self.most)
@@ -223,7 +226,9 @@ class TestCommand(Command):
 
     def run(self):
         # self.announce("anouncing", 1)
-        self.run_command('build_ext')
+        print(f"no_rebuild = {self.no_rebuild}")
+        if not self.no_rebuild:
+            self.run_command('build_ext')
         # self.run_command('pytest')
         self.announce('Testing...')
         cmd = ['/usr/bin/env', 'python3', '-m', 'pytest', '--disable-pytest-warnings']  # , '--doctest-cython']
@@ -245,7 +250,7 @@ class TestCommand(Command):
             cmd.append("-x")
 
         print(f"cmd = {repr(cmd)}")
-        subprocess.call(cmd)
+        subprocess.check_call(cmd)
 
 
 class BuildFlowstarCommand(Command):
@@ -259,7 +264,7 @@ class BuildFlowstarCommand(Command):
 
     def run(self):
         self.announce('Building flowstar...')
-        subprocess.call(['make'], cwd='flowstar/flowstar-2.1.0')
+        subprocess.check_call(['make'], cwd='flowstar/flowstar-2.1.0')
 
 
 class BuildAllCommand(build_ext, object):
@@ -283,5 +288,5 @@ setup(
               'test': TestCommand,
               'build_ext': BuildAllCommand},
     ext_modules=cythonize(extensions, gdb_debug=True,
-                          annotate=True, nthreads=4,
+                          annotate=True, nthreads=8,
                           language_level=3))

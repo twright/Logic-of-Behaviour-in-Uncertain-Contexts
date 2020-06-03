@@ -11,27 +11,35 @@ FROM sagemath/sagemath:9.0-py3 as lbuclib
 USER root
 RUN apt update && apt -y install git wget software-properties-common
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
-RUN apt update && apt -y install build-essential bison libbison-dev flex gcc-9 g++-9
+RUN apt update && apt -y install build-essential bison libbison-dev flex gcc-9 g++-9 libgsl-dev libblas-dev liblapack-dev libmpfr-dev libgmp-dev libglpk-dev
+
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9  100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
-COPY flowstar flowstar
+COPY flowstar/flowstar-2.1.0-fast-intervals flowstar/flowstar-2.1.0
+RUN cd flowstar/flowstar-2.1.0/ && make
+COPY flowstar/*.pyx flowstar/
+COPY flowstar/*.pxd flowstar/
 COPY setup.py setup.py
-RUN sage -python3 ./setup.py choose_flowstar -m fastintervals
-COPY ulbc ulbc
 RUN sage -python3 ./setup.py build_ext
 
 FROM sagemath/sagemath:9.0-py3
 
 USER root
 RUN apt update && apt install -y libgsl2 libblas3 liblapack3
-COPY --from=bondwb /root/.local/bin/bondwb-minimal /usr/bin/bondwb
-COPY --from=lbuclib /home/sage/flowstar/flowstar-2.1.0/libflowstar.so /usr/lib/libflowstar.so
-COPY --chown=1000:1000 --from=lbuclib /home/sage/build/lib.linux-x86_64-3.7/flowstar/ /home/sage/sage/local/lib/python3.7/site-packages/flowstar/
-COPY --chown=1000:1000 --from=lbuclib /home/sage/ulbc/*.py /home/sage/sage/local/lib/python3.7/site-packages/ulbc/
-
 USER sage
 COPY requirements.txt /tmp/
 RUN sage -pip install -r /tmp/requirements.txt
+COPY --from=bondwb /root/.local/bin/bondwb-minimal /usr/bin/bondwb
+COPY --from=lbuclib /home/sage/flowstar/flowstar-2.1.0/libflowstar.so /usr/lib/libflowstar.so
+COPY --chown=1000:1000 --from=lbuclib /home/sage/build/lib.linux-x86_64-3.7/flowstar/ /home/sage/sage/local/lib/python3.7/site-packages/flowstar/
+
+COPY setup.py .
+COPY --from=lbuclib /home/sage/flowstar flowstar
+COPY flowstar/tests/*.py flowstar/tests/
+COPY ulbc/*.py ulbc/
+COPY ulbc/tests/*.py ulbc/tests/
+COPY ulbc/*.py /home/sage/sage/local/lib/python3.7/site-packages/ulbc/
 COPY models ./models
 COPY Introduction.ipynb .
+COPY pytest.ini .
 EXPOSE 8888
 CMD [ "sage", "-python", "-m", "jupyterlab", "--ip=0.0.0.0", "--no-browser" ]

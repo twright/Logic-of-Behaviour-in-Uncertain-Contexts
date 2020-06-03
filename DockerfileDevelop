@@ -23,7 +23,7 @@ ENV PYTHONPATH=/lbuc:${PYTHONPATH}
 ENV JUPYTERPATH=/lbuc:${JUPYTERPATH}
 ENV SAGE_PATH=/lbuc:${SAGE_PATH}
 # Fix broken sympy sage integration
-COPY compatibility.py /usr/lib/python3.8/site-packages/sympy/core/compatibility.py
+COPY extra_files/compatibility.py /usr/lib/python3.8/site-packages/sympy/core/compatibility.py
 COPY . /lbuc
 ENV PATH=/lbuc/.local/bin:${PATH}
 WORKDIR /lbuc

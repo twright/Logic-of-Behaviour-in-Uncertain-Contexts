@@ -1,4 +1,5 @@
 **/*.so
+**/*.o
 **/Dockerfile*
 .git/*
 *.egg-info

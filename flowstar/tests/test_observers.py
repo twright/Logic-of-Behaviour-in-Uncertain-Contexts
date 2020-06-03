@@ -221,7 +221,8 @@ class TestPolyObserverRoots(object):
     def test_unrestricted_symbolic_composition_low_order(self, observer_sym_low_order):
         assert roots_approx_eq(observer_sym_low_order.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
-                                RIF(3.38202621523960720, 3.7350404376435665)])
+                                RIF(3.38202621523960720, 3.7350404376435665)],
+                               0.01)
 
     # @pytest.mark.slow
     def test_unrestricted_symbolic_composition_no_trunc(self, observer_sym_no_trunc):
