@@ -1,0 +1,6 @@
+**/*.so
+**/Dockerfile*
+.git/*
+*.egg-info
+outputs/*
+signals_crash_logs/*

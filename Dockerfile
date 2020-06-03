@@ -1,37 +1,37 @@
-FROM fedora:32
-
-RUN dnf -y install sagemath
-RUN dnf -y install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-RUN dnf -y install git wget glpk-devel bison bison-devel flex patch ImageMagick-devel ffmpeg
+FROM ubuntu:xenial as bondwb
+RUN apt update && apt install -y git wget
 RUN wget -qO- https://get.haskellstack.org/ | sh
+RUN apt-get -y install ghc libncurses5-dev happy alex libcairo2-dev gsl-bin gsl-ref-html libgsl0-dev liblapack-dev libmpfr-dev
+RUN git clone -n https://github.com/twright/bondwb.git && cd bondwb && git checkout 5557788f8cdf780fa2899ca29eb926ed5c3ab205
 ENV PATH="/root/.local/bin:${PATH}"
-# Update this line with specific bondwb revision
-RUN git clone -n https://github.com/twright/bondwb.git && cd bondwb && git checkout ba7ccec5140618cbc32a150fa6743f415fc93c3a
-# RUN cd bondwb && perl -pe 's/(?<=enable: )true/false/g' stack.yaml && stack setup
-#COPY local.patch bondwb/local.patch
-RUN cd bondwb && ./install-deps-fedora.sh #&& patch < local.patch 
-RUN cd bondwb && stack setup && stack install && ./install-bins.sh
-RUN dnf -y install python3-pip
-RUN groupadd lbuc && useradd -m -s /bin/bash -N -u 1000 -g lbuc lbuc && chown -R lbuc:lbuc /bondwb
-USER lbuc
-WORKDIR /home/lbuc
-ENV PATH=/home/lbuc/.local/bin:${PATH}
-COPY requirements.txt .
-RUN pip3 install --user -r requirements.txt
-ENV SAGE_DOC=/usr/share/doc/sagemath SAGE_LOCAL=/usr/lib64/sagemath/local SAGE_EXTCODE=/usr/share/sagemath/etc SAGE_DOC_SRC=/usr/share/doc/sagemath SAGE_SRC=/usr/lib64/sagemath/src SAGE_ROOT=/usr/lib64/sagemath SAGE_PKGS=/usr/lib64/sagemath/local/var/lib/sage/installed SAGE_TESTDIR=/home/lbuc/.sage/tmp PYTHONPATH=/usr/lib64/sagemath/site-packages:/usr/lib64/sagemath/local/bin SYMPOW_DIR=/home/lbuc/.sage/sympow SAGE_SHARE=/usr/share/sagemath SAGE_ETC=/usr/share/sagemath/etc SINGULAR_DATA_DIR=/usr/share SINGULAR_SO=/usr/lib64/libSingular-4.1.1.so SINGULAR_BIN_DIR=/usr/lib64/Singular
-ENV PYTHONPATH=/lbuc:${PYTHONPATH}
-ENV JUPYTERPATH=/lbuc:${JUPYTERPATH}
-ENV SAGE_PATH=/lbuc:${SAGE_PATH}
-# Fix broken sympy sage integration
-COPY compatibility.py /usr/lib/python3.8/site-packages/sympy/core/compatibility.py
-COPY . /lbuc
-ENV PATH=/lbuc/.local/bin:${PATH}
-WORKDIR /lbuc
-RUN ./setup.py choose_flowstar -m fastintervals && ./setup.py build_ext
+RUN cd bondwb && mv -f stack-minimal.yaml stack.yaml && stack setup && stack install
+
+FROM sagemath/sagemath:9.0-py3 as lbuclib
+
 USER root
-RUN cd flowstar/flowstar-2.1.0 && make install
-USER lbuc
-# RUN ./setup.py install --user
-RUN cp -R flowstar/ /home/lbuc/.local/lib/python3.8/site-packages/ && cp -R ulbc/ /home/lbuc/.local/lib/python3.8/site-packages/
+RUN apt update && apt -y install git wget software-properties-common
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
+RUN apt update && apt -y install build-essential bison libbison-dev flex gcc-9 g++-9
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9  100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+COPY flowstar flowstar
+COPY setup.py setup.py
+RUN sage -python3 ./setup.py choose_flowstar -m fastintervals
+COPY ulbc ulbc
+RUN sage -python3 ./setup.py build_ext
+
+FROM sagemath/sagemath:9.0-py3
+
+USER root
+RUN apt update && apt install -y libgsl2 libblas3 liblapack3
+COPY --from=bondwb /root/.local/bin/bondwb-minimal /usr/bin/bondwb
+COPY --from=lbuclib /home/sage/flowstar/flowstar-2.1.0/libflowstar.so /usr/lib/libflowstar.so
+COPY --chown=1000:1000 --from=lbuclib /home/sage/build/lib.linux-x86_64-3.7/flowstar/ /home/sage/sage/local/lib/python3.7/site-packages/flowstar/
+COPY --chown=1000:1000 --from=lbuclib /home/sage/ulbc/*.py /home/sage/sage/local/lib/python3.7/site-packages/ulbc/
+
+USER sage
+COPY requirements.txt /tmp/
+RUN sage -pip install -r /tmp/requirements.txt
+COPY models ./models
+COPY Introduction.ipynb .
 EXPOSE 8888
-CMD [ "python3", "-m", "jupyterlab", "--ip=0.0.0.0", "--no-browser" ]
+CMD [ "sage", "-python", "-m", "jupyterlab", "--ip=0.0.0.0", "--no-browser" ]
