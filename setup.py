@@ -198,8 +198,30 @@ class CleanFlowstarCommand(Command):
             pass
 
 
+class BuildContainerCommand(Command):
+    user_options = [
+        ('name', 'n', "Container name."),
+        ('tag', 't', "Container tag."),
+    ]
+
+    def initialize_options(self):
+        self.name = 'lbuc-jupyter'
+        self.tag = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        full_name = self.name if self.tag is None else f'{self.name}:{self.tag}'
+
+        cmd = ['docker', 'build', '-t', full_name, '.']
+
+        subprocess.check_call(cmd)
+
+
 class TestCommand(Command):
     user_options = [
+        ('docker', 'd', "Test in a Docker container."),
         ('no-rebuild', 'n', "Don't rebuild before testing."),
         ('verbose-test', 'v', 'Verbose?'),
         ('all', 'a', 'Run all tests?'),
@@ -209,6 +231,7 @@ class TestCommand(Command):
     ]
 
     def initialize_options(self):
+        self.docker = False
         self.no_rebuild = False
         self.verbose_test = False
         self.all = False
@@ -217,6 +240,7 @@ class TestCommand(Command):
         self.fail_fast = False
 
     def finalize_options(self):
+        self.docker = bool(self.docker)
         self.no_rebuild = bool(self.no_rebuild)
         self.verbose_test = bool(self.verbose_test)
         self.all = bool(self.all)
@@ -224,19 +248,16 @@ class TestCommand(Command):
         self.failed = bool(self.failed)
         self.fail_fast = bool(self.fail_fast)
 
-    def run(self):
-        # self.announce("anouncing", 1)
-        print(f"no_rebuild = {self.no_rebuild}")
+    def run_local(self):
         if not self.no_rebuild:
             self.run_command('build_ext')
-        # self.run_command('pytest')
-        self.announce('Testing...')
-        cmd = ['/usr/bin/env', 'python3', '-m', 'pytest', '--disable-pytest-warnings']  # , '--doctest-cython']
+
+        cmd = ['/usr/bin/env', 'python3', '-m', 'pytest', '--disable-pytest-warnings']
+
         if self.verbose_test:
             cmd.append('-v')
         if self.all:
             self.announce("running all tests")
-            # cmd.append('-m "slow or not slow or very_slow or not very_slow"')
             cmd.extend(['-m', 'very_slow or not very_slow'])
         elif self.most:
             self.announce("running *most* tests")
@@ -244,13 +265,44 @@ class TestCommand(Command):
         else:
             self.announce("warning: excluding slow tests")
             cmd.extend(['-m', 'not slow and not very_slow'])
+
         if self.failed:
             cmd.extend(["--lf", "--lfnf=all"])
         if self.fail_fast:
             cmd.append("-x")
 
-        print(f"cmd = {repr(cmd)}")
+        print(f"cmd = {cmd}")
+
         subprocess.check_call(cmd)
+
+    def run_container(self):
+        if not self.no_rebuild:
+            self.run_command('build_container')
+
+        cmd = ["/usr/bin/env", "docker", "run", "lbuc-jupyter", "sage", "-python3", "/home/sage/setup.py", "test", "-n"]
+
+        if self.verbose_test:
+            cmd.append('-v')
+
+        if self.all:
+            cmd.append('-a')
+        elif self.most:
+            cmd.append('-m')
+
+        if self.failed:
+            cmd.append("-f")
+        if self.fail_fast:
+            cmd.append("-x")
+
+        print(f"cmd = {cmd}")
+
+        subprocess.check_call(cmd)
+
+    def run(self):
+        if self.docker:
+            self.run_container()
+        else:
+            self.run_local()
 
 
 class BuildFlowstarCommand(Command):
@@ -286,6 +338,7 @@ setup(
               'clean_flowstar': CleanFlowstarCommand,
               'build_flowstar': BuildFlowstarCommand,
               'test': TestCommand,
+              'build_container': BuildContainerCommand,
               'build_ext': BuildAllCommand},
     ext_modules=cythonize(extensions, gdb_debug=True,
                           annotate=True, nthreads=8,
