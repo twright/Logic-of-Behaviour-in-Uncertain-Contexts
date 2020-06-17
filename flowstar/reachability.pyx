@@ -31,6 +31,7 @@ from warnings import warn
 from enum import Enum, IntEnum
 from flowstar.cppstd cimport optional
 import instrument
+import wurlitzer
 
 
 current_global_manager = None
@@ -65,7 +66,7 @@ class InitialForm(Enum):
 
 
 cdef class CReach:
-    def __cinit__(CReach self, *args, **kwargs):
+    def __cinit__(CReach self, *args, verbosity=0, **kwargs):
         # Associate system object
         self.system = kwargs.get('system', None)
         # Create instrumentor for time logging
@@ -75,6 +76,7 @@ cdef class CReach:
             self.instrumentor = AggregateMetric()
         # Create global variable manager
         self.global_manager = FlowstarGlobalManager(self.instrumentor)
+        self.verbosity = verbosity
 
         if len(args) == 1 or len(args) == 2:
             ## Copy constructor
@@ -83,11 +85,13 @@ cdef class CReach:
             ## Construct from string formatted ODE arguments
             self._init_non_polynomial_str_args(*args, **kwargs)
         elif any(isinstance(ode, sage.Expression) for ode in args[1]):
-            print("ode in symbolic ring")
+            if self.verbosity > 0:
+                print("ode in symbolic ring")
             ## Construct from sage expressions
             self._init_non_polynomial_sage_args(*args, **kwargs)
         else:
-            print("ode in polynomial ring")
+            if self.verbosity > 0:
+                print("ode in polynomial ring")
             ## Construct polynomial from arguments
             self._init_args(*args, **kwargs)
         assert self.system_vars is not None
@@ -120,9 +124,6 @@ cdef class CReach:
         """Declare variables for Taylor-models and produce a vector of
         Flowpipes representing the initial conditions."""
         # Must be called from inside the global manager
-        print("_handle_initials called!")
-        print(f"vars = {repr(vars)}")
-
         cdef:
             # One per state dimension
             vector[TaylorModel] tms
@@ -159,7 +160,8 @@ cdef class CReach:
                 # Declare Taylor-model variable
                 C.declareTMVar(<string>f"local_var_c{i}".encode('utf-8'))
                 initial_int_C = interval.make_interval(initialC)
-                print(f"C = {interval.as_str(initial_int_C)}")
+                if self.verbosity >= 2:
+                    print(f"C = {interval.as_str(initial_int_C)}")
                 context_intervals.push_back(optional[Interval](initial_int_C))
 
                 tm_var_index += 1
@@ -169,7 +171,8 @@ cdef class CReach:
             
             if initialS is not None:
                 initial_int_S = interval.make_interval(initialS)
-                print(f"S = {interval.as_str(initial_int_S)}")
+                if self.verbosity >= 2:
+                    print(f"S = {interval.as_str(initial_int_S)}")
                 static_intervals.push_back(initial_int_S)
             else:
                 static_intervals.push_back(zero_int)
@@ -359,7 +362,6 @@ cdef class CReach:
         precondition=0,
         order=2,
         orders=None,
-        verbose=False,
         # Must be NONPOLY_TAYLOR
         # integrationScheme=2,
         integration_method=IntegrationMethod.NONPOLY_TAYLOR,
@@ -371,7 +373,7 @@ cdef class CReach:
         symbolic_composition=True,
         unpreconditioning_order=None,
         unpreconditioning_orders=None,
-        precompose_taylor_models=False,
+        unprecondition_upfront=False,
         crude_roots=False,
         skip_unpreconditioning=False,
         initial_form=InitialForm.COMBINED,
@@ -388,8 +390,6 @@ cdef class CReach:
         self.result = 0
         self.symbolic_composition = symbolic_composition
         self.skip_unpreconditioning = skip_unpreconditioning
-
-        print("run =", run)
 
         cdef ContinuousReachability * C
         cdef Interval zero_int
@@ -421,7 +421,7 @@ cdef class CReach:
         C.precondition = precondition
         C.plotSetting = 1  # We have to set this to something, but should be
         # set by plot method
-        C.bPrint = verbose
+        C.bPrint = self.verbosity > 0
         C.bSafetyChecking = False
         C.bPlot = True
         C.bDump = False
@@ -459,14 +459,9 @@ cdef class CReach:
         # === Set properties ===
 
         # Run immediately?
-        print("run within string args")
+        # print("run within string args")
         if run:
             self.run()
-            if self.ran and precompose_taylor_models:
-                with instrument.block(
-                        name="precomposing taylor models",
-                        metric=self.instrumentor.metric):
-                    self.precompose_taylor_models()
 
     @flowstar_globals
     def _init_clone(CReach self, CReach other, initials=None, initial_form=None):
@@ -491,6 +486,8 @@ cdef class CReach:
         self.skip_unpreconditioning = other.skip_unpreconditioning
         self.unpreconditioning_orders = other.unpreconditioning_orders
         self.unpreconditioning_max_order = other.unpreconditioning_max_order
+        self.unprecondition_upfront = other.unprecondition_upfront
+        self.verbosity = other.verbosity
 
         continuousProblem = other.global_manager.continuousProblem
 
@@ -528,7 +525,6 @@ cdef class CReach:
         orders=None,
         unpreconditioning_order=None,
         unpreconditioning_orders=None,
-        verbose=False,
         integration_method=IntegrationMethod.LOW_DEGREE,
         cutoff_threshold=1e-7,
         estimation=1e-3,
@@ -538,7 +534,7 @@ cdef class CReach:
         run=True,
         system=None,
         symbolic_composition=False,
-        precompose_taylor_models=False,
+        unprecondition_upfront=False,
         crude_roots=False,
         skip_unpreconditioning=False,
         initial_form=InitialForm.COMBINED,
@@ -553,13 +549,10 @@ cdef class CReach:
         self.prepared = False
         self.prepared_for_plotting = False
         self.crude_roots = crude_roots
-        print(f"crude_roots = {repr(crude_roots)}")
         self.result = 0
         self.symbolic_composition = symbolic_composition
         self.skip_unpreconditioning = skip_unpreconditioning
-
-        # Create global variable manager
-        # self.global_manager = FlowstarGlobalManager()
+        self.unprecondition_upfront = unprecondition_upfront
 
         # --- Creating the continuous system ---
         assert len(odes) == len(initials),\
@@ -568,7 +561,7 @@ cdef class CReach:
 
         if vars is None:
             self.var_ring = odes[0].parent()
-            print('vars =', vars)
+            # print('vars =', vars)
         else:
             self.var_ring = vars[0].parent()
         # We really want the vars to be strings, rather than symbolic variables
@@ -595,8 +588,9 @@ cdef class CReach:
 
         # Create system object
         C.system = ContinuousSystem(odes_tmv, initials_fpvect)
-        print(f"assigning system with dimension {odes_tmv.tms.size()}") 
-        print(f"resulting system has dimension {continuousProblem.system.tmvOde.tms.size()}") 
+        if self.verbosity > 0:
+            print(f"assigning system with dimension {odes_tmv.tms.size()}") 
+            print(f"resulting system has dimension {continuousProblem.system.tmvOde.tms.size()}") 
 
         # === Set properties ===
 
@@ -619,7 +613,7 @@ cdef class CReach:
         C.precondition = precondition
         C.plotSetting = 1  # We have to set this to something, but should be
         # set by plot method
-        C.bPrint = verbose
+        C.bPrint = self.verbosity > 0
         C.bSafetyChecking = False
         C.bPlot = True
         C.bDump = False
@@ -629,21 +623,10 @@ cdef class CReach:
             C.estimation.push_back(Interval(-estimation,estimation))
         C.maxNumSteps = maxNumSteps
         C.max_remainder_queue = max_remainder_queue
-        # Test if this is doing anything!
-        # C.num_of_flowpipes = 42
-
-        print("run within tmv args")
 
         # Run immediately?
         if run:
-            # setContinuousProblem(deref(C))
-            # with self.global_manager:
             self.run()
-            if self.ran and precompose_taylor_models:
-                with instrument.block(
-                        name="precomposing taylor models",
-                        metric=self.instrumentor.metric):
-                    self.precompose_taylor_models()
 
     cdef object _handle_orders(
         CReach self,
@@ -693,7 +676,6 @@ cdef class CReach:
                     )
                 self.unpreconditioning_max_order = unpreconditioning_order
         else:
-            print(f"unpreconditioning_orders = {unpreconditioning_orders}")
             for o in unpreconditioning_orders:
                 self.unpreconditioning_orders.push_back(o)
             self.unpreconditioning_max_order = max(unpreconditioning_orders)
@@ -846,20 +828,24 @@ cdef class CReach:
             raise Exception('Not ran!')
 
         if not self.prepared:
-            # Initialize flowpipes_compo to an empty array of the right
-            # length
-            self.flowpipes_compo = vector[optional[TaylorModelVec]](
-                continuousProblem.flowpipes.size(),
-                optional[TaylorModelVec](),
-            )
-            # print("In prepare! flowpipes_compo.size() =",
-            #       self.flowpipes_compo.size())
-            self.prepared = True
+            with instrument.block(
+                name="prepare",
+                metric=self.instrumentor.metric,
+            ):
+                # Initialize flowpipes_compo to an empty array of the right
+                # length
+                self.flowpipes_compo = vector[optional[TaylorModelVec]](
+                    continuousProblem.flowpipes.size(),
+                    optional[TaylorModelVec](),
+                )
+                # print("In prepare! flowpipes_compo.size() =",
+                #       self.flowpipes_compo.size())
+                self.prepared = True
 
-            # Prepare domains
-            continuousProblem.domains.clear()
-            for fp in continuousProblem.flowpipes:
-                continuousProblem.domains.push_back(fp.domain)
+                # Prepare domains
+                continuousProblem.domains.clear()
+                for fp in continuousProblem.flowpipes:
+                    continuousProblem.domains.push_back(fp.domain)
 
     @flowstar_globals
     def prepare_for_plotting(self):
@@ -868,7 +854,7 @@ cdef class CReach:
 
         self.prepare()
 
-        self.precompose_taylor_models()
+        self.unprecondition_flowpipes()
         # print("in prepare for plotting")
 
         cdef:
@@ -881,14 +867,8 @@ cdef class CReach:
 
         with self.global_manager:
             if not self.prepared_for_plotting:
-                continuousProblem.flowpipesCompo.clear()
+                continuousProblem.flowpipesCompo.clear()            # print(f"unpreconditioning_orders = {unpreconditioning_orders}")
                 continuousProblem.domains.clear()
-
-            # print("fp.size", self.c_reach.flowpipes.size())
-            # print("fp_compo.size", self.flowpipes_compo.size())
-            #
-            # print('fp eq:      ', fp == fp_end)
-            # print('fp_compo eq:', fp_compo == fp_compo_end)
 
                 while fp != fp_end and fp_compo != fp_compo_end:
                     assert deref(fp_compo).has_value()
@@ -902,12 +882,14 @@ cdef class CReach:
                 self.prepared_for_plotting = True
 
     @flowstar_globals
-    def precompose_taylor_models(self):
+    def unprecondition_flowpipes(self):
         """Prepare for plotting / evaluating."""
         global continuousProblem
 
         if not self.ran:
             raise Exception('Not ran!')
+
+        self.prepare()
 
         cdef:
             clist[Flowpipe].iterator fp = continuousProblem.flowpipes.begin()
@@ -917,17 +899,19 @@ cdef class CReach:
             vector[optional[TaylorModelVec]].iterator fp_compo_end = \
                 self.flowpipes_compo.end()
 
-        self.prepare()
+        with instrument.block(
+            name="unpreconditioning flowpipes",
+            metric=self.instrumentor.metric,
+        ):
+            while fp != fp_end and fp_compo != fp_compo_end:
+                self.compose_flowpipe(deref(fp), deref(fp_compo))
 
-        while fp != fp_end and fp_compo != fp_compo_end:
-            self.compose_flowpipe(deref(fp), deref(fp_compo))
-
-            inc(fp)
-            inc(fp_compo)
+                inc(fp)
+                inc(fp_compo)
 
     cdef void compose_flowpipe(CReach self,
-                                const Flowpipe & fp,
-                                optional[TaylorModelVec] & fp_compo):
+                               const Flowpipe & fp,
+                               optional[TaylorModelVec] & fp_compo):
         """Symbolically compose flowpipe.
         
         Result stored in (optional tmv) fp_compo.
@@ -945,26 +929,18 @@ cdef class CReach:
             TaylorModel tm_zero
             int order
 
-        with instrument.block(name="composing flowpipe",
-                metric=self.instrumentor.metric):
-            # Do nothing if fp_compo already has a value.
-            if fp_compo.has_value():
+        # Do nothing if fp_compo already has a value.
+        if fp_compo.has_value():
+            with instrument.block(name="returning cached composed flowpipe",
+                    metric=self.instrumentor.metric):
                 # print("compo has value")
                 return
 
-            # print("need to compo!")
-
+        with instrument.block(name="composing flowpipe",
+                metric=self.instrumentor.metric):
             # Create an empty tmv for result of composition
             (&fp_compo)[0] = optional[TaylorModelVec](TaylorModelVec())
 
-            # print("composing fp")
-            # print("orders =",
-            #       repr([o for o in self.c_reach.orders]))
-            # print("cutoff threshold =",
-            #       repr([interval.as_str(o) for o in
-            #             self.c_reach.cutoff_threshold]))
-
-            # Get flow* to perform the composition
             # Manual composition
             # (skipping certain dimensions)
             fp.tmv.polyRange(poly_range, fp.domain)
@@ -998,13 +974,21 @@ cdef class CReach:
             raise Exception('Already ran')
 
         try:
-            print(f"integrationScheme = {continuousProblem.integrationScheme}")
-            # FlowstarGlobalManager.clear_globals()
-            self.result = int(continuousProblem.run())
+            # Redirect C standard out to Python
+            with wurlitzer.sys_pipes():
+                with instrument.block(
+                        name="Running Flow*",
+                        metric=self.instrumentor.metric):
+                    # Run via Flow* shared library
+                    self.result = int(continuousProblem.run())
 
             return self.result
         finally:
             self.ran = self.num_flowpipes > 0
+
+            if self.ran and self.unprecondition_upfront:
+                # Unprecondition flowpipes
+                self.unprecondition_flowpipes()
 
     @property
     def res(self):

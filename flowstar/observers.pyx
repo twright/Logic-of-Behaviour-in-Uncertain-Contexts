@@ -113,7 +113,6 @@ cdef class RestrictedObserver(PolyObserver):
             inc(f)
             inc(fprime)
 
-
     cdef optional[vector[Interval]] _global_domain(self):
         cdef vector[Interval] domain = (<RestrictedObserver?>self).space_domain
         domain.insert(domain.begin(), Interval(-1, 1))
@@ -319,12 +318,15 @@ cdef class FunctionObserver:
             ### Perform composition of preconditioned taylor model
             self.reach.compose_flowpipe(deref(fp), deref(fp_compo))
             assert deref(fp_compo).has_value()
+            assert not self.reach.skip_unpreconditioning
 
             ### Retrieve cached symbolically composed functions, or perform
             ### functional composition.
-            self._pre_retrieve_f(f_fn, fprime_fn,
-                                 deref(poly_f_fn), deref(poly_fprime_fn),
-                                 deref(fp_compo).value(), loop_domain)
+            with instrument.block(name="pre retrieve",
+                    metric=self.reach.instrumentor.metric):
+                self._pre_retrieve_f(f_fn, fprime_fn,
+                                    deref(poly_f_fn), deref(poly_fprime_fn),
+                                    deref(fp_compo).value(), loop_domain)
 
             # Evaluate f over the whole domain
             with instrument.block(name="whole domain eval",
@@ -624,8 +626,11 @@ cdef class FunctionObserver:
             return None
 
     def check_single_point(self, t):
-        robs = RestrictedObserver(self, [0]*self.reach.context_dim)
-        return robs.check(t)
+        with instrument.block(
+                name="check_single_point",
+                metric=self.reach.instrumentor.metric):
+            robs = RestrictedObserver(self, [0]*self.reach.context_dim)
+            return robs.check(t)
 
     ### Helper methods
 
@@ -817,12 +822,14 @@ cdef class FunctionObserver:
         if self.symbolic_composition and not poly_f_fn.has_value():
             # Define f and fprime by symbolically composing polynomials
             # print("Performing symbolic composition!")
-            observable_hf( 
-                f_fn, fprime_fn,
-                (<PolyObserver?>self).f_hf, tmv, deref(loop_domain),
-                self.symbolic_composition_order,
-                continuousProblem.cutoff_threshold,
-            )
+            with instrument.block(name="observable_hf",
+                                  metric=self.reach.instrumentor.metric):
+                observable_hf( 
+                    f_fn, fprime_fn,
+                    (<PolyObserver?>self).f_hf, tmv, deref(loop_domain),
+                    self.symbolic_composition_order,
+                    continuousProblem.cutoff_threshold,
+                )
             # if self.symbolic_composition_order == -1:
             #     order = continuousProblem.globalMaxOrder
             # else:
@@ -847,11 +854,16 @@ cdef class FunctionObserver:
             # print("functional composition for fprime")
             if self.fprime is None:
                 raise ValueError("Manual functional composition of polynomials does not work for non-polynomial systems.")
-            (&fprime_fn)[0] = interval.compose_interval_fn(
-                self.fprime_interval_fn,
-                tmv_interval_fn(tmv, deref(loop_domain)),
-            )
-        # else:
+            with instrument.block(name="compose_interval_fn for atomic",
+                                  metric=self.reach.instrumentor.metric):
+                (&fprime_fn)[0] = interval.compose_interval_fn(
+                    self.fprime_interval_fn,
+                    tmv_interval_fn(tmv, deref(loop_domain)),
+                )
+        else:
+            with instrument.block(name="symbolic composition already done",
+                                  metric=self.reach.instrumentor.metric):
+                pass
         #     print("Nothing! Let's hope we have retrieved a symbolical "
         #           "polynomial")
         # Nothing should happen in the else case since a cached value
@@ -1075,8 +1087,10 @@ cdef class PolyObserver(FunctionObserver):
         ))
 
         self.f = Poly(f)
-        self.f.c_poly.toHornerForm(self.f_hf)
         self.reach = reach
+        with instrument.block(name="toHornerForm",
+                              metric=reach.instrumentor.metric):
+            self.f.c_poly.toHornerForm(self.f_hf)
         if fprime is not None:
             print(f"fprime = {repr(fprime)}")
             self.fprime = Poly(fprime)

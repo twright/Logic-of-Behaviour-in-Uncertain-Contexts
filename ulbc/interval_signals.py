@@ -48,13 +48,19 @@ def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
                               domain)
 
 
-def signal_from_observer(observer, domain, verbosity=0, global_root_detection=False):  # , theta=0.01,
+def signal_from_observer(observer, domain, verbosity=0,           
+        global_root_detection=False,
+        check_single_point=True):  # , theta=0.01,
     # abs_inf=0.0001):
     @instrument.function(name="observer.check",
             metric=observer.reach.instrumentor.metric)
     def check(x):
-        # Avoid reentering global guard at each step
-        return observer.check_single_point(x)
+        if check_single_point:
+            # Check at just a single point in the space domain
+            return observer.check_single_point(x)
+        else:
+            # Check using the original observer
+            return observer.check(x)
 
     mask = observer.mask
     if not observer.reach.successful:

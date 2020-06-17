@@ -43,6 +43,15 @@ class TestReachability(object):
     def test_constructor(ringxy, odes, initials):
         reach = Reach(odes, initials, 2*sage.pi, (0.001, 0.1), order=10)
         assert reach.ran
+        assert not reach.unprecondition_upfront
+        assert reach.result == 2
+
+    @staticmethod
+    def test_unprecondition_upfront(ringxy, odes, initials):
+        reach = Reach(odes, initials, 2*sage.pi, (0.001, 0.1), order=10,
+            unprecondition_upfront=True)
+        assert reach.ran
+        assert reach.unprecondition_upfront
         assert reach.result == 2
 
     @staticmethod

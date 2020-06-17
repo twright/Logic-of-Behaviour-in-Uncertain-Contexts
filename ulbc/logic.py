@@ -14,6 +14,7 @@ import sage.all as sage
 from sage.all import RIF
 from flowstar.poly import Poly
 from flowstar.reachability import (Reach, FlowstarFailedException, InitialForm)
+from flowstar.instrumentation import AggregateMetric
 import ulbc.bondcalculus as bc
 from ulbc.symbolic import RelationConverter, is_relation
 
@@ -46,6 +47,12 @@ class Logic(metaclass=ABCMeta):
         if 'step' not in kwargs:
             kwargs['step'] = (0.001, 0.1)
 
+        if 'instrumentor' not in kwargs:
+            kwargs['instrumentor'] = AggregateMetric()
+
+        if 'print_timings' not in kwargs:
+            kwargs['print_timings'] = False
+
         if len(args) == 3:
             odes, initials, duration = args
             R, x = odes[0].parent().objgens()
@@ -75,9 +82,7 @@ class Logic(metaclass=ABCMeta):
         if precompose_systems:
             with instrument.block(
                     name="Precomposing Contexts",
-                    metric=kwargs['instrumentor'].metric
-                        if 'instrumentor' in kwargs
-                        else instrument.call_default):
+                    metric=kwargs['instrumentor'].metric):
                 composed = self.with_system(system)
             return composed.signal(duration, **kwargs)
         else:
@@ -99,11 +104,6 @@ class Logic(metaclass=ABCMeta):
                 'symbolic_composition', False,
             )
 
-        print(f"include_derivs = {unpreconditioning_include_derivs}")
-
-        if 'order' not in kwargs:
-            kwargs['order'] = 10
-
         # Choose order to be used for unpreconditioning
         # TODO: cope better with adaptive orders
         print(f"phi variables sfs = {self.variables(system)}")
@@ -122,18 +122,13 @@ class Logic(metaclass=ABCMeta):
         else:
             kwargs['unpreconditioning_order'] = unpreconditioning_order
         
-        with instrument.block(
-                name="Running Flow*",
-                metric=kwargs['instrumentor'].metric
-                    if 'instrumentor' in kwargs
-                    else instrument.call_default):
-            reach = system.reach(
-                # Run for a little extra time to make sure endpoint of
-                # interval is strictly inside time-domain of reachset
-                # accounting for rounding errors and temporal quantifiers
-                self.duration + duration + 2e-3,
-                **kwargs
-            )
+        reach = system.reach(
+            # Run for a little extra time to make sure endpoint of
+            # interval is strictly inside time-domain of reachset
+            # accounting for rounding errors and temporal quantifiers
+            self.duration + duration + 2e-3,
+            **kwargs
+        )
 
         # Decide on an initial mask.
         if mask is None and use_masks:
@@ -153,12 +148,12 @@ class Logic(metaclass=ABCMeta):
         reach.prepare()
         with instrument.block(
                 name=f"Monitoring Signal for {str(self)}",
-                metric=kwargs['instrumentor'].metric
-                    if 'instrumentor' in kwargs
-                    else instrument.call_default):
+                metric=kwargs['instrumentor'].metric):
             res = self.signal(reach, mask=mask, **kwargs
-                            ).to_domain(RIF(0, duration))
-        reach.instrumentor.print()
+                              ).to_domain(RIF(0, duration))
+        assert kwargs['instrumentor'] is reach.instrumentor
+        if kwargs['print_timings']:
+            reach.instrumentor.print()
         return res
 
     def _unpreconditioning_orders(self, system : System, order : int,
@@ -582,17 +577,24 @@ class Atomic(Logic):
 
         return observer
 
-    def signal_from_observer(self, observer,  global_root_detection=False, two_pass_masks=False, **kwargs):
+    # TODO: do we really want to intercept to_pass_masks here?
+    # Why?
+    def signal_from_observer(self, observer,  global_root_detection=False, two_pass_masks=False, check_single_point=True, **kwargs):
         return signal_from_observer(
             observer,
             RIF(0, observer.time),
             # It should only be at the top level we trim the time domain
             # RIF(0, observer.time - 2e-3),
             verbosity=kwargs.get('verbosity', 0),
+            check_single_point=True,
             global_root_detection=global_root_detection,
         )
 
     def signal(self, reach: Reach, physical_space_domain=None, symbolic_space_domain=None, mask=None, two_pass_masks=False, **kwargs):
+
+        if 'instrumentor' not in kwargs:
+            kwargs['instrumentor'] = reach.instrumentor
+
         observer = self.observer(
             reach,
             space_domain=symbolic_space_domain,
@@ -602,13 +604,18 @@ class Atomic(Logic):
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
         )
 
-        print(f"symbolic_composition={observer.symbolic_composition},symbolic_composition_order={observer.symbolic_composition_order}, tentative_unpreconditioning={observer.tentative_unpreconditioning},two_pass_masks={two_pass_masks}")
+        if kwargs.get('verbosity', 0) > 0:
+            print(
+                f"signal with:\n"
+                f"symbolic_composition={observer.symbolic_composition}\n"
+                f"symbolic_composition_order={observer.symbolic_composition_order}\n"
+                f"tentative_unpreconditioning={observer.tentative_unpreconditioning}\n"
+                f"two_pass_masks={two_pass_masks}"
+            )
 
         with instrument.block(
                 name=f"Monitoring atomic {self}",
-                metric=kwargs['instrumentor'].metric
-                    if 'instrumentor' in kwargs
-                    else instrument.call_default):
+                metric=kwargs['instrumentor'].metric):
             return self.signal_from_observer(
                 observer,
                 **kwargs

@@ -161,11 +161,12 @@ class System:
             # Fixed initial set with variable context
             y0 = list(zip(self._y0_ctx, self.y0))
 
-        try:
-            # First segment: context, second segment, static portion
-            print(f"calling reach with y0 = {[('None' if a is None else a.str(style='brackets'), b.str(style='brackets')) for a, b in y0]}")
-        except TypeError:
-            print(f"calling reach with y0 = {[a.str(style='brackets') for a in y0]}")
+        if kwargs.get('verbosity', 0) > 0:
+            try:
+                # First segment: context, second segment, static portion
+                print(f"calling reach with y0 = {[('None' if a is None else a.str(style='brackets'), b.str(style='brackets')) for a, b in y0]}")
+            except TypeError:
+                print(f"calling reach with y0 = {[a.str(style='brackets') for a in y0]}")
 
         if self.R == sg.SR:
             # Non-Polynomial case

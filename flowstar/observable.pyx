@@ -23,7 +23,7 @@ cdef void observable_hf(
         TaylorModel f1, f2
         vector[Interval] space_domain
         vector[int] varIDs
-        Interval R
+        # Interval R
         Polynomial p, p_deriv
     cdef Interval zero_interval
 
@@ -53,7 +53,7 @@ cdef void observable_hf(
     p.derivative(p_deriv, 0)
     # p.ctrunc(R, domain, order)
 
-    (&f_fn)[0] = poly_time_fn(p + Polynomial(R, 1))
+    (&f_fn)[0] = poly_time_fn(p)
     (&f_prime_fn)[0] = poly_time_fn(p_deriv)
 
 
