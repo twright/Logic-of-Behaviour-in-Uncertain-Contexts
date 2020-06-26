@@ -155,7 +155,6 @@ class TestReach:
 
 class TestReachTree:
     @staticmethod
-    @pytest.mark.xfail
     @pytest.mark.parametrize(
         "initial_form",
         [
@@ -182,33 +181,43 @@ class TestReachTree:
             initials1,
         )
         assert intervals_approx_eq(
-            r0(t),
-            solution(*initials1, t),
+            r0(0),
+            initials1,
         )
+        # Containment
+        sol0 = lambda t: solution(*initials1, t)
+        check_containment(sol0, r0, 0, 10, 0.5)
+        check_inflation(sol0, r0, 1.1, 0, 5, 0.5)
 
         # Level 1
         r1 : Reach = r((0,))
         initials_r1 = [RIF(1, 1.1), RIF(1.5, 1.55)]
+        sol1 = lambda t: solution(*initials_r1, t)
         assert intervals_approx_eq(
             r1.system.y0_composed,
             initials_r1,
         )
         assert intervals_approx_eq(
-            r1(t),
-            solution(*initials_r1, t),
+            r1(0),
+            initials_r1,
         )
+        check_containment(sol1, r1, 0, 10, 0.5)
+        check_inflation(sol1, r1, 1.1, 0, 5, 0.5)
 
         # Level 2
         r2 : Reach = r((0, 3))
         initials_r2 = [RIF(1.05, 1.1), RIF(1.525, 1.55)]
+        sol2 = lambda t: solution(*initials_r2, t)
         assert intervals_approx_eq(
             r2.system.y0_composed,
             initials_r2,
         )
         assert intervals_approx_eq(
-            r2(t),
-            solution(*initials_r2, t),
+            r2(0),
+            initials_r2,
         )
+        check_containment(sol2, r2, 0, 10, 0.5)
+        check_inflation(sol2, r2, 1.1, 0, 5, 0.5)
 
     @staticmethod
     @pytest.mark.parametrize(
