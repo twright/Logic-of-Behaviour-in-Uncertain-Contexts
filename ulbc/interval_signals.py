@@ -14,7 +14,8 @@ from typing import *
 from sage.all import RIF, region_plot
 from ulbc.interval_root_isolation import isolate_roots
 from flowstar.reachability import FlowstarFailedException
-from ulbc.interval_utils import inner_inverse_minkowski, int_dist
+from ulbc.interval_utils import (inner_inverse_minkowski, int_dist,
+    interval_subseteq)
 from ulbc.systems import System
 
 
@@ -345,6 +346,20 @@ class Signal(BaseSignal):
             self._mask = None
         else:
             self._mask = mask.to_domain(self.domain)
+
+    def enclosed_by(self, other):
+        return all(
+            any(s is w and interval_subseteq(J, I)
+                for I, s in self.values)
+            for J, w in other.values
+        )
+    
+    def consistent_with(self, other):
+        return all(
+            all(I.overlaps(J) <= (s is w)
+                for J, w in other.values)
+            for I, s in self.values
+        )
 
     def inflate(self, epsilon: float):
         return Signal(

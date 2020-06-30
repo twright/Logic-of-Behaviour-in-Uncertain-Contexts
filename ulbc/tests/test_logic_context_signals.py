@@ -261,8 +261,10 @@ class TestContextSignalWhelksAndLobsters:
         # Compare generated signals
         sig0 = csig.refined_signal(0)
         sig1 = csig.refined_signal(1)
+        assert sig1.enclosed_by(sig0)
         assert sig0.approx_eq(sig1, 0.5)
         sig2 = csig.refined_signal(2)
+        assert sig2.enclosed_by(sig1)
         assert sig1.approx_eq(sig2, 0.5)
 
         # assert space_domain_approx_eq(
@@ -337,16 +339,19 @@ class TestContextSignalWhelksAndLobsters:
         sig2 = csig.refined_signal(2)
         assert sig1.approx_eq(sig2, 0.5)
         sig0p = csigp.refined_signal(0)
+        assert sig0.consistent_with(sig0p)
         assert sig0.approx_eq(sig0p, 0.2)
         sig1p = csigp.refined_signal(1)
+        assert sig1.consistent_with(sig1p)
         assert sig0p.approx_eq(sig1p, 0.5)
         assert sig1.approx_eq(sig1p, 0.5)
         sig2p = csigp.refined_signal(2)
+        assert sig2.consistent_with(sig2p)
         assert sig1p.approx_eq(sig2p, 0.5)
         assert sig2.approx_eq(sig2p, 0.3)
+        assert csig.consistent_with(csigp, 2)
 
     @pytest.mark.slow
-    @pytest.mark.xfail # TODO: fix based on new context signals
     def test_wandl_combined_initial(self, ringxy, odes_whelks, poly_low_kwargs):
         '''Test with a single, combined initial set.'''
         RNG, us = ringxy
@@ -380,25 +385,43 @@ class TestContextSignalWhelksAndLobsters:
         # Check absolute space domains
         assert space_domain_approx_eq(
             csigs.physical_space_domain,
-            [RIF(0, 0.05), RIF(0, 0.5)],
+            v0 + c,
         )
         assert space_domain_approx_eq(
             csigs.children[0].physical_space_domain,
-            [RIF(0, 0.05), RIF(0, 0.5)],
+            v0 + c,
         )
         assert space_domain_approx_eq(
             csigs.children[0].children[0].physical_space_domain,
-            [RIF(0, 0.05), RIF(0, 0.5)],
+            v0 + c,
+        )
+        assert space_domain_approx_eq(
+            csig.physical_space_domain,
+            list(c),
+        )
+        assert space_domain_approx_eq(
+            csig.children[0].physical_space_domain,
+            list(c),
+        )
+        assert space_domain_approx_eq(
+            csig.children[0].children[0].physical_space_domain,
+            list(c),
         )
         
         sig0 = csig.refined_signal(0)
+        assert sig0.consistent_with(csig.refined_signal(0))
         sig1 = csig.refined_signal(1)
+        assert sig1.enclosed_by(sig0)
         assert sig0.approx_eq(sig1, 0.5)
+        assert sig1.consistent_with(csig.refined_signal(1))
         sig2 = csig.refined_signal(2)
+        assert sig2.enclosed_by(sig1)
         assert sig1.approx_eq(sig2, 0.5)
+        assert sig2.consistent_with(csig.refined_signal(2))
+        assert csig.enclosed_by(csigs, 2)
+        assert csigs.enclosed_by(csig, 2)
 
     @pytest.mark.slow
-    @pytest.mark.xfail # TODO: fix based on new context signals
     def test_wandl_combined_initial_physical(self, ringxy, odes_whelks, poly_low_kwargs):
         '''Test with a single, combined initial set.'''
         RNG, us = ringxy
@@ -414,41 +437,77 @@ class TestContextSignalWhelksAndLobsters:
             **poly_low_kwargs)
         csig = P.context_signal_for_system(system.with_y0(v0, c), 10,
             initial_form=InitialForm.COMBINED, **poly_low_kwargs)
+        csigsp = P.context_signal_for_system(system.with_y0(v0 + c), 10,
+            restriction_method=RestrictionMethod.RECOMPUTE_FLOWPIPE,
+            **poly_low_kwargs)
+        csigp = P.context_signal_for_system(system.with_y0(v0, c), 10,
+            restriction_method=RestrictionMethod.RECOMPUTE_FLOWPIPE,
+            initial_form=InitialForm.COMBINED, **poly_low_kwargs)
 
         # Check symbolic space domains
         assert space_domain_approx_eq(
-            csigs.symbolic_space_domain,
+            csigp.symbolic_space_domain,
             [RIF(-1, 1), RIF(-1, 1)],
         )
         assert space_domain_approx_eq(
-            csigs.children[0].symbolic_space_domain,
-            [RIF(-1, 0), RIF(-1, 0)],
+            csigp.children[0].symbolic_space_domain,
+            [RIF(-1, 1), RIF(-1, 1)],
         )
         assert space_domain_approx_eq(
-            csigs.children[0].children[0].symbolic_space_domain,
-            [RIF(-1, -1/2), RIF(-1, -1/2)],
+            csigp.children[0].children[0].symbolic_space_domain,
+            [RIF(-1, 1), RIF(-1, 1)],
+        )
+        assert space_domain_approx_eq(
+            csigsp.symbolic_space_domain,
+            [RIF(-1, 1), RIF(-1, 1)],
+        )
+        assert space_domain_approx_eq(
+            csigsp.children[0].symbolic_space_domain,
+            [RIF(-1, 1), RIF(-1, 1)],
+        )
+        assert space_domain_approx_eq(
+            csigsp.children[0].children[0].symbolic_space_domain,
+            [RIF(-1, 1), RIF(-1, 1)],
         )
 
         # Check absolute space domains
         assert space_domain_approx_eq(
-            csigs.physical_space_domain,
-            [RIF(0, 0.05), RIF(0, 0.5)],
+            csigp.physical_space_domain,
+            list(c),
         )
         assert space_domain_approx_eq(
-            csigs.children[0].physical_space_domain,
-            [RIF(0, 0.05), RIF(0, 0.5)],
+            csigp.children[0].physical_space_domain,
+            [RIF(0, 0.025), RIF(0, 0.25)],
         )
         assert space_domain_approx_eq(
-            csigs.children[0].children[0].physical_space_domain,
-            [RIF(0, 0.05), RIF(0, 0.5)],
+            csigp.children[0].children[0].physical_space_domain,
+            [RIF(0, 0.0125), RIF(0, 0.125)],
+        )
+        assert space_domain_approx_eq(
+            csigsp.physical_space_domain,
+            list(v0 + c),
+        )
+        assert space_domain_approx_eq(
+            csigsp.children[0].physical_space_domain,
+            [RIF(1, 1.05), RIF(4, 4.5)],
+        )
+        assert space_domain_approx_eq(
+            csigsp.children[0].children[0].physical_space_domain,
+            [RIF(1, 1.025), RIF(4, 4.25)],
         )
         
-        sig0 = csig.refined_signal(0)
-        sig1 = csig.refined_signal(1)
+        sig0 = csigp.refined_signal(0)
+        sig1 = csigp.refined_signal(1)
+        assert sig1.enclosed_by(sig0)
         assert sig0.approx_eq(sig1, 0.5)
-        sig2 = csig.refined_signal(2)
+        sig2 = csigp.refined_signal(2)
+        assert sig2.enclosed_by(sig1)
         assert sig1.approx_eq(sig2, 0.5)
-
+        assert csigsp.refined_signal(2).consistent_with(sig2)
+        assert csigp.consistent_with(csig, 2)
+        assert csigs.refined_signal(2).consistent_with(sig2)
+        assert csigsp.consistent_with(csigs, 2)
+        assert csig.refined_signal(2).consistent_with(sig2)
 
 class TestContextMasks:
     @staticmethod

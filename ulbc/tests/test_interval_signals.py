@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import pytest
 from ulbc.interval_signals import (Signal, interval_complements, isplit,
-    shift_G, shift_F)
+    shift_G, shift_F, true_signal, false_signal)
 from ulbc.signal_masks import Mask
 from sage.all import RIF
 
@@ -130,7 +130,7 @@ class TestDecomposition:
                    for seg1, seg2
                    in zip(sig4.decomposition, expected))
 
-class TestApproxEq(object):
+class TestApproxEq:
     def test_exact(self, sig1):
         assert sig1.approx_eq(sig1, 0.1)
 
@@ -167,14 +167,88 @@ class TestApproxEq(object):
         assert sig1.approx_eq(sig1b, 0.1)
 
 
-class TestIntervalComplements(object):
+class TestInformationOrdering:
+    @staticmethod
+    @pytest.mark.parametrize(
+        'x, y, expected',
+        [
+            (False, True,  False),
+            (True,  False, False),
+            (False, False, True),
+            (True,  True,  True),
+            (None,  True,  True),
+            (True,  None,  True),
+            (None,  False, True),
+            (False, None,  True),
+            (None,  False, True),
+            (None,  None,  True),
+        ]
+    )
+    def test_consistency(x, y, expected):
+        I = RIF(0, 5)
+        xsig = Signal(I, [(I, x)])
+        ysig = Signal(I, [(I, y)])
+        assert xsig.consistent_with(ysig) is expected
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        'x, y, expected',
+        [
+            (False, True,  False),
+            (True,  False, False),
+            (False, False, True),
+            (True,  True,  True),
+            (None,  True,  False),
+            (True,  None,  True),
+            (None,  False, False),
+            (False, None,  True),
+            (None,  False, False),
+            (None,  None,  True),
+        ]
+    )
+    def test_enclosed_by(x, y, expected):
+        I = RIF(0, 5)
+        xsig = Signal(I, [(I, x)])
+        ysig = Signal(I, [(I, y)])
+        assert xsig.enclosed_by(ysig) is expected
+
+    @staticmethod
+    def test_enclosure_smaller_set():
+        I = RIF(0, 5)
+        xsig = Signal(I, [(RIF(1, 3), True)])
+        ysig = Signal(I, [(RIF(2, 3), True)])
+        assert xsig.enclosed_by(ysig) is True
+
+    @staticmethod
+    def test_no_enclosure_bigger_set():
+        I = RIF(0, 5)
+        xsig = Signal(I, [(RIF(2, 3), True)])
+        ysig = Signal(I, [(RIF(1, 3), True)])
+        assert xsig.enclosed_by(ysig) is False
+
+    @staticmethod
+    def test_enclosure_divided_set():
+        I = RIF(0, 5)
+        xsig = Signal(I, [(RIF(1, 4), True)])
+        ysig = Signal(I, [(RIF(1, 2), True), (RIF(3, 4), True)])
+        assert xsig.enclosed_by(ysig) is True
+
+    @staticmethod
+    def test_no_enclosure_inconsistent_divided_set():
+        I = RIF(0, 5)
+        xsig = Signal(I, [(RIF(1, 4), True)])
+        ysig = Signal(I, [(RIF(1, 2), True), (RIF(3, 4), False)])
+        assert xsig.enclosed_by(ysig) is False
+
+
+class TestIntervalComplements:
     def test_inside(self):
         int1, int2 = interval_complements(RIF(0, 5), RIF(1, 3))
         assert int_approx_eq(int1, RIF(0, 1))
         assert int_approx_eq(int2, RIF(3, 5))
 
 
-class TestSignalMasks(object):
+class TestSignalMasks:
 
     def test_simple_signal_or_mask(self, sig2):
         mask = Mask(RIF(0, 5), [RIF(0, 1), RIF(3, 5)])

@@ -227,6 +227,22 @@ class SignalTree(object):
                 other.children),
         )
 
+    def expand_signals(self, level: int) -> Iterable[Signal]:
+        '''Expand the tree to get all signals at a given level.
+        
+        There is no guarantee that these come out is an *sensible*
+        ordering, however, the order for two trees over the same initial
+        set should be consistent (so we can zip) and should exhaustively
+        cover the initial set (so we can reduce).
+        '''
+        if level == 0:
+            yield self.signal
+        else:
+            return itertools.chain(*(
+                child.expand_signals(level - 1)
+                    for child in self.children
+            ))
+
     def __invert__(self):
         return self.signal_map(lambda x: ~x)
 
@@ -375,6 +391,26 @@ class ContextSignal(SignalTree):
     @property
     def restriction_method(self) -> RestrictionMethod:
         return self._restriction_method
+
+    def consistent_with(self, other: 'SignalTree', level: int):
+        '''Check if self is consistent with other up to a given level.'''
+        return all(
+            all(s.consistent_with(o)
+                   for s, o
+                   in zip(self.expand_signals(l),
+                          other.expand_signals(l)))
+            for l in range(0, level+1)
+        )
+
+    def enclosed_by(self, other: 'SignalTree', level: int):
+        '''Check if self refined other up to a given level.'''
+        return all(
+            all(s.enclosed_by(o)
+                   for s, o
+                   in zip(self.expand_signals(l),
+                          other.expand_signals(l)))
+            for l in range(0, level+1)
+        )
 
     def __repr__(self):
         return 'ContextSignal({}, {}, {}, children={})'.format(
