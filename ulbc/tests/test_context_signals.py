@@ -6,6 +6,7 @@ import sage.all as sg
 from functools import partial
 
 from ulbc.interval_signals import Signal
+import ulbc.interval_signals as interval_signals
 from ulbc.context_signals import (ContextSignal,
                                   true_context_signal,
                                   ChildIterator,
@@ -24,6 +25,7 @@ from ulbc.reach_trees import (context_to_space_domain,
                               preconditioned_space_domain,
                               ReachTree)
 # from flowstar.interval import int_dist
+from ulbc.tests.test_systems import solution as sin_cos_solution
 
 
 def signal_fn(prop, _, o, mask=None):
@@ -90,31 +92,61 @@ class TestContextSignalSinCos:
         assert ctx.signal.approx_eq(expected, 0.1)
 
     @pytest.mark.slow
-    @pytest.mark.xfail
-    def test_signal_gen_restricted_context(self, ringxy, odes):  # NOQA
+    def test_signal_gen_restricted_context(self, ringxy, odes):
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
-        # space_domain = [RIF(1, 1.5), RIF(3.5, 3.75)]
-        space_domain = [RIF(-1, 0), RIF(0, 0.5)]
         initials = [RIF(1, 2), RIF(3, 4)]
-        expected = Signal(
+        physical_subdomain = gen_sub_space_domains(initials)[3]
+        explicitly_computed_solution = interval_signals.to_signal_bisection(
+            lambda t: sin_cos_solution(*physical_subdomain, t)[0],
             RIF(0, 5),
-            [(RIF(0.00000000000000000, 0.25876412796561455), True),
-             (RIF(0.40515754491116440, 3.39947778050338870), False),
-             (RIF(3.54895843840935880, 4.99900000000000060), True)],
+            0.01,
         )
         # reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p),
                                 Reach(odes, initials, 5, (0.001, 0.1),
                                       order=10),
                                 symbolic_composition=False)
+        observer_physical = PolyObserver(R(atomic.p),
+                                         Reach(odes, physical_subdomain, 5,
+                                               (0.001, 0.1), order=10),
+                                         symbolic_composition=False)
         ctx = ContextSignal(RIF(0, 5), 2, (3,),
             signal=partial(signal_fn, atomic),
+            top_level_domain=initials,
+            reach_level=1,
             observer=observer)
-        assert space_domain_approx_eq(ctx.symbolic_space_domain, space_domain)
+        ctx_physical = ContextSignal(RIF(0, 5), 2, (3,),
+            signal=partial(signal_fn, atomic),
+            top_level_domain=initials,
+            reach_level=0,
+            observer=observer_physical)
+        assert space_domain_approx_eq(ctx.top_level_domain, initials)
+        assert ctx.reach_level == 1
+        assert ctx.coordinate == (3,)
+        assert ctx.physical_coordinate == ()
+        assert ctx.symbolic_coordinate == (3,)
+        assert ctx_physical.reach_level == 0
+        assert ctx_physical.coordinate == (3,)
+        assert ctx_physical.physical_coordinate == (3,)
+        assert ctx_physical.symbolic_coordinate == ()
+        assert space_domain_approx_eq(ctx.physical_space_domain,
+            initials)
+        assert space_domain_approx_eq(ctx.symbolic_space_domain,
+            [RIF(0, 1), RIF(0, 1)])
         print(ctx.signal)
-        assert ctx.signal.approx_eq(expected, 0.1)
+        assert explicitly_computed_solution.consistent_with(
+            ctx.signal)
+        assert explicitly_computed_solution.consistent_with(
+            ctx_physical.signal)
+        assert ctx.signal.consistent_with(ctx_physical.signal)
+        assert explicitly_computed_solution.approx_eq(
+            ctx.signal,0.05)
+        assert explicitly_computed_solution.approx_eq(
+            ctx_physical.signal,0.05)
+        assert ctx.signal.approx_eq(
+            ctx_physical.signal,0.05)
 
     @pytest.mark.slow
     def test_restricted_context_symbolic_vs_manual(self, ringxy, odes):  # NOQA

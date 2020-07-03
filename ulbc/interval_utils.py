@@ -9,7 +9,39 @@ __all__ = ('int_dist', 'finterval', 'intervals_approx_eq',
            'inner_shift_back', 'inner_minkowski', 'interval_subseteq',
            'function_max_width', 'containment_failures',
            'containment_failure_plots', 'check_containment', 'inflation_plot',
-           'inflation_plot', 'plot_comparison', 'plot_full_comparison')
+           'inflation_plot', 'plot_comparison', 'plot_full_comparison',
+           'isub', 'extdiv')
+
+
+def isub(a, b):
+    al, au = a.endpoints()
+    bl, bu = b.endpoints()
+    if al <= bl <= au <= bu:
+        return RIF(al, bl)
+    elif bl <= al <= bu <= au:
+        return RIF(bu, au)
+    elif al in b and au in b:
+        return None
+    #elif a.overlaps(b):
+    #    return a
+    else:
+        return a
+
+
+def extdiv(a, b, d):
+    a = RIF(a)
+    # print 'b = {}'.format(repr(b))
+    b = RIF(b)
+    al, au = a.endpoints()
+    bl, bu = b.endpoints()
+    if 0 not in b:
+        return (a/b).intersection(d) if (a/b).overlaps(d) else None
+    elif al > 0:
+        return isub(d, RIF(al/bl, al/bu))
+    elif au < 0:
+        return isub(d, RIF(au/bu, au/bl))
+    else:
+        return d
 
 
 def inner_inverse_minkowski(I : RIF, J : RIF) -> Optional[RIF]:
@@ -54,8 +86,13 @@ def finterval(I):
 
     I = RIF(I)
     a, b = I.endpoints()
-    ra, rb = a.floor(), b.ceil()
-    if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
+    try:
+        ra, rb = a.floor(), b.ceil()
+    except ValueError:
+        ra = rb = None
+    if (ra is not None
+            and rb is not None
+            and abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9):
         return str(ra) if ra == rb else '[{} .. {}]'.format(ra, rb)
     else:
         # return f"[{QQ(I.lower())}..{QQ(I.upper())}]"
@@ -67,8 +104,13 @@ def fqqinterval(I):
 
     I = RIF(I)
     a, b = I.endpoints()
-    ra, rb = a.floor(), b.ceil()
-    if abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9:
+    try:
+        ra, rb = a.floor(), b.ceil()
+    except ValueError:
+        ra = rb = None
+    if (ra is not None
+            and rb is not None
+            and abs(ra - a) < 1e-9 and abs(rb - b) < 1e-9):
         return str(ra) if ra == rb else '[{} .. {}]'.format(ra, rb)
     else:
         return f"[{QQ(I.lower())} .. {QQ(I.upper())}]"

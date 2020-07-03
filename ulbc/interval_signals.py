@@ -40,7 +40,7 @@ def isplit(pred, xs):
 
 
 def to_signal(f, fprime, domain):  # , theta=0.01, abs_inf=0.0001):
-    # Shortcut if signal consistient over domain
+    # Shortcut if signal consistent over domain
     # fI = RIF(f(domain))
     # if 0 not in fI:
     #     return Signal(domain, [(domain, fI.center() > 0)])
@@ -348,6 +348,7 @@ class Signal(BaseSignal):
             self._mask = mask.to_domain(self.domain)
 
     def enclosed_by(self, other):
+        print(f"checking enclosure:\n - {self}\n - {other}\n")
         return all(
             any(s is w and interval_subseteq(J, I)
                 for I, s in self.values)
@@ -355,6 +356,7 @@ class Signal(BaseSignal):
         )
     
     def consistent_with(self, other):
+        print(f"checking consistency:\n - {self}\n - {other}\n")
         return all(
             all(I.overlaps(J) <= (s is w)
                 for J, w in other.values)
