@@ -305,8 +305,6 @@ class TestContextOperatorContextSignals:
     @staticmethod
     @pytest.mark.very_slow
     @pytest.mark.slow
-    @pytest.mark.skip
-    @pytest.mark.xfail # TODO: fix in new context signals
     def test_differential_context_context_signals(ringxy, odes_whelks):
         R, (x, y) = ringxy
 

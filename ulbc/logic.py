@@ -1396,8 +1396,6 @@ class C(Context):
             # Remove arguments which don't make sense to forward
             # to composed system
             kwargs.pop('unpreconditioning_orders', None)
-            # TODO: Remove assertion
-            assert mask is None
 
             # should we refer to the parent reach object or the child
             # observer?
@@ -1412,11 +1410,8 @@ class C(Context):
                 f=reach,
                 epsilon=kwargs.get('epsilon_ctx', 0.5),
                 verbosity=kwargs.get('verbosity', 0),
-                # Does this mask sense?
                 mask=mask,
             )
-
-        # TODO: finish fixing me!
 
         return ContextSignal(
             reach_tree.time_domain,
@@ -1475,30 +1470,42 @@ class D(Context):
             mask=mask,
         )
 
-    def context_signal(self, reach: Reach, refine=0, **kwargs):
-        # TODO: fix for use with restriction method
-        assert reach.system is not None
-        space_domain = preconditioned_space_domain(reach.context_dim)
-        # This does not actually subdivide the differential context,
-        # but only the initial context, and each component of the initial set
-        # for the system once the differential context is composed.
-        def signal_fn(_, space_domain, mask=None):
-            return ctx(
-                system=reach.system,
-                domain=RIF(0, reach.time),
+    def context_signal(self, reach_tree: ReachTree, refine=0, **kwargs):
+        assert reach_tree.system is not None
+
+        if refine > 0:
+            warn("Refinement not supported for differential contexts")
+
+        def signal_fn(reach, observer, mask=None):
+            # Remove arguments which don't make sense to forward
+            # to composed system
+            kwargs.pop('unpreconditioning_orders', None)
+
+            # should we refer to the parent reach object or the child
+            # observer?
+            return masked_ctx(
+                system=reach_tree.system,
+                domain=reach_tree.time_domain,
                 C=identity,
                 D=self.context_jump,
-                phi=partial(self.context_signal_phi_fn, kwargs,
-                            use_masks=mask is not None,
-                            refine=refine),
-                f=partial(reach, space_domain=space_domain),
+                phi=partial(self.phi_fn, kwargs,
+                            use_masks=mask is not None),
+                            # refine=refine),
+                f=reach,
                 epsilon=kwargs.get('epsilon_ctx', 0.5),
-                verbosity=kwargs.get('verbosity', 0)
+                verbosity=kwargs.get('verbosity', 0),
+                mask=mask,
             )
 
-        return ContextSignal(RIF(0, reach.time),
-                             space_domain,
-                             signal_fn)
+        # This does not actually subdivide the differential context,
+        # but only the initial context, and each component of the initial set
+        return ContextSignal(
+            reach_tree.time_domain,
+            reach_tree.dimension,
+            signal=signal_fn,
+            reach_tree=reach_tree,
+            top_level_domain=reach_tree.top_level_domain,
+        )
 
 
 class G(Logic):
