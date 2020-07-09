@@ -89,38 +89,14 @@ class Logic(metaclass=ABCMeta):
             return self._signal_for_system(system, duration,
                 precompose_systems=False, **kwargs)
 
-    def _signal_for_system(self, system, duration, use_masks=False, mask=None, 
-        # Set all variables which do not occur in the atomics to zero
-        # when performing symbolic composition
-        selective_unpreconditioning=True,
-        unpreconditioning_include_derivs=None, **kwargs):
+
+    def _signal_for_system(self, system : System, duration : float, use_masks : bool=False, mask : Optional[Mask]=None, 
+        **kwargs):
         use_masks |= mask is not None
         t0 = time.perf_counter()
 
-        if unpreconditioning_include_derivs is None:
-            # WARNING: when this is False,
-            # calculating dP/dt by LieDerivative will be invalid 
-            unpreconditioning_include_derivs = not kwargs.get(
-                'symbolic_composition', False,
-            )
-
-        # Choose order to be used for unpreconditioning
-        # TODO: cope better with adaptive orders
-        print(f"phi variables sfs = {self.variables(system)}")
-        print(f"system sfs = {system}")
-        unpreconditioning_order = kwargs.pop('unpreconditioning_order',
-            kwargs['order'])
-        if ('unpreconditioning_orders' in kwargs
-            and kwargs['unpreconditioning_orders'] is not None
-            or unpreconditioning_order is None):
-            pass
-        elif selective_unpreconditioning:
-            kwargs['unpreconditioning_orders'] = self._unpreconditioning_orders(
-                system, unpreconditioning_order,
-                unpreconditioning_include_derivs)
-            # kwargs.pop('unpreconditioning_order', None)
-        else:
-            kwargs['unpreconditioning_order'] = unpreconditioning_order
+        # Handle unpreconditioning order arguments 
+        self._handle_unpreconditioning_orders(system, kwargs)
         
         reach = system.reach(
             # Run for a little extra time to make sure endpoint of
@@ -156,9 +132,38 @@ class Logic(metaclass=ABCMeta):
             reach.instrumentor.print()
         return res
 
+    def _handle_unpreconditioning_orders(self, system : System, kwargs : dict):
+        unpreconditioning_include_derivs = kwargs.get('unpreconditioning_include_derivs', None)
+        if unpreconditioning_include_derivs is None:
+            # WARNING: when this is False,
+            # calculating dP/dt by LieDerivative will be invalid 
+            unpreconditioning_include_derivs = not kwargs.get(
+                'symbolic_composition', False,
+            )
+
+        # Choose order to be used for unpreconditioning
+        # TODO: cope better with adaptive orders
+        print(f"phi variables sfs = {self.variables(system)}")
+        print(f"system sfs = {system}")
+        unpreconditioning_order = kwargs.pop('unpreconditioning_order',
+            kwargs['order'])
+        if ('unpreconditioning_orders' in kwargs
+            and kwargs['unpreconditioning_orders'] is not None
+            or unpreconditioning_order is None):
+            pass
+        # Set all variables which do not occur in the atomics to zero
+        # when performing symbolic composition
+        elif kwargs.get('selective_unpreconditioning', None):
+            kwargs['unpreconditioning_orders'] = self._unpreconditioning_orders(
+                system, unpreconditioning_order,
+                unpreconditioning_include_derivs)
+            # kwargs.pop('unpreconditioning_order', None)
+        else:
+            kwargs['unpreconditioning_order'] = unpreconditioning_order
+
     def _unpreconditioning_orders(self, system : System, order : int,
             full : bool) -> List[int]:
-        """Set unpreconditioning orders based on variable actually occuring in the property.
+        """Set unpreconditioning orders based on variable actually occurring in the property.
         
         -1 Denotes skipping the variable entirely."""
         variables = (self.variables_full(system)
@@ -194,14 +199,32 @@ class Logic(metaclass=ABCMeta):
         use_masks : bool, mask : Optional[Mask],
         restriction_method : RestrictionMethod, **kwargs) -> ContextSignal: ...
 
-    def context_signal_for_system(self, *args,
-                                  use_masks=False, mask=None,
-                                  restriction_method=RestrictionMethod.SYMBOLIC,
-                                  **kwargs):
-        use_masks |= mask is not None
+    def context_signal_for_system(self, *args, precompose_systems=True, **kwargs):
+        """
+        Generate a context signal for a temporal logic formula.
+        """
         system, duration, kwargs = self._handle_args_signal_for_system(*args, **kwargs)
 
+        if precompose_systems:
+            with instrument.block(
+                    name="Precomposing Contexts",
+                    metric=kwargs['instrumentor'].metric):
+                composed = self.with_system(system)
+            return composed.context_signal(duration, **kwargs)
+        else:
+            return self._context_signal_for_system(system, duration,
+                precompose_systems=False, **kwargs)
+
+    def _context_signal_for_system(self, system : System, duration : float,
+                                   use_masks : bool=False,
+                                   mask : Optional[ContextMask]=None,
+                                   restriction_method : RestrictionMethod=RestrictionMethod.SYMBOLIC,
+                                   **kwargs):
+        use_masks |= mask is not None
+
         assert 'mask' not in kwargs
+
+        self._handle_unpreconditioning_orders(system, kwargs)
 
         full_duration = duration + 2e-3
 
@@ -209,21 +232,22 @@ class Logic(metaclass=ABCMeta):
         # in terms of the preconditioned variables
         # TODO: is this the correct number of variables
         # space_domain = preconditioned_space_domain(len(system.y0))
-        with instrument.block(name="Generating Reach Tree"):
-            reach_tree = system.reach_tree(full_duration, **kwargs)
 
         # Run for a little extra time to account for rounding
         # errors and temporal quantifiers
         reach_duration = self.duration + full_duration
+
+        if 'initial_form' not in kwargs:
+            kwargs['initial_form'] = InitialForm.SPLIT_VARS
+
+        with instrument.block(name="Generating Reach Tree"):
+            reach_tree = system.reach_tree(reach_duration, **kwargs)
 
         if use_masks and mask is None:
             # TODO: fix this; parameters incorrect
             # TODO: Should get dimension from system
             mask = true_context_mask(RIF(0, full_duration),
                                      reach_tree.dimension)
-
-        if 'initial_form' not in kwargs:
-            kwargs['initial_form'] = InitialForm.SPLIT_VARS
 
         with instrument.block(name="Monitoring initial signal"):
             res = self.context_signal(
@@ -334,6 +358,7 @@ class LogicWithSystem:
     def __repr__(self):
         return f"LogicWithSystem({repr(self.phi)}, repr({self.system}))"
 
+    # TODO: should this take a reach tree???
     @overload
     def signal(self, reach: Reach, duration: float, **kwargs): ...
 
@@ -351,6 +376,27 @@ class LogicWithSystem:
 
         kwargs['precompose_systems'] = False
         return self.phi.signal_for_system(self.system, duration, **kwargs)
+
+    @overload
+    def context_signal(self, reach: Reach, duration: float, **kwargs): ...
+
+    @overload
+    def context_signal(self, duration: float, **kwargs): ...
+
+    def context_signal(self, *args, **kwargs):
+        if len(args) == 1:
+            duration, = args
+
+        elif len(args) == 2:
+            _, duration = args
+        else:
+            raise TypeError("Wrong number of arguments!")
+
+        kwargs['precompose_systems'] = False
+        return self.phi.context_signal_for_system(self.system, duration, **kwargs)
+
+    def context_signal_for_system(self, system: System, duration: float, **kwargs):
+        return self.with_system(system).context_signal(duration + 2e-3, **kwargs).to_domain(RIF(0, duration))
 
     def signal_for_system(self, system: System, duration: float, **kwargs):
         return self.with_system(system).signal(duration + 2e-3, **kwargs).to_domain(RIF(0, duration))
@@ -491,6 +537,8 @@ class Atomic(Logic):
 
         # Do the smart thing in the case of duration 0
         if duration == 0:
+            # TODO: Check this actually still makes sense!
+            # What about context jumps???
             with instrument.block(
                     name=f"Trivial atomic monitoring for "
                          f"{str(self)}",
@@ -499,8 +547,7 @@ class Atomic(Logic):
                         else instrument.call_default):
                 mask = mask_zero if use_masks else None
                 # print("our mask =", repr(mask))
-                initials = system.y0
-                res = RIF(self.p(**dict(zip(map(str, system.x), system.y0))))
+                res = RIF(self.p(**dict(zip(map(str, system.x), system.y0_composed))))
                 # Poly(self.p)(initials)
                 if res.lower() > 0:
                     return true_signal(RIF(0, 0), mask=mask)
@@ -522,6 +569,7 @@ class Atomic(Logic):
         symbolic_composition_order=None,
         tentative_unpreconditioning=False,
         restriction_method : Optional[RestrictionMethod]=None):
+        # breakpoint()
         # Convert atomic proposition to a suitable ring and variable
         # namespace
         if reach.system is not None:
@@ -1213,6 +1261,12 @@ class Context(Logic, metaclass=ABCMeta):
         # in this case we should recombine the context and static
         # variables
         kwargs['initial_form'] = InitialForm.COMBINED
+        if kwargs.get('verbosity', 0) >= 1:
+            print(f"signal_for_system with:")
+            print(f"C = {self.ctx}")
+            print(f"phi = {self.phi}")
+            print(f"kwargs = {kwargs}")
+            print(f"system = {system}")
         sig = self.phi.signal_for_system(system, 2e-3, use_masks=use_masks,
                                          **kwargs)
         if kwargs.get('verbosity', 0) >= 3:
@@ -1222,18 +1276,29 @@ class Context(Logic, metaclass=ABCMeta):
 
     def context_signal_phi_fn(self, kwargs: dict, system: System,
             use_masks=False, refine=0):
+        
         # TODO: mask clearly needs defining!
         # mask=mask
         # TODO context signal on top of context signals is not currently sound
         # (this may now be correct)
         # TODO restriction method
+        if kwargs.get('mask', None) is not None:
+            use_masks = True
+            del kwargs['mask']
         if 'initial_form' not in kwargs:
             kwargs['initial_form'] = InitialForm.SPLIT_VARS
+        if kwargs.get('verbosity', 0) >= 1:
+            print(f"context_signal_for_system with:")
+            print(f"C = {self.ctx}")
+            print(f"phi = {self.phi}")
+            print(f"kwargs = {kwargs}")
+            print(f"system = {system}")
+            print(f"initial_form = {kwargs['initial_form']}")
         ctx_sig = self.phi.context_signal_for_system(system, 2e-3,
                                                      use_masks=use_masks,
                                                      **kwargs)
         sig = ctx_sig.refined_signal(refine)
-        if kwargs.get('verbosity', 0) >= 3:
+        if kwargs.get('verbosity', 0) >= 1:
             print('sig    =', sig)
             print('sig(0) =', sig(0))
         return sig(0)
@@ -1307,14 +1372,6 @@ class C(Context):
         return '{} >> {}'.format(self.ctx_str(), self.phi.bstr(8))
 
     def signal(self, reach: Reach, mask=None, **kwargs):
-        # print("In C.signal")
-        # kwargs2 = dict(kwargs)
-        # try:
-            # del kwargs2['mask']
-        # except:
-            # pass
-        # print(kwargs2)
-
         # Remove arguments which don't make sense to forward
         # to composed system
         kwargs.pop('unpreconditioning_orders', None)
@@ -1336,24 +1393,27 @@ class C(Context):
         assert reach_tree.system is not None
 
         def signal_fn(reach, observer, mask=None):
+            # Remove arguments which don't make sense to forward
+            # to composed system
+            kwargs.pop('unpreconditioning_orders', None)
+            # TODO: Remove assertion
+            assert mask is None
+
             # should we refer to the parent reach object or the child
             # observer?
-            kwargs2 = dict(kwargs)
-            try:
-                del kwargs2['mask']
-            except:
-                pass
             return masked_ctx(
                 system=reach_tree.system,
                 domain=reach_tree.time_domain,
                 C=self.context_jump,
                 D=identity,
-                phi=partial(self.context_signal_phi_fn, kwargs2,
+                phi=partial(self.context_signal_phi_fn, kwargs,
                             use_masks=mask is not None,
                             refine=refine),
                 f=reach,
                 epsilon=kwargs.get('epsilon_ctx', 0.5),
-                verbosity=kwargs.get('verbosity', 0)
+                verbosity=kwargs.get('verbosity', 0),
+                # Does this mask sense?
+                mask=mask,
             )
 
         # TODO: finish fixing me!

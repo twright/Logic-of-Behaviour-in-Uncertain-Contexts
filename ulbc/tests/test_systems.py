@@ -158,8 +158,8 @@ class TestReachTree:
     @pytest.mark.parametrize(
         "initial_form",
         [
-            (InitialForm.COMBINED,),
-            (InitialForm.SPLIT_VARS,),
+            InitialForm.COMBINED,
+            InitialForm.SPLIT_VARS,
         ]
     )
     def test_reach_tree_2_dimensional(initials1, system, initial_form):
@@ -223,8 +223,8 @@ class TestReachTree:
     @pytest.mark.parametrize(
         "initial_form",
         [
-            (InitialForm.COMBINED,),
-            (InitialForm.SPLIT_VARS,),
+            InitialForm.COMBINED,
+            InitialForm.SPLIT_VARS,
         ]
     )
     def test_reach_tree_1_dimensional(initials3, system, initial_form):

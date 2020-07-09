@@ -5,20 +5,12 @@ import pytest
 import sage.all as sg
 from functools import partial
 
-from ulbc.interval_signals import Signal
-# from flowstar.reachability import Reach, InitialForm
-# from flowstar.observers import PolyObserver
-# from flowstar.tests.test_reachability import ringxy, odes  # NOQA
-# from ulbc.logic import Atomic
 from ulbc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
-from ulbc.systems import System
 from ulbc.reach_trees import (context_to_space_domain,
                               gen_sub_space_domains,
-                              preconditioned_space_domain,
                               ReachTree,
                               ctx_dimension)
-# from flowstar.interval import int_dist
 
 
 def ctx_approx_eq(kxs1, kxs2, epsilon=1e-3):
@@ -64,10 +56,6 @@ def space_domains_approx_eq(xs, ys, epsilon=1e-3):
             and len(xs) == len(ys)
             and all(space_domain_approx_eq(x, y, epsilon)
                     for x, y in zip(xs, ys)))
-
-
-# def signal_fn(prop, _, o, mask=None):
-    # return prop.signal_from_observer(o)
 
 
 class TestReachTreeGen:

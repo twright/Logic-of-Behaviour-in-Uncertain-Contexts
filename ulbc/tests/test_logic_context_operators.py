@@ -1,12 +1,13 @@
 from __future__ import print_function, division
+from typing import Iterable
 
 import pytest
-import sage.all as sage
+import sage.all as sg
 from sage.all import RIF, QQ
 # from builtins import *
 
 from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
-    IntegrationMethod, RestrictionMethod, C)
+    IntegrationMethod, RestrictionMethod, C, InitialForm)
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
 from ulbc.systems import System
@@ -14,6 +15,8 @@ from ulbc.bondcalculus import BondSystem
 from ulbc.symbolic import var
 from ulbc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
+import ulbc.interval_signals as interval_signals
+from ulbc.tests.test_systems import solution as sin_cos_solution
 
 
 @pytest.fixture(scope='module')
@@ -33,12 +36,45 @@ def atomic_q(ringxy):
     _, (x, y) = ringxy
     return Atomic(3 - y)
 
+        
+def sin_cos_solution_after_jump(initials : Iterable[RIF], T : RIF,
+        jump : Iterable[RIF]):
+    jump = sg.vector(jump)
+    jump_domain = sg.vector(sin_cos_solution(*initials, T))
+    after_jump = jump_domain + jump
+    return lambda t: sin_cos_solution(*after_jump, t)
+
+
+def sin_cos_signal_after_jump(initials : Iterable[RIF], T : RIF,
+        jump : Iterable[RIF], epsilon : float=0.1):
+    sol = sin_cos_solution_after_jump(initials, T, jump)
+    atomic_sig = interval_signals.to_signal_bisection(
+        lambda t: sol(t)[0] + 0.5,
+        RIF(0,5),
+        epsilon,
+    )
+    return atomic_sig.G(RIF(sg.pi/8))
+
+
+def sin_cos_signal_ctx_jump(domain, initials : Iterable[RIF],
+        jump : Iterable[RIF], steps : int, epsilon : float):
+    domain = RIF(domain)
+    Tmin, Tmax = domain.edges()
+    step = (Tmax - Tmin)/RIF(steps)
+    def sig_value(T):
+        return sin_cos_signal_after_jump(initials, T, jump, epsilon)(0)
+    
+    return Signal(
+        domain,
+        [(Tk := RIF(Tmin + k*step, Tmin + (k+1)*step), sig_value(Tk))
+         for k in range(steps)]
+    )
 
 
 class TestVarContextBody:
     @staticmethod
     def test_var_context_body_str(ringxy):
-        R, (x, y) = ringxy
+        _, (x, y) = ringxy
         assert (str(VarContextBody({x: RIF(1,2), y: RIF(3,4)}))
             == "{x: [1 .. 2], y: [3 .. 4]}")
 
@@ -105,7 +141,7 @@ class TestC:
     @pytest.mark.slow
     def test_context_with_jump_at_zero(ringxy, odes):
         _, (x, y) = ringxy
-        prop = G(RIF(sage.pi/8), Atomic(x + 0.5))
+        prop = G(RIF(sg.pi/8), Atomic(x + 0.5))
         resa = ({y: RIF(1, 5)} >> prop).signal_for_system(
             odes, [RIF(1, 2), RIF(3, 4)], 0, epsilon_ctx=0.1)(0)
         resb = prop.signal_for_system(
@@ -114,39 +150,33 @@ class TestC:
 
     @staticmethod
     @pytest.mark.slow
-    @pytest.mark.xfail # TODO: fix this given new context signals
     def test_context_with_jump(ringxy, odes):
         _, (x, y) = ringxy
-        prop = {y: RIF(1, 5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
-        res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
-                                    epsilon_ctx=0.1)
-        expected = Signal(
-            RIF(0.0000000000000000, 6.2831853071795872),
-            [(RIF(0.0000000000000000 , 0.19638079084936209), True),
-             (RIF(0.29457118627404310, 3.1420926535897933 ), False),
-             (RIF(3.6330446307131989 , 6.2831853071795872 ), True)],
-        )
+        prop = {y: RIF(1, 5)} >> G(RIF(sg.pi/8), Atomic(x + 0.5))
+        domain = RIF(0, 2*sg.pi)
+        initials = [RIF(1, 2), RIF(3, 4)]
+        res = prop.signal_for_system(odes, initials,
+            domain.upper(), epsilon_ctx=0.05)
+        expected = sin_cos_signal_ctx_jump(domain, initials,
+            [0, RIF(1, 5)], 100, 0.01)
+        assert res.consistent_with(expected)
         assert res.approx_eq(expected, 0.1)
 
     @staticmethod
     @pytest.mark.slow
-    @pytest.mark.xfail # TODO: fix this given new context signals
     def test_context_with_jump_vars(odes):
         system = System(
-            sage.SR,
+            sg.SR,
             [var("x"), var("y")],
             [RIF(1, 2), RIF(3, 4)],
             odes,
         )
         prop = ({var("y"): RIF(1, 5)}
-                >> G(RIF(sage.pi/8), Atomic(var("x") + 0.5)))
-        res = prop.signal_for_system(system,  2*sage.pi, epsilon_ctx=0.1)
-        expected = Signal(
-            RIF(0.0000000000000000, 6.2831853071795872),
-            [(RIF(0.0000000000000000 , 0.19638079084936209), True),
-             (RIF(0.29457118627404310, 3.1420926535897933 ), False),
-             (RIF(3.6330446307131989 , 6.2831853071795872 ), True)],
-        )
+                >> G(RIF(sg.pi/8), Atomic(var("x") + 0.5)))
+        domain = RIF(0, 2*sg.pi)
+        res = prop.signal_for_system(system, domain.upper(), epsilon_ctx=0.05)
+        expected = sin_cos_signal_ctx_jump(domain, system.y0, [0, RIF(1, 5)], 100, 0.01)
+        assert res.consistent_with(expected)
         assert res.approx_eq(expected, 0.1)
 
     @staticmethod 
@@ -192,10 +222,10 @@ class TestMasks(object):
     @pytest.mark.slow
     def test_masked_context_with_jump(self, ringxy, odes):
         _, (x, y) = ringxy
-        prop = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
-        mask = Mask(RIF(0, 2*sage.pi),
-                    [RIF(0.2, 2.5), RIF(3.5, 2*sage.pi)])
-        res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
+        prop = {y: RIF(1, 1.5)} >> G(RIF(sg.pi/8), Atomic(x + 0.5))
+        mask = Mask(RIF(0, 2*sg.pi),
+                    [RIF(0.2, 2.5), RIF(3.5, 2*sg.pi)])
+        res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sg.pi,
                                      epsilon_ctx=0.1, mask=mask)
         expected = Signal(
             RIF(0.00000000000000000, 6.2831853071795872),
@@ -217,11 +247,38 @@ class TestD(object):
 
 
 class TestContextOperatorContextSignals:
+    @staticmethod
+    def test_sin_cos_context_context_signal(ringxy, odes):
+        _, (x, y) = ringxy
+        prop = {y: RIF(1, 5)} >> G(RIF(sg.pi/8), Atomic(x + 0.5))
+        domain = RIF(0, 2*sg.pi)
+        initials = [RIF(1, 2), RIF(3, 4)]
+        ctx_sig = prop.context_signal_for_system(odes, initials,
+            domain.upper(), epsilon_ctx=0.05)
+        ctx_sig_combined = prop.context_signal_for_system(odes, initials,
+            domain.upper(), 
+            initial_form=InitialForm.COMBINED, epsilon_ctx=0.05)
+        expected = sin_cos_signal_ctx_jump(domain, initials,
+            [0, RIF(1, 5)], 100, 0.01)
+        assert ctx_sig_combined.signal.consistent_with(expected)
+        assert ctx_sig.signal.consistent_with(expected)
+        assert ctx_sig_combined.signal.approx_eq(expected, 0.1)
+        assert ctx_sig.signal.approx_eq(expected, 0.1)
+
+
+    @staticmethod
     @pytest.mark.very_slow
     @pytest.mark.slow
-    @pytest.mark.xfail # TODO: fix in new context signals
-    def test_context_context_signals(self, ringxy, odes_whelks):
-        R, (x, y) = ringxy
+    @pytest.mark.parametrize(
+        'symbolic_composition',
+        [False, True],
+    )
+    @pytest.mark.parametrize(
+        'refine',
+        [0, 1],
+    )
+    def test_context_context_signals(ringxy, odes_whelks, symbolic_composition, refine):
+        _, (x, y) = ringxy
 
         initials = [RIF(1, 1.2), RIF(4, 6)]
         P = Atomic((x - 1)**2 + y**2 - 0.2)
@@ -232,20 +289,25 @@ class TestContextOperatorContextSignals:
             integration_method=IntegrationMethod.LOW_DEGREE,
             cutoff_threshold=1e-5,
             verbosity=0,
-            epsilon_ctx=0.5,
+            epsilon_ctx=0.1,
             symbolic_composition=False,
         )
         sig = ({x: RIF(0.05, 0.1)} >> G(RIF(0, 0.2), P)
                ).signal_for_system(odes_whelks, initials, 10, **kwargs)
+        kwargs['refine'] = refine
         ctx_sig = ({x: RIF(0.05, 0.1)} >> G(RIF(0, 0.2), P)
                    ).context_signal_for_system(odes_whelks, initials, 10,
                                                **kwargs)
-        assert ctx_sig.signal.approx_eq(sig, 0.001)
+        assert refine > 0 or ctx_sig.signal.approx_eq(sig, 0.001)
+        assert all(s.enclosed_by(sig)
+                   for s in ctx_sig.expand_signals(1))
 
+    @staticmethod
     @pytest.mark.very_slow
     @pytest.mark.slow
+    @pytest.mark.skip
     @pytest.mark.xfail # TODO: fix in new context signals
-    def test_differential_context_context_signals(self, ringxy, odes_whelks):
+    def test_differential_context_context_signals(ringxy, odes_whelks):
         R, (x, y) = ringxy
 
         initials = [RIF(1, 1.2), RIF(4, 6)]
@@ -266,3 +328,5 @@ class TestContextOperatorContextSignals:
                    ).context_signal_for_system(odes_whelks, initials, 10,
                                                **kwargs)
         assert ctx_sig.signal.approx_eq(sig, 0.001)
+        assert all(s.enclosed_by(sig)
+                   for s in ctx_sig.expand_signals(2))

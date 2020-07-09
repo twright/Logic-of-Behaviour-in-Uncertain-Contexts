@@ -706,8 +706,8 @@ def ctx(system: System, domain: RIF, C, D, phi, f, epsilon=0.1, verbosity=0):
 
     failed = False
 
-    fI = [RIF(x) for x in f(domain)]
-    h = D(C(system.with_y0(fI)))
+    fI = system.with_y0([RIF(x) for x in f(domain)])
+    h = D(C(fI))
     # Dodes = D(system)
 
     try:

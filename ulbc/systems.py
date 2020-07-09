@@ -189,10 +189,10 @@ class System:
                 vars=self.x,
                 **kwargs,
             )
-
-    def reach_tree(self, duration, initial_form=InitialForm.SPLIT_VARS, **kwargs):
+    # Pass on initial form to Reach
+    # initial_form=InitialForm.SPLIT_VARS,
+    def reach_tree(self, duration, **kwargs):
         # Initial crude reach tree definition method
-        # TODO: support contexts
         if self.y0_ctx is None:
             def reach_fn(space_domain):
                 return self.with_y0(space_domain).reach(

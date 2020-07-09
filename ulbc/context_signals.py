@@ -11,7 +11,6 @@ import sage.all as sage
 from sage.all import RIF
 from sage.rings.real_mpfi import is_RealIntervalFieldElement
 
-from flowstar.observers import RestrictedObserver, PolyObserver
 from ulbc.interval_signals import (true_signal, false_signal, BaseSignal,
                                    Signal)
 from ulbc.signal_masks import Mask
@@ -78,7 +77,7 @@ class ChildIterator(object):
 
 
 class SignalTree(object):
-    def __init__(self, domain, dimension : int, coordinate : Tuple[int] =(), reach_level : Optional[int] = None, signal=None, children : Optional[Iterable] = None, top_level_domain : List = None, context_embedding=None):
+    def __init__(self, domain, dimension : int, coordinate : Tuple[int, ...] =(), reach_level : Optional[int] = None, signal=None, children : Optional[Iterable] = None, top_level_domain : List = None, context_embedding=None):
         """A node in a tree of progressively refined signals.
 
         :param domain: The time domain of the signal tree.
@@ -106,11 +105,11 @@ class SignalTree(object):
         )
 
     @property
-    def coordinate(self) -> List[int]:
+    def coordinate(self) -> Tuple[int, ...]:
         return self._coordinate
 
     @property
-    def symbolic_coordinate(self) -> Optional[List[int]]:
+    def symbolic_coordinate(self) -> Optional[Tuple[int,...]]:
         """Coordinate relative to level of reach computation."""
         return (
             self.coordinate[-self.reach_level:]
@@ -119,12 +118,12 @@ class SignalTree(object):
         )
 
     @property
-    def physical_coordinate(self) -> Optional[List[int]]:
+    def physical_coordinate(self) -> Optional[Tuple[int,...]]:
         """Coordinate of reach computation."""
         return self.coordinate[:-self.reach_level if self.reach_level > 0 else None]
 
     @property
-    def reach_level(self) -> int:
+    def reach_level(self) -> Optional[int]:
         # How many level above us was the reachset
         # calculated
         return self._reach_level
@@ -278,7 +277,7 @@ class ContextSignal(SignalTree):
 
     def __init__(self, domain, dimension, coordinate=(), 
             signal: Union[Signal,
-                          Callable[[Any, List[RIF], Mask], Signal],
+                          Callable[[Any, List[RIF], Optional[Mask]], Signal],
                           None]=None,
             reach_level=0,
             restriction_method=RestrictionMethod.SYMBOLIC,
@@ -293,6 +292,12 @@ class ContextSignal(SignalTree):
         # assert observer is None or isinstance(observer, PolyObserver)
         assert ctx_mask is None or isinstance(ctx_mask, ContextMask),\
             'ctx_mask = {}'.format(ctx_mask)
+
+        # In the case we are given a concrete signal,
+        # ignore the reach tree and observer
+        if signal is not None and isinstance(signal, Signal):
+            reach_tree = None
+            observer = None
 
         print(f" ==> creating ContextSignal with coord={coordinate}, signal = {signal}, reach_tree = {reach_tree}")
 
@@ -343,7 +348,7 @@ class ContextSignal(SignalTree):
         elif signal is not None:
             # assert observer is not None
             mask = ctx_mask.mask if ctx_mask is not None else None
-            self._signal= signal(
+            self._signal=signal(
                 partial(reach, space_domain=self.symbolic_space_domain)
                     if reach else None,
                 observer,
@@ -376,7 +381,10 @@ class ContextSignal(SignalTree):
                     observer_fn=None if child_reach_tree is None else observer_fn,
                     observer=observer
                     if observer is not None
-                    else None)
+                    else None,
+                    # TODO: is this all that is required for context masks?
+                    ctx_mask=child_ctx_mask,
+                    )
                 for coord, child_ctx_mask
                 in zip(range(2**dimension),
                        ctx_mask.children
@@ -425,7 +433,10 @@ class ContextSignal(SignalTree):
             self.domain,
             self.dimension,
             self.coordinate,
-            reach_tree=self._reach_tree,
+            # reach_tree=self._reach_tree,
+            # TODO: do all of these actually make sense in the map
+            # case?
+            # Some of them are worth keeping around as metadata
             signal=f(self.signal),
             reach_level=self.reach_level,
             top_level_domain=self.top_level_domain,
@@ -438,7 +449,7 @@ class ContextSignal(SignalTree):
             self.domain,
             self.dimension,
             self.coordinate,
-            reach_tree=self._reach_tree,
+            # reach_tree=self._reach_tree,
             signal=f(self.signal, other.signal),
             reach_level=min(self.reach_level, other.reach_level),
             top_level_domain=self.top_level_domain,

@@ -42,7 +42,8 @@ cdef class RestrictedObserver(PolyObserver):
     def __init__(RestrictedObserver self, PolyObserver p,
                  list space_domain not None):
         self.f = p.f
-        p.f.c_poly.toHornerForm(self.f_hf)
+        self.f_hf = p.f_hf
+        # p.f.c_poly.toHornerForm(self.f_hf)
         self.fprime = p.fprime
         self.poly_f_fns = p.poly_f_fns
         self.poly_fprime_fns = p.poly_fprime_fns

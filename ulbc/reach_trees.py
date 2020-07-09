@@ -63,7 +63,7 @@ def space_domain_to_context(R, xs):
     return {str(g): x for g, x in zip(R.gens(), xs)}
 
 
-def coordinate_to_space_domain(dim: int, cs : List[int], top_level_domain=None):
+def coordinate_to_space_domain(dim: int, cs : Tuple[int, ...], top_level_domain=None):
     # Could be written more efficiently using arithmetic
     # rather than generating all of the domains, but,
     # unless this becomes a performance bottleneck,
@@ -117,7 +117,7 @@ class ReachTree:
     def top_level_domain(self) -> list:
         return self._top_level_domain
 
-    def __call__(self, coordinate: Tuple[int]):
+    def __call__(self, coordinate: Tuple[int, ...]):
         if coordinate in self._known_reachsets:
             return self._known_reachsets[coordinate]
         else:

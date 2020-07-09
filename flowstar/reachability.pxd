@@ -32,6 +32,8 @@ cdef class CReach:
     cdef readonly bint symbolic_composition
     # Should we skip unpreconditioning of the Flow* Taylor models?
     cdef readonly bint skip_unpreconditioning
+    # Python initials
+    cdef readonly object initials 
     # What order should we truncate the unpreconditioned Taylor models
     # for each dimension to?
     cdef vector[int] unpreconditioning_orders

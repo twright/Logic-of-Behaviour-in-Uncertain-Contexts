@@ -142,6 +142,8 @@ cdef class CReach:
         C.declareTMVar(b"local_t")
         tm_var_index = 1
 
+        self.initials = []
+
         for i, (initial, var) in enumerate(zip(initials, vars), 1):
             # Interpret initial condition
             try:
@@ -150,6 +152,8 @@ cdef class CReach:
                 # assert mode == InitialForm.COMBINED,\
                 #     f"Unexpected mode = {mode}"
                 initialC, initialS = initial, None
+
+            self.initials.append((initialC, initialS))
         
             # Declare state variable
             var_str = str(var).encode('utf-8')
@@ -198,7 +202,7 @@ cdef class CReach:
                 tm_var_index,
             )
         else:
-            raise ValueError("Invalid mode")
+            raise ValueError(f"Invalid mode = {mode}")
 
         
         initials_fpvect.push_back(flowpipe)
@@ -682,11 +686,45 @@ cdef class CReach:
 
 
     cdef object _convert_space_domain(CReach self, vector[Interval] * res, space_domain=None):
+        # Converts a Python list formatted space domain to one
+        # compatible with the flowpipes of this system
+        # This can just involve converting the sage interval
+        # into flowstar intervals but is more
+        # involved when context operators are involved since
+        # it needs to take into account the
+        # different forms of the Taylor model representing
+        # the initial conditions:
+        #  - in the COMBINED initial form, if any dimensions of
+        #    the context are not supplied replace them with
+        #    [-1, 1];
+        #  - in the SPLIT_VARS initial form, supply [-1, 1]
+        #    for each of the static vars;
+        #  - in the REMAINDER initial form, the space domain
+        #    translates directly.
+
         cdef Interval I
 
         res[0] = vector[Interval]()
 
-        if space_domain is not None:
+        if space_domain is None:
+            for _ in range(self.static_dim
+                    if self.initial_form == InitialForm.COMBINED
+                    else self.context_dim):
+                res[0].push_back(Interval(-1, 1))
+        elif self.initial_form == InitialForm.COMBINED:
+            iter_space_domain = iter(space_domain)
+            for c, s in self.initials:
+                if c is None:
+                    x = RIF(-1, 1)
+                else:
+                    x = next(iter_space_domain)
+                I = interval.make_interval(x)
+                assert I.inf() >= -1,\
+                    f"Invalid space domain {repr(space_domain)}"
+                assert I.sup() <= 1,\
+                    f"Invalid space domain {repr(space_domain)}"
+                res[0].push_back(I)
+        else:
             for x in space_domain:
                 I = interval.make_interval(x)
                 assert I.inf() >= -1,\
@@ -694,6 +732,11 @@ cdef class CReach:
                 assert I.sup() <= 1,\
                     f"Invalid space domain {repr(space_domain)}"
                 res[0].push_back(I)
+
+            if self.initial_form == InitialForm.SPLIT_VARS:
+                for _ in range(self.static_dim):
+                    res[0].push_back(Interval(-1, 1))
+
 
     @flowstar_globals
     def convert_space_domain(CReach self, space_domain):
