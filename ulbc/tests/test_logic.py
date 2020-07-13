@@ -5,7 +5,7 @@ import sage.all as sage
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
+from ulbc import (Atomic, Signal, G, F, Release, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
     IntegrationMethod, RestrictionMethod, C)
 from ulbc.tests.test_context_signals import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
@@ -311,6 +311,31 @@ class TestU:
              (RIF(4.0753576290606146, 5.2475118760960671), True)],
         )
         assert res.approx_eq(expected, 0.1)
+
+
+class TestR:
+    @staticmethod
+    @pytest.mark.slow
+    def test_R_as_U(odes):
+        R = Release
+        propR = R(Atomic(var("x")), RIF(2,3), Atomic(var("y")))
+        propU = ~U(~Atomic(var("x")), RIF(2,3), ~Atomic(var("y")))
+        initials = [RIF(1, 2), RIF(3, 4)]
+        sigR = propR.signal_for_system(odes, initials, 5)
+        sigU = propU.signal_for_system(odes, initials, 5)
+        assert sigR.approx_eq(sigU)
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_U_as_R(odes):
+        R = Release
+        propR = ~R(~Atomic(var("x")), RIF(2,3), ~Atomic(var("y")))
+        propU = U(Atomic(var("x")), RIF(2,3), Atomic(var("y")))
+        initials = [RIF(1, 2), RIF(3, 4)]
+        sigR = propR.signal_for_system(odes, initials, 5)
+        sigU = propU.signal_for_system(odes, initials, 5)
+        assert sigR.approx_eq(sigU)
+
 
 class TestWithSystem:
     @staticmethod

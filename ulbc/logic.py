@@ -356,6 +356,10 @@ class LogicWithSystem:
     def __repr__(self):
         return f"LogicWithSystem({repr(self.phi)}, repr({self.system}))"
 
+    @property
+    def atomic_propositions(self):
+        return self.phi.atomic_propositions
+
     # TODO: should this take a reach tree???
     @overload
     def signal(self, reach: Reach, duration: float, **kwargs): ...
@@ -1098,8 +1102,8 @@ class Neg(Logic):
     def numerical_signal(self, f, events, duration):
         return ~self.p.numerical_signal(f, events, duration)
 
-    def _with_system(self, system: System) -> LogicWithSystem:
-        return ~self.p._with_system(system)
+    def _with_system(self, system: System) -> Logic:
+        return Neg(self.p._with_system(system))
 
 
 class ContextBody:
@@ -1550,7 +1554,7 @@ class G(Logic):
     def atomic_propositions(self):
         return self.phi.atomic_propositions
 
-    def _with_system(self, system: System) -> LogicWithSystem:
+    def _with_system(self, system: System) -> Logic:
         return G(self.interval, self.phi._with_system(system))
 Globally = G
 
@@ -1685,7 +1689,7 @@ class U(Logic):
     def atomic_propositions(self):
         return self.phi.atomic_propositions + self.psi.atomic_propositions
 
-    def _with_system(self, system: System) -> LogicWithSystem:
+    def _with_system(self, system: System) -> Logic:
         return U(
             self.phi._with_system(system),
             self.interval,
@@ -1769,13 +1773,10 @@ class R(Logic):
     def atomic_propositions(self):
         return self.phi.atomic_propositions + self.psi.atomic_propositions
 
-    def _with_system(self, system: System) -> LogicWithSystem:
-        return LogicWithSystem(
-            R(
-                self.phi._with_system(system),
-                self.interval,
-                self.psi._with_system(system),
-            ),
-            system,
+    def _with_system(self, system: System) -> Logic:
+        return R(
+            self.phi._with_system(system),
+            self.interval,
+            self.psi._with_system(system),
         )
 Release = R
