@@ -2,6 +2,7 @@ from sage.all import RIF
 
 from ulbc.context_signals import SignalTree
 from ulbc.signal_masks import *
+from typing import *
 
 
 __all__ = ('ContextMask', 'context_mask_zero',
@@ -24,15 +25,21 @@ class ContextMask(SignalTree):
     F_inverse = P
 
 
-def context_mask_zero(dimension, coordinate=()):
+def mask_to_context_mask(dimension : int, mask : Mask,
+        coordinate : Tuple[int, ...]=()):
     return ContextMask(
-        RIF(0),
+        mask.domain,
         dimension,
-        signal=mask_zero,
+        signal=mask,
         coordinate=coordinate,
-        children=(context_mask_zero(dimension, coordinate + (k,))
+        children=(mask_to_context_mask(dimension, mask, coordinate + (k,))
                   for k in range(2**dimension)),
     )
+
+
+def context_mask_zero(dimension, coordinate=()):
+    return mask_to_context_mask(dimension, mask_zero,
+        coordinate=coordinate)
 
 
 def true_context_mask(domain, dimension, coordinate=()):

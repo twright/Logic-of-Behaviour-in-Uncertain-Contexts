@@ -56,6 +56,7 @@ cdef class RestrictedObserver(PolyObserver):
         self.fprime_interval_fn = p.fprime_interval_fn
         self.mask = p.mask
         self.masked_regions = p.masked_regions
+        self.py_space_domain = space_domain
         if self.reach is not None:
             assert isinstance(self.reach, CReach)
             assert self.reach.context_dim == len(space_domain),\
@@ -120,6 +121,16 @@ cdef class RestrictedObserver(PolyObserver):
         for _ in range(self.reach.static_dim):
             domain.push_back(Interval(-1, 1))
         return optional[vector[Interval]](domain)
+
+    def with_mask(self, mask):
+        observer = RestrictedObserver(
+            super().with_mask(mask),
+            self.py_space_domain,
+        )
+        observer.bools = self.bools
+        observer.poly_f_fns = self.poly_f_fns
+        observer.poly_fprime_fns = self.poly_fprime_fns
+        return observer
 
 
 cdef class FunctionObserver:
@@ -1139,6 +1150,7 @@ cdef class PolyObserver(FunctionObserver):
             tentative_unpreconditioning=self.tentative_unpreconditioning,
             mask=mask,
         )
+        # observer.f_hf = self.f_hf
         observer.bools = self.bools
         observer.poly_f_fns = self.poly_f_fns
         observer.poly_fprime_fns = self.poly_fprime_fns

@@ -30,7 +30,7 @@ class RestrictionMethod(IntEnum):
 
 def base_context_signal(J, dim, coordinate, signal, reach_level=0, top_level_domain=None, ctx_mask=None):
     return ContextSignal(J, dim, coordinate,
-                         lambda o, sym_s, abs_s, mask=None, *_: signal.with_mask(mask),
+                         lambda r, o, mask=None: signal.with_mask(mask),
                          reach_level=reach_level,
                          top_level_domain=top_level_domain,
                          ctx_mask=ctx_mask)
@@ -257,8 +257,11 @@ class SignalTree(object):
     def G(self, J):
         return self.signal_map(lambda x: x.G(J))
 
-    def U(self, J):
-        return self.signal_zip_with(lambda x, y: x.U(y, J))
+    def U(self, J, other):
+        return self.signal_zip_with(lambda x, y: x.U(J, y), other)
+
+    def R(self, J, other):
+        return self.signal_zip_with(lambda x, y: x.R(J, y), other)
 
     def to_domain(self, domain):
         print(f"({self}).to_domain({domain})")
@@ -299,7 +302,7 @@ class ContextSignal(SignalTree):
             reach_tree = None
             observer = None
 
-        print(f" ==> creating ContextSignal with coord={coordinate}, signal = {signal}, reach_tree = {reach_tree}")
+        print(f" ==> creating ContextSignal with coord={coordinate}, signal = {signal}, reach_tree = {reach_tree}, ctx_mask={ctx_mask}")
 
         # We call parent __init__ with the arguments we know so far
         super(ContextSignal, self).__init__(
@@ -318,6 +321,8 @@ class ContextSignal(SignalTree):
 
         self._reach_tree = reach_tree
         child_reach_tree = None
+        # The mask at the current level
+        mask = ctx_mask.mask if ctx_mask is not None else None
 
         if reach_tree is not None:
             # Get (or compute) correct reachset from tree
@@ -328,6 +333,7 @@ class ContextSignal(SignalTree):
             # assert observer_fn is not None
             if observer_fn is not None:
                 observer = observer_fn(reach)
+                # , mask=mask)
 
             if (not reach.successful
                 or restriction_method == RestrictionMethod.RECOMPUTE_FLOWPIPE):
@@ -342,19 +348,18 @@ class ContextSignal(SignalTree):
                 self.symbolic_space_domain,
             )
 
+            # Apply mask
+            observer = observer.with_mask(mask)
+
         # Determine signal
         if isinstance(signal, Signal):
             self._signal = signal
         elif signal is not None:
             # assert observer is not None
-            mask = ctx_mask.mask if ctx_mask is not None else None
             self._signal=signal(
                 partial(reach, space_domain=self.symbolic_space_domain)
                     if reach else None,
                 observer,
-                # self.physical_space_domain,
-                # self.symbolic_space_domain,
-                mask,
             )
         else:
             self._signal = None
@@ -471,13 +476,23 @@ class ContextSignal(SignalTree):
     def to_mask_and(self):
         from ulbc.context_masks import ContextMask
 
-        return ContextMask(self.domain, self.space_domain,
-                           signal=self.signal.to_mask_and(),
-                           children=(c.to_mask_and() for c in self.children))
+        return ContextMask(
+            self.domain,
+            self.dimension,
+            self.coordinate,
+            signal=self.signal.to_mask_and(),
+            top_level_domain=self.top_level_domain,
+            children=self.children.map(lambda c: c.to_mask_and()),
+        )
 
     def to_mask_or(self):
         from ulbc.context_masks import ContextMask
 
-        return ContextMask(self.domain, self.space_domain,
-                           signal=self.signal.to_mask_and(),
-                           children=(c.to_mask_or() for c in self.children))
+        return ContextMask(
+            self.domain,
+            self.dimension,
+            self.coordinate,
+            signal=self.signal.to_mask_or(),
+            top_level_domain=self.top_level_domain,
+            children=self.children.map(lambda c: c.to_mask_and()),
+        )

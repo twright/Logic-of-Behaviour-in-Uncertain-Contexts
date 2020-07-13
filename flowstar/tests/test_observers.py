@@ -45,7 +45,6 @@ def observer_masked_sym(ringxy, reach_split, odes, mask1):
     return PolyObserver(x, reach_split, symbolic_composition=True, mask=mask1)
 
 
-
 @pytest.fixture
 def observer(ringxy, reach_split, odes):
     _, (x, y) = ringxy
@@ -105,13 +104,13 @@ def nonpoly_reach(nonpoly_system):
     return r
 
 
-class TestSageObserver(object):
+class TestSageObserver:
     """Tests for interval evaluation."""
 
+    @staticmethod
     @pytest.mark.slow
-    def test_t_call(self, nonpoly_reach):
+    def test_t_call(nonpoly_reach):
         t, x = sg.SR.var('t, x')
-        # pytest.set_trace()
         observer = SageObserver(t, nonpoly_reach)
         img = observer(RIF(2.5))
         print(finterval(img))
@@ -127,8 +126,9 @@ class TestIntervalFnFromSage:
         assert h(3, 2) == 10
 
 
-class TestPolyObserver(object):
-    def test_construct_with_implicit_derivative(self, observer):
+class TestPolyObserver:
+    @staticmethod
+    def test_construct_with_implicit_derivative(observer):
         assert observer.f.var_names == ["x", 'y']
         print("expected =", '(([1.0000000000 , 1.0000000000] * x))')
         assert repr(observer.f) == '(([1.0000000000 , 1.0000000000] * x))'
@@ -137,15 +137,26 @@ class TestPolyObserver(object):
                 == '(([-1.0000000000 , -1.0000000000] * y))')
 
 
-class TestPolyObserverMask(object):
-    def test_construct_masked(self, observer_masked, mask1):
+class TestPolyObserverMask:
+    @staticmethod
+    def test_construct_masked(observer_masked, mask1):
         assert observer_masked.mask.approx_eq(mask1)
 
-    def test_masked_roots(self, observer_masked):
+    @staticmethod
+    def test_masked_roots(observer_masked):
         assert roots_approx_eq(observer_masked.roots(verbosity=2),
                                [RIF(0.23975290341611912, 0.4)])
 
-    def test_masked_eval_inside(self, observer, observer_masked):
+    @staticmethod
+    def test_with_mask(observer, mask1):
+        observer_masked = observer.with_mask(mask1)
+        assert observer_masked.mask.approx_eq(mask1)
+        assert observer_masked.mask.approx_eq
+        assert roots_approx_eq(observer_masked.roots(verbosity=2),
+                               [RIF(0.23975290341611912, 0.4)])
+
+    @staticmethod
+    def test_masked_eval_inside(observer, observer_masked):
         observer_unmasked = observer
 
         res_masked = observer_masked(RIF(0.25, 0.35))
@@ -155,7 +166,8 @@ class TestPolyObserverMask(object):
 
         assert int_dist(res_masked, res_unmasked) < 1e-3
 
-    def test_masked_eval_overlapping(self, observer, observer_masked):
+    @staticmethod
+    def test_masked_eval_overlapping(observer, observer_masked):
         observer_unmasked = observer
 
         res_masked = observer_masked(RIF(0.2, 0.45), verbosity=10)
@@ -165,7 +177,8 @@ class TestPolyObserverMask(object):
 
         assert int_dist(res_masked, res_unmasked) < 1e-3
 
-    def test_masked_bool_eval_inside(self, observer, observer_masked):
+    @staticmethod
+    def test_masked_bool_eval_inside(observer, observer_masked):
         observer_unmasked = observer
 
         res_masked = observer_masked.check(RIF(0.25, 0.35))
@@ -173,7 +186,8 @@ class TestPolyObserverMask(object):
 
         assert res_masked is res_unmasked
 
-    def test_masked_eval_overlapping_sym(self, observer_sym,
+    @staticmethod
+    def test_masked_eval_overlapping_sym(observer_sym,
                                          observer_masked_sym):
         observer_unmasked = observer_sym
         observer_masked = observer_masked_sym
@@ -197,42 +211,62 @@ class TestRestrictedObserverMask(object):
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.4)])
 
+    @staticmethod
+    def test_restricted_with_mask(observer, observer_masked, mask1):
+        masked_restricted = RestrictedObserver(
+            observer_masked, [RIF(-1, 0), RIF(0, 0.5)])
+        restricted_observer = RestrictedObserver(
+            observer, [RIF(-1, 0), RIF(0, 0.5)])
+        restricted_with_mask = restricted_observer.with_mask(mask1)
+        assert masked_restricted.mask.approx_eq(mask1)
+        assert restricted_with_mask.mask.approx_eq(mask1)
+        assert roots_approx_eq(
+            restricted_with_mask.roots(verbosity=2),
+            masked_restricted.roots(verbosity=2),
+        )
 
-class TestPolyObserverRoots(object):
+
+class TestPolyObserverRoots:
+    @staticmethod
     # @pytest.mark.slow
-    def test_unrestricted(self, observer):
+    def test_unrestricted(observer):
         observer.reach.prepare()
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
-    def test_unrestricted_symbolic_composition(self, observer_sym_combined):
+    @staticmethod
+    def test_unrestricted_symbolic_composition(observer_sym_combined):
         assert roots_approx_eq(observer_sym_combined.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
+    @staticmethod
     # @pytest.mark.slow
-    def test_unrestricted_symbolic_composition(self, observer_sym):
+    def test_unrestricted_symbolic_composition(observer_sym):
         assert roots_approx_eq(observer_sym.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
+    @staticmethod
     # @pytest.mark.slow
-    def test_unrestricted_symbolic_composition_low_order(self, observer_sym_low_order):
+    def test_unrestricted_symbolic_composition_low_order(observer_sym_low_order):
         assert roots_approx_eq(observer_sym_low_order.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)],
                                0.01)
 
+    @staticmethod
     # @pytest.mark.slow
-    def test_unrestricted_symbolic_composition_no_trunc(self, observer_sym_no_trunc):
+    def test_unrestricted_symbolic_composition_no_trunc(observer_sym_no_trunc):
         assert roots_approx_eq(observer_sym_no_trunc.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
 
-class TestRestrictedObserverRoots(object):
-    def test_restricted(self, observer):
+class TestRestrictedObserverRoots:
+    @staticmethod
+    def test_restricted(observer):
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
@@ -243,14 +277,16 @@ class TestRestrictedObserverRoots(object):
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
-    def test_restricted_no_cache(self, observer):
+    @staticmethod
+    def test_restricted_no_cache(observer):
         restricted = RestrictedObserver(observer,
                                         [RIF(-1, 0), (0, 0.5)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
-    def test_restricted_no_oversharing(self, observer):
+    @staticmethod
+    def test_restricted_no_oversharing(observer):
         # The caching on the child should not break the parent
         restricted = RestrictedObserver(observer,
                                         [RIF(-1, 0), (0, 0.5)])
@@ -262,7 +298,8 @@ class TestRestrictedObserverRoots(object):
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
 
-    def test_restricted_symbolic_composition(self, observer_sym):
+    @staticmethod
+    def test_restricted_symbolic_composition(observer_sym):
         assert roots_approx_eq(observer_sym.roots(),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
@@ -275,14 +312,16 @@ class TestRestrictedObserverRoots(object):
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
-    def test_restricted_symbolic_composition_no_cache(self, observer_sym):
+    @staticmethod
+    def test_restricted_symbolic_composition_no_cache(observer_sym):
         restricted = RestrictedObserver(observer_sym,
                                         [RIF(-1, 0), (0, 0.5)])
         assert roots_approx_eq(restricted.roots(verbosity=10),
                                [RIF(0.25876412796561448, 0.40515754491116441),
                                 RIF(3.39947778050338860, 3.5489584384093589)])
 
-    def test_one_dimensional_context(self, observer):
+    @staticmethod
+    def test_one_dimensional_context(observer):
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
@@ -292,7 +331,8 @@ class TestRestrictedObserverRoots(object):
                                [RIF(0.27559817196853414, 0.40515751487396307),
                                 RIF(3.41786626286944360, 3.5489199118809270)])
 
-    def test_one_dimensional_context_split(self, ringxy, odes, observer):
+    @staticmethod
+    def test_one_dimensional_context_split(ringxy, odes, observer):
         # Observer split context
         initials = [(RIF(1, 2), None), (None, RIF(3.5))]
         reach = Reach(odes, initials, 2 * sage.pi, (0.001, 0.1), order=10,
@@ -311,7 +351,8 @@ class TestRestrictedObserverRoots(object):
              RIF(3.41786626286944360, 3.5489199118809270)],
         )
 
-    def test_context_one_restricted_dimension(self, observer):
+    @staticmethod
+    def test_context_one_restricted_dimension(observer):
         assert roots_approx_eq(observer.roots(verbosity=10),
                                [RIF(0.23975290341611912, 0.60000000000000020),
                                 RIF(3.38202621523960720, 3.7350404376435665)])
@@ -322,28 +363,32 @@ class TestRestrictedObserverRoots(object):
                                 RIF(3.38404800182969050, 3.6056159786942144)])
 
 
-class TestPolyObserverEval(object):
+class TestPolyObserverEval:
     """Tests for interval evaluation."""
 
-    def test_x_call(self, observer):
+    @staticmethod
+    def test_x_call(observer):
         img = observer(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
                         RIF(-4.5240526319578552, -1.3583472984326301)) < 1e-3
 
-    def test_y_call(self, observer_y):
+    @staticmethod
+    def test_y_call(observer_y):
         img = observer_y(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
                         RIF(-0.79464978559099065, 3.9296122373432128)) < 1e-3
 
-    def test_x_call_symbolic(self, observer_sym):  # NOQA
+    @staticmethod
+    def test_x_call_symbolic(observer_sym):
         img = observer_sym(RIF(1, 2))
         print(finterval(img))
         assert int_dist(img,
                         RIF(-4.5240526319578552, -1.3583472984326301)) < 1e-3
 
-    def test_y_call_symbolic(self, observer_sym_y):  # NOQA
+    @staticmethod
+    def test_y_call_symbolic(observer_sym_y):
         observer = observer_sym_y
 
         img = observer(RIF(1, 2))
@@ -351,7 +396,8 @@ class TestPolyObserverEval(object):
         assert int_dist(img,
                         RIF(-0.79464978559099065, 3.9296122373432128)) < 1e-3
 
-    def test_xy_squared_call(self, ringxy, odes, reach):  # NOQA
+    @staticmethod
+    def test_xy_squared_call(ringxy, odes, reach):
         PR, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
         observer = PolyObserver(PR(poly.p), reach, symbolic_composition=False)
@@ -360,8 +406,9 @@ class TestPolyObserverEval(object):
         assert int_dist(img,
                         RIF(6.7527704962289236, 25.081577547495158)) < 1e-3
 
+    @staticmethod
     @pytest.mark.slow
-    def test_xy_squared_call_symbolic(self, ringxy, odes, reach):  # NOQA
+    def test_xy_squared_call_symbolic(ringxy, odes, reach):
         PR, (x, y) = ringxy
         poly = Atomic(x ** 2 + y ** 2)
         observer = PolyObserver(PR(poly.p), reach, symbolic_composition=True)
@@ -371,25 +418,29 @@ class TestPolyObserverEval(object):
                         RIF(9.4999999999989839, 20.000000000001002)) < 1e-3
 
 
-class TestPolyObserverBoolEval(object):
+class TestPolyObserverBoolEval:
     """Tests for interval evaluation."""
 
-    def test_x_call(self, observer):
+    @staticmethod
+    def test_x_call(observer):
         res = observer.check(RIF(1, 2))
         assert res is False
 
-    def test_minus_x_call(self, ringxy, odes, reach):  # NOQA
+    @staticmethod
+    def test_minus_x_call(ringxy, odes, reach):  # NOQA
         PR, (x, y) = ringxy
         poly = Atomic(-x)
         observer = PolyObserver(PR(poly.p), reach, symbolic_composition=False)
         res = observer.check(RIF(1, 2))
         assert res is True
 
-    def test_y_call(self, observer_y):
+    @staticmethod
+    def test_y_call(observer_y):
         res = observer_y.check(RIF(1, 2))
         assert res is None
 
-    def test_restricted_bool_symbolic_composition(self, observer_sym):
+    @staticmethod
+    def test_restricted_bool_symbolic_composition(observer_sym):
         assert observer_sym.check(RIF(0.5)) is None
 
         print("=== RestrictedObserver ===")

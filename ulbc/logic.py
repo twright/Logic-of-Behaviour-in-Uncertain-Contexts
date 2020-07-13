@@ -12,7 +12,6 @@ import instrument
 
 import sage.all as sage
 from sage.all import RIF
-from flowstar.poly import Poly
 from flowstar.reachability import (Reach, FlowstarFailedException, InitialForm)
 from flowstar.instrumentation import AggregateMetric
 import ulbc.bondcalculus as bc
@@ -21,7 +20,6 @@ from ulbc.symbolic import RelationConverter, is_relation
 from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver)
 from ulbc.context_signals import (ContextSignal,
                                   true_context_signal, false_context_signal,
-                                  preconditioned_space_domain,
                                   RestrictionMethod,
                                   ReachTree)
 from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
@@ -669,7 +667,9 @@ class Atomic(Logic):
                 **kwargs
             )
 
-    def signal_fn(self, _, observer, mask=None, **kwargs):
+    # Signal fn cannot do anything about the mask
+    # mask=None, 
+    def signal_fn(self, _, observer, **kwargs):
         # str_abs_space_domain = [[sage.QQ(w)
         #     for w in s.endpoints()]
         #     for s in physical_space_domain]
@@ -684,33 +684,17 @@ class Atomic(Logic):
             observer,
             # physical_space_domain=physical_space_domain,
             # symbolic_space_domain=symbolic_space_domain,
-            mask=mask,
             **kwargs,
         )
 
     # reach should be a reach tree
-    def context_signal(self, reach_tree, mask: Optional[Mask] = None,         
+    def context_signal(self, reach_tree, mask: Optional[ContextMask] = None,         
             restriction_method=RestrictionMethod.SYMBOLIC, **kwargs):
         observer_fn = partial(self.observer,
             symbolic_composition=kwargs.get('symbolic_composition', False),
             symbolic_composition_order=kwargs.get('symbolic_composition_order', None),
             tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
         )
-        #  self.observer(
-        #     reach,
-        #     # We should not pass in a mask here, since the mask is really
-        #     # a context mask, which will be applied inside ContextSignal
-        #     # as we move down the tree
-        #     # mask=mask,
-        #     symbolic_composition=kwargs.get('symbolic_composition', False),
-        #     tentative_unpreconditioning=kwargs.get('tentative_unpreconditioning', True),
-        #     # Should already have been passed to Reach
-        #     # by context_signal_for_system
-        #     # initial_form=InitialForm.SPLIT_VARS,
-        # )
-
-        # Generate preconditioned space domain of correct dimension
-        # space_domain = preconditioned_space_domain(reach.context_dim)
 
         # Turn initials for a vector into a list
         return ContextSignal(
@@ -878,7 +862,7 @@ class And(Logic):
         else:
             return self._signal_one_pass(reach, mask=mask, **kwargs)
 
-    def context_signal(self, reach_tree: ReachTree, mask: Optional[Mask] = None, **kwargs):
+    def context_signal(self, reach_tree: ReachTree, mask: Optional[ContextMask] = None, **kwargs):
         sig = true_context_signal(
             reach_tree.time_domain,
             # Do we get the domain subdivision right?
@@ -891,7 +875,7 @@ class And(Logic):
             if sig_mask is not None and not len(sig_mask.mask.pos):
                 return sig
             sig &= t.context_signal(reach_tree,
-                                    ctx_mask=sig_mask, **kwargs)
+                                    mask=sig_mask, **kwargs)
         return sig
 
     def __repr__(self):
@@ -1041,7 +1025,7 @@ class Or(Logic):
             if sig_mask is not None and not len(sig_mask.mask.pos):
                 return sig
             sig |= t.context_signal(reach_tree,
-                                    ctx_mask=sig_mask, **kwargs)
+                                    mask=sig_mask, **kwargs)
         return sig
 
     @property
@@ -1389,7 +1373,7 @@ class C(Context):
             mask=mask,
         )
 
-    def context_signal(self, reach_tree: ReachTree, refine=0, **kwargs):
+    def context_signal(self, reach_tree: ReachTree, refine=0, mask=None, **kwargs):
         assert reach_tree.system is not None
 
         def signal_fn(reach, observer, mask=None):
@@ -1419,6 +1403,7 @@ class C(Context):
             signal=signal_fn,
             reach_tree=reach_tree,
             top_level_domain=reach_tree.top_level_domain,
+            ctx_mask=mask,
         )
 
 
@@ -1470,7 +1455,7 @@ class D(Context):
             mask=mask,
         )
 
-    def context_signal(self, reach_tree: ReachTree, refine=0, **kwargs):
+    def context_signal(self, reach_tree: ReachTree, refine=0, mask=None, **kwargs):
         assert reach_tree.system is not None
 
         if refine > 0:
@@ -1505,6 +1490,7 @@ class D(Context):
             signal=signal_fn,
             reach_tree=reach_tree,
             top_level_domain=reach_tree.top_level_domain,
+            ctx_mask=mask,
         )
 
 
@@ -1551,8 +1537,11 @@ class G(Logic):
         return self.phi.signal(reach, mask=mask, **kwargs).G(
             self.interval)
 
-    def context_signal(self, reach: Reach, **kwargs):
-        return self.phi.context_signal(reach, **kwargs).G(self.interval)
+    def context_signal(self, reach: Reach, mask=None, **kwargs):
+        if mask is not None:
+            mask = mask.P(self.interval)
+        return self.phi.context_signal(reach, mask=mask, **kwargs).G(
+            self.interval)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).G(self.interval)
@@ -1768,12 +1757,12 @@ class R(Logic):
         #     self.interval, ~self.psi.signal(reach, odes, **kwargs))
 
     def context_signal(self, reach: Reach, **kwargs):
-        return ~(~self.phi.context_signal(reach, **kwargs)).U(
+        return ~(~self.phi.context_signal(reach, **kwargs)).R(
             self.interval,
             ~self.psi.context_signal(reach, **kwargs))
 
     def numerical_signal(self, f, events, duration):
-        return ~(~self.phi.numerical_signal(f, events, duration)).U(
+        return ~(~self.phi.numerical_signal(f, events, duration)).R(
             self.interval, ~self.psi.numerical_signal(f, events, duration))
 
     @property

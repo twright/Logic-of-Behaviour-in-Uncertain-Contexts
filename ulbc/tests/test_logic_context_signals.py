@@ -1,9 +1,10 @@
+from _pytest.outcomes import xfail
 import pytest
 import sage.all as sg
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
+from ulbc import (Atomic, Signal, G, F, U, R, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
     IntegrationMethod, RestrictionMethod, C)
 from ulbc.tests.test_reach_trees import space_domain_approx_eq
 from ulbc.signal_masks import Mask, mask_zero
@@ -13,6 +14,7 @@ from ulbc.symbolic import var
 from ulbc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
 from flowstar.reachability import InitialForm
+from ulbc.context_masks import mask_to_context_mask
 
 
 @pytest.fixture(scope='module')
@@ -32,6 +34,28 @@ def atomic_q(ringxy):
     _, (x, y) = ringxy
     return Atomic(3 - y)
 
+
+# A list of properties for testing the sin cos system
+sin_cos_properties = [
+    Atomic(var("x")) & Atomic(var("y")),
+    Atomic(var("x")) | Atomic(var("y")),
+    F(RIF(1, 1.5), Atomic(var("y"))),
+    ~Atomic(var("x")) | G(RIF(1, 1.5), Atomic(var("y"))),
+    pytest.param(
+        U(Atomic(var("x")), RIF(2,3), Atomic(var("y"))),
+        marks=pytest.mark.xfail,
+    ),
+    pytest.param(
+        R(Atomic(var("x")), RIF(2,3), Atomic(var("y"))),
+        marks=pytest.mark.xfail,
+    ),
+    ~Atomic(var("x"))
+        | ({var("x"): RIF(1,2)}
+            >> G(RIF(0.5,1), Atomic(var("y")))),
+    ~Atomic(var("x"))
+        | ({var("x"): RIF(1,2)}
+            % F(RIF(0.5,1), Atomic(var("y")))),
+]
 
 class TestLogicContextSignal(object):
     @staticmethod
@@ -67,7 +91,7 @@ class TestLogicContextSignal(object):
     @staticmethod
     @pytest.mark.slow
     def test_context_refined_and_signal(ringxy, odes):
-        R, (x, y) = ringxy
+        _, (x, y) = ringxy
 
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = Signal(
@@ -88,13 +112,25 @@ class TestLogicContextSignal(object):
     @staticmethod
     @pytest.mark.slow
     def test_context_signal_and_signal(ringxy, odes):
-        R, (x, y) = ringxy
+        # This is subtly different from the parametrized test below since
+        # it uses explicit variables rather than var
+        _, (x, y) = ringxy
 
         initials = [RIF(1, 2), RIF(3, 4)]
-        ctx = (Atomic(x) & Atomic(y)).context_signal_for_system(odes, initials,
-                                                                5)
+        ctx = (Atomic(x) & Atomic(y)).context_signal_for_system(
+            odes, initials, 5)
         sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials, 5)
         assert ctx.signal.approx_eq(sig, 0.01)
+
+    @staticmethod
+    @pytest.mark.slow
+    @pytest.mark.parametrize('prop', sin_cos_properties)
+    def test_signal_vs_context_signal(odes, prop):
+        initials = [RIF(1, 2), RIF(3, 4)]
+        ctx = prop.context_signal_for_system(odes, initials, 5)
+        sig = prop.signal_for_system(odes, initials, 5)
+        assert ctx.signal.approx_eq(sig, 0.01)
+        assert ctx.refined_signal(0).approx_eq(sig, 0.01)
 
 
 class TestContextSignalRefinement:
@@ -513,7 +549,7 @@ class TestContextMasks:
     @staticmethod
     @pytest.mark.very_slow
     def test_whelks_and_lobsters_context_mask(ringxy, odes_whelks):
-        R, (x, y) = ringxy
+        _, (x, y) = ringxy
 
         initials = [RIF(1, 1.2), RIF(4, 6)]
         P = Atomic((x - 1)**2 + y**2 - 0.2)
@@ -538,3 +574,51 @@ class TestContextMasks:
             f"We should have sig0 = sig2 where\nsig0 = {sig0}\nsig2 = {sig2}"
         assert sig1.approx_eq(sig2, 1e-10),\
             f"We should have sig1 = sig2 where\nsig1 = {sig1}\nsig2 = {sig2}"
+
+    @staticmethod
+    @pytest.mark.very_slow
+    @pytest.mark.parametrize(
+        'prop',
+        [
+            Atomic(var("x")),
+            F(RIF(1, 1.5), Atomic(var("y"))),
+        ]
+    )
+    @pytest.mark.parametrize(
+        'mask',
+        [
+            Mask(RIF(0,5), [RIF(0, 5)]),
+            Mask(RIF(0,5), [RIF(0, 1)]),
+            Mask(RIF(0,5), [RIF(2, 3)]),
+            Mask(RIF(0,5), [RIF(1, 2), RIF(3, 4)]),
+        ]
+    )
+    def test_context_signals_external_masks(odes, prop, mask):
+        initials = [RIF(1, 2), RIF(3, 4)]
+        sig = prop.signal_for_system(odes, initials, 5,
+            mask=mask).with_mask(None)
+        ctx = prop.context_signal_for_system(odes, initials, 5)
+        ctx_masked = prop.context_signal_for_system(
+            odes, initials, 5,
+            mask=mask_to_context_mask(2, mask))
+        assert ctx_masked.signal.with_mask(None).approx_eq(sig)
+        assert all(
+            c.with_mask(mask).approx_eq(cm)    
+            for c, cm in zip(ctx.expand_signals(2),
+                             ctx_masked.expand_signals(2))
+        )
+
+    @staticmethod
+    @pytest.mark.very_slow
+    @pytest.mark.parametrize('prop', sin_cos_properties)
+    def test_context_signals_internal_masks(odes, prop):
+        initials = [RIF(1, 2), RIF(3, 4)]
+        ctx = prop.context_signal_for_system(odes, initials, 5)
+        ctx_masked = prop.context_signal_for_system(
+            odes, initials, 5, use_masks=True)
+        # assert ctx_masked.signal.mask is not None
+        assert ctx.signal.approx_eq(ctx_masked.signal.with_mask(None),
+            0.01)
+        # assert all(s.mask is not None for s in ctx_masked.expand_signals(2))
+        assert ctx.enclosed_by(ctx_masked, 2)
+        assert ctx_masked.enclosed_by(ctx, 2)

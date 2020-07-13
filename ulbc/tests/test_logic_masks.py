@@ -17,7 +17,7 @@ from ulbc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
 
 
-class TestMasks(object):
+class TestMasks:
     @pytest.mark.slow
     def test_standard_mask(self, atomic_p, odes, initials2):
         mask = Mask(RIF(0, 2*sage.pi), [RIF(0, 2*sage.pi)])

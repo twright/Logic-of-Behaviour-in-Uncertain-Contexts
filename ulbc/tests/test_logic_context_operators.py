@@ -248,6 +248,7 @@ class TestD(object):
 
 class TestContextOperatorContextSignals:
     @staticmethod
+    @pytest.mark.slow
     def test_sin_cos_context_context_signal(ringxy, odes):
         _, (x, y) = ringxy
         prop = {y: RIF(1, 5)} >> G(RIF(sg.pi/8), Atomic(x + 0.5))
@@ -306,7 +307,7 @@ class TestContextOperatorContextSignals:
     @pytest.mark.very_slow
     @pytest.mark.slow
     def test_differential_context_context_signals(ringxy, odes_whelks):
-        R, (x, y) = ringxy
+        _, (x, y) = ringxy
 
         initials = [RIF(1, 1.2), RIF(4, 6)]
         P = Atomic((x - 1)**2 + y**2 - 0.2)

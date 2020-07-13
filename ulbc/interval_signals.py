@@ -663,6 +663,16 @@ class Signal(BaseSignal):
             raise Exception("Incompatible domains: {} {} {}!".format(
                 self.domain, J, other.domain))
 
+    def R(self, J, other):
+        J = RIF(J)
+        if (other.domain - J).overlaps(self.domain):
+            # J = (other.domain - I).intersection(self.domain)
+            return reduce(Signal.__and__,
+                          (~s | (~s | other).G(J) for s in (~self).decompose()))
+        else:
+            raise Exception("Incompatible domains: {} {} {}!".format(
+                self.domain, J, other.domain))
+
 
 def to_signal_piecewise(f, fprime, time, step):
     sig = Signal(RIF(0), [])
