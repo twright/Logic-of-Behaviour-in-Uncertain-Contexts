@@ -219,7 +219,9 @@ class SignalTree(object):
             self.coordinate,
             signal=f(self.signal, other.signal),
             # Perhaps this should really be None?
-            reach_level=min(self.reach_level, other.reach_level),
+            reach_level=min(self.reach_level, other.reach_level)
+                if self.reach_level is not None
+                else None,
             top_level_domain=self.top_level_domain,
             children=self.children.zip_with(
                 lambda c1, c2: c1.signal_zip_with(f, c2),
@@ -496,3 +498,9 @@ class ContextSignal(SignalTree):
             top_level_domain=self.top_level_domain,
             children=self.children.map(lambda c: c.to_mask_and()),
         )
+
+    def to_mask_until(self, I):
+        # We know that
+        # H[0, a] φ = ⋁_j (φ_j ∧ P[a, b] φ_j)
+        # where φ = ⋁_j φ_j is the unitary decomposition of phi
+        return self.to_mask_and().H(RIF(0, I.lower('RNDD')))

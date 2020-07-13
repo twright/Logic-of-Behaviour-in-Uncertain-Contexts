@@ -1684,7 +1684,7 @@ class U(Logic):
         phi_mask = (mask | mask.P(J)
                     if mask is not None
                     else None)
-        sig_phi = self.phi.signal(reach, mask=phi_mask, **kwargs)
+        sig_phi = self.phi.context_signal(reach, mask=phi_mask, **kwargs)
 
         # Monitor psi
         psi_mask = (sig_phi.to_mask_until(J) & mask.P(J)
@@ -1692,11 +1692,16 @@ class U(Logic):
                     else None)
         sig_psi = self.psi.context_signal(reach, mask=psi_mask, **kwargs)
 
+        def sig_combined(sig_phi, sig_psi):
+            return reduce(
+                operator.or_,
+                (sig_phi_j & (sig_phi_j & sig_psi).F(J)
+                 for sig_phi_j in sig_phi.decomposition),
+                false_signal(reach.time_domain, sig_phi.mask),
+            )
+
         # Compute overall answer
-        return reduce(operator.or_,
-                      (sig_phi_j & (sig_phi_j & sig_psi).F(J)
-                       for sig_phi_j in sig_phi.decomposition),
-                      false_context_signal(RIF(0, reach.time), mask))
+        return sig_phi.signal_zip_with(sig_combined, sig_psi)
 
     def numerical_signal(self, f, events, duration):
         return self.phi.numerical_signal(f, events, duration).U(
@@ -1787,13 +1792,18 @@ class R(Logic):
         psi_mask = (sig_neg_phi.to_mask_until(J) & mask.P(J)
                     if mask is not None
                     else None)
-        sig_psi = self.psi.signal(reach, mask=psi_mask, **kwargs)
+        sig_psi = self.psi.context_signal(reach, mask=psi_mask, **kwargs)
+
+        def sig_combined(sig_phi, sig_psi):
+            return reduce(
+                operator.and_,
+                (~sig_phi_j | (~sig_phi_j | sig_psi).G(J)
+                 for sig_phi_j in sig_phi.decomposition),
+                true_signal(reach.time_domain, sig_phi.mask),
+            )
 
         # Compute overall answer
-        return reduce(operator.and_,
-                      (~sig_phi_j | (~sig_phi_j | sig_psi).G(J)
-                       for sig_phi_j in sig_neg_phi.decomposition),
-                      true_signal(RIF(0, reach.time), mask))
+        return sig_neg_phi.signal_zip_with(sig_combined, sig_psi)
 
     def numerical_signal(self, f, events, duration):
         return ~(~self.phi.numerical_signal(f, events, duration)).R(

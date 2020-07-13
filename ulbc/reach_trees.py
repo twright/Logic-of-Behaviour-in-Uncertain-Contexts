@@ -106,6 +106,10 @@ class ReachTree:
         return self._time_domain
 
     @property
+    def time(self) -> float:
+        return self.time_domain.upper()
+
+    @property
     def dimension(self) -> int:
         return self._dimension
 

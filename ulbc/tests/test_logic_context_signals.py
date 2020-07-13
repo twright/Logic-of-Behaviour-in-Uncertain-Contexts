@@ -41,14 +41,8 @@ sin_cos_properties = [
     Atomic(var("x")) | Atomic(var("y")),
     F(RIF(1, 1.5), Atomic(var("y"))),
     ~Atomic(var("x")) | G(RIF(1, 1.5), Atomic(var("y"))),
-    pytest.param(
-        U(Atomic(var("x")), RIF(2,3), Atomic(var("y"))),
-        marks=pytest.mark.xfail,
-    ),
-    pytest.param(
-        R(Atomic(var("x")), RIF(2,3), Atomic(var("y"))),
-        marks=pytest.mark.xfail,
-    ),
+    U(Atomic(var("x")), RIF(2,3), Atomic(var("y"))),
+    R(Atomic(var("x")), RIF(2,3), Atomic(var("y"))),
     ~Atomic(var("x"))
         | ({var("x"): RIF(1,2)}
             >> G(RIF(0.5,1), Atomic(var("y")))),
