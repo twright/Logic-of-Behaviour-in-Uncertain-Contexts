@@ -12,6 +12,7 @@ from Cython.Distutils import build_ext
 from distutils.extension import Extension
 from distutils.cmd import Command
 from typing import *
+import multiprocessing
 # from distutils.core import setup
 # from setuptools import find_packages
 
@@ -221,6 +222,7 @@ class BuildContainerCommand(Command):
 
 class TestCommand(Command):
     user_options = [
+        ('parallel', 'p', "Rerun tests in parallel."),
         ('docker', 'd', "Test in a Docker container."),
         ('no-rebuild', 'n', "Don't rebuild before testing."),
         ('verbose-test', 'v', 'Verbose?'),
@@ -231,6 +233,7 @@ class TestCommand(Command):
     ]
 
     def initialize_options(self):
+        self.parallel = False
         self.docker = False
         self.no_rebuild = False
         self.verbose_test = False
@@ -240,6 +243,7 @@ class TestCommand(Command):
         self.fail_fast = False
 
     def finalize_options(self):
+        self.parallel = bool(self.parallel)
         self.docker = bool(self.docker)
         self.no_rebuild = bool(self.no_rebuild)
         self.verbose_test = bool(self.verbose_test)
@@ -254,6 +258,9 @@ class TestCommand(Command):
 
         cmd = ['/usr/bin/env', 'python3', '-m', 'pytest', '--disable-pytest-warnings']
 
+        if self.parallel:
+            cmd.append('-n')
+            cmd.append(f'{multiprocessing.cpu_count()}')
         if self.verbose_test:
             cmd.append('-v')
         if self.all:
