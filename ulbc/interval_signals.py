@@ -198,8 +198,7 @@ def false_signal(J, mask=None):
     return Signal(J, [(J, False)], mask=mask)
 
 
-class BaseSignal(object):
-    __metaclass__ = ABCMeta
+class BaseSignal(metaclass=ABCMeta):
 
     def __init__(self, domain : RIF, values, expect_consistent=True):
         if domain is None:
