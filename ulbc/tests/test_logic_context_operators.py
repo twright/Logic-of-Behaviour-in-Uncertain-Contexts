@@ -66,8 +66,9 @@ def sin_cos_signal_ctx_jump(domain, initials : Iterable[RIF],
     
     return Signal(
         domain,
-        [(Tk := RIF(Tmin + k*step, Tmin + (k+1)*step), sig_value(Tk))
-         for k in range(steps)]
+        [(Tk, sig_value(Tk))
+         for k in range(steps)
+         for Tk in [RIF(Tmin + k*step, Tmin + (k+1)*step)]]
     )
 
 
