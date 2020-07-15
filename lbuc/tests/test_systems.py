@@ -3,8 +3,8 @@ import sage.all as sg
 from sage.all import RIF, QQ
 
 from flowstar.reachability import IntegrationMethod, InitialForm
-from ulbc.systems import *
-from ulbc.interval_utils import (intervals_approx_eq,
+from lbuc.systems import *
+from lbuc.interval_utils import (intervals_approx_eq,
     check_containment, check_inflation)
 
 

@@ -32,6 +32,6 @@ USER root
 RUN cd flowstar/flowstar-2.1.0 && make install
 USER lbuc
 # RUN ./setup.py install --user
-RUN cp -R flowstar/ /home/lbuc/.local/lib/python3.8/site-packages/ && cp -R ulbc/ /home/lbuc/.local/lib/python3.8/site-packages/
+RUN cp -R flowstar/ /home/lbuc/.local/lib/python3.8/site-packages/ && cp -R lbuc/ /home/lbuc/.local/lib/python3.8/site-packages/
 EXPOSE 8888
 CMD [ "python3", "-m", "jupyterlab", "--ip=0.0.0.0", "--no-browser" ]

@@ -1,7 +1,7 @@
 from sage.all import RIF
 
-from ulbc.context_signals import SignalTree
-from ulbc.signal_masks import *
+from lbuc.context_signals import SignalTree
+from lbuc.signal_masks import *
 from typing import *
 
 

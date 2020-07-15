@@ -2,9 +2,9 @@ from __future__ import print_function
 # absolute_import,
 
 import pytest
-from ulbc.interval_signals import (Signal, interval_complements, isplit,
+from lbuc.interval_signals import (Signal, interval_complements, isplit,
     shift_G, shift_F, true_signal, false_signal)
-from ulbc.signal_masks import Mask
+from lbuc.signal_masks import Mask
 from sage.all import RIF
 
 

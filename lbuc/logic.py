@@ -14,22 +14,22 @@ import sage.all as sage
 from sage.all import RIF
 from flowstar.reachability import (Reach, FlowstarFailedException, InitialForm)
 from flowstar.instrumentation import AggregateMetric
-import ulbc.bondcalculus as bc
-from ulbc.symbolic import RelationConverter, is_relation
+import lbuc.bondcalculus as bc
+from lbuc.symbolic import RelationConverter, is_relation
 
 from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver)
-from ulbc.context_signals import (ContextSignal,
+from lbuc.context_signals import (ContextSignal,
                                   true_context_signal, false_context_signal,
                                   RestrictionMethod,
                                   ReachTree)
-from ulbc.interval_signals import (true_signal, false_signal, Signal, ctx,
+from lbuc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer, masked_ctx)
-from ulbc.interval_utils import finterval
-from ulbc.signal_masks import *
-from ulbc.context_masks import *
-from ulbc.matrices import *
-from ulbc.systems import System
-from ulbc.symbolic import var, varname
+from lbuc.interval_utils import finterval
+from lbuc.signal_masks import *
+from lbuc.context_masks import *
+from lbuc.matrices import *
+from lbuc.systems import System
+from lbuc.symbolic import var, varname
 
 
 class Logic(metaclass=ABCMeta):
@@ -421,7 +421,7 @@ class Atomic(Logic):
     Atomic(x^2 + y + 1)
     >>> print(Atomic(x**2 + y + 1))
     x^2 + y + 1 > 0
-    >>> from ulbc.symbolic import var
+    >>> from lbuc.symbolic import var
     >>> print(Atomic(var("x")**2 + var("y") > 1))
     x^2 + y > 1
     >>> Atomic(x**2 + 1).duration
@@ -1293,7 +1293,7 @@ class Context(Logic, metaclass=ABCMeta):
 
     def context_jump(self, system: System) -> System:
         """
-        >>> from ulbc.symbolic import *
+        >>> from lbuc.symbolic import *
         >>> system = System(
         ...     sage.SR,    
         ...     [var("x"),  var("y")],

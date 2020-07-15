@@ -3,12 +3,12 @@ import pytest
 import sage.all as sg
 from functools import partial
 
-from ulbc.interval_utils import finterval, fqqintervals
+from lbuc.interval_utils import finterval, fqqintervals
 
-from ulbc.tests.test_reach_trees import (space_domain_approx_eq, space_domains_approx_eq)
+from lbuc.tests.test_reach_trees import (space_domain_approx_eq, space_domains_approx_eq)
 
-from ulbc.signal_masks import true_mask, false_mask
-from ulbc.context_masks import *
+from lbuc.signal_masks import true_mask, false_mask
+from lbuc.context_masks import *
 
 
 class TestContextMasks:

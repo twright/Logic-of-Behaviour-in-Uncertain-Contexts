@@ -1,10 +1,10 @@
 import pytest
-from ulbc.symbolic import VariableManager
+from lbuc.symbolic import VariableManager
 import sage.all as sg
 from sage.all import RIF
-from ulbc import Atomic
-from ulbc.systems import System
-from ulbc.bondcalculus import BondSystem, BondModel
+from lbuc import Atomic
+from lbuc.systems import System
+from lbuc.bondcalculus import BondSystem, BondModel
 
 
 @pytest.fixture()

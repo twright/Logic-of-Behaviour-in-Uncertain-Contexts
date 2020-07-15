@@ -11,12 +11,12 @@ import sage.all as sg
 
 from flowstar.observers import (PolyObserver, RestrictedObserver, SageObserver,
                                 py_interval_fn_from_sage)
-from ulbc.interval_utils import (finterval, int_dist,
+from lbuc.interval_utils import (finterval, int_dist,
                                  intervals_approx_eq as roots_approx_eq)
-from ulbc.logic import Atomic
-from ulbc.signal_masks import Mask
+from lbuc.logic import Atomic
+from lbuc.signal_masks import Mask
 from flowstar.tests.test_reachability import ringxy, odes, reach, initials
-from ulbc.systems import System
+from lbuc.systems import System
 # import faulthandler
 from flowstar.reachability import Reach, InitialForm
 

@@ -9,7 +9,7 @@ from sage.rings.real_mpfi import is_RealIntervalFieldElement
 
 from flowstar.reachability import Reach
 from flowstar.observers import RestrictedObserver, PolyObserver
-from ulbc.interval_utils import finterval, fintervals as space_domain_str
+from lbuc.interval_utils import finterval, fintervals as space_domain_str
 
 __all__ = ('ReachTree',)
 

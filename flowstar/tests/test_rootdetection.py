@@ -8,7 +8,7 @@ import sage.all as sage
 
 from flowstar.poly import Poly
 from flowstar.root_detection import py_detect_roots
-from ulbc.interval_utils import intervals_approx_eq
+from lbuc.interval_utils import intervals_approx_eq
 
 
 @pytest.fixture(scope='module')

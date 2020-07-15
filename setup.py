@@ -19,7 +19,7 @@ import multiprocessing
 Cython.Compiler.Options.annotate = True
 Cython.Compiler.Options.fast_fail = True
 
-LIB_DIRS = ['.', './flowstar/', './ulbc/', './flowstar/flowstar-2.1.0',
+LIB_DIRS = ['.', './flowstar/', './lbuc/', './flowstar/flowstar-2.1.0',
             '/usr/include/boost']
 LIBS = ['flowstar', 'mpfr', 'gmp', 'gsl', 'gslcblas', 'm', 'glpk']
 COMPILE_ARGS = ['-O3', '-std=c++17', '-Wno-register', '-march=native',
@@ -337,8 +337,8 @@ class BuildAllCommand(build_ext, object):
 
 setup(
     packages=find_packages(),
-    package_dir={'ulbc': 'ulbc', 'flowstar': 'flowstar'},
-    py_modules=['flowstar', 'ulbc'],
+    package_dir={'lbuc': 'lbuc', 'flowstar': 'flowstar'},
+    py_modules=['flowstar', 'lbuc'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     cmdclass={'choose_flowstar': ChooseFlowstarCommand,

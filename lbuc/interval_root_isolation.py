@@ -3,7 +3,7 @@ from functools import partial, reduce
 import sage.all as sage
 from sage.all import RIF
 
-from ulbc.interval_utils import *
+from lbuc.interval_utils import *
 
 __all__ = ['search_zero', 'isolate_roots']
 

@@ -5,9 +5,9 @@ from typing import *
 from bidict import bidict
 
 from flowstar.reachability import Reach, InitialForm
-from ulbc.interval_utils import fintervals, finterval
-from ulbc.symbolic import *
-from ulbc.reach_trees import ReachTree, ctx_dimension
+from lbuc.interval_utils import fintervals, finterval
+from lbuc.symbolic import *
+from lbuc.reach_trees import ReachTree, ctx_dimension
 
 __all__ = ('System',)
 

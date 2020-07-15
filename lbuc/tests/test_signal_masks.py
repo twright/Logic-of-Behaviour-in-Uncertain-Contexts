@@ -5,8 +5,8 @@ import pytest
 from sage.all import RIF
 import re
 
-from ulbc.signal_masks import Mask, mask_zero, true_mask
-from ulbc.interval_utils import finterval, intervals_approx_eq
+from lbuc.signal_masks import Mask, mask_zero, true_mask
+from lbuc.interval_utils import finterval, intervals_approx_eq
 
 
 @pytest.fixture

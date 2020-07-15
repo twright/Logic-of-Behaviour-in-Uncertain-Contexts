@@ -12,11 +12,11 @@ import instrument
 from typing import *
 
 from sage.all import RIF, region_plot
-from ulbc.interval_root_isolation import isolate_roots
+from lbuc.interval_root_isolation import isolate_roots
 from flowstar.reachability import FlowstarFailedException
-from ulbc.interval_utils import (inner_inverse_minkowski, int_dist,
+from lbuc.interval_utils import (inner_inverse_minkowski, int_dist,
     interval_subseteq)
-from ulbc.systems import System
+from lbuc.systems import System
 
 
 __all__ = ('to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
@@ -339,7 +339,7 @@ def _sig_intersect(x, y):
 class Signal(BaseSignal):
     def __init__(self, domain, values, mask=None):
         super(Signal, self).__init__(domain, values)
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
         assert mask is None or isinstance(mask, Mask)
         if mask is None:
             self._mask = None
@@ -370,7 +370,7 @@ class Signal(BaseSignal):
         )
 
     def to_mask_and(self):
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
 
         masks = (
             Mask(self.domain,
@@ -390,7 +390,7 @@ class Signal(BaseSignal):
         return step & self.to_domain(J)
 
     def to_mask_or(self):
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
 
         masks = (
             Mask(self.domain,
@@ -403,7 +403,7 @@ class Signal(BaseSignal):
         return reduce(Mask.intersection, masks, base_mask)
 
     def to_mask_until_decomposed(self, I):
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
 
         masks1 = (x.to_mask_and()
                   for x in self.true_unknown_false_decomposition)

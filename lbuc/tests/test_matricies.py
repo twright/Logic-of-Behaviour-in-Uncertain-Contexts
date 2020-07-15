@@ -5,7 +5,7 @@ import sage.all as sage
 import sympy
 import numpy as np
 
-from ulbc.matricies import *
+from lbuc.matricies import *
 
 
 @pytest.fixture

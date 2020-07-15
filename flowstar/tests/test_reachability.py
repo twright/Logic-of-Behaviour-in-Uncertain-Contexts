@@ -5,7 +5,7 @@ from flowstar.reachability import Reach, InitialForm
 import sage.all as sage
 from sage.all import RIF
 
-from ulbc.interval_utils import (finterval, intervals_approx_eq)
+from lbuc.interval_utils import (finterval, intervals_approx_eq)
 
 
 @pytest.fixture(scope='module')

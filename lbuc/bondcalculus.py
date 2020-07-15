@@ -8,9 +8,9 @@ from typing import *
 from bidict import bidict
 
 from flowstar.reachability import Reach
-from ulbc.interval_utils import fintervals, finterval
-from ulbc.symbolic import *
-from ulbc.systems import System
+from lbuc.interval_utils import fintervals, finterval
+from lbuc.symbolic import *
+from lbuc.systems import System
 
 __all__ = ('BondModel', 'BondwbException', 'BondProcess', 'BondSystem')
 

@@ -5,7 +5,7 @@ import pytest
 from sage.all import RIF
 import re
 
-from ulbc.interval_utils import (intervals_approx_eq, inner_minkowski, int_dist)
+from lbuc.interval_utils import (intervals_approx_eq, inner_minkowski, int_dist)
 
 
 class TestInnerMinkowski:

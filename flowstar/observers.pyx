@@ -25,7 +25,7 @@ cimport flowstar.interval as interval
 from flowstar.interval cimport (make_interval, interval_time_fn, interval_fn,
                                 partial_interval_fn, partial_interval_time_fn,
                                 make_interval_fn)
-from ulbc.interval_utils import fintervals
+from lbuc.interval_utils import fintervals
 from flowstar.tribool cimport tribool, unknown
 from flowstar.tribool cimport and_ as tri_and
 from flowstar.reachability import Reach
@@ -993,7 +993,7 @@ cdef class SageObserver(FunctionObserver):
                  int symbolic_composition_order=-1,
                  bint tentative_unpreconditioning=False,
                  object mask=None):
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
 
         if symbolic_composition:
             warn("symbolic_composition not supported for SageObserver")
@@ -1037,7 +1037,7 @@ cdef class SageObserver(FunctionObserver):
         return observer
 
     def with_mask(self, mask):
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
 
         assert mask is None or isinstance(mask, Mask)
 
@@ -1087,7 +1087,7 @@ cdef class PolyObserver(FunctionObserver):
                  int symbolic_composition_order=-1,
                  bint tentative_unpreconditioning=False,
                  object mask=None):
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
 
         print("{}({}, {}, {}, symbolic_composition={}, symbolic_composition_order={}, "
               "tentative_unpreconditioning={}, mask={})".format(
@@ -1137,7 +1137,7 @@ cdef class PolyObserver(FunctionObserver):
         return observer
 
     def with_mask(self, mask):
-        from ulbc.signal_masks import Mask
+        from lbuc.signal_masks import Mask
 
         assert mask is None or isinstance(mask, Mask)
 

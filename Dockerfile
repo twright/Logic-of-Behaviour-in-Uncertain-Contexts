@@ -35,9 +35,9 @@ COPY --chown=1000:1000 --from=lbuclib /home/sage/build/lib.linux-x86_64-3.7/flow
 COPY setup.py .
 COPY --from=lbuclib /home/sage/flowstar flowstar
 COPY flowstar/tests/*.py flowstar/tests/
-COPY ulbc/*.py ulbc/
-COPY ulbc/tests/*.py ulbc/tests/
-COPY ulbc/*.py /home/sage/sage/local/lib/python3.7/site-packages/ulbc/
+COPY lbuc/*.py lbuc/
+COPY lbuc/tests/*.py lbuc/tests/
+COPY lbuc/*.py /home/sage/sage/local/lib/python3.7/site-packages/lbuc/
 COPY models ./models
 COPY Introduction.ipynb .
 COPY pytest.ini .

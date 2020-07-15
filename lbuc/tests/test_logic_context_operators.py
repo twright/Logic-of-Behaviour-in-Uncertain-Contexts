@@ -6,17 +6,17 @@ import sage.all as sg
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
+from lbuc import (Atomic, Signal, G, F, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
     IntegrationMethod, RestrictionMethod, C, InitialForm)
-from ulbc.tests.test_context_signals import space_domain_approx_eq
-from ulbc.signal_masks import Mask, mask_zero
-from ulbc.systems import System
-from ulbc.bondcalculus import BondSystem
-from ulbc.symbolic import var
-from ulbc.interval_utils import (finterval, int_dist, int_sorted,
+from lbuc.tests.test_context_signals import space_domain_approx_eq
+from lbuc.signal_masks import Mask, mask_zero
+from lbuc.systems import System
+from lbuc.bondcalculus import BondSystem
+from lbuc.symbolic import var
+from lbuc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
-import ulbc.interval_signals as interval_signals
-from ulbc.tests.test_systems import solution as sin_cos_solution
+import lbuc.interval_signals as interval_signals
+from lbuc.tests.test_systems import solution as sin_cos_solution
 
 
 @pytest.fixture(scope='module')

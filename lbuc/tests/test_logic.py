@@ -5,14 +5,14 @@ import sage.all as sage
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc import (Atomic, Signal, G, F, Release, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
+from lbuc import (Atomic, Signal, G, F, Release, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
     IntegrationMethod, RestrictionMethod, C)
-from ulbc.tests.test_context_signals import space_domain_approx_eq
-from ulbc.signal_masks import Mask, mask_zero
-from ulbc.systems import System
-from ulbc.bondcalculus import BondSystem
-from ulbc.symbolic import var
-from ulbc.interval_utils import (finterval, int_dist, int_sorted,
+from lbuc.tests.test_context_signals import space_domain_approx_eq
+from lbuc.signal_masks import Mask, mask_zero
+from lbuc.systems import System
+from lbuc.bondcalculus import BondSystem
+from lbuc.symbolic import var
+from lbuc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
 
 

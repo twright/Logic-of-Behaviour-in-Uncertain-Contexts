@@ -6,10 +6,10 @@ from __future__ import (division,
 from sage.all import RIF
 # import sage.all as sage
 
-from ulbc.interval_utils import (inner_shift_back,
+from lbuc.interval_utils import (inner_shift_back,
                                  inner_minkowski,
                                  fintervals)
-from ulbc.interval_signals import BaseSignal
+from lbuc.interval_signals import BaseSignal
 
 
 __all__ = ('Mask', 'mask_zero', 'true_mask', 'false_mask')

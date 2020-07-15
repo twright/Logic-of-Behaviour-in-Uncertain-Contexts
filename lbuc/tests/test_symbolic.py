@@ -5,7 +5,7 @@ import sage.all as sage
 from sage.all import RIF, QQ
 # from builtins import *
 
-from ulbc.symbolic import *
+from lbuc.symbolic import *
 
 
 class TestIsRelation:

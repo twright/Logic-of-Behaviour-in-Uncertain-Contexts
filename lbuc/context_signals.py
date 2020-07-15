@@ -11,12 +11,12 @@ import sage.all as sage
 from sage.all import RIF
 from sage.rings.real_mpfi import is_RealIntervalFieldElement
 
-from ulbc.interval_signals import (true_signal, false_signal, BaseSignal,
+from lbuc.interval_signals import (true_signal, false_signal, BaseSignal,
                                    Signal)
-from ulbc.signal_masks import Mask
-from ulbc.interval_utils import finterval, fintervals as space_domain_str
-from ulbc.systems import System
-from ulbc.reach_trees import (ReachTree, coordinate_to_space_domain, preconditioned_space_domain)
+from lbuc.signal_masks import Mask
+from lbuc.interval_utils import finterval, fintervals as space_domain_str
+from lbuc.systems import System
+from lbuc.reach_trees import (ReachTree, coordinate_to_space_domain, preconditioned_space_domain)
 
 __all__ = ('true_context_signal', 'false_context_signal', 'ContextSignal', 'SignalTree', 'RestrictionMethod')
 
@@ -292,7 +292,7 @@ class ContextSignal(SignalTree):
             reach = None,
             children=None, observer=None, observer_fn=None, ctx_mask=None,
         ):
-        from ulbc.context_masks import ContextMask
+        from lbuc.context_masks import ContextMask
 
         # assert observer is None or isinstance(observer, PolyObserver)
         assert ctx_mask is None or isinstance(ctx_mask, ContextMask),\
@@ -476,7 +476,7 @@ class ContextSignal(SignalTree):
             raise ValueError('n should be a possible integer')
 
     def to_mask_and(self):
-        from ulbc.context_masks import ContextMask
+        from lbuc.context_masks import ContextMask
 
         return ContextMask(
             self.domain,
@@ -488,7 +488,7 @@ class ContextSignal(SignalTree):
         )
 
     def to_mask_or(self):
-        from ulbc.context_masks import ContextMask
+        from lbuc.context_masks import ContextMask
 
         return ContextMask(
             self.domain,

@@ -30,9 +30,9 @@ def suppress_warnings():
         yield
 
 
-from ulbc import *
+from lbuc import *
 from flowstar import *
-from ulbc.bondcalculus import *
+from lbuc.bondcalculus import *
 
 
 from sage.all import *

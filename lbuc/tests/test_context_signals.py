@@ -5,27 +5,27 @@ import pytest
 import sage.all as sg
 from functools import partial
 
-from ulbc.interval_signals import Signal
-import ulbc.interval_signals as interval_signals
-from ulbc.context_signals import (ContextSignal,
+from lbuc.interval_signals import Signal
+import lbuc.interval_signals as interval_signals
+from lbuc.context_signals import (ContextSignal,
                                   true_context_signal,
                                   ChildIterator,
                                   RestrictionMethod)
 from flowstar.reachability import Reach, InitialForm
 from flowstar.observers import PolyObserver
 from flowstar.tests.test_reachability import ringxy, odes  # NOQA
-from ulbc.logic import Atomic
-from ulbc.interval_utils import (finterval, int_dist, int_sorted,
+from lbuc.logic import Atomic
+from lbuc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
-from ulbc.bondcalculus import System
-from ulbc.tests.test_reach_trees import (context_to_space_domain,
+from lbuc.bondcalculus import System
+from lbuc.tests.test_reach_trees import (context_to_space_domain,
     space_domain_approx_eq)
-from ulbc.reach_trees import (context_to_space_domain,
+from lbuc.reach_trees import (context_to_space_domain,
                               gen_sub_space_domains,
                               preconditioned_space_domain,
                               ReachTree)
 # from flowstar.interval import int_dist
-from ulbc.tests.test_systems import solution as sin_cos_solution
+from lbuc.tests.test_systems import solution as sin_cos_solution
 
 
 def signal_fn(prop, _, o, mask=None):

@@ -5,9 +5,9 @@ import pytest
 import sage.all as sg
 from functools import partial
 
-from ulbc.interval_utils import (finterval, int_dist, int_sorted,
+from lbuc.interval_utils import (finterval, int_dist, int_sorted,
     fqqintervals, fintervals)
-from ulbc.reach_trees import (context_to_space_domain,
+from lbuc.reach_trees import (context_to_space_domain,
                               gen_sub_space_domains,
                               ReachTree,
                               ctx_dimension)
