@@ -67,6 +67,10 @@ class TestReachability(object):
         assert reach1.ran
 
     @staticmethod
+    def test_wplot(ringxy, reach):
+        reach.wplot('x', 'y')
+
+    @staticmethod
     def test_constructor_str():
         reach = Reach(["x"], ["-x"], [RIF(1,1)], 1, 0.1, order=5)
         assert reach.ran

@@ -15148,6 +15148,9 @@ void ContinuousReachability::plot_2D(const bool bProjected)
 
 	FILE *fpPlotting = fopen(filename, "w");
 
+	std::cout << "Preparing to plot to " << filename << std::endl;
+	// std::cout << "Preparing to plot to " << filename << std::endl;
+
 	if(fpPlotting == NULL)
 	{
 		printf("Can not create the plotting file.\n");

@@ -43,3 +43,5 @@ flowstar/flowstar-2.1.0
 **/*.output
 flowstar/flowstar*/flowstar
 **/.history
+script.py
+**/cysignals_crash_logs/*

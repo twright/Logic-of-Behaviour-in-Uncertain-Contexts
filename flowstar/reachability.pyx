@@ -897,6 +897,19 @@ cdef class CReach:
 
         self.prepare()
 
+        # Create plot directories
+        import os
+
+        try:
+            os.mkdir("./outputs/")
+        except FileExistsError:
+            pass
+        try:
+            os.mkdir("./images/")
+        except FileExistsError:
+            pass
+
+        # Unpreconditioning
         self.unprecondition_flowpipes()
         # print("in prepare for plotting")
 
