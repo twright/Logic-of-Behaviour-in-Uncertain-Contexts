@@ -158,6 +158,15 @@ class ChooseFlowstarCommand(Command):
         elif self.mode == 'fastintervals':
             self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
                                              'flowstar-2.1.0-fast-intervals')
+        elif self.mode == 'doubles':
+            self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
+                                             'flowstar-2.1.0-doubles')
+        elif self.mode == 'opposite-trick':
+            self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
+                                             'flowstar-2.1.0-opposite-trick')
+        elif self.mode == 'sse-register':
+            self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
+                                             'flowstar-2.1.0-sse-register')
         elif self.mode == 'stockintervals':
             self.flowstar_dir = os.path.join(os.getcwd(), 'flowstar',
                                              'flowstar-2.1.0-stock-intervals')
