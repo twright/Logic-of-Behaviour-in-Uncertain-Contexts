@@ -144,6 +144,8 @@ cdef class CReach:
 
         self.initials = []
 
+        print(f"initials = {initials}")
+
         for i, (initial, var) in enumerate(zip(initials, vars), 1):
             # Interpret initial condition
             try:
@@ -293,10 +295,7 @@ cdef class CReach:
             Polynomial p_context
             Polynomial p_static
             int context_i = 0
-            int context_dim = tm_var_index - 1
-            # int system_dim = static_intervals.size()
             int static_i = 0
-            int system_dim = 0
 
         for I in static_intervals:
             if I.width() > 0:
@@ -304,39 +303,58 @@ cdef class CReach:
 
         system_dim = 1 + self.context_dim + self.static_dim
 
+        cdef vector[string] varNames
+        cdef string tm_str
+
+        varNames.push_back(b"t")
+        for i in range(self.context_dim):
+            varNames.push_back(f"c{i}".encode("utf-8"))
+        for i in range(self.static_dim):
+            varNames.push_back(f"s{i}".encode("utf-8"))
+
         # Loop through and create initial condition taylor models
         while (    context_iter  != context_intervals.end()
                and static_iter   != static_intervals.end()):
             # Construct the desired taylor model
             # tm = y_i + x_i where TM var x_i in C, y_i in S
+            print(f"context loop {context_i}, {static_i}")
 
             # Context parts
             if deref(context_iter).has_value():
+                print("ctx")
+                # Offset of 1 for time variable
                 p_context = Polynomial(1 + context_i, 1, system_dim)
 
                 # Domain of context variable
                 context_domains.push_back(deref(context_iter).value())
 
+                # Context i is indexed from 0
                 inc(context_i)
             else:
+                print("no ctx")
                 p_context = Polynomial(zero_int, system_dim)
 
             # Static parts
             # Only expand if nonzero width
             if deref(static_iter).width() > 0:
+                print(f"static {1 + self.context_dim + static_i}")
                 p_static = Polynomial(1 + self.context_dim + static_i, 1,
                     system_dim)
                 C.declareTMVar(<string>f"local_var_s{static_i}"
                     .encode('utf-8'))
-                self.static_dim += 1
                 static_domains.push_back(deref(static_iter))
+
+                # Static i is indexed from 0
+                inc(static_i)
             else:
+                print(f"zero width static set {interval.as_str(deref(static_iter))}")
                 p_static = Polynomial(deref(static_iter), system_dim)
 
             # Create tm
+            (p_context + p_static).toString(tm_str, varNames)
+            print(f"poly {context_i},{static_i} = {tm_str}")
             tms.push_back(TaylorModel(p_context + p_static))
 
-            inc(static_i)
             inc(context_iter)
             inc(static_iter)
 

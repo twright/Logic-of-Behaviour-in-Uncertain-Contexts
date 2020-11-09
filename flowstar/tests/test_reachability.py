@@ -81,8 +81,13 @@ class TestReachability(object):
         "initials, initial_form",
         [
             ([RIF(1, 2), RIF(3, 4)], InitialForm.COMBINED),
+            ([(None, RIF(1, 2)), (None, RIF(3, 4))], InitialForm.COMBINED),
             ([(None, RIF(1, 2)), (None, RIF(3, 4))], InitialForm.REMAINDER),
             ([(None, RIF(1, 2)), (None, RIF(3, 4))], InitialForm.SPLIT_VARS),
+            ([(RIF(1, 2), 0), (None, RIF(3, 4))], InitialForm.COMBINED),
+            ([(RIF(1, 2), 0), (None, RIF(3, 4))], InitialForm.SPLIT_VARS),
+            ([(RIF(0, 1), 1), (None, RIF(3, 4))], InitialForm.COMBINED),
+            ([(RIF(0, 1), 1), (None, RIF(3, 4))], InitialForm.SPLIT_VARS),
             ([(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 3.5), RIF(0, 0.5))],
              InitialForm.REMAINDER),
             ([(RIF(1, 1.5), RIF(0, 0.5)), (RIF(3, 3.5), RIF(0, 0.5))],
