@@ -12,34 +12,29 @@ RUN git clone -n https://github.com/twright/bondwb.git && cd bondwb && git check
 RUN cd bondwb && ./install-deps-fedora.sh #&& patch < local.patch 
 RUN cd bondwb && stack setup && stack install && ./install-bins.sh
 RUN dnf -y install python3-pip
-RUN groupadd lbuc && useradd -m -s /bin/bash -N -u 1000 -g lbuc lbuc && chown -R lbuc:lbuc /bondwb 
-USER lbuc
-WORKDIR /home/lbuc
-ENV PATH=/home/lbuc/.local/bin:${PATH}
+RUN dnf -y install zsh
+WORKDIR /root
 COPY requirements.txt .
-RUN pip3 install --user -r requirements.txt
+RUN pip3 install -r requirements.txt
 ENV SAGE_DOC=/usr/share/doc/sagemath SAGE_LOCAL=/usr/lib64/sagemath/local SAGE_EXTCODE=/usr/share/sagemath/etc SAGE_DOC_SRC=/usr/share/doc/sagemath SAGE_SRC=/usr/lib64/sagemath/src SAGE_ROOT=/usr/lib64/sagemath SAGE_PKGS=/usr/lib64/sagemath/local/var/lib/sage/installed SAGE_TESTDIR=/home/lbuc/.sage/tmp PYTHONPATH=/usr/lib64/sagemath/site-packages:/usr/lib64/sagemath/local/bin SYMPOW_DIR=/home/lbuc/.sage/sympow SAGE_SHARE=/usr/share/sagemath SAGE_ETC=/usr/share/sagemath/etc SINGULAR_DATA_DIR=/usr/share SINGULAR_SO=/usr/lib64/libSingular-4.1.1.so SINGULAR_BIN_DIR=/usr/lib64/Singular
-ENV PYTHONPATH=/lbuc:${PYTHONPATH}
-ENV JUPYTERPATH=/lbuc:${JUPYTERPATH}
-ENV SAGE_PATH=/lbuc:${SAGE_PATH}
+ENV PYTHONPATH=/root:${PYTHONPATH}
+ENV JUPYTERPATH=/root:${JUPYTERPATH}
+ENV SAGE_PATH=/root:${SAGE_PATH}
 # Fix broken sympy sage integration
 COPY extra_files/compatibility.py /usr/lib/python3.8/site-packages/sympy/core/compatibility.py
-COPY . /lbuc
-USER root
-RUN dnf -y install zsh
-RUN chown -R lbuc:lbuc /lbuc
-RUN mkdir /lbuclive && chown -R lbuc:lbuc /lbuclive
-USER lbuc
-ENV PATH=/lbuc/.local/bin:${PATH}
-WORKDIR /lbuc
+WORKDIR /root
+COPY setup.py .
+COPY setup.cfg .
+COPY flowstar/flowstar-2.1.0-fast-intervals ./flowstar/flowstar-2.1.0-fast-intervals
+COPY flowstar/*.pxd ./flowstar/
+COPY flowstar/*.pyx ./flowstar/
 RUN ./setup.py choose_flowstar -m fastintervals && ./setup.py build_ext
-USER root
 RUN cd flowstar/flowstar-2.1.0 && make install
-USER lbuc
-RUN ./setup.py install --user
-RUN cp -R flowstar/ /home/lbuc/.local/lib/python3.8/site-packages/ && cp -R lbuc/ /home/lbuc/.local/lib/python3.8/site-packages/
-WORKDIR /lbuclive
+RUN cp -R flowstar /usr/lib/python3.8/site-packages/
+COPY lbuc ./lbuc/
+RUN cp -R lbuc /usr/lib/python3.8/site-packages/
+RUN ./setup.py install
+RUN dnf install -y passwd
 EXPOSE 8888
-USER root
 # CMD [ "python3", "-m", "jupyterlab", "--ip=0.0.0.0", "--no-browser" ]
 CMD "/bin/sh"
