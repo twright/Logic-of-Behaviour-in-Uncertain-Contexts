@@ -1,4 +1,4 @@
-from genetic_oscillator_benchmarking import *
+from genetic_oscillator_benchmarking_fixed import *
 
 import concurrent.futures as fut
 import flowstar.instrumentation as instrumentation

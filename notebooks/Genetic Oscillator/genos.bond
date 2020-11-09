@@ -1,0 +1,67 @@
+species Promoter(bindp, unbindp, transc, transcb, transl, decay, bind, unbind, decayu, decayb;) =
+	  bindp(l) -> PromoterBound(bindp, unbindp, transc, transcb, transl, decay, bind, unbind, decayu, decayb; l)
+	+ transc -> ( Promoter(bindp, unbindp, transc, transcb, transl, decay, bind, unbind, decayu, decayb;)
+		        | MRNA(transl, decay, bind, unbind, decayu, decayb;));
+
+species PromoterBound(bindp, unbindp, transc, transcb, transl, decay, bind, unbind, decayu, decayb; l) =
+	  unbindp@l -> Promoter(bindp, unbindp, transc, transcb, transl, decay, bind, unbind, decayu, decayb;)
+	+ transcb@l -> ( PromoterBound(bindp, unbindp, transc, transcb, transl, decay, bind, unbind, decayu, decayb; l)
+		         | MRNA(transl, decay, bind, unbind, decayu, decayb;) );
+
+species MRNA(transl, decay, bind, unbind, decayu, decayb;) =
+	  decay -> 0
+	+ transl -> ( P(bind, unbind, decayu, decayb)
+		        | MRNA(transl, decay, bind, unbind, decayu, decayb;) );
+
+species P(bind, unbind, decayu, decayb;) =
+	  bind(l) -> Pb(bind, unbind, decayu, decayb; l)
+	+ decayu -> 0;
+
+species Pb(bind, unbind, decayu, decayb; l) =
+	  unbind@l -> P(bind, unbind, decayu, decayb;)
+	+ decayb@l -> 0;
+
+affinity network Aff(alphaA, alphaAp, alphaR, alphaRp,
+					 betaA, betaR,
+					 deltaMA, deltaMR, deltaA, deltaR,
+					 gammaA, gammaR, gammaC,
+					 thetaA, thetaR) = {
+    transcA at rate MA(alphaA);
+    transcbA at rate MA(alphaAp);
+    transcR at rate MA(alphaR);
+    transcbR at rate MA(alphaRp);
+    translA at rate MA(betaA);
+    translR at rate MA(betaR);
+    decayA at rate MA(deltaMA);
+    decayuA at rate MA(deltaA);
+    decaybA | unbindR at rate MA(deltaA);
+    decayR at rate MA(deltaMR);
+    decayuR at rate MA(deltaR);
+    bindA || bindpA at rate MA(gammaA);
+    bindA || bindpR at rate MA(gammaR);
+    bindA || bindR at rate MA(gammaC);
+    unbindA | unbindpA at rate MA(thetaA);
+    unbindA | unbindpR at rate MA(thetaR);
+}
+
+process Mix =
+	   [1.0] Promoter(bindpA, unbindpA, transcA, transcbA, translA, decayA, bindA, unbindA, decayuA, decaybA)
+	|| [1.0] Promoter(bindpR, unbindpR, transcR, transcbR, translR, decayR, bindR, unbindR, decayuR, decaybR)
+	with network Aff(50, 500, 0.01, 50, 50, 0.5, 10, 0.5, 1, 0.2, 1, 1, 2, 50, 100);
+
+process MixF =
+	   [1.0] Promoter(bindpA, unbindpA, transcA, transcbA, translA, decayA, bindA, unbindA, decayuA, decaybA)
+	|| [1.0] Promoter(bindpR, unbindpR, transcR, transcbR, translR, decayR, bindR, unbindR, decayuR, decaybR)
+	with network Aff(0.5, 5, 0.01, 50, 50, 0.5, 10, 0.5, 1, 0.2, 0.1, 1, 2, 50, 100);
+
+process MixF1 =
+	   [0.98, 1.02] Promoter(bindpA, unbindpA, transcA, transcbA, translA, decayA, bindA, unbindA, decayuA, decaybA)
+	|| [1.28, 1.32] Promoter(bindpR, unbindpR, transcR, transcbR, translR, decayR, bindR, unbindR, decayuR, decaybR)
+	|| [0.08, 0.12] new l in PromoterBound(bindpA,unbindpA,transcA,transcbA,translA,decayA,bindA,unbindA,decayuA,decaybA; l) | Pb(bindA,unbindA,decayuA,decaybA; l)
+	|| [0.08, 0.12] new l in Pb(bindA,unbindA,decayuA,decaybA; l) | PromoterBound(bindpR,unbindpR,transcR,transcbR,translR,decayR,bindR,unbindR,decayuR,decaybR; l)
+	|| [0.08, 0.12] MRNA(translA,decayA,bindA,unbindA,decayuA,decaybA;)
+	|| [1.28, 1.32] P(bindA,unbindA,decayuA,decaybA;)
+	|| [2.48, 2.52] MRNA(translR,decayR,bindR,unbindR,decayuR,decaybR;)
+	|| [0.58, 0.62] P(bindR,unbindR,decayuR,decaybR;)
+	|| [1.28, 1.32] new l in Pb(bindA,unbindA,decayuA,decaybA; l) | Pb(bindR,unbindR,decayuR,decaybR; l)
+	with network Aff(0.5, 5, 0.01, 50,  50, 0.5,  10, 0.5, 1, 0.2,  0.1, 1, 2,  50, 100);

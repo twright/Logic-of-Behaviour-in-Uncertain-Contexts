@@ -1,0 +1,22 @@
+species Whelk = dieWhelk -> 0
+              + growWhelk -> (Whelk | Whelk)
+              + beWhelk -> Whelk;
+
+species Lobster = dieLobster -> 0
+                + beLobster -> Lobster
+                + growLobster -> (Lobster | Lobster);
+
+kinetic law NLGrowth(k; x) = k*x*(1 - x); 
+
+kinetic law NLDecay(k; x) = k*x*(1 + x); 
+
+kinetic law RRPredation(k, l; x, y) = k*x*(l - x)*y; 
+
+affinity network N(k, b, c, e, f) = {
+    growWhelk at rate NLGrowth(b);
+    dieWhelk || beLobster at rate RRPredation(c, k);
+    dieLobster at rate NLDecay(e);
+    beWhelk || growLobster at rate RRPredation(f, k);
+}
+
+process Pi = [0.4] Whelk || [1.0] Lobster with network N(0.6, 0.3, 0.05, 2, 0.3);
