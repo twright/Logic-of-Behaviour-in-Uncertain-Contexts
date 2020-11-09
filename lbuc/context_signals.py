@@ -180,12 +180,14 @@ class SignalTree(object):
                 [cs[0], cs[2], cs[1], cs[3]],
             )
 
-    def plot_histogram2d(self, n : int):
+    def plot_histogram2d(self, n : int, flip:bool = False):
         from matplotlib.colors import LinearSegmentedColormap
         from matplotlib import ticker
         colors = ['pink', 'white', 'lightgreen']
         cm = LinearSegmentedColormap.from_list('ternary colors', colors, N=3)
         m = self.histogram2d(n)
+        if flip:
+            m = m.transpose()
         s = min(2 ** n, 8)
         ticks = [-0.5 + k * 2 ** n / s for k in range(s + 1)]
         gridlines = [k + 0.5 for k in range(2 ** n - 1)]
