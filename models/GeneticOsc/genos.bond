@@ -1,0 +1,34 @@
+species Promoter(bindp, unbindp, transc, transcb, transl, bind, unbind, react, unreact;) =
+	  bindp(l) -> PromoterBound(bindp, unbindp, transc, transcb, transl, bind, unbind, interact, react, unreact; l)
+	+ transc -> Promoter(bindp, unbindp, transc, transcb, transl, bind, unbind, react, unreact;);
+
+species PromoterBound(bindp, unbindp, transc, transcb, transl, bind, unbind, interact, react, unreact;l) =
+	  unbindp@l -> Promoter(bindp, unbindp, transc, transcb, transl, bind, unbind, react, unreact;)
+	+ transcb -> ( PromoterBound(bindp, unbindp, transc, transcb, transl, bind, unbind, react, unreact;l)
+		         | P(bind, unbind, react, unreact;));
+
+
+species P(bind, unbind, react, unreact;) =
+	bind(l) -> Pb(bind, unbind, interact, react, unreact;l);
+
+species Pb(bind, unbind, react, unreact; l) =
+	  unbind@l   -> P(bind, unbind, react, unreact;)
+	+ react@l    -> Pbb(bind, unbind, interact, react, unreact; l);
+
+species Pbb(bind, unbind, interact, react, unreact; l) =
+	  unreact@l -> Pb(bind, unbind, interact, react, unreact; l);
+
+
+process Mix =
+	   [1.0] Promoter(bindpA, unbindpA, transcA, transcbA, translA, bindA, unbindA, reactA, unreactA)
+	|| [1.0] Promoter(bindpR, unbindpR, transcR, transcbR, translA, bindA, unbindR, reactA, unreactA)
+	|| [1.0] P(bindA, unbindA, reactA, unreactA)
+	|| [1.0] P(bindR, unbindR, reactR, unreactR)
+	with network Aff;
+
+
+affinity network Aff = {
+	reactA || reactR at rate MA(1);
+	unreactA | unreactR at rate MA(1);
+	bindpA || bindA at rate MA(1);
+}

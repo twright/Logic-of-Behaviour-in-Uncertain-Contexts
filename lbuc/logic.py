@@ -10,7 +10,7 @@ from warnings import warn
 import pytest
 import instrument
 
-import sage.all as sage
+import sage.all as sg
 from sage.all import RIF
 from flowstar.reachability import (Reach, FlowstarFailedException, InitialForm)
 from flowstar.instrumentation import AggregateMetric
@@ -24,7 +24,7 @@ from lbuc.context_signals import (ContextSignal,
                                   ReachTree)
 from lbuc.interval_signals import (true_signal, false_signal, Signal, ctx,
                                    signal_from_observer, masked_ctx)
-from lbuc.interval_utils import finterval
+from lbuc.interval_utils import finterval, fintervals
 from lbuc.signal_masks import *
 from lbuc.context_masks import *
 from lbuc.matrices import *
@@ -261,7 +261,7 @@ class Logic(metaclass=ABCMeta):
         from scipy.integrate import solve_ivp
 
         assert len(odes) > 0
-        odes = sage.vector(odes)
+        odes = sg.vector(odes)
         R = odes[0].parent()
 
         if R is RIF:
@@ -271,7 +271,7 @@ class Logic(metaclass=ABCMeta):
         events = [poly_to_numpy(R, atomic.p)
                   for atomic in self.atomic_propositions]
         f = vec_to_numpy(R, odes)
-        jac = mat_to_numpy(R, sage.jacobian(odes, R.gens()))
+        jac = mat_to_numpy(R, sg.jacobian(odes, R.gens()))
 
         sln = solve_ivp(f,
                         (0, self.duration + duration),
@@ -408,13 +408,13 @@ class LogicWithSystem:
 
 
 def is_polynomial(f, vars):
-    f = sage.SR(f)
+    f = sg.SR(f)
     return all(f.is_polynomial(x) for x in vars)
 
 
 class Atomic(Logic):
     """
-    >>> R, (x, y) = sage.PolynomialRing(sage.RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(sg.RIF, 'x, y').objgens()
     >>> Atomic(x**2 + y + 1).p
     1*x^2 + 1*y + 1
     >>> Atomic(x**2 + y + 1)
@@ -434,7 +434,7 @@ class Atomic(Logic):
 
     def __init__(self, p):
         self._p_raw = p
-        self._p = RelationConverter(sage.SR(self._p_raw))()
+        self._p = RelationConverter(sg.SR(self._p_raw))()
 
     @property
     def p(self):
@@ -447,9 +447,9 @@ class Atomic(Logic):
         # Let's not be too polymorphic: make sure we work with
         # SR internally and return a result in SR,
         # whatever type we are passed
-        diffs = [self.p.diff(sage.SR.var(str(x))) for x in vars]
+        diffs = [self.p.diff(sg.SR.var(str(x))) for x in vars]
         # print(f"vars = {vars}, diffs = {diffs}, odes = {odes}")
-        return sage.vector(diffs) * sage.vector(map(sage.SR, odes))
+        return sg.vector(diffs) * sg.vector(map(sg.SR, odes))
 
     def sage_plot(self, observer, *args, symbolic_composition=False, tentative_unpreconditioning=True, symbolic_composition_order=None,
         color_scheme='blue',
@@ -480,7 +480,7 @@ class Atomic(Logic):
         def wrap_log(f,s):
             def g(t):
                 try:
-                    return sage.log(max(s*f(t), 1e-3), 10)
+                    return sg.log(max(s*f(t), 1e-3), 10)
                 except:
                     return 1e-3
             return g
@@ -496,10 +496,10 @@ class Atomic(Logic):
 
         if log:
             # minp = 1e-10# max(lo(RIF(0, observer.time)).lower(), 1e-10)
-            return sage.plot((lop, upp, lon, upn), duration, *args, **kwargs)
-                # + sage.plot((lon, upn), (0, observer.time), *args, fill={0:[1]}, **kwargs)
+            return sg.plot((lop, upp, lon, upn), duration, *args, **kwargs)
+                # + sg.plot((lon, upn), (0, observer.time), *args, fill={0:[1]}, **kwargs)
         else:
-            return sage.plot((lo, up), duration, *args, fill={0:[1]}, **kwargs)
+            return sg.plot((lo, up), duration, *args, fill={0:[1]}, **kwargs)
 
 
     def visualize(self, *args, **kwargs):
@@ -578,7 +578,7 @@ class Atomic(Logic):
             p = reach.system.embed(self.p)
             pprime = reach.system.embed(self.dpdt(reach.system.y, reach.system.x))
         else:
-            p = sage.SR(self.p)
+            p = sg.SR(self.p)
             pprime = None
 
         if symbolic_composition_order is None:
@@ -674,10 +674,10 @@ class Atomic(Logic):
     # Signal fn cannot do anything about the mask
     # mask=None, 
     def signal_fn(self, _, observer, **kwargs):
-        # str_abs_space_domain = [[sage.QQ(w)
+        # str_abs_space_domain = [[sg.QQ(w)
         #     for w in s.endpoints()]
         #     for s in physical_space_domain]
-        # str_sym_space_domain = [[sage.QQ(w)
+        # str_sym_space_domain = [[sg.QQ(w)
         #     for w in s.endpoints()]
         #     for s in symbolic_space_domain]
         print("=== in signal_fn ===")
@@ -747,7 +747,7 @@ class Atomic(Logic):
             tmid = (a + b) / 2
             pmid = self.p.subs(dict(zip(self.R.gens(),
                                         f(tmid))))
-            intervals.append((RIF(a, b), sage.RR(pmid) > 0))
+            intervals.append((RIF(a, b), sg.RR(pmid) > 0))
             a = b
 
         return Signal(RIF(0, duration), intervals)
@@ -758,7 +758,7 @@ class Atomic(Logic):
 
 class And(Logic):
     """
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(RIF, 'x, y').objgens()
     >>> And([Atomic(x**2 + 1), Atomic(y**3 - 2)])
     And([Atomic(x^2 + 1), Atomic(y^3 - 2)])
     >>> And([Atomic(x**2 + 1), Atomic(y**3 - 2)]).terms
@@ -904,7 +904,7 @@ class And(Logic):
 
 class Or(Logic):
     """
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(RIF, 'x, y').objgens()
     >>> Or([Atomic(x**2 + 1), Atomic(y**3 - 2)])
     Or([Atomic(x^2 + 1), Atomic(y^3 - 2)])
     >>> Or([Atomic(x**2 + 1), Atomic(y**3 - 2)]).terms
@@ -1048,7 +1048,7 @@ class Or(Logic):
 
 class Neg(Logic):
     """
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(RIF, 'x, y').objgens()
     >>> Neg(Atomic(x**3 - 2))
     Neg(Atomic(x^3 - 2))
     >>> ~Atomic(x**3 - 2)
@@ -1160,14 +1160,27 @@ class BondProcessContextBody(ContextBody):
             return proc.compose(self._body).as_system
         else:
             # Assume we have already carried out the composition
-            # (resulting in child_system) and embed the context
-            # vector in the child system
+            # (resulting in child_system) and embed the static set
+            # in the child system
+
+            # Context set is initial conditions of composed system
+            # y0_ctx = [(y0 if y0.diameter() > 0 else None)
+                      # for y0 in child_system.y0]
+
+            # Static set is initial conditions or original system,
+            # embedded in composed system
             y0dict: dict = {child_system.v(system.varname(x)): y0
                             for x, y0 in zip(system.x, system.y0)}
-            y0child = [
-                y0dict.get(k, None) for k in child_system.x
-            ]
-            return child_system.with_y0(child_system.y0, y0child)
+            y0 = sg.vector([
+                y0dict.get(k, 0) for k in child_system.x
+            ])
+
+            y0_ctx = child_system.y0_ctx
+            print(f"y0={fintervals(y0)}\ny0_ctx={fintervals(y0_ctx)}")
+
+            # Add on existing y0 since some of the context may
+            # have been shifted into there!
+            return child_system.with_y0(child_system.y0 + y0)
 
     def child_system(self, system: bc.BondSystem) -> System:
         assert isinstance(system, System),\
@@ -1179,13 +1192,21 @@ class BondProcessContextBody(ContextBody):
         # A slight hack: we use 1 for each initial concentration and
         # subsequently subtract 1, to make sure they are included in the 
         # support.
-        base_system: System = system.with_y0([RIF(1) for _ in system.y0])
+        base_system: System = system.with_y0([RIF(-1, 1) for _ in system.y0])
         proc: BondProcess = base_system.as_process
         composed: bc.BondSystem = proc.compose(self._body).as_system
-        originalvars = {composed.v(system.varname(x)) for x in system.x}
-        y0shift = sage.vector([RIF(-1 if x in originalvars else 0)
-                               for x in composed.x])
-        return composed.with_y0(composed.y0 + y0shift)
+        # ctx: bc.BondSystem = base_system.model.process(self._body).as_system
+        # originalvars = {composed.v(system.varname(x)) for x in system.x}
+        # y0shift = sg.vector([RIF(-1 if x in originalvars else 0)
+                               # for x in composed.x])
+
+        # We find the initial state corresponding to just the context
+        # process in the composed system
+        y0 = [RIF(0)]*len(composed.x)
+        y0_ctx = composed.state_from_process(self._body)
+
+        # Return the context embedded in the composed system
+        return composed.with_y0(y0, y0_ctx)
 
 @overload
 def to_context_body(x : str) -> BondProcessContextBody: ...
@@ -1285,7 +1306,10 @@ class Context(Logic, metaclass=ABCMeta):
         ctx_sig = self.phi.context_signal_for_system(system, 2e-3,
                                                      use_masks=use_masks,
                                                      **kwargs)
+        print(f"refine = {refine}")
         sig = ctx_sig.refined_signal(refine)
+        # sig = self.phi.signal_for_system(system, 2e-3, use_masks=use_masks,
+        #                                  **kwargs)
         if kwargs.get('verbosity', 0) >= 1:
             print('sig    =', sig)
             print('sig(0) =', sig(0))
@@ -1295,7 +1319,7 @@ class Context(Logic, metaclass=ABCMeta):
         """
         >>> from lbuc.symbolic import *
         >>> system = System(
-        ...     sage.SR,    
+        ...     sg.SR,    
         ...     [var("x"),  var("y")],
         ...     [1, 2],
         ...     [var("-y"), var("x")],
@@ -1329,7 +1353,7 @@ class C(Context):
     """
     Spacial context operator.
 
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(RIF, 'x, y').objgens()
     >>> {x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)
     C({x: [1 .. 2], y: [3 .. 4]}, Atomic(x^3 - 2))
     >>> print({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
@@ -1415,7 +1439,7 @@ class D(Context):
     """
     Differential context spatial operator.
 
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(RIF, 'x, y').objgens()
     >>> {x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2)
     C({x: [1 .. 2], y: [3 .. 4]}, Atomic(x^3 - 2))
     >>> print({x: RIF(1,2), y: RIF(3,4)} >> Atomic(x**3 - 2))
@@ -1500,7 +1524,7 @@ class D(Context):
 
 class G(Logic):
     """
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(RIF, 'x, y').objgens()
     >>> print(repr(G(RIF(1, 2), Atomic(x**3 - 2))))
     G([1 .. 2], Atomic(x^3 - 2))
     >>> print(G(RIF(1, 2), Atomic(x**3 - 2)))
@@ -1561,7 +1585,7 @@ Globally = G
 
 class F(Logic):
     """
-    >>> R, (x, y) = sage.PolynomialRing(RIF, 'x, y').objgens()
+    >>> R, (x, y) = sg.PolynomialRing(RIF, 'x, y').objgens()
     >>> print(repr(G(RIF(1, 2), Atomic(x**3 - 2))))
     G([1 .. 2], Atomic(x^3 - 2))
     >>> print(G(RIF(1, 2), Atomic(x**3 - 2)))

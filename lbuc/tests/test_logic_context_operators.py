@@ -219,6 +219,15 @@ class TestC:
         assert len(sys.y0) == dim
 
 
+    @staticmethod
+    @pytest.mark.very_slow
+    def test_whelks_bond_calculus_context(bond_whelks, bond_whelks_kwargs):
+        P = Atomic((var("Whelk") - 1)**2 + var("Lobster")**2 > 0.2)
+        sigG = G(RIF(10.2, 10.3), ("[0.05, 0.1] Whelk" >> G(RIF(0,0.2), P)),
+         ).signal_for_system(bond_whelks, 5, **bond_whelks_kwargs)
+        assert sigG is not None
+
+
 class TestMasks(object):
     @pytest.mark.slow
     def test_masked_context_with_jump(self, ringxy, odes):
@@ -303,6 +312,19 @@ class TestContextOperatorContextSignals:
         assert refine > 0 or ctx_sig.signal.approx_eq(sig, 0.001)
         assert all(s.enclosed_by(sig)
                    for s in ctx_sig.expand_signals(1))
+
+    @staticmethod
+    @pytest.mark.very_slow
+    def test_whelks_wide_context_context_signal(bond_whelks_model, bond_whelks_kwargs):
+        sf = bond_whelks_model.process(
+            "[0, 1.5] Whelk || [0, 8] Lobster "
+            "with network N(0.8, 0.6, 0.3, 0.05, 2)").as_system
+        P = Atomic((var("Whelk") - 1)**2 + var("Lobster")**2 > 0.2)
+        csigG = G(RIF(1, 1.1), ("[0.05, 0.1] Whelk" >> F(RIF(0,0.2), ~P)),
+          ).context_signal_for_system(sf, 10, use_masks=True, refine=2,
+            **bond_whelks_kwargs)
+        assert csigG.signal.approx_eq(Signal(RIF(0, 10), []))
+        csigG.plot_histogram2d(3)
 
     @staticmethod
     @pytest.mark.very_slow

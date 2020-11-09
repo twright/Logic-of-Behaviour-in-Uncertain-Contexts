@@ -725,6 +725,7 @@ cdef class CReach:
                     f"Invalid space domain {repr(space_domain)}"
                 res[0].push_back(I)
         else:
+            assert len(space_domain) == self.context_dim
             for x in space_domain:
                 I = interval.make_interval(x)
                 assert I.inf() >= -1,\

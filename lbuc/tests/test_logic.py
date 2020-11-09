@@ -6,7 +6,8 @@ from sage.all import RIF, QQ
 # from builtins import *
 
 from lbuc import (Atomic, Signal, G, F, Release, U, And, Or, VarContextBody, BondProcessContextBody, to_context_body, LogicWithSystem,
-    IntegrationMethod, RestrictionMethod, C)
+    IntegrationMethod, RestrictionMethod, C, FlowstarFailedException,
+    InitialForm)
 from lbuc.tests.test_context_signals import space_domain_approx_eq
 from lbuc.signal_masks import Mask, mask_zero
 from lbuc.systems import System
@@ -214,6 +215,32 @@ class TestAtomic:
         system = System(sage.SR, (var("x"), var("y")), (0,0), (-var("y"), var("x")))
         assert at.variables(system) == {var("x"), var("y")}
 
+    @staticmethod
+    @pytest.mark.slow
+    def test_initial_form(bond_whelks, bond_whelks_kwargs):
+        P = Atomic((var("Whelk") - 1)**2 + var("Lobster")**2 < 0.2)
+        s = bond_whelks.with_y0(
+            [0, RIF(0.39999999220775695,0.9433923730837686)],
+            [RIF(0, 2), None],
+        )
+
+        bond_whelks_kwargs['verbosity'] = 3
+
+        try:
+            sig1 = P.signal_for_system(s, 10, **bond_whelks_kwargs,
+                initial_form=InitialForm.COMBINED)
+        except FlowstarFailedException:
+            sig1 = None
+        try:
+            sig2 = P.signal_for_system(s, 10, **bond_whelks_kwargs,
+                initial_form=InitialForm.SPLIT_VARS)
+        except FlowstarFailedException:
+            sig2 = None
+        assert (sig1 is sig2
+                or (sig1 is not None and sig2 is not None
+                    and sig1.approx_eq(sig2))),\
+            f"{sig1} != {sig2}"
+
 
 class TestU:
     @staticmethod
@@ -357,7 +384,6 @@ class TestWithSystem:
         assert res.approx_eq(expected, 0.1)
 
 
-class TestWithSystem:
     @staticmethod
     @pytest.mark.slow
     def test_atomic(enzyme_full):

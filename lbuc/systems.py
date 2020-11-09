@@ -28,8 +28,18 @@ class System:
         self._y0 = sg.vector([sg.RIF(y00) for y00 in y0])
         # y0_ctx is not a vector since it may contain None
         if y0_ctx is not None:
-            self._y0_ctx = [None if y00 is None else sg.RIF(y00)
-                for y00 in y0_ctx]
+            self._y0_ctx = [(None
+                             if y00 is None
+                                 #or hasattr(y00, 'diameter')
+                                 #and y00.diameter() == 0)
+                             else sg.RIF(y00))
+                            for y00 in y0_ctx]
+            # Shift 0 width sets into the static portion
+            for i, c in enumerate(self._y0_ctx):
+                if (c is not None and c.diameter() == 0):
+                    print(f"moving {c.str(style='brackets')} from ctx to static for {self.x[i]}")
+                    self._y0[i] += c
+                    self._y0_ctx[i] = None
         else:
             self._y0_ctx = None #[None]*len(self.x)
         self._y = sg.vector(map(self.R, y))
@@ -126,11 +136,15 @@ class System:
         return str(self.varmap.inv[var])
 
     def __repr__(self):
-        return "System(R, {}, {}, {}".format(
-            self.x, fintervals(self.y0), self.y,
-        ) + (", varmap={})".format(repr(self.varmap))
-             if self.varmap is not None
-             else ")")
+        return "System(" + ", ".join(
+            ["R", f"{self.x}", f"{fintervals(self.y0)}", f"{self.y}"]
+            + ([f"varmap={repr(self.varmap)})"]
+               if self.varmap is not None
+               else [])
+            + ([f"y0_ctx={fintervals(self._y0_ctx)})"]
+               if self._y0_ctx is not None
+               else [])
+        ) + ")"
 
     def streamline_plot(self, xarg, yarg, **kwargs):
         (x, xmin, xmax) = xarg
@@ -203,7 +217,12 @@ class System:
             space_domain = list(self.y0)
         else:
             def reach_fn(space_domain):
-                return self.with_y0_ctx(space_domain).reach(
+                print(f"in reach_fn")
+                print(f"{self=}")
+                print(f"{space_domain=}")
+                restricted = self.with_y0_ctx(space_domain)
+                print(f"{restricted=}")
+                return restricted.reach(
                     duration,
                     **kwargs,
                 )

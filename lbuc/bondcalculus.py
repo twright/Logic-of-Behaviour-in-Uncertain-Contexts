@@ -51,6 +51,20 @@ class BondSystem(System):
             self.affinity_network,
         )
 
+    def state_from_process(self, proc: str) -> List[Any]:
+        try:
+            composed : 'BondSystem' = self.model.process(proc, self.affinity_network).as_system
+        except ValueError:
+            print("Could not generate -- assuming empty proc!")
+            return [0]*len(self.x)
+
+        concs = {
+            self.v(composed.varname(x)): y0
+            for x, y0 in zip(composed.x, composed.y0)
+        }
+
+        return [concs.get(x, 0) for x in self.x]
+
     @property
     def as_process(self) -> 'BondProcess':
         return self.process_from_state(self.y0)

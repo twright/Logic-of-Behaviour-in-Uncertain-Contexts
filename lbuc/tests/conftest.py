@@ -1,5 +1,5 @@
 import pytest
-from lbuc.symbolic import VariableManager
+from lbuc.symbolic import VariableManager, var
 import sage.all as sg
 from sage.all import RIF
 from lbuc import Atomic
@@ -72,6 +72,31 @@ def odes_whelks(ringxy):
     e = RIF(0.05)
     f = RIF(2)
     return [b*x*(RIF(1)-x) - c*x*(k-x)*y, -e*y*(RIF(1)+y)+f*x*(k-x)*y]
+
+
+@pytest.fixture(scope='module')
+def bond_whelks_model():
+    return BondModel("models/WhelksAndLobsters.bond")
+
+
+@pytest.fixture(scope='module')
+def bond_whelks_kwargs():
+    return dict(
+        order=5, step=(0.01, 0.5),
+        precondition=1,
+        estimation=1e-3,
+        integrationScheme=2,
+        cutoff_threshold=1e-5,
+        verbosity=0,
+        epsilon_ctx=0.1,
+    #    symbolic_composition=True,
+    )
+
+@pytest.fixture(scope='module')
+def bond_whelks(bond_whelks_model):
+    p = bond_whelks_model.process("[1, 1.2] Whelk || [4, 6] Lobster "
+                                  "with network N(0.8, 0.6, 0.3, 0.05, 2)")
+    return p.as_system
 
 
 @pytest.fixture
