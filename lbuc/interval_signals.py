@@ -715,11 +715,15 @@ def ctx(system: System, domain: RIF, C, D, phi, f, epsilon=0.1, verbosity=0):
 
     failed = False
 
-    fI = system.with_y0([RIF(x) for x in f(domain)])
-    h = D(C(fI))
     # Dodes = D(system)
 
     try:
+        fIset = [RIF(x) for x in f(domain)]
+        if len(fIset) == 0:
+            raise FlowstarFailedException()
+        fI = system.with_y0(fIset)
+        h = D(C(fI))
+
         res = phi(h)
     except FlowstarFailedException:
         failed = True

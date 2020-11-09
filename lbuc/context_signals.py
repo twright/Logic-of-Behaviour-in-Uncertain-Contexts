@@ -112,7 +112,7 @@ class SignalTree(object):
     def symbolic_coordinate(self) -> Optional[Tuple[int,...]]:
         """Coordinate relative to level of reach computation."""
         return (
-            self.coordinate[-self.reach_level:]
+            self.coordinate[-self.reach_level-1:]
                 if self.reach_level > 0
                 else ()
         )

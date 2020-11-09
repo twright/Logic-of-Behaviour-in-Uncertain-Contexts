@@ -869,7 +869,7 @@ cdef class CReach:
         global continuousProblem
 
         if not self.ran:
-            raise Exception('Not ran!')
+            raise FlowstarFailedException('Not ran!')
 
         if not self.prepared:
             with instrument.block(
@@ -944,7 +944,7 @@ cdef class CReach:
         global continuousProblem
 
         if not self.ran:
-            raise Exception('Not ran!')
+            raise FlowstarFailedException('Not ran!')
 
         self.prepare()
 
