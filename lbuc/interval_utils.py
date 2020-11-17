@@ -50,7 +50,9 @@ def inner_inverse_minkowski(I : RIF, J : RIF) -> Optional[RIF]:
     jl, ju = RIF(J).edges()
     kl = il - ju
     ku = iu - jl
-    if kl.overlaps(ku):
+    if sg.infinity in I:
+        return RIF(kl.upper('RNDU'), sg.infinity)
+    elif kl.overlaps(ku):
         return None
     else:
         return RIF(kl.upper('RNDU'), ku.lower('RNDD'))

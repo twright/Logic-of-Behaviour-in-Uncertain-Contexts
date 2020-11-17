@@ -810,9 +810,11 @@ class And(Logic):
         sig = true_signal(RIF(0, reach.time), mask)
         for t in self.terms:
             sig_mask = sig.to_mask_and() if mask is not None else None
+            print(f"and mask = {sig_mask}")
             if sig_mask is not None and not len(sig_mask.pos):
                 return sig
             sig &= t.signal(reach, mask=sig_mask, **kwargs)
+            print(f"and sig = {mask}")
         return sig
 
     def _signal_two_pass(self, reach: Reach, mask=None,
@@ -1384,6 +1386,8 @@ class C(Context):
         return '{} >> {}'.format(self.ctx_str(), self.phi.bstr(8))
 
     def signal(self, reach: Reach, mask=None, **kwargs):
+        print(f"mask for ctx = {mask}")
+
         # Remove arguments which don't make sense to forward
         # to composed system
         kwargs.pop('unpreconditioning_orders', None)
@@ -1562,6 +1566,7 @@ class G(Logic):
         print("In G.signal")
         if mask is not None:
             mask = mask.P(self.interval)
+        print(f"mask for G = {mask}")
         return self.phi.signal(reach, mask=mask, **kwargs).G(
             self.interval)
 
@@ -1620,6 +1625,7 @@ class F(Logic):
     def signal(self, reach: Reach, mask=None, **kwargs):
         if mask is not None:
             mask = mask.P(self.interval)
+        print(f"mask for F = {mask}")
         return self.phi.signal(reach, mask=mask, **kwargs).F(
             self.interval)
 
