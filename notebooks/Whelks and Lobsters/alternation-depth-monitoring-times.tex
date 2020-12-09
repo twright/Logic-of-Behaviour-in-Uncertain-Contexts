@@ -1,0 +1,53 @@
+% This file was created by tikzplotlib v0.9.5.
+\begin{tikzpicture}
+
+\definecolor{color0}{rgb}{0.12156862745098,0.466666666666667,0.705882352941177}
+\definecolor{color1}{rgb}{1,0.498039215686275,0.0549019607843137}
+
+\begin{axis}[
+legend cell align={left},
+legend style={fill opacity=0.8, draw opacity=1, text opacity=1, at={(0.03,0.97)}, anchor=north west, draw=white!80!black},
+log basis y={10},
+tick align=outside,
+tick pos=left,
+x grid style={white!69.0196078431373!black},
+xlabel={Depth},
+xmajorgrids,
+xmin=0, xmax=5,
+xminorgrids,
+xtick style={color=black},
+xtick={-0,1,2,3,4,5},
+xticklabels={\(\displaystyle {0}\),\(\displaystyle {1}\),\(\displaystyle {2}\),\(\displaystyle {3}\),\(\displaystyle {4}\),\(\displaystyle {5}\)},
+y grid style={white!69.0196078431373!black},
+ylabel={Monitoring Time (sec)},
+ymajorgrids,
+ymin=2.40603928438438, ymax=855.36733696668,
+yminorgrids,
+ymode=log,
+ytick style={color=black},
+ytick={0.1,1,10,100,1000,10000},
+yticklabels={\(\displaystyle {10^{-1}}\),\(\displaystyle {10^{0}}\),\(\displaystyle {10^{1}}\),\(\displaystyle {10^{2}}\),\(\displaystyle {10^{3}}\),\(\displaystyle {10^{4}}\)}
+]
+\addplot [semithick, color0]
+table {%
+0 3.18348641200282
+1 14.275795516005
+2 31.4311555720051
+3 88.2867702520016
+4 172.831452656013
+5 654.945160415999
+};
+\addlegendentry{Unmasked Time}
+\addplot [semithick, color1]
+table {%
+0 3.15207156300312
+1 3.14232021199132
+2 3.66314285699627
+3 4.31659571500495
+4 5.05180477901013
+5 5.89747403199726
+};
+\addlegendentry{Masked Time}
+\end{axis}
+
+\end{tikzpicture}

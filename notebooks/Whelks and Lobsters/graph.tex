@@ -1,0 +1,34 @@
+{ \newcommand{\nodea}{\node[draw,circle] (a) {$()$}
+;}\newcommand{\nodeb}{\node[draw,circle] (b) {$(0,)$}
+;}\newcommand{\nodec}{\node[draw,circle] (c) {$(0, 0)$}
+;}\newcommand{\noded}{\node[draw,circle] (d) {$(0, 1)$}
+;}\newcommand{\nodee}{\node[draw,circle] (e) {$(0, 2)$}
+;}\newcommand{\nodef}{\node[draw,circle] (f) {$(0, 3)$}
+;}\newcommand{\nodeg}{\node[draw,circle] (g) {$(1,)$}
+;}\newcommand{\nodeh}{\node[draw,circle] (h) {$(1, 0)$}
+;}\newcommand{\nodei}{\node[draw,circle] (i) {$(1, 1)$}
+;}\newcommand{\nodej}{\node[draw,circle] (j) {$(1, 2)$}
+;}\newcommand{\nodeba}{\node[draw,circle] (ba) {$(1, 3)$}
+;}\newcommand{\nodebb}{\node[draw,circle] (bb) {$(2,)$}
+;}\newcommand{\nodebc}{\node[draw,circle] (bc) {$(2, 0)$}
+;}\newcommand{\nodebd}{\node[draw,circle] (bd) {$(2, 1)$}
+;}\newcommand{\nodebe}{\node[draw,circle] (be) {$(2, 2)$}
+;}\newcommand{\nodebf}{\node[draw,circle] (bf) {$(2, 3)$}
+;}\newcommand{\nodebg}{\node[draw,circle] (bg) {$(3,)$}
+;}\newcommand{\nodebh}{\node[draw,circle] (bh) {$(3, 0)$}
+;}\newcommand{\nodebi}{\node[draw,circle] (bi) {$(3, 1)$}
+;}\newcommand{\nodebj}{\node[draw,circle] (bj) {$(3, 2)$}
+;}\newcommand{\nodeca}{\node[draw,circle] (ca) {$(3, 3)$}
+;}\begin{tikzpicture}[auto]
+\matrix[column sep=.3cm, row sep=.3cm,ampersand replacement=\&]{
+         \&         \&         \&         \&         \&         \&         \&         \&         \&         \& \nodea  \&         \&         \&         \&         \&         \&         \&         \&         \&         \&         \\ 
+         \&         \& \nodeb  \&         \&         \&         \&         \& \nodeg  \&         \&         \&         \&         \&         \& \nodebb \&         \&         \&         \&         \& \nodebg \&         \&         \\ 
+ \nodec  \& \noded  \&         \& \nodee  \& \nodef  \& \nodeh  \& \nodei  \&         \& \nodej  \& \nodeba \&         \& \nodebc \& \nodebd \&         \& \nodebe \& \nodebf \& \nodebh \& \nodebi \&         \& \nodebj \& \nodeca \\
+};
+
+\path[ultra thick, red] (b) edge (c) edge (d) edge (e) edge (f)
+	(g) edge (h) edge (i) edge (j) edge (ba)
+	(bb) edge (bc) edge (bd) edge (be) edge (bf)
+	(bg) edge (bh) edge (bi) edge (bj) edge (ca)
+	(a) edge (b) edge (g) edge (bb) edge (bg);
+\end{tikzpicture}}

@@ -5,9 +5,9 @@ from __future__ import (division,
 from functools import reduce, partial
 import itertools
 from typing import *
-from enum import IntEnum
+import enum
 
-import sage.all as sage
+import sage.all as sg
 from sage.all import RIF
 from sage.rings.real_mpfi import is_RealIntervalFieldElement
 
@@ -21,7 +21,7 @@ from lbuc.reach_trees import (ReachTree, coordinate_to_space_domain, preconditio
 __all__ = ('true_context_signal', 'false_context_signal', 'ContextSignal', 'SignalTree', 'RestrictionMethod')
 
 
-class RestrictionMethod(IntEnum):
+class RestrictionMethod(enum.IntEnum):
     """The method used for reachability on a restricted region of the flowpipe's
     spatial domain."""
     SYMBOLIC = 1
@@ -33,7 +33,8 @@ def base_context_signal(J, dim, coordinate, signal, reach_level=0, top_level_dom
                          lambda r, o, mask=None: signal.with_mask(mask),
                          reach_level=reach_level,
                          top_level_domain=top_level_domain,
-                         ctx_mask=ctx_mask)
+                         ctx_mask=ctx_mask,
+                         flowpipe_node_type=FlowpipeNodeType.DIRECT)
 
 
 def true_context_signal(J, dim, coordinate=(), top_level_domain=None, reach_level=0, ctx_mask=None):
@@ -167,20 +168,20 @@ class SignalTree(object):
         if n == 0:
             x = self.signal(0)
             if x is False:
-                return sage.matrix([[-1]])
+                return sg.matrix([[-1]])
             elif x is True:
-                return sage.matrix([[1]])
+                return sg.matrix([[1]])
             else:
-                return sage.matrix([[0]])
+                return sg.matrix([[0]])
         else:
             assert len(list(self.children)) == 4
             cs = [c.histogram2d(n - 1) for c in self.children]
-            return sage.block_matrix(
+            return sg.block_matrix(
                 2, 2,
                 [cs[0], cs[2], cs[1], cs[3]],
             )
 
-    def plot_histogram2d(self, n : int, flip:bool = False):
+    def plot_histogram2d(self, n : int, flip:bool = False, gridlines:bool = True):
         from matplotlib.colors import LinearSegmentedColormap
         from matplotlib import ticker
         colors = ['pink', 'white', 'lightgreen']
@@ -190,16 +191,20 @@ class SignalTree(object):
             m = m.transpose()
         s = min(2 ** n, 8)
         ticks = [-0.5 + k * 2 ** n / s for k in range(s + 1)]
-        gridlines = [k + 0.5 for k in range(2 ** n - 1)]
+        if gridlines:
+            x_gridlines = [k + 0.5 for k in range(2 ** n - 1)]
+            xy_gridlines = (x_gridlines, x_gridlines)
+        else:
+            xy_gridlines = None
         xformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
             self.symbolic_space_domain[0].lower()
             + (k + 0.5) * self.symbolic_space_domain[0].absolute_diameter() / 2 ** n))
         yformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
             self.symbolic_space_domain[1].lower()
             + (k + 0.5) * self.symbolic_space_domain[1].absolute_diameter() / 2 ** n))
-        p = sage.matrix_plot(m, cmap=cm, ticks=(ticks, ticks),
+        p = sg.matrix_plot(m, cmap=cm, ticks=(ticks, ticks),
                              origin='lower', vmin=-1, vmax=1,
-                             gridlines=(gridlines, gridlines),
+                             gridlines=xy_gridlines,
                              tick_formatter=(xformatter, yformatter))
         return p
 
@@ -274,6 +279,39 @@ class SignalTree(object):
         return res
 
 
+class FlowpipeNodeType(enum.Enum):
+    UNDEFINED = enum.auto()
+    PHYSICAL = enum.auto()
+    SYMBOLIC = enum.auto()
+    DIRECT = enum.auto()
+
+
+### Tree plot helper functions
+
+def boxes(coordinates : List[Tuple [int]], n : int) -> list:
+    k = 2**n
+    top_level = [RIF(0, k) - 0.5, RIF(0, k) - 0.5]
+    intervals = [coordinate_to_space_domain(2, coordinate, top_level)
+                 for coordinate in coordinates]
+    return intervals
+
+
+def box_to_polygon(box, flip=False, **kwargs):
+    x, y = box
+    if flip:
+        y, x = x, y
+    xl, xu = x.endpoints()
+    yl, yu = y.endpoints()
+    return sg.polygon([(xl, yl), (xu, yl), (xu, yu), (xl, yu)], fill=False, **kwargs)
+
+
+def coordinates_to_tree_plot(coordinates : List[Tuple [int]], n : int, **kwargs) -> sg.Graphics:
+    return sum(
+        map(partial(box_to_polygon, **kwargs), boxes(coordinates, n)),
+        sg.Graphics(),
+    )
+
+
 class ContextSignal(SignalTree):
     # Signal map
     # signal_fn :: reach, domain -> Signal
@@ -293,6 +331,7 @@ class ContextSignal(SignalTree):
             reach_tree : Optional[ReachTree] = None,
             reach = None,
             children=None, observer=None, observer_fn=None, ctx_mask=None,
+            flowpipe_node_type=None,
         ):
         from lbuc.context_masks import ContextMask
 
@@ -328,11 +367,15 @@ class ContextSignal(SignalTree):
         # The mask at the current level
         mask = ctx_mask.mask if ctx_mask is not None else None
 
+
         if reach_tree is not None:
             # Get (or compute) correct reachset from tree
             reach = reach_tree(self.physical_coordinate)
 
             print("recomputing reachset")
+            self._flowpipe_node_type = (FlowpipeNodeType.PHYSICAL
+                if reach.successful
+                else FlowpipeNodeType.UNDEFINED)
 
             # assert observer_fn is not None
             if observer_fn is not None:
@@ -345,7 +388,13 @@ class ContextSignal(SignalTree):
 
             print("setting reach level to 0")
             self._reach_level = 0
-        
+        else:
+            self._flowpipe_node_type = (
+                flowpipe_node_type
+                    if flowpipe_node_type is not None
+                    else FlowpipeNodeType.SYMBOLIC
+            )
+
         if observer is not None:
             # Symbolic restriction
             observer = observer.restrict(
@@ -406,6 +455,11 @@ class ContextSignal(SignalTree):
             self._children = ChildIterator(children)
 
     @property
+    def flowpipe_node_type(self):
+        return self._flowpipe_node_type
+    
+
+    @property
     def restriction_method(self) -> RestrictionMethod:
         return self._restriction_method
 
@@ -451,6 +505,7 @@ class ContextSignal(SignalTree):
             top_level_domain=self.top_level_domain,
             restriction_method=self.restriction_method,
             children=self.children.map(lambda c: c.signal_map(f)),
+            flowpipe_node_type=self.flowpipe_node_type,
         )
 
     def signal_zip_with(self, f, other):
@@ -466,6 +521,9 @@ class ContextSignal(SignalTree):
             children=self.children.zip_with(
                 lambda c1, c2: c1.signal_zip_with(f, c2),
                 other.children),
+            flowpipe_node_type=(self.flowpipe_node_type
+                if other.flowpipe_node_type is FlowpipeNodeType.DIRECT
+                else other.flowpipe_node_type),
         )
 
     def refined_signal(self, n):
@@ -506,3 +564,61 @@ class ContextSignal(SignalTree):
         # H[0, a] φ = ⋁_j (φ_j ∧ P[a, b] φ_j)
         # where φ = ⋁_j φ_j is the unitary decomposition of phi
         return self.to_mask_and().H(RIF(0, I.lower('RNDD')))
+
+    def first_physical_coordinates(self, n):
+        '''The first physical coordinates of the tree of depth <= n.'''
+        if self.flowpipe_node_type == FlowpipeNodeType.PHYSICAL:
+            return [self.coordinate]
+        elif n > 0:
+            return sum(
+                (child.first_physical_coordinates(n - 1)
+                    for child in self.children),
+                [],
+            )
+        else:
+            return []
+
+    def first_known_coordinates(self, n):
+        '''The first coordinates of the tree of depth <= n for which
+        the signal value is known at 0.'''
+        if self.signal(0) is not None:
+            return [self.coordinate]
+        elif n > 0:
+            return sum(
+                (child.first_known_coordinates(n - 1)
+                    for child in self.children),
+                []
+            )
+        else:
+            return []
+
+    def plot_histogram2d(self,
+            n : int,
+            flip : bool = False,
+            gridlines : bool = False,
+            physical_grid : bool = True,
+            symbolic_grid : bool = True):
+
+        gridlines = gridlines and not (physical_grid or symbolic_grid)
+
+        histogram = super().plot_histogram2d(n, flip=flip, gridlines=gridlines)
+
+        if symbolic_grid:
+            histogram += coordinates_to_tree_plot(
+                self.first_known_coordinates(n),
+                n,
+                flip=flip,
+                color='grey',
+                thickness=0.8,
+            )
+
+        if physical_grid:
+            histogram += coordinates_to_tree_plot(
+                self.first_physical_coordinates(n),
+                n,
+                flip=flip,
+                color='black',
+                thickness=1,
+            )
+
+        return histogram
