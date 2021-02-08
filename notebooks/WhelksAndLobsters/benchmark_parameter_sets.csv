@@ -1,0 +1,4 @@
+Step Size,0.05,0.02,0.005
+Order,6.0,7.0,8.0
+Remainder Estimation,0.0001,1e-05,1e-06
+Cutoff Threshold,1e-05,1e-06,1e-07

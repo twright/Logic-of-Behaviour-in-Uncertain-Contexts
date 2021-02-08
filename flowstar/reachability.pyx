@@ -113,7 +113,7 @@ cdef class CReach:
         str_vars = [str(v) for v in vars]
         converter = FlowstarConverter(str_vars)
         str_odes = [converter(sage.SR(ode)) for ode in odes]
-        print('str_odes =', repr(str_odes))
+        # print('str_odes =', repr(str_odes))
         self._init_non_polynomial_str_args(str_vars, str_odes, *args, **kwargs)
         self.system_vars = vars
 
@@ -144,7 +144,8 @@ cdef class CReach:
 
         self.initials = []
 
-        print(f"initials = {initials}")
+        if self.verbosity > 0:
+            print(f"initials = {initials}")
 
         for i, (initial, var) in enumerate(zip(initials, vars), 1):
             # Interpret initial condition
@@ -317,11 +318,13 @@ cdef class CReach:
                and static_iter   != static_intervals.end()):
             # Construct the desired taylor model
             # tm = y_i + x_i where TM var x_i in C, y_i in S
-            print(f"context loop {context_i}, {static_i}")
+            if self.verbosity > 0:
+                print(f"context loop {context_i}, {static_i}")
 
             # Context parts
             if deref(context_iter).has_value():
-                print("ctx")
+                if self.verbosity > 0:
+                    print("ctx")
                 # Offset of 1 for time variable
                 p_context = Polynomial(1 + context_i, 1, system_dim)
 
@@ -331,13 +334,15 @@ cdef class CReach:
                 # Context i is indexed from 0
                 inc(context_i)
             else:
-                print("no ctx")
+                if self.verbosity > 0:
+                    print("no ctx")
                 p_context = Polynomial(zero_int, system_dim)
 
             # Static parts
             # Only expand if nonzero width
             if deref(static_iter).width() > 0:
-                print(f"static {1 + self.context_dim + static_i}")
+                if self.verbosity > 0:
+                    print(f"static {1 + self.context_dim + static_i}")
                 p_static = Polynomial(1 + self.context_dim + static_i, 1,
                     system_dim)
                 C.declareTMVar(<string>f"local_var_s{static_i}"
@@ -347,22 +352,26 @@ cdef class CReach:
                 # Static i is indexed from 0
                 inc(static_i)
             else:
-                print(f"zero width static set {interval.as_str(deref(static_iter))}")
+                if self.verbosity > 0:
+                    print(f"zero width static set {interval.as_str(deref(static_iter))}")
                 p_static = Polynomial(deref(static_iter), system_dim)
 
             # Create tm
             (p_context + p_static).toString(tm_str, varNames)
-            print(f"poly {context_i},{static_i} = {tm_str}")
+            if self.verbosity > 0:
+                print(f"poly {context_i},{static_i} = {tm_str}")
             tms.push_back(TaylorModel(p_context + p_static))
 
             inc(context_iter)
             inc(static_iter)
 
         # Print context and static domains
-        print("contexts = {}".format([interval.as_str(c)
-            for c in context_domains]))
-        print("statics  = {}".format([interval.as_str(s)
-            for s in static_domains]))
+        if self.verbosity > 0:
+            print("contexts = {}".format([interval.as_str(c)
+                for c in context_domains]))
+        if self.verbosity > 0:
+            print("statics  = {}".format([interval.as_str(s)
+                for s in static_domains]))
 
         # Assemble domains
         domains.push_back(zero_int)
@@ -405,7 +414,8 @@ cdef class CReach:
         self.ran = False
         self.system_vars = vars
         self.crude_roots = crude_roots
-        print(f"crude_roots = {repr(crude_roots)}")
+        if self.verbosity > 0:
+            print(f"crude_roots = {repr(crude_roots)}")
         self.initial_form = initial_form
         self.prepared = False
         self.prepared_for_plotting = False
@@ -495,7 +505,8 @@ cdef class CReach:
         self.crude_roots = other.crude_roots
         self.system = other.system
         self.system_vars = other.system_vars
-        print(f"other = {repr(other)}\nother.system_vars = {repr(other.system_vars)}")
+        if other.verbosity > 0:
+            print(f"other = {repr(other)}\nother.system_vars = {repr(other.system_vars)}")
         if self.initial_form is None:
             self.initial_form = other.initial_form
         else:

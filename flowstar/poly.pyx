@@ -674,10 +674,10 @@ cdef class Poly:
         var_names.push_back(b'local_t')
         for name in self.var_names:
             var_names.push_back(<string>name.encode('utf-8'))
-        print('var_names =', var_names)
+        # print('var_names =', var_names)
         cdef string res
         self.c_poly.toString(res, var_names)
-        print('res =', res)
+        # print('res =', res)
         return res.decode('utf-8')
 
 

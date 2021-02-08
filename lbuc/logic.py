@@ -141,8 +141,9 @@ class Logic(metaclass=ABCMeta):
 
         # Choose order to be used for unpreconditioning
         # TODO: cope better with adaptive orders
-        print(f"phi variables sfs = {self.variables(system)}")
-        print(f"system sfs = {system}")
+        if kwargs.get('verbosity', 0) > 0:
+            print(f"phi variables sfs = {self.variables(system)}")
+            print(f"system sfs = {system}")
         unpreconditioning_order = kwargs.pop('unpreconditioning_order',
             kwargs['order'])
         if ('unpreconditioning_orders' in kwargs
@@ -680,8 +681,9 @@ class Atomic(Logic):
         # str_sym_space_domain = [[sg.QQ(w)
         #     for w in s.endpoints()]
         #     for s in symbolic_space_domain]
-        print("=== in signal_fn ===")
-        print(f"observer = {observer}")
+        if kwargs.get('verbosity', 0) > 0:
+            print("=== in signal_fn ===")
+            print(f"observer = {observer}")
         # print(f"physical_space_domain = {str_abs_space_domain}")
         # print(f"symbolic_space_domain = {str_sym_space_domain}")
         return self.signal_from_observer(
@@ -710,7 +712,8 @@ class Atomic(Logic):
             observer_fn=observer_fn,
             restriction_method=restriction_method,
             top_level_domain=reach_tree.top_level_domain,
-            ctx_mask=mask
+            ctx_mask=mask,
+            downtree_masking=kwargs.pop('downtree_masking', False),
         )
 
     def __repr__(self):
@@ -1436,6 +1439,7 @@ class C(Context):
             reach_tree=reach_tree,
             top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask,
+            downtree_masking=kwargs.pop('downtree_masking', True),
         )
 
 
@@ -1523,6 +1527,7 @@ class D(Context):
             reach_tree=reach_tree,
             top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask,
+            downtree_masking=kwargs.pop('downtree_masking', False),
         )
 
 

@@ -126,9 +126,10 @@ class TestDecomposition:
                                 (RIF(10, 12), False)]),
             Signal(RIF(0, 12), [(RIF(0, 11),  False)]),
         ]
+        print(sig4.true_unknown_false_decomposition)
         assert all(seg1.approx_eq(seg2)
                    for seg1, seg2
-                   in zip(sig4.decomposition, expected))
+                   in zip(sig4.true_unknown_false_decomposition, expected))
 
 class TestApproxEq:
     def test_exact(self, sig1):
@@ -334,3 +335,20 @@ class TestSignalMasks:
         sig = ~masked_sig1
         assert sig.mask is not None
         assert sig.mask.approx_eq(mask1)
+
+    def test_to_mask_unknown(self, sig4):
+        expected_mask = Mask(
+            RIF(0, 12),
+            [
+                RIF(1, 2),
+                RIF(3, 4),
+                RIF(5, 6),
+                RIF(7, 8),
+                RIF(9, 10),
+                RIF(11, 12),
+            ]
+        )
+        unknown_mask = sig4.to_mask_unknown()
+        
+        assert unknown_mask.approx_eq(expected_mask)
+        # assert expected_mask.enclosed_by(unknown_mask)

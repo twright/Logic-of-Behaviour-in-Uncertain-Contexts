@@ -5,7 +5,7 @@ cdef class AggregateMetric:
         self._time_totals = defaultdict(float)
         self._count_totals = defaultdict(int)
         self.events = []
-        
+
     def total_time(self, name):
         return self._time_totals[name]
     

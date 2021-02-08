@@ -149,6 +149,39 @@ class TestContextSignalSinCos:
             ctx_physical.signal,0.05)
 
     @pytest.mark.slow
+    def test_restricted_context_symbolic_vs_manual_downtree(self, ringxy, odes):  # NOQA
+        R, (x, y) = ringxy
+        atomic = Atomic(x)
+
+        space_domain = [RIF(1.5, 3), RIF(3, 3.25)]
+        symbolic_space_domain = [RIF(1/2, 1), RIF(-1, -1/2)]
+        initials = [RIF(1, 2), RIF(3, 4)]
+        expected = atomic.signal_for_system(
+            odes, space_domain, 5, step=(0.001, 0.1), order=10,
+            symbolic_composition=True,
+        )
+        # reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
+        observer = PolyObserver(R(atomic.p),
+                                Reach(odes, initials, 5 + 2e-3, (0.001, 0.1),
+                                      order=10),
+                                symbolic_composition=True)
+        ctx = ContextSignal(RIF(0, 5), 2, (),
+            signal=partial(signal_fn, atomic),
+            observer=observer,
+            restriction_method=RestrictionMethod.SYMBOLIC,
+            downtree_masking=False)
+        ctx_downtree = ContextSignal(RIF(0, 5), 2, (),
+            signal=partial(signal_fn, atomic),
+            observer=observer,
+            restriction_method=RestrictionMethod.SYMBOLIC,
+            downtree_masking=True)
+        child = ctx.children[2].children[2]
+        assert space_domain_approx_eq(child.symbolic_space_domain, symbolic_space_domain)
+        print(ctx.signal)
+        assert child.signal.approx_eq(ctx_downtree.children[2].children[2].signal)
+        assert child.signal.approx_eq(expected, 0.5)
+
+    @pytest.mark.slow
     def test_restricted_context_symbolic_vs_manual(self, ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
@@ -206,9 +239,9 @@ class TestContextSignalSinCos:
         assert child.coordinate == (2, 2)
         assert child.physical_coordinate == (2, 2)
         assert space_domain_approx_eq(child.physical_space_domain, space_domain)
+        assert space_domain_approx_eq(child.symbolic_space_domain, [RIF(-1,1), RIF(-1,1)])
         print(child.signal)
-        # TODO: why do these not agree better: they should be almost exactly the same!
-        assert child.signal.approx_eq(expected, 0.2), \
+        assert child.signal.approx_eq(expected, 0.01), \
             f"expected equal:\n{child.signal}\n{expected}"
 
     @pytest.mark.slow

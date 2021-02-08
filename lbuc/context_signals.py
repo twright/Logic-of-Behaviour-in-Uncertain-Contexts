@@ -1,7 +1,3 @@
-from __future__ import (division,
-                        print_function)
-# absolute_import,
-
 from functools import reduce, partial
 import itertools
 from typing import *
@@ -13,7 +9,7 @@ from sage.rings.real_mpfi import is_RealIntervalFieldElement
 
 from lbuc.interval_signals import (true_signal, false_signal, BaseSignal,
                                    Signal)
-from lbuc.signal_masks import Mask
+from lbuc.signal_masks import Mask, true_mask
 from lbuc.interval_utils import finterval, fintervals as space_domain_str
 from lbuc.systems import System
 from lbuc.reach_trees import (ReachTree, coordinate_to_space_domain, preconditioned_space_domain)
@@ -113,7 +109,7 @@ class SignalTree(object):
     def symbolic_coordinate(self) -> Optional[Tuple[int,...]]:
         """Coordinate relative to level of reach computation."""
         return (
-            self.coordinate[-self.reach_level-1:]
+            self.coordinate[-self.reach_level:]
                 if self.reach_level > 0
                 else ()
         )
@@ -181,10 +177,20 @@ class SignalTree(object):
                 [cs[0], cs[2], cs[1], cs[3]],
             )
 
-    def plot_histogram2d(self, n : int, flip:bool = False, gridlines:bool = True):
+    def plot_histogram2d(self, n : int, flip:bool = False, gridlines:bool = True, symbolic_ticks : bool=False):
         from matplotlib.colors import LinearSegmentedColormap
         from matplotlib import ticker
         colors = ['pink', 'white', 'lightgreen']
+
+        def tick_label(k, _, axis):
+            space_domain = (self.symbolic_space_domain
+                            if symbolic_ticks
+                            else self.physical_space_domain)[axis]
+            return '{0:.2f}'.format(
+                space_domain.lower()
+                    + (k + 0.5) * space_domain.absolute_diameter() / 2 ** n
+            )
+
         cm = LinearSegmentedColormap.from_list('ternary colors', colors, N=3)
         m = self.histogram2d(n)
         if flip:
@@ -196,12 +202,8 @@ class SignalTree(object):
             xy_gridlines = (x_gridlines, x_gridlines)
         else:
             xy_gridlines = None
-        xformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
-            self.symbolic_space_domain[0].lower()
-            + (k + 0.5) * self.symbolic_space_domain[0].absolute_diameter() / 2 ** n))
-        yformatter = ticker.FuncFormatter(lambda k, _: '{0:.2f}'.format(
-            self.symbolic_space_domain[1].lower()
-            + (k + 0.5) * self.symbolic_space_domain[1].absolute_diameter() / 2 ** n))
+        xformatter = ticker.FuncFormatter(partial(tick_label, axis=0))
+        yformatter = ticker.FuncFormatter(partial(tick_label, axis=1))
         p = sg.matrix_plot(m, cmap=cm, ticks=(ticks, ticks),
                              origin='lower', vmin=-1, vmax=1,
                              gridlines=xy_gridlines,
@@ -246,10 +248,8 @@ class SignalTree(object):
         if level == 0:
             yield self.signal
         else:
-            return itertools.chain(*(
-                child.expand_signals(level - 1)
-                    for child in self.children
-            ))
+            for child in self.children:
+                yield from child.expand_signals(level - 1)
 
     def __invert__(self):
         return self.signal_map(lambda x: ~x)
@@ -273,7 +273,7 @@ class SignalTree(object):
         return self.signal_zip_with(lambda x, y: x.R(J, y), other)
 
     def to_domain(self, domain):
-        print(f"({self}).to_domain({domain})")
+        # print(f"({self}).to_domain({domain})")
         res = self.signal_map(lambda x: x.to_domain(domain))
         res._domain = domain
         return res
@@ -332,6 +332,9 @@ class ContextSignal(SignalTree):
             reach = None,
             children=None, observer=None, observer_fn=None, ctx_mask=None,
             flowpipe_node_type=None,
+            parent_signal=None,
+            downtree_masking=True,
+            verbosity = 0
         ):
         from lbuc.context_masks import ContextMask
 
@@ -345,10 +348,11 @@ class ContextSignal(SignalTree):
             reach_tree = None
             observer = None
 
-        print(f" ==> creating ContextSignal with coord={coordinate}, signal = {signal}, reach_tree = {reach_tree}, ctx_mask={ctx_mask}")
+        if verbosity > 0:
+            print(f" ==> creating ContextSignal with coord={coordinate}, signal = {signal}, reach_tree = {reach_tree}, ctx_mask={ctx_mask}")
 
         # We call parent __init__ with the arguments we know so far
-        super(ContextSignal, self).__init__(
+        super().__init__(
             domain,
             dimension,
             coordinate,
@@ -367,12 +371,48 @@ class ContextSignal(SignalTree):
         # The mask at the current level
         mask = ctx_mask.mask if ctx_mask is not None else None
 
+        if (downtree_masking
+                and parent_signal is not None):
+            # Use the parent signal as a mask for the child and
+            # use it to fill in 
+            if verbosity > 0:
+                print("performing downtree_masking")
+            output_mask = mask
+
+            if mask is None:
+                inner_mask = true_mask(domain)
+            else:
+                inner_mask = mask
+
+            inner_mask = inner_mask.intersection(parent_signal.to_mask_unknown())#.inflate(0.1))
+            if verbosity > 0:
+                print(f"mask = {inner_mask}")
+                print(f"parent_signal = {parent_signal}")
+
+            def signal_downtree(reach, observer):
+                p = parent_signal.with_mask(output_mask)
+                c = signal(
+                    reach,
+                    observer.with_mask(inner_mask)
+                        if observer is not None
+                        else None,
+                ).with_mask(output_mask)
+                return p.union(c)
+        else:
+            signal_downtree = signal
 
         if reach_tree is not None:
             # Get (or compute) correct reachset from tree
+            if verbosity > 0:
+                print("setting reach level to 0")
+            self._reach_level = 0
+
+            assert self.physical_coordinate == self.coordinate
+
             reach = reach_tree(self.physical_coordinate)
 
-            print("recomputing reachset")
+            if verbosity > 0:
+                print("recomputing reachset")
             self._flowpipe_node_type = (FlowpipeNodeType.PHYSICAL
                 if reach.successful
                 else FlowpipeNodeType.UNDEFINED)
@@ -385,9 +425,6 @@ class ContextSignal(SignalTree):
             if (not reach.successful
                 or restriction_method == RestrictionMethod.RECOMPUTE_FLOWPIPE):
                 child_reach_tree = reach_tree
-
-            print("setting reach level to 0")
-            self._reach_level = 0
         else:
             self._flowpipe_node_type = (
                 flowpipe_node_type
@@ -409,13 +446,16 @@ class ContextSignal(SignalTree):
             self._signal = signal
         elif signal is not None:
             # assert observer is not None
-            self._signal=signal(
+            self._signal=signal_downtree(
                 partial(reach, space_domain=self.symbolic_space_domain)
                     if reach else None,
                 observer,
             )
         else:
             self._signal = None
+
+        assert (self.coordinate == self.physical_coordinate
+                                 + self.symbolic_coordinate)
 
         # Generate children
         if children is None and signal is not None:
@@ -442,7 +482,10 @@ class ContextSignal(SignalTree):
                     else None,
                     # TODO: is this all that is required for context masks?
                     ctx_mask=child_ctx_mask,
-                    )
+                    parent_signal=self._signal,
+                    downtree_masking=downtree_masking,
+                    verbosity=verbosity,
+                )
                 for coord, child_ctx_mask
                 in zip(range(2**dimension),
                        ctx_mask.children
@@ -578,6 +621,19 @@ class ContextSignal(SignalTree):
         else:
             return []
 
+    def physical_coordinates(self, n):
+        '''All physical coordinates of the tree of depth <= n.'''
+        coordinates = []
+
+        if self.flowpipe_node_type == FlowpipeNodeType.PHYSICAL:
+            coordinates.append(self.coordinate)
+        
+        if n > 0:
+            for child in self.children:
+                coordinates.extend(child.physical_coordinates(n - 1))
+
+        return coordinates
+
     def first_known_coordinates(self, n):
         '''The first coordinates of the tree of depth <= n for which
         the signal value is known at 0.'''
@@ -614,7 +670,7 @@ class ContextSignal(SignalTree):
 
         if physical_grid:
             histogram += coordinates_to_tree_plot(
-                self.first_physical_coordinates(n),
+                self.physical_coordinates(n),
                 n,
                 flip=flip,
                 color='black',

@@ -214,21 +214,25 @@ cdef class FunctionObserver:
               epsilon=0.00001, verbosity=0):
         # if not self.reach.successful:
         #     return [sage.RIF(0, self.time)]
-        print("roots(space_domain={}, epsilon={}, verbosity={})".format(
-            space_domain, epsilon, verbosity,
-        ))
+        if verbosity > 0:
+            print("roots(space_domain={}, epsilon={}, verbosity={})".format(
+                space_domain, epsilon, verbosity,
+            ))
 
         cdef vector[Interval] c_res
 
         if self.reach is None:
             return None
 
-        with instrument.block(name="top-level root detection"):
+        with instrument.block(
+                name="top-level root detection",
+                metric=self.reach.instrumentor.metric):
             c_res = self.c_roots(epsilon=epsilon,
                 verbosity=verbosity)
 
         res = [sage.RIF(r.inf(), r.sup()) for r in c_res]
-        print("roots =", fintervals(res))
+        if verbosity > 0:
+            print("roots =", fintervals(res))
         return res
 
     cdef vector[Interval] c_roots(FunctionObserver self,
@@ -998,11 +1002,12 @@ cdef class SageObserver(FunctionObserver):
         if symbolic_composition:
             warn("symbolic_composition not supported for SageObserver")
 
-        print("SageObserver({}, {}, {}, symbolic_composition={}, "
-              "tentative_unpreconditioning={}, mask={})".format(
-            f, reach, fprime, symbolic_composition, tentative_unpreconditioning,
-            mask,
-        ))
+        if reach.verbosity > 0:
+            print("SageObserver({}, {}, {}, symbolic_composition={}, "
+                  "tentative_unpreconditioning={}, mask={})".format(
+                f, reach, fprime, symbolic_composition, tentative_unpreconditioning,
+                mask,
+            ))
 
         self.f = sage.SR(f)
         self.reach = reach
@@ -1089,14 +1094,15 @@ cdef class PolyObserver(FunctionObserver):
                  object mask=None):
         from lbuc.signal_masks import Mask
 
-        print("{}({}, {}, {}, symbolic_composition={}, symbolic_composition_order={}, "
-              "tentative_unpreconditioning={}, mask={})".format(
-            self.__class__.__name__,
-            f, reach, fprime, symbolic_composition,
-            symbolic_composition_order,
-            tentative_unpreconditioning,
-            mask,
-        ))
+        if reach.verbosity > 0:
+            print("{}({}, {}, {}, symbolic_composition={}, symbolic_composition_order={}, "
+                  "tentative_unpreconditioning={}, mask={})".format(
+                self.__class__.__name__,
+                f, reach, fprime, symbolic_composition,
+                symbolic_composition_order,
+                tentative_unpreconditioning,
+                mask,
+            ))
 
         self.f = Poly(f)
         self.reach = reach
@@ -1104,7 +1110,7 @@ cdef class PolyObserver(FunctionObserver):
                               metric=reach.instrumentor.metric):
             self.f.c_poly.toHornerForm(self.f_hf)
         if fprime is not None:
-            print(f"fprime = {repr(fprime)}")
+            # print(f"fprime = {repr(fprime)}")
             self.fprime = Poly(fprime)
         else:
             self.fprime = self._fprime_given_f()

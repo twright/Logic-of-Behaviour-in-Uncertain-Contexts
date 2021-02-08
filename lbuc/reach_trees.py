@@ -90,7 +90,7 @@ class ReachTree:
     to be looked up based on coordinates."""
 
     def __init__(self, time_domain, dimension, top_level_domain, reach_fn,
-            system=None):
+            system=None, verbosity=0):
         self._time_domain = (time_domain
             if is_RealIntervalFieldElement(time_domain)
             else RIF(0, time_domain))
@@ -100,6 +100,7 @@ class ReachTree:
         self._known_reachsets = {}
         self._reach_fn = reach_fn
         self._system = system
+        self._verbosity = verbosity
 
     @property
     def time_domain(self) -> RIF:
@@ -118,15 +119,24 @@ class ReachTree:
         return self._system
 
     @property
+    def verbosity(self) -> int:
+        return self._verbosity
+    
+
+    @property
     def top_level_domain(self) -> list:
         return self._top_level_domain
 
     def __call__(self, coordinate: Tuple[int, ...]):
+        if self.verbosity > 0:
+            print(f"====> reach_tree coordinate {coordinate}")
         if coordinate in self._known_reachsets:
             return self._known_reachsets[coordinate]
         else:
             space_domain = coordinate_to_space_domain(self.dimension,
                 coordinate, top_level_domain=self.top_level_domain)
+            if self.verbosity > 1:
+                print(f"==> reach_tree call at {space_domain_str(space_domain)}")
             reach = self._reach_fn(space_domain)
             self._known_reachsets[coordinate] = reach
             return reach

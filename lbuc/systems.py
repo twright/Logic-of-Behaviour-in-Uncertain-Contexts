@@ -37,7 +37,7 @@ class System:
             # Shift 0 width sets into the static portion
             for i, c in enumerate(self._y0_ctx):
                 if (c is not None and c.diameter() == 0):
-                    print(f"moving {c.str(style='brackets')} from ctx to static for {self.x[i]}")
+                    # print(f"moving {c.str(style='brackets')} from ctx to static for {self.x[i]}")
                     self._y0[i] += c
                     self._y0_ctx[i] = None
         else:
@@ -206,6 +206,9 @@ class System:
     # Pass on initial form to Reach
     # initial_form=InitialForm.SPLIT_VARS,
     def reach_tree(self, duration, **kwargs):
+        # Lower the verbosity since it this is more specific than the tree
+        kwargs['verbosity'] = min(kwargs.get('verbosity', 0) - 1, 0)
+
         # Initial crude reach tree definition method
         if self.y0_ctx is None:
             def reach_fn(space_domain):
@@ -217,11 +220,13 @@ class System:
             space_domain = list(self.y0)
         else:
             def reach_fn(space_domain):
-                print(f"in reach_fn")
-                print(f"{self=}")
-                print(f"{space_domain=}")
+                if kwargs['verbosity'] > 0:
+                    print(f"in reach_fn")
+                    print(f"{self=}")
+                    print(f"{space_domain=}")
                 restricted = self.with_y0_ctx(space_domain)
-                print(f"{restricted=}")
+                if kwargs['verbosity'] > 0:
+                    print(f"{restricted=}")
                 return restricted.reach(
                     duration,
                     **kwargs,

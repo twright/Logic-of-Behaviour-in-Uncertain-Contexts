@@ -40,6 +40,9 @@ class Mask(BaseSignal):
         # in case e.g. super.__init__ merged some intervals
         self._positive = [x for x, b in self.values if b]
 
+    def inflate(self, epsilon):
+        return Mask(self.domain, [x + RIF(-epsilon, epsilon) for x in self.pos])
+
     @property
     def pos(self):
         return self._positive
