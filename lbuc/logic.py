@@ -1439,7 +1439,8 @@ class C(Context):
             reach_tree=reach_tree,
             top_level_domain=reach_tree.top_level_domain,
             ctx_mask=mask,
-            downtree_masking=kwargs.pop('downtree_masking', True),
+            downtree_masking=False,
+            # downtree_masking=kwargs.pop('downtree_masking', True),
         )
 
 

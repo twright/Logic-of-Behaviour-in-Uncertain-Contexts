@@ -29,3 +29,10 @@ class TestContextMasks:
         assert child.coordinate == (1, 0)
         assert child.signal(3) is False
         assert child.signal.approx_eq(false_mask(RIF(0, 5)))
+
+    @staticmethod
+    def test_true_and_false_compositions_context_mask():
+        ctx_mask_true = true_context_mask(RIF(0, 5), 2)
+        ctx_mask_false = false_context_mask(RIF(0, 5), 2)
+        assert (ctx_mask_true & ctx_mask_false).signal(3) is False
+        assert (ctx_mask_true | ctx_mask_false).signal(3) is True
