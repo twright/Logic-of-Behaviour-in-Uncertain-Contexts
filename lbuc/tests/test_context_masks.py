@@ -17,7 +17,7 @@ class TestContextMasks:
         ctx_mask = true_context_mask(RIF(0, 5), 2)
         assert ctx_mask.signal(3) is True
         child = ctx_mask.children[1].children[0]
-        assert child.coordinate == (1, 0)
+        assert child.coordinate.absolute == (1, 0)
         assert child.signal(3) is True
         assert child.signal.approx_eq(true_mask(RIF(0, 5)))
 
@@ -26,7 +26,7 @@ class TestContextMasks:
         ctx_mask = false_context_mask(RIF(0, 5), 2)
         assert ctx_mask.signal(3) is False
         child = ctx_mask.children[1].children[0]
-        assert child.coordinate == (1, 0)
+        assert child.coordinate.absolute == (1, 0)
         assert child.signal(3) is False
         assert child.signal.approx_eq(false_mask(RIF(0, 5)))
 

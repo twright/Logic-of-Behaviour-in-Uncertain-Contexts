@@ -10,7 +10,8 @@ import lbuc.interval_signals as interval_signals
 from lbuc.context_signals import (ContextSignal,
                                   true_context_signal,
                                   ChildIterator,
-                                  RestrictionMethod)
+                                  RestrictionMethod,
+                                  SignalTreeCoordinate)
 from flowstar.reachability import Reach, InitialForm
 from flowstar.observers import PolyObserver
 from flowstar.tests.test_reachability import ringxy, odes  # NOQA
@@ -26,6 +27,30 @@ from lbuc.reach_trees import (context_to_space_domain,
                               ReachTree)
 # from flowstar.interval import int_dist
 from lbuc.tests.test_systems import solution as sin_cos_solution
+
+
+class TestSignalTreeCoordinate:
+    @staticmethod
+    @pytest.mark.parametrize(
+        'absolute,reach_level,physical,symbolic',
+        (   
+            # Drawings of these cases in "Final Benchmarks" notebook
+            ((0,), 1, (), (0,)),
+            ((0,), 0, (0,), ()),
+            ((0,0), 2, (), (0,0)),
+            ((0,0), 1, (0,), (0,)),
+            ((0,), None, None, None),
+        )
+    )
+    def test_coordinate_split(absolute, reach_level, physical, symbolic):
+        coordinate = SignalTreeCoordinate(absolute, reach_level)
+        assert coordinate.absolute == absolute
+        assert coordinate.reach_level == reach_level
+        assert coordinate.physical == physical
+        assert coordinate.symbolic == symbolic
+        assert (reach_level is None
+            or coordinate.absolute
+               == coordinate.physical + coordinate.symbolic)
 
 
 def signal_fn(prop, _, o, mask=None):
@@ -46,9 +71,9 @@ class TestContextSignalSinCos:
     @staticmethod
     def test_sub_sub_child_space_domain():
         ctx = true_context_signal(RIF(1, 2), 2)
-        assert ctx.coordinate == ()
+        assert ctx.coordinate.absolute == ()
         assert ctx.reach_level == 0
-        assert ctx.children[3].coordinate == (3,)
+        assert ctx.children[3].coordinate.absolute == (3,)
         print([x.str(style='brackets')
             for x in ctx.children[3].symbolic_space_domain])
         assert space_domain_approx_eq(
@@ -56,9 +81,9 @@ class TestContextSignalSinCos:
             [RIF(0, 1), RIF(0, 1)],
         )
         chosen_child = ctx.children[3].children[2]
-        assert chosen_child.coordinate == (3, 2)
+        assert chosen_child.coordinate.absolute == (3, 2)
         assert chosen_child.reach_level == 2
-        assert chosen_child.symbolic_coordinate == (3, 2)
+        assert chosen_child.coordinate.symbolic == (3, 2)
         print([x.str(style='brackets')
             for x in chosen_child.symbolic_space_domain])
         assert space_domain_approx_eq(
@@ -127,13 +152,13 @@ class TestContextSignalSinCos:
             observer=observer_physical)
         assert space_domain_approx_eq(ctx.top_level_domain, initials)
         assert ctx.reach_level == 1
-        assert ctx.coordinate == (3,)
-        assert ctx.physical_coordinate == ()
-        assert ctx.symbolic_coordinate == (3,)
+        assert ctx.coordinate.absolute == (3,)
+        assert ctx.coordinate.physical == ()
+        assert ctx.coordinate.symbolic == (3,)
         assert ctx_physical.reach_level == 0
-        assert ctx_physical.coordinate == (3,)
-        assert ctx_physical.physical_coordinate == (3,)
-        assert ctx_physical.symbolic_coordinate == ()
+        assert ctx_physical.coordinate.absolute == (3,)
+        assert ctx_physical.coordinate.physical == (3,)
+        assert ctx_physical.coordinate.symbolic == ()
         assert space_domain_approx_eq(ctx.physical_space_domain,
             initials)
         assert space_domain_approx_eq(ctx.symbolic_space_domain,
@@ -247,8 +272,8 @@ class TestContextSignalSinCos:
         assert ctx.children[2].reach_level == 0
         assert child.reach_level == 0
         print(child.coordinate)
-        assert child.coordinate == (2, 2)
-        assert child.physical_coordinate == (2, 2)
+        assert child.coordinate.absolute == (2, 2)
+        assert child.coordinate.physical == (2, 2)
         assert space_domain_approx_eq(child.physical_space_domain, space_domain)
         assert space_domain_approx_eq(child.symbolic_space_domain, [RIF(-1,1), RIF(-1,1)])
         print(child.signal)

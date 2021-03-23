@@ -10,7 +10,7 @@ from sage.rings.real_mpfi import is_RealIntervalFieldElement
 from lbuc.interval_signals import (true_signal, false_signal, BaseSignal,
                                    Signal)
 from lbuc.signal_masks import Mask, true_mask
-from lbuc.interval_utils import finterval, fintervals as space_domain_str
+from lbuc.interval_utils import finterval, fintervals as space_domain_str, int_dist
 from lbuc.systems import System
 from lbuc.reach_trees import (ReachTree, coordinate_to_space_domain, preconditioned_space_domain)
 
@@ -24,7 +24,9 @@ class RestrictionMethod(enum.IntEnum):
     RECOMPUTE_FLOWPIPE = 2
 
 
-def base_context_signal(J, dim, coordinate, signal, reach_level=0, top_level_domain=None, ctx_mask=None):
+def base_context_signal(J, dim, coordinate, signal,
+                        reach_level=0, top_level_domain=None,
+                        ctx_mask=None):
     return ContextSignal(J, dim, coordinate,
                          lambda r, o, mask=None: signal.with_mask(mask),
                          reach_level=reach_level,
@@ -43,6 +45,44 @@ def false_context_signal(J, dim, coordinate=(), top_level_domain=None, reach_lev
     return base_context_signal(J, dim, coordinate, false_signal(J), reach_level=reach_level,
         top_level_domain=top_level_domain,
         ctx_mask=ctx_mask)
+
+
+class SignalTreeCoordinate:
+    '''Represents the coordinate of a node within a context tree.'''
+
+    def __init__(self, coordinate : Iterable[int], reach_level : Optional[int]) -> None:
+        self._coordinate = tuple(coordinate)
+        self._reach_level = reach_level
+
+    def __str__(self) -> str:
+        return f"{self.physical}:{self.symbolic}"
+
+    def __repr__(self) -> str:
+        return f"SignalTreeCoordinate({self.absolute}, {self.reach_level})"
+
+    @property
+    def absolute(self) -> Tuple[int, ...]:
+        return self._coordinate
+
+    @property
+    def reach_level(self) -> Optional[int]:
+        return self._reach_level
+
+    @property
+    def physical(self) -> Optional[Tuple[int, ...]]:
+        if self.reach_level is None:
+            return None
+        return self.absolute[:-self.reach_level
+                             if self.reach_level > 0
+                             else None]
+
+    @property
+    def symbolic(self) -> Optional[Tuple[int, ...]]:
+        if self.reach_level is None:
+            return None
+        return (self.absolute[-self.reach_level:]
+                if self.reach_level > 0
+                else ())
 
 
 class ChildIterator(object):
@@ -73,7 +113,7 @@ class ChildIterator(object):
         return ChildIterator(f(c1, c2) for (c1, c2) in zip(self, other))
 
 
-class SignalTree(object):
+class SignalTree:
     def __init__(self, domain, dimension : int, coordinate : Tuple[int, ...] =(), reach_level : Optional[int] = None, signal=None, children : Optional[Iterable] = None, top_level_domain : List = None, context_embedding=None):
         """A node in a tree of progressively refined signals.
 
@@ -86,7 +126,6 @@ class SignalTree(object):
         """
         assert domain in RIF
         self._domain = domain
-        self._reach_level = reach_level
         self._dimension = int(dimension)
         self._context_embedding = context_embedding
         assert signal is None or isinstance(signal, BaseSignal)
@@ -94,7 +133,7 @@ class SignalTree(object):
         assert top_level_domain is None or isinstance(top_level_domain, list)
         self._top_level_domain = top_level_domain
         #assert isinstance(coordinate, (tuple, list))
-        self._coordinate = tuple(coordinate)
+        self._coordinate = SignalTreeCoordinate(coordinate, reach_level)
         self._children = (
             ChildIterator(children)
             if children is not None
@@ -102,28 +141,14 @@ class SignalTree(object):
         )
 
     @property
-    def coordinate(self) -> Tuple[int, ...]:
+    def coordinate(self) -> SignalTreeCoordinate:
         return self._coordinate
-
-    @property
-    def symbolic_coordinate(self) -> Optional[Tuple[int,...]]:
-        """Coordinate relative to level of reach computation."""
-        return (
-            self.coordinate[-self.reach_level:]
-                if self.reach_level > 0
-                else ()
-        )
-
-    @property
-    def physical_coordinate(self) -> Optional[Tuple[int,...]]:
-        """Coordinate of reach computation."""
-        return self.coordinate[:-self.reach_level if self.reach_level > 0 else None]
 
     @property
     def reach_level(self) -> Optional[int]:
         # How many level above us was the reachset
         # calculated
-        return self._reach_level
+        return self._coordinate.reach_level
 
     @property
     def domain(self):
@@ -138,14 +163,14 @@ class SignalTree(object):
         return self._dimension
 
     @property
-    def top_level_domain(self) -> List:
+    def top_level_domain(self) -> Optional[List]:
         return self._top_level_domain
 
     @property
     def physical_space_domain(self):
         return coordinate_to_space_domain(
             self.dimension,
-            self.physical_coordinate,
+            self.coordinate.physical,
             top_level_domain=self.top_level_domain,
         )
 
@@ -153,7 +178,7 @@ class SignalTree(object):
     def symbolic_space_domain(self):
         return coordinate_to_space_domain(
             self.dimension,
-            self.symbolic_coordinate,
+            self.coordinate.symbolic,
         )
 
     @property
@@ -214,7 +239,7 @@ class SignalTree(object):
         return self.__class__(
             self.domain,
             self.dimension,
-            self.coordinate,
+            self.coordinate.absolute,
             signal=f(self.signal),
             reach_level=self.reach_level,
             top_level_domain=self.top_level_domain,
@@ -225,7 +250,7 @@ class SignalTree(object):
         return self.__class__(
             self.domain,
             self.dimension,
-            self.coordinate,
+            self.coordinate.absolute,
             signal=f(self.signal, other.signal),
             # Perhaps this should really be None?
             reach_level=min(self.reach_level, other.reach_level)
@@ -406,11 +431,13 @@ class ContextSignal(SignalTree):
             # Get (or compute) correct reachset from tree
             if verbosity > 0:
                 print("setting reach level to 0")
-            self._reach_level = 0
+            self._coordinate = SignalTreeCoordinate(self.coordinate.absolute, 0)
 
-            assert self.physical_coordinate == self.coordinate
+            assert self.coordinate.physical == self.coordinate.absolute,\
+                "Given we have no signal tree, the physical coordinate "\
+                "should be the overall coordinate."
 
-            reach = reach_tree(self.physical_coordinate)
+            reach = reach_tree(self.coordinate.physical)
 
             if verbosity > 0:
                 print("recomputing reachset")
@@ -455,8 +482,13 @@ class ContextSignal(SignalTree):
         else:
             self._signal = None
 
-        assert (self.coordinate == self.physical_coordinate
-                                 + self.symbolic_coordinate)
+        assert (self.coordinate.absolute
+                == self.coordinate.physical\
+                 + self.coordinate.symbolic),\
+            f"We should have the correct overall coordinate where:\n"\
+            f"coordinate = {self.coordinate.absolute}\n"\
+            f"physical   = {self.coordinate.physical}"\
+            f"symbolic   = {self.coordinate.symbolic}"
 
         # Generate children
         if children is None and signal is not None:
@@ -464,7 +496,7 @@ class ContextSignal(SignalTree):
                 ContextSignal(
                     domain,
                     dimension,
-                    self.coordinate + (coord,),
+                    self.coordinate.absolute + (coord,),
                     reach_tree=child_reach_tree,
                     reach=reach,
                     # Important! This is the signal function, not the
@@ -539,7 +571,7 @@ class ContextSignal(SignalTree):
         return self.__class__(
             self.domain,
             self.dimension,
-            self.coordinate,
+            self.coordinate.absolute,
             # reach_tree=self._reach_tree,
             # TODO: do all of these actually make sense in the map
             # case?
@@ -556,7 +588,7 @@ class ContextSignal(SignalTree):
         return self.__class__(
             self.domain,
             self.dimension,
-            self.coordinate,
+            self.coordinate.absolute,
             # reach_tree=self._reach_tree,
             signal=f(self.signal, other.signal),
             reach_level=min(self.reach_level, other.reach_level),
@@ -585,7 +617,7 @@ class ContextSignal(SignalTree):
         return ContextMask(
             self.domain,
             self.dimension,
-            self.coordinate,
+            self.coordinate.absolute,
             signal=self.signal.to_mask_and(),
             top_level_domain=self.top_level_domain,
             children=self.children.map(lambda c: c.to_mask_and()),
@@ -597,7 +629,7 @@ class ContextSignal(SignalTree):
         return ContextMask(
             self.domain,
             self.dimension,
-            self.coordinate,
+            self.coordinate.absolute,
             signal=self.signal.to_mask_or(),
             top_level_domain=self.top_level_domain,
             children=self.children.map(lambda c: c.to_mask_and()),
@@ -612,7 +644,7 @@ class ContextSignal(SignalTree):
     def first_physical_coordinates(self, n):
         '''The first physical coordinates of the tree of depth <= n.'''
         if self.flowpipe_node_type == FlowpipeNodeType.PHYSICAL:
-            return [self.coordinate]
+            return [self.coordinate.absolute]
         elif n > 0:
             return sum(
                 (child.first_physical_coordinates(n - 1)
@@ -627,7 +659,7 @@ class ContextSignal(SignalTree):
         coordinates = []
 
         if self.flowpipe_node_type == FlowpipeNodeType.PHYSICAL:
-            coordinates.append(self.coordinate)
+            coordinates.append(self.coordinate.absolute)
         
         if n > 0:
             for child in self.children:
@@ -639,7 +671,7 @@ class ContextSignal(SignalTree):
         '''The first coordinates of the tree of depth <= n for which
         the signal value is known at 0.'''
         if self.signal(0) is not None:
-            return [self.coordinate]
+            return [self.coordinate.absolute]
         elif n > 0:
             return sum(
                 (child.first_known_coordinates(n - 1)

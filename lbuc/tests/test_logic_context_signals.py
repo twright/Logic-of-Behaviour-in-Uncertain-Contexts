@@ -164,9 +164,9 @@ class TestContextSignalRefinement:
         assert csig.reach_level == 0
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 0
-        assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].physical_coordinate == (1, 0)
-        assert csig.children[1].children[0].symbolic_coordinate == ()
+        assert csig.children[1].children[0].coordinate.absolute == (1, 0)
+        assert csig.children[1].children[0].coordinate.physical == (1, 0)
+        assert csig.children[1].children[0].coordinate.symbolic == ()
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
@@ -196,9 +196,9 @@ class TestContextSignalRefinement:
         assert csig.reach_level == 0
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 0
-        assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].physical_coordinate == (1, 0)
-        assert csig.children[1].children[0].symbolic_coordinate == ()
+        assert csig.children[1].children[0].coordinate.absolute == (1, 0)
+        assert csig.children[1].children[0].coordinate.physical == (1, 0)
+        assert csig.children[1].children[0].coordinate.symbolic == ()
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
@@ -228,9 +228,9 @@ class TestContextSignalRefinement:
         assert csig.reach_level == 0
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 2
-        assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].physical_coordinate == ()
-        assert csig.children[1].children[0].symbolic_coordinate == (1, 0)
+        assert csig.children[1].children[0].coordinate.absolute == (1, 0)
+        assert csig.children[1].children[0].coordinate.physical == ()
+        assert csig.children[1].children[0].coordinate.symbolic == (1, 0)
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
@@ -261,9 +261,9 @@ class TestContextSignalRefinement:
         assert csig.reach_level == 0
         assert space_domain_approx_eq(csig.top_level_domain, initials) 
         assert csig.children[1].children[0].reach_level == 2
-        assert csig.children[1].children[0].coordinate == (1, 0)
-        assert csig.children[1].children[0].physical_coordinate == ()
-        assert csig.children[1].children[0].symbolic_coordinate == (1, 0)
+        assert csig.children[1].children[0].coordinate.absolute == (1, 0)
+        assert csig.children[1].children[0].coordinate.physical == ()
+        assert csig.children[1].children[0].coordinate.symbolic == (1, 0)
         assert space_domain_approx_eq(
             csig.children[1].children[0].top_level_domain,
             initials,
