@@ -591,7 +591,11 @@ class ContextSignal(SignalTree):
             self.coordinate.absolute,
             # reach_tree=self._reach_tree,
             signal=f(self.signal, other.signal),
-            reach_level=min(self.reach_level, other.reach_level),
+            reach_level=
+                min(self.reach_level, other.reach_level)
+                if self.reach_level is not None
+                    and other.reach_level is not None
+                else None,
             top_level_domain=self.top_level_domain,
             restriction_method=self.restriction_method,
             children=self.children.zip_with(
@@ -611,7 +615,7 @@ class ContextSignal(SignalTree):
         else:
             raise ValueError('n should be a possible integer')
 
-    def to_mask_and(self):
+    def to_mask_and(self) -> 'ContextMask':
         from lbuc.context_masks import ContextMask
 
         return ContextMask(
@@ -623,7 +627,7 @@ class ContextSignal(SignalTree):
             children=self.children.map(lambda c: c.to_mask_and()),
         )
 
-    def to_mask_or(self):
+    def to_mask_or(self) -> 'ContextMask':
         from lbuc.context_masks import ContextMask
 
         return ContextMask(
@@ -632,7 +636,7 @@ class ContextSignal(SignalTree):
             self.coordinate.absolute,
             signal=self.signal.to_mask_or(),
             top_level_domain=self.top_level_domain,
-            children=self.children.map(lambda c: c.to_mask_and()),
+            children=self.children.map(lambda c: c.to_mask_or()),
         )
 
     def to_mask_until(self, I):

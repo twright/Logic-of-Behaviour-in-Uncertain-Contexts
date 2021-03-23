@@ -147,6 +147,36 @@ class TestLogicContextSignal(object):
         assert ctx.signal.approx_eq(sig, 0.01)
         assert ctx.refined_signal(0).approx_eq(sig, 0.01)
 
+    @staticmethod
+    @pytest.mark.slow
+    @pytest.mark.parametrize('prop', sin_cos_properties)
+    def test_context_signal_masking_downtree(odes, prop):
+        initials = [RIF(1, 2), RIF(3, 4)]
+        ctx = prop.context_signal_for_system(odes, initials, 5,
+                                             use_masks=False,
+                                             downtree_masking=False)
+        ctx_masked = prop.context_signal_for_system(odes, initials, 5,
+                                                    use_masks=True,
+                                                    downtree_masking=False)
+        assert ctx.consistent_with(ctx_masked, 2)
+        assert ctx.refined_signal(2).approx_eq(
+            ctx_masked.refined_signal(2).with_mask(None), 0.01)
+
+    @staticmethod
+    @pytest.mark.slow
+    @pytest.mark.parametrize('prop', sin_cos_properties)
+    def test_context_signal_masking_no_downtree(odes, prop):
+        initials = [RIF(1, 2), RIF(3, 4)]
+        ctx = prop.context_signal_for_system(odes, initials, 5,
+                                             use_masks=False,
+                                             downtree_masking=False)
+        ctx_masked = prop.context_signal_for_system(odes, initials, 5,
+                                                    use_masks=True,
+                                                    downtree_masking=False)
+        assert ctx.consistent_with(ctx_masked, 2)
+        assert ctx.refined_signal(2).approx_eq(
+            ctx_masked.refined_signal(2).with_mask(None), 0.01)
+
 
 class TestContextSignalRefinement:
     @staticmethod
