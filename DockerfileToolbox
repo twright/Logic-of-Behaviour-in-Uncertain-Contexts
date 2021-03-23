@@ -30,6 +30,7 @@ COPY flowstar/*.pyx ./flowstar/
 RUN ./setup.py choose_flowstar -m fastintervals && ./setup.py build_ext
 RUN cd flowstar/flowstar-2.1.0 && make install
 RUN cp -R flowstar /usr/lib/python3.8/site-packages/
+RUN dnf install -y python3-gobject libnotify
 COPY lbuc ./lbuc/
 RUN cp -R lbuc /usr/lib/python3.8/site-packages/
 RUN ./setup.py install
