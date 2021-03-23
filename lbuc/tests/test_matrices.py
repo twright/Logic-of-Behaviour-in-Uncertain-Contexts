@@ -1,11 +1,9 @@
-# from __future__ import absolute_import
-
 import pytest
 import sage.all as sage
 import sympy
 import numpy as np
 
-from lbuc.matricies import *
+from lbuc.matrices import *
 
 
 @pytest.fixture
@@ -30,13 +28,15 @@ def ringxy():
 
 
 class TestConvertMat:
-    def test_convert_mat1(self, mat1):
+    @staticmethod
+    def test_convert_mat1(mat1):
         sym_mat1 = convert_mat(mat1)
         assert sym_mat1 == sympy.Matrix([[1]])
         assert sym_mat1.rows == 1
         assert sym_mat1.cols == 1
 
-    def test_convert_mat2(self, mat2):
+    @staticmethod
+    def test_convert_mat2(mat2):
         sym_mat2 = convert_mat(mat2)
         assert sym_mat2 == sympy.Matrix([[1, 2], [3, 4]])
         assert sym_mat2.rows == 2
@@ -44,18 +44,21 @@ class TestConvertMat:
 
 
 class TestMatToNumpy:
-    def test_to_numpy_mat1(self, ringxy, mat1):
+    @staticmethod
+    def test_to_numpy_mat1(ringxy, mat1):
         R, (_, _) = ringxy
         num_mat1 = mat_to_numpy(R, mat1)
         assert num_mat1(0, np.array([0, 0])) == np.array([[1]])
 
-    def test_to_numpy_mat2(self, ringxy, mat2):
+    @staticmethod
+    def test_to_numpy_mat2(ringxy, mat2):
         R, (_, _) = ringxy
         num_mat2 = mat_to_numpy(R, mat2)
         assert (num_mat2(0, np.array([0, 0]))
                 == np.array([[1, 2], [3, 4]])).all()
 
-    def test_to_numpy_mat3(self, ringxy, mat3):
+    @staticmethod
+    def test_to_numpy_mat3(ringxy, mat3):
         R, (_, _) = ringxy
         num_mat3 = mat_to_numpy(R, mat3)
         assert (num_mat3(0, np.array([4, 5]))
@@ -89,18 +92,21 @@ class TestConvertVec:
 
 
 class TestVecToNumpy:
-    def test_to_numpy_vec1(self, ringxy, vec1):
+    @staticmethod
+    def test_to_numpy_vec1(ringxy, vec1):
         R, (_, _) = ringxy
         num_vec1 = vec_to_numpy(R, vec1)
         assert num_vec1(0, np.array([0, 0])) == np.array([1])
 
-    def test_to_numpy_vec2(self, ringxy, vec2):
+    @staticmethod
+    def test_to_numpy_vec2(ringxy, vec2):
         R, (_, _) = ringxy
         num_vec2 = vec_to_numpy(R, vec2)
         assert (num_vec2(0, np.array([0, 0]))
                 == np.array([1, 2, 3, 4])).all()
 
-    def test_to_numpy_vec3(self, ringxy, vec3):
+    @staticmethod
+    def test_to_numpy_vec3(ringxy, vec3):
         R, (_, _) = ringxy
         num_vec3 = vec_to_numpy(R, vec3)
         assert (num_vec3(0, np.array([4, 5]))
