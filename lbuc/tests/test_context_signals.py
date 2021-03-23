@@ -43,7 +43,8 @@ class TestChildIterator:
 
 
 class TestContextSignalSinCos:
-    def test_sub_sub_child_space_domain(self):
+    @staticmethod
+    def test_sub_sub_child_space_domain():
         ctx = true_context_signal(RIF(1, 2), 2)
         assert ctx.coordinate == ()
         assert ctx.reach_level == 0
@@ -65,8 +66,9 @@ class TestContextSignalSinCos:
             [RIF(0.5, 1), RIF(0, 0.5)],
         )
 
+    @staticmethod
     @pytest.mark.slow
-    def test_signal_gen(self, ringxy):  # NOQA
+    def test_signal_gen(ringxy):  # NOQA
         R, (x, y) = ringxy
         odes = [-y, x]
         atomic = Atomic(x)
@@ -91,8 +93,9 @@ class TestContextSignalSinCos:
             observer=observer)
         assert ctx.signal.approx_eq(expected, 0.1)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_signal_gen_restricted_context(self, ringxy, odes):
+    def test_signal_gen_restricted_context(ringxy, odes):
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -148,8 +151,9 @@ class TestContextSignalSinCos:
         assert ctx.signal.approx_eq(
             ctx_physical.signal,0.05)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_restricted_context_symbolic_vs_manual_downtree(self, ringxy, odes):  # NOQA
+    def test_restricted_context_symbolic_vs_manual_downtree(ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -181,8 +185,13 @@ class TestContextSignalSinCos:
         assert child.signal.approx_eq(ctx_downtree.children[2].children[2].signal)
         assert child.signal.approx_eq(expected, 0.5)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_restricted_context_symbolic_vs_manual(self, ringxy, odes):  # NOQA
+    @pytest.mark.parametrize(
+        'symbolic_composition',
+        ((True,), (False,)),
+    )
+    def test_restricted_context_symbolic_vs_manual(ringxy, odes, symbolic_composition):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -191,12 +200,13 @@ class TestContextSignalSinCos:
         initials = [RIF(1, 2), RIF(3, 4)]
         expected = atomic.signal_for_system(
             odes, space_domain, 5, step=(0.001, 0.1), order=10,
+            symbolic_composition=symbolic_composition,
         )
         # reach = Reach(odes, initials, 5, (0.001, 0.1), order=10)
         observer = PolyObserver(R(atomic.p),
                                 Reach(odes, initials, 5 + 2e-3, (0.001, 0.1),
                                       order=10),
-                                symbolic_composition=False)
+                                symbolic_composition=symbolic_composition)
         ctx = ContextSignal(RIF(0, 5), 2, (),
             signal=partial(signal_fn, atomic),
             observer=observer,
@@ -206,8 +216,9 @@ class TestContextSignalSinCos:
         print(ctx.signal)
         assert child.signal.approx_eq(expected, 0.5)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_restricted_context_recompute_flowpipe(self, ringxy, odes):  # NOQA
+    def test_restricted_context_recompute_flowpipe(ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -244,8 +255,9 @@ class TestContextSignalSinCos:
         assert child.signal.approx_eq(expected, 0.01), \
             f"expected equal:\n{child.signal}\n{expected}"
 
+    @staticmethod
     @pytest.mark.slow
-    def test_signal_restricted_via_children(self, ringxy, odes):  # NOQA
+    def test_signal_restricted_via_children(ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -267,8 +279,9 @@ class TestContextSignalSinCos:
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.1)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_signal_further_restricted_via_children(self, ringxy, odes):  # NOQA
+    def test_signal_further_restricted_via_children(ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -300,8 +313,9 @@ class TestContextSignalSinCos:
         print(child_context_sig.signal)
         assert child_context_sig.signal.approx_eq(expected, 0.01)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_trivial_refined_signal(self, ringxy, odes):  # NOQA
+    def test_trivial_refined_signal(ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -314,8 +328,9 @@ class TestContextSignalSinCos:
             observer=observer)
         assert ctx.refined_signal(0).approx_eq(ctx.signal, 0.01)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_refined_signal(self, ringxy, odes):  # NOQA
+    def test_refined_signal(ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 
@@ -336,8 +351,9 @@ class TestContextSignalSinCos:
         print(ctx.refined_signal(1))
         assert ctx.refined_signal(1).approx_eq(expected, 0.01)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_further_refined_signal(self, ringxy, odes):  # NOQA
+    def test_further_refined_signal(ringxy, odes):  # NOQA
         R, (x, y) = ringxy
         atomic = Atomic(x)
 

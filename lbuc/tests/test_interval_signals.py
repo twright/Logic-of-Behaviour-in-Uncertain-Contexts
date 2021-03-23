@@ -2,8 +2,9 @@ from __future__ import print_function
 # absolute_import,
 
 import pytest
+from lbuc.interval_utils import fintervals
 from lbuc.interval_signals import (Signal, interval_complements, isplit,
-    shift_G, shift_F, true_signal, false_signal)
+    shift_G, shift_F, true_signal, false_signal, fvalues)
 from lbuc.signal_masks import Mask
 from sage.all import RIF
 
@@ -73,6 +74,136 @@ def int_approx_eq(I, J, epsilon=1e-3):
     return int_dist(I, J) <= epsilon
 
 
+def ints_approx_eq(Is, Js, epsilon=1e-3):
+    return all(int_approx_eq(I, J, epsilon)
+               for I, J in zip(Is, Js))
+
+
+
+def values_approx_eq(Ibs, Jbs, epsilon=1e-3):
+    print("Ibs =", fvalues(Ibs))
+    print("Jbs =", fvalues(Jbs))
+    return all(int_approx_eq(I, J, epsilon) and bI == bJ
+               for (I, bI), (J, bJ) in zip(Ibs, Jbs))
+
+
+class TestSignalInit:
+    @staticmethod
+    def test_trivial_signal():
+        assert values_approx_eq(
+            Signal(RIF(0,5), []).values,
+            [],
+        )
+        
+    @staticmethod
+    def test_true_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), True), (RIF(1.5, 3), True)]).values,
+            [(RIF(1, 3), True)],
+        )
+
+    @staticmethod
+    def test_true_double_disjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), True), (RIF(1.5, 3), True), (RIF(1.75, 4), True)]).values,
+            [(RIF(1, 4), True)],
+        )
+
+    @staticmethod
+    def test_true_double_nondisjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), True), (RIF(1.5, 3), True), (RIF(1.75, 4), True)]).values,
+            [(RIF(1, 4), True)],
+        )
+
+    @staticmethod
+    def test_true_double_disjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), True), (RIF(1.5, 3), True), (RIF(2.75, 4), True)]).values,
+            [(RIF(1, 4), True)],
+        )
+
+    @staticmethod
+    def test_true_double_nondisjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), True), (RIF(1.5, 3), True), (RIF(1.75, 4), True)]).values,
+            [(RIF(1, 4), True)],
+        )
+        
+    @staticmethod
+    def test_true_double_disjoint_overlap_with_false():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), True), (RIF(1.5, 3), True), (RIF(2.75, 4), True), (RIF(4.5, 5), False)]).values,
+            [(RIF(1, 4), True), (RIF(4.5, 5), False)],
+        )
+
+    @staticmethod
+    def test_true_double_nondisjoint_overlap_with_false():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), True), (RIF(1.5, 3), True), (RIF(1.75, 4), True), (RIF(4.5, 5), False)]).values,
+            [(RIF(1, 4), True), (RIF(4.5, 5), False)],
+        )
+
+    @staticmethod
+    def test_false_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), False), (RIF(1.5, 3), False)]).values,
+            [(RIF(1, 3), False)],
+        )
+    
+    @staticmethod
+    def test_false_double_disjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), False), (RIF(1.5, 3), False), (RIF(1.75, 4), False)]).values,
+            [(RIF(1, 4), False)],
+        )
+
+    @staticmethod
+    def test_false_double_nondisjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), False), (RIF(1.5, 3), False), (RIF(1.75, 4), False)]).values,
+            [(RIF(1, 4), False)],
+        )
+
+    @staticmethod
+    def test_false_double_disjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), False), (RIF(1.5, 3), False), (RIF(2.75, 4), False)]).values,
+            [(RIF(1, 4), False)],
+        )
+
+    @staticmethod
+    def test_false_double_nondisjoint_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), False), (RIF(1.5, 3), False), (RIF(1.75, 4), False)]).values,
+            [(RIF(1, 4), False)],
+        )
+        
+    @staticmethod
+    def test_false_double_disjoint_overlap_with_true():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), False), (RIF(1.5, 3), False), (RIF(2.75, 4), False), (RIF(4.5, 5), True)]).values,
+            [(RIF(1, 4), False), (RIF(4.5, 5), True)],
+        )
+
+    @staticmethod
+    def test_false_double_nondisjoint_overlap_with_true():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(1,2), False), (RIF(1.5, 3), False), (RIF(1.75, 4), False), (RIF(4.5, 5), True)]).values,
+            [(RIF(1, 4), False), (RIF(4.5, 5), True)],
+        )
+
+    
+    @staticmethod
+    def test_false_true_overlap():
+        assert values_approx_eq(
+            Signal(RIF(0,5), [(RIF(0,3), False), (RIF(2, 5), True)],
+                   expect_consistent=False).values,
+            [(RIF(0,3), False), (RIF(2, 5), True)],
+        )
+
+
+
 class TestSignalOperations:
     def test_shift_G_zero_true(self):
         J = RIF(2.5)
@@ -96,6 +227,17 @@ class TestSignalOperations:
         assert sig1(2.5) is None
         # These two should be equal
         assert sig1G(0) is None
+
+    def test_inflate(self):
+        sig = Signal(
+            RIF(0, 10),
+            [
+                (RIF('[0.0000000000000000, 8.3999999999999222]'), True),
+                (RIF('[8.4000000000000305, 10.000000000000000]'), False),
+            ],
+        )
+        sig_inflated = 'Signal([0.0000000000000000 .. 10.000000000000000], [([0.0000000000000000 .. 8.5999999999999251], True), ([8.2000000000000277 .. 10.000000000000000], False)], mask=None)'
+        assert str(sig.inflate(0.2)) == sig_inflated
 
 
 class TestISplit:

@@ -22,7 +22,16 @@ from lbuc.systems import System
 __all__ = ('to_signal', 'shift_F', 'shift_G', 'true_signal', 'false_signal',
            'Signal', 'ctx', 'to_signal_piecewise', 'signal_given_roots',
            'signal_from_observer', 'signal_given_bool_roots', 'masked_ctx',
-           'BaseSignal')
+           'BaseSignal', 'fvalue', 'fvalues')
+
+
+def fvalue(vb):
+    v, b = vb
+    return f"({v.str(style='brackets')}, {b})"
+
+
+def fvalues(vbs):
+    return f"[{', '.join(map(fvalue, vbs))}]"
 
 
 def isplit(pred, xs):
@@ -216,24 +225,29 @@ def indicator_signal(domain, J, K, mask=None):
     )
 
 
+class InconsistentIntervalException(Exception):
+    """Attempting to construct a three-valued signal with inconsitent true and false intervals."""
+    pass
+
+
 class BaseSignal(metaclass=ABCMeta):
 
     def __init__(self, domain : RIF, values, expect_consistent=True):
         if domain is None:
             raise ValueError("Domain is None!")
 
+        self._domain = RIF(max(0, domain.lower()),
+                           max(0, domain.upper()))  # :: RIF
+
         # We do some canonicalization when constructing a signal to
         # merge overlapping intervals, remove nulls,
         # and restrict domains to positive time
 
-        self._domain = RIF(max(0, domain.lower()),
-                           max(0, domain.upper()))  # :: RIF
         self._values = list(values)
         self._remove_none_values()
         self._restict_and_filter_values()
-        self._merge_values()
+        self._merge_values(expect_consistent=expect_consistent)
         self._sort_values()
-
 
     def _remove_none_values(self):
         self._values = [
@@ -257,23 +271,25 @@ class BaseSignal(metaclass=ABCMeta):
             overlaps = [j for j in self._overlapping_indicies(v) if j != i]
             if len(overlaps) == 0:
                 continue
+            consistent_overlaps = []
 
             for j in overlaps:
                 u, bu = self._values[j]
-                if expect_consistent and not (bu is bv):
-                        # and v.upper() != u.lower()
-                        # and u.upper() != v.lower()):
-                    warnings.warn('Inconsistent intervals {} ({}) '
-                                  'and {} ({}) in signal!'.format(
-                                      v.str(style='brackets'), bv,
-                                      u.str(style='brackets'), bu))
-                else:
+                if bu is bv:
+                    consistent_overlaps.append(j)
                     v = v.union(u)
+                elif expect_consistent:
+                    raise InconsistentIntervalException(
+                        f'Inconsistent intervals {v.str(style="brackets")} '
+                        f'({bv}) and {u.str(style="brackets")} '
+                        f'({bu}) in signal!'
+                    )
 
             self._values[i] = (v, bv)
-            for j in reversed(overlaps):
+            for j in reversed(consistent_overlaps):
                 self._values.pop(j)
-            return True
+            if len(consistent_overlaps) > 0:
+                return True
 
         return False
 
@@ -375,13 +391,9 @@ def interval_complements(I, J):
         yield RIF(ju, iu)
 
 
-def _sig_intersect(x, y):
-    return x.intersection(y)
-
-
 class Signal(BaseSignal):
-    def __init__(self, domain, values, mask=None):
-        super(Signal, self).__init__(domain, values)
+    def __init__(self, domain, values, mask=None, expect_consistent=True):
+        super().__init__(domain, values, expect_consistent=expect_consistent)
         from lbuc.signal_masks import Mask
         assert mask is None or isinstance(mask, Mask)
         if mask is None:
@@ -406,10 +418,12 @@ class Signal(BaseSignal):
         )
 
     def inflate(self, epsilon: float):
-        return Signal(
+        return self.__class__(
             self.domain,
             ((x + RIF(-epsilon, epsilon), b) for x, b in self.values),
             mask=self._mask,
+            # We may make a signal inconsitent by inflating it
+            expect_consistent=False,
         )
 
     def to_mask_and(self):
@@ -537,9 +551,9 @@ class Signal(BaseSignal):
     def __repr__(self):
         return 'Signal({}, {}, mask={})'.format(
             self.domain.str(style='brackets'),
-            "[{}]".format(", ".join("({}, {})".format(
-                v.str(style='brackets'), b) for v, b in self.values)),
-            repr(self.mask))
+            fvalues(self.values),
+            repr(self.mask),
+        )
 
     def union(self, other):
         if self.mask is None or other.mask is None:

@@ -93,14 +93,35 @@ class TestLogicContextSignal(object):
             [(RIF(0.00000000000000000, 0.24391449587943354), True),
              (RIF(0.32218960990226191, 5),                   False)],
         )
-        ctx = (Atomic(x) & Atomic(y)).context_signal_for_system(odes, initials,
-                                                                5)
-        plain_sig = (Atomic(x) & Atomic(y)).signal_for_system(odes, initials,
-                                                              5)
+        ctx = (Atomic(x) & Atomic(y)
+               ).context_signal_for_system(odes, initials, 5)
+        plain_sig = (Atomic(x) & Atomic(y)
+                     ).signal_for_system(odes, initials, 5)
         refined_sig = ctx.refined_signal(2)
         print('plain_sig   =', plain_sig)
         print('refined_sig =', refined_sig)
         assert refined_sig.approx_eq(plain_sig, 0.5)
+        assert refined_sig.approx_eq(expected, 0.01)
+
+    @staticmethod
+    @pytest.mark.slow
+    def test_context_trivially_refined_and_signal(ringxy, odes):
+        _, (x, y) = ringxy
+
+        initials = [RIF(1, 2), RIF(3, 4)]
+        expected = Signal(
+            RIF(0, 5),
+            [(RIF(0.00000000000000000, 0.23975290341611905), True),
+             (RIF(0.60000000000000019, 4.9544043137734617),  False)],
+        )
+        ctx = (Atomic(x) & Atomic(y)
+               ).context_signal_for_system(odes, initials, 5)
+        plain_sig = (Atomic(x) & Atomic(y)
+                     ).signal_for_system(odes, initials, 5)
+        refined_sig = ctx.refined_signal(0)
+        print('plain_sig   =', plain_sig)
+        print('refined_sig =', refined_sig)
+        assert refined_sig.approx_eq(plain_sig, 0.01)
         assert refined_sig.approx_eq(expected, 0.01)
 
     @staticmethod
@@ -260,7 +281,8 @@ class TestContextSignalRefinement:
 
 class TestContextSignalWhelksAndLobsters:
     @pytest.mark.slow
-    def test_wandl_single_initial(self, ringxy, odes_whelks, poly_low_kwargs):
+    @staticmethod
+    def test_wandl_single_initial(ringxy, odes_whelks, poly_low_kwargs):
         '''Test with a single, combined initial set.'''
         RNG, us = ringxy
         x, y = us
@@ -310,8 +332,10 @@ class TestContextSignalWhelksAndLobsters:
         #     [RIF(-1, 1), RIF(-1, 1)],
         # )
 
+    @staticmethod
     @pytest.mark.slow
-    def test_wandl_single_initial_physical(self, ringxy, odes_whelks, poly_low_kwargs):
+    def test_wandl_single_initial_physical(ringxy, odes_whelks,
+                                           poly_low_kwargs):
         '''Test with a single, combined initial set.'''
         RNG, us = ringxy
         x, y = us
@@ -381,8 +405,9 @@ class TestContextSignalWhelksAndLobsters:
         assert sig2.approx_eq(sig2p, 0.3)
         assert csig.consistent_with(csigp, 2)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_wandl_combined_initial(self, ringxy, odes_whelks, poly_low_kwargs):
+    def test_wandl_combined_initial(ringxy, odes_whelks, poly_low_kwargs):
         '''Test with a single, combined initial set.'''
         RNG, us = ringxy
         x, y = us
@@ -448,11 +473,12 @@ class TestContextSignalWhelksAndLobsters:
         assert sig2.enclosed_by(sig1)
         assert sig1.approx_eq(sig2, 0.5)
         assert sig2.consistent_with(csig.refined_signal(2))
-        assert csig.enclosed_by(csigs, 2)
-        assert csigs.enclosed_by(csig, 2)
+        assert csig.consistent_with(csigs, 2)
+        assert csigs.consistent_with(csig, 2)
 
+    @staticmethod
     @pytest.mark.slow
-    def test_wandl_combined_initial_physical(self, ringxy, odes_whelks, poly_low_kwargs):
+    def test_wandl_combined_initial_physical(ringxy, odes_whelks, poly_low_kwargs):
         '''Test with a single, combined initial set.'''
         RNG, us = ringxy
         x, y = us
@@ -538,6 +564,7 @@ class TestContextSignalWhelksAndLobsters:
         assert csigs.refined_signal(2).consistent_with(sig2)
         assert csigsp.consistent_with(csigs, 2)
         assert csig.refined_signal(2).consistent_with(sig2)
+
 
 class TestContextMasks:
     @staticmethod

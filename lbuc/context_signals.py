@@ -342,6 +342,7 @@ class ContextSignal(SignalTree):
         assert ctx_mask is None or isinstance(ctx_mask, ContextMask),\
             'ctx_mask = {}'.format(ctx_mask)
 
+
         # In the case we are given a concrete signal,
         # ignore the reach tree and observer
         if signal is not None and isinstance(signal, Signal):
