@@ -2,7 +2,7 @@ bidict==0.18.3
 wand==0.5.7
 instrument==0.6.0
 functional==0.4
-jupyterlab==3.0.12
+jupyterlab==3.0.17
 pytest==6.2.2
 wurlitzer==2.0.0
 pytest-xdist==1.33.0
