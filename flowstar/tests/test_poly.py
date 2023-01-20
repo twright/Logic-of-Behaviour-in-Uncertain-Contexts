@@ -30,7 +30,7 @@ def test_two_var(ringxy):
 
 def test_one_var(ringt):
     R, (t,) = ringt
-    assert (str(Poly(t - 0.5))
+    assert (str(Poly(t - sage.RIF("0.5")))
             == '(([-0.5000000000 , -0.5000000000]) '
                '+ ([1.0000000000 , 1.0000000000] * t))')
 
@@ -72,5 +72,5 @@ def test_fast_compose():
 
 def test_time_fn_eval(ringt):
     R, (t,) = ringt
-    assert (poly_eval(Poly(t - 0.5, explicit_time=True), sage.RIF(0.5, 0.5))
+    assert (poly_eval(Poly(t - sage.RIF("0.5"), explicit_time=True), sage.RIF(0.5, 0.5))
             == sage.RIF(0, 0))

@@ -1,10 +1,10 @@
-bidict==0.18.3
-wand==0.5.7
+bidict==0.21.4
+Wand==0.6.7
 instrument==0.6.0
 functional==0.4
-jupyterlab==3.0.12
-pytest==6.2.2
-wurlitzer==2.0.0
-pytest-xdist==1.33.0
-altair==4.1.0
+jupyterlab==3.2.9
+pytest==7.0.0
+wurlitzer==3.0.2
+pytest-xdist==2.5.0
+altair==4.2.0
 mypi==0.0.3

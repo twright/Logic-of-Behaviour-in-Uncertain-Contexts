@@ -1,45 +1,51 @@
-FROM ubuntu:xenial as bondwb
+FROM ubuntu:focal as bondwb
 RUN apt update && apt install -y git wget
 RUN wget -qO- https://get.haskellstack.org/ | sh
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 RUN apt-get -y install ghc libncurses5-dev happy alex libcairo2-dev gsl-bin gsl-ref-html libgsl0-dev liblapack-dev libmpfr-dev
 RUN git clone -n https://github.com/twright/bondwb.git && cd bondwb && git checkout 5557788f8cdf780fa2899ca29eb926ed5c3ab205
 ENV PATH="/root/.local/bin:${PATH}"
 RUN cd bondwb && mv -f stack-minimal.yaml stack.yaml && stack setup && stack install
 
-FROM sagemath/sagemath:9.0-py3 as lbuclib
-
+FROM sagemath/sagemath:9.7 as lbuclib
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 USER root
 RUN apt update && apt -y install git wget software-properties-common
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt update && apt -y install build-essential bison libbison-dev flex gcc-9 g++-9 libgsl-dev libblas-dev liblapack-dev libmpfr-dev libgmp-dev libglpk-dev
 
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9  100 --slave /usr/bin/g++ g++ /usr/bin/g++-9
-COPY flowstar/flowstar-2.1.0-fast-intervals flowstar/flowstar-2.1.0
+COPY flowstar/flowstar-2.1.0-stock-intervals flowstar/flowstar-2.1.0
 RUN cd flowstar/flowstar-2.1.0/ && make
 COPY flowstar/*.pyx flowstar/
 COPY flowstar/*.pxd flowstar/
 COPY setup.py setup.py
 RUN sage -python3 ./setup.py build_ext
 
-FROM sagemath/sagemath:9.0-py3
+FROM sagemath/sagemath:9.7
 
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 USER root
-RUN apt update && apt install -y libgsl2 libblas3 liblapack3
+RUN apt update && apt install -y libgslcblas0 liblapack3 libglpk40 libgsl27 libmagickwand-dev gnuplot
 USER sage
 COPY requirements.txt /tmp/
 RUN sage -pip install -r /tmp/requirements.txt
 COPY --from=bondwb /root/.local/bin/bondwb-minimal /usr/bin/bondwb
 COPY --from=lbuclib /home/sage/flowstar/flowstar-2.1.0/libflowstar.so /usr/lib/libflowstar.so
-COPY --chown=1000:1000 --from=lbuclib /home/sage/build/lib.linux-x86_64-3.7/flowstar/ /home/sage/sage/local/lib/python3.7/site-packages/flowstar/
+COPY --chown=1000:1000 --from=lbuclib /home/sage/build/lib.linux-x86_64-cpython-310/flowstar/ /home/sage/sage/local/lib/python3.10/site-packages/flowstar/
 
 COPY setup.py .
 COPY --from=lbuclib /home/sage/flowstar flowstar
 COPY flowstar/tests/*.py flowstar/tests/
 COPY lbuc/*.py lbuc/
 COPY lbuc/tests/*.py lbuc/tests/
-COPY lbuc/*.py /home/sage/sage/local/lib/python3.7/site-packages/lbuc/
+COPY lbuc/*.py /home/sage/sage/local/lib/python3.10/site-packages/lbuc/
 COPY models ./models
 COPY Introduction.ipynb .
 COPY pytest.ini .
+COPY extra_files/policy.xml /etc/ImageMagick-6/policy.xml
 EXPOSE 8888
 CMD [ "sage", "-python", "-m", "jupyterlab", "--ip=0.0.0.0", "--no-browser" ]

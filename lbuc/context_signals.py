@@ -315,7 +315,7 @@ class FlowpipeNodeType(enum.Enum):
 
 def boxes(coordinates : List[Tuple [int]], n : int) -> list:
     k = 2**n
-    top_level = [RIF(0, k) - 0.5, RIF(0, k) - 0.5]
+    top_level = [RIF(0, k) - RIF("0.5"), RIF(0, k) - RIF("0.5")]
     intervals = [coordinate_to_space_domain(2, coordinate, top_level)
                  for coordinate in coordinates]
     return intervals

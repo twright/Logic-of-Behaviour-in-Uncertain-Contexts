@@ -5,6 +5,7 @@ from libcpp.string cimport string
 from libcpp.cast cimport reinterpret_cast, const_cast
 from libcpp.list cimport list as clist
 import collections
+import collections.abc
 import operator
 import itertools
 import sage.all as sage

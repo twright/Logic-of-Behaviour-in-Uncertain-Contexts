@@ -49,7 +49,7 @@ def sin_cos_signal_after_jump(initials : Iterable[RIF], T : RIF,
         jump : Iterable[RIF], epsilon : float=0.1):
     sol = sin_cos_solution_after_jump(initials, T, jump)
     atomic_sig = interval_signals.to_signal_bisection(
-        lambda t: sol(t)[0] + 0.5,
+        lambda t: sol(t)[0] + RIF("0.5"),
         RIF(0,5),
         epsilon,
     )
@@ -153,7 +153,7 @@ class TestC:
     @pytest.mark.slow
     def test_context_with_jump(ringxy, odes):
         _, (x, y) = ringxy
-        prop = {y: RIF(1, 5)} >> G(RIF(sg.pi/8), Atomic(x + 0.5))
+        prop = {y: RIF(1, 5)} >> G(RIF(sg.pi/8), Atomic(x + RIF("0.5")))
         domain = RIF(0, 2*sg.pi)
         initials = [RIF(1, 2), RIF(3, 4)]
         res = prop.signal_for_system(odes, initials,
@@ -173,7 +173,7 @@ class TestC:
             odes,
         )
         prop = ({var("y"): RIF(1, 5)}
-                >> G(RIF(sg.pi/8), Atomic(var("x") + 0.5)))
+                >> G(RIF(sg.pi/8), Atomic(var("x") + RIF("0.5"))))
         domain = RIF(0, 2*sg.pi)
         res = prop.signal_for_system(system, domain.upper(), epsilon_ctx=0.05)
         expected = sin_cos_signal_ctx_jump(domain, system.y0, [0, RIF(1, 5)], 100, 0.01)
@@ -191,7 +191,7 @@ class TestC:
     )
     # @pytest.mark.xfail # TODO: fix this given new context signals
     def test_immediate_bondcalculus_context(enzyme, context, enzyme_full):
-        at = Atomic(var("S") > 0.7)
+        at = Atomic(var("S") > RIF("0.7"))
         prop = context >> at
         print(f"system = {repr(enzyme['system'])}")
         sig1 = prop.signal_for_system(enzyme['system'], 10)
@@ -222,7 +222,7 @@ class TestC:
     @staticmethod
     @pytest.mark.very_slow
     def test_whelks_bond_calculus_context(bond_whelks, bond_whelks_kwargs):
-        P = Atomic((var("Whelk") - 1)**2 + var("Lobster")**2 > 0.2)
+        P = Atomic((var("Whelk") - 1)**2 + var("Lobster")**2 > RIF("0.2"))
         sigG = G(RIF(10.2, 10.3), ("[0.05, 0.1] Whelk" >> G(RIF(0,0.2), P)),
          ).signal_for_system(bond_whelks, 5, **bond_whelks_kwargs)
         assert sigG is not None
@@ -232,7 +232,7 @@ class TestMasks(object):
     @pytest.mark.slow
     def test_masked_context_with_jump(self, ringxy, odes):
         _, (x, y) = ringxy
-        prop = {y: RIF(1, 1.5)} >> G(RIF(sg.pi/8), Atomic(x + 0.5))
+        prop = {y: RIF(1, 1.5)} >> G(RIF(sg.pi/8), Atomic(x + RIF("0.5")))
         mask = Mask(RIF(0, 2*sg.pi),
                     [RIF(0.2, 2.5), RIF(3.5, 2*sg.pi)])
         res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sg.pi,
@@ -261,7 +261,7 @@ class TestContextOperatorContextSignals:
     @pytest.mark.slow
     def test_sin_cos_context_context_signal(ringxy, odes):
         _, (x, y) = ringxy
-        prop = {y: RIF(1, 5)} >> G(RIF(sg.pi/8), Atomic(x + 0.5))
+        prop = {y: RIF(1, 5)} >> G(RIF(sg.pi/8), Atomic(x + RIF("0.5")))
         domain = RIF(0, 2*sg.pi)
         initials = [RIF(1, 2), RIF(3, 4)]
         ctx_sig = prop.context_signal_for_system(odes, initials,
@@ -292,7 +292,7 @@ class TestContextOperatorContextSignals:
         _, (x, y) = ringxy
 
         initials = [RIF(1, 1.2), RIF(4, 6)]
-        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        P = Atomic((x - 1)**2 + y**2 - RIF("0.2"))
         kwargs = dict(
             order=5, step=(0.01, 0.5),
             precondition=1,
@@ -319,7 +319,7 @@ class TestContextOperatorContextSignals:
         sf = bond_whelks_model.process(
             "[0, 1.5] Whelk || [0, 8] Lobster "
             "with network N(0.8, 0.6, 0.3, 0.05, 2)").as_system
-        P = Atomic((var("Whelk") - 1)**2 + var("Lobster")**2 > 0.2)
+        P = Atomic((var("Whelk") - 1)**2 + var("Lobster")**2 > RIF("0.2"))
         csigG = G(RIF(1, 1.1), ("[0.05, 0.1] Whelk" >> F(RIF(0,0.2), ~P)),
           ).context_signal_for_system(sf, 10, use_masks=True, refine=2,
             **bond_whelks_kwargs)
@@ -333,7 +333,7 @@ class TestContextOperatorContextSignals:
         _, (x, y) = ringxy
 
         initials = [RIF(1, 1.2), RIF(4, 6)]
-        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        P = Atomic((x - 1)**2 + y**2 - RIF("0.2"))
         kwargs = dict(
             order=5, step=(0.01, 0.5),
             precondition=1,

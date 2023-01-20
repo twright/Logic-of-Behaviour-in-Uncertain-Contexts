@@ -321,7 +321,7 @@ class TestContextSignalWhelksAndLobsters:
         c  = sg.vector([RIF(0, 0.05), RIF(0, 0.5)])
 
         system = System(RNG, us, v0 + c, odes_whelks)
-        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        P = Atomic((x - 1)**2 + y**2 - RIF("0.2"))
 
         csig = P.context_signal_for_system(system, 10,
             **poly_low_kwargs)
@@ -374,7 +374,7 @@ class TestContextSignalWhelksAndLobsters:
         c  = sg.vector([RIF(0, 0.05), RIF(0, 0.5)])
 
         system = System(RNG, us, v0 + c, odes_whelks)
-        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        P = Atomic((x - 1)**2 + y**2 - RIF("0.2"))
 
         csig = P.context_signal_for_system(system, 10,
             **poly_low_kwargs)
@@ -446,7 +446,7 @@ class TestContextSignalWhelksAndLobsters:
         c  = sg.vector([RIF(0, 0.05), RIF(0, 0.5)])
 
         system = System(RNG, us, v0 + c, odes_whelks)
-        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        P = Atomic((x - 1)**2 + y**2 - RIF("0.2"))
 
         csigs = P.context_signal_for_system(system.with_y0(v0 + c), 10,
             **poly_low_kwargs)
@@ -517,7 +517,7 @@ class TestContextSignalWhelksAndLobsters:
         c  = sg.vector([RIF(0, 0.05), RIF(0, 0.5)])
 
         system = System(RNG, us, v0 + c, odes_whelks)
-        P = Atomic((x - 1)**2 + y**2 - 0.2)
+        P = Atomic((x - 1)**2 + y**2 - RIF("0.2"))
 
         csigs = P.context_signal_for_system(system.with_y0(v0 + c), 10,
             **poly_low_kwargs)

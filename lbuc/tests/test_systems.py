@@ -10,12 +10,12 @@ from lbuc.interval_utils import (intervals_approx_eq,
 
 def solution(x0, y0, t):
     m = sg.matrix([
-        [x0, -y0],
-        [y0, x0],
+        [RIF(x0), -RIF(y0)],
+        [RIF(y0), RIF(x0)],
     ])
     v = sg.vector([
-        sg.cos(t),
-        sg.sin(t),
+        RIF(sg.cos(t)),
+        RIF(sg.sin(t)),
     ])
     return m*v
 

@@ -151,11 +151,11 @@ class TestAtomic:
     @staticmethod
     @pytest.mark.parametrize(
         "k, res",
-        [(1.5, None), (0.5, True), (2.5, False)],
+        [("1.5", None), ("0.5", True), ("2.5", False)],
     )
     def test_signal_for_system_zero(ringxy, odes, initials, k, res):
         _, (x, y) = ringxy
-        assert Atomic(x - k).signal_for_system(odes, initials, 0)(0) is res
+        assert Atomic(x - RIF(k)).signal_for_system(odes, initials, 0)(0) is res
     
     @staticmethod
     def test_variables_x(ringxy, odes, initials):

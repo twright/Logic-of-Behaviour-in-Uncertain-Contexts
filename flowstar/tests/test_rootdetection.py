@@ -23,7 +23,7 @@ def ringxy():
 
 def test_single_root(ringt):
     R, (t,) = ringt
-    res = py_detect_roots(Poly(t - 0.5, explicit_time=True),
+    res = py_detect_roots(Poly(t - RIF("0.5"), explicit_time=True),
                           Poly(R(1.0), explicit_time=True),
                           sage.RIF(0, 1), verbosity=100)
     assert res == [(0.5, 0.5)]
@@ -48,7 +48,7 @@ def test_sqrt2(ringt):
 
 def test_double_root(ringt):
     R, (t,) = ringt
-    res = py_detect_roots(Poly(6*(t - 0.5)**2 - sage.RIF(0.4),
+    res = py_detect_roots(Poly(6*(t - RIF("0.5"))**2 - sage.RIF(0.4),
                                explicit_time=True),
                           Poly(12*t - 6, explicit_time=True),
                           sage.RIF(0, 1))

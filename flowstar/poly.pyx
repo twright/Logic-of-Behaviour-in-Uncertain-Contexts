@@ -5,6 +5,7 @@ from libcpp.string cimport string
 from libcpp.cast cimport reinterpret_cast, const_cast
 from libcpp.list cimport list as clist
 import collections
+import collections.abc
 import operator
 import itertools
 import sage.all as sage
@@ -596,7 +597,7 @@ cdef class Poly:
 
         return sum(
             (Poly.from_monomial(c,
-                                ex if isinstance(ex, collections.Iterable)
+                                ex if isinstance(ex, collections.abc.Iterable)
                                 else (ex,),
                                 vars,
                                 explicit_time=explicit_time)

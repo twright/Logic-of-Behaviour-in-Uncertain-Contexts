@@ -179,7 +179,7 @@ class TestMasks:
     @pytest.mark.slow
     def test_masked_context_with_jump(self, ringxy, odes):
         _, (x, y) = ringxy
-        prop = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + 0.5))
+        prop = {y: RIF(1, 1.5)} >> G(RIF(sage.pi/8), Atomic(x + RIF("0.5")))
         mask = Mask(RIF(0, 2*sage.pi),
                     [RIF(0.2, 2.5), RIF(3.5, 2*sage.pi)])
         res = prop.signal_for_system(odes, [RIF(1, 2), RIF(3, 4)], 2*sage.pi,
